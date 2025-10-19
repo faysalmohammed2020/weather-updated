@@ -1,3 +1,5 @@
+// app/dashboard/data-entry/first-card/FirstCardForm.tsx
+
 "use client";
 
 import * as Yup from "yup";
@@ -185,66 +187,73 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
   ];
 
   // Tab styles with gradients and more vibrant colors
-  
+
   const tabStyles = {
-  pressure: {
-    tab: "from-rose-500 to-rose-600",
-    icon: <BarChart3 className="w-4 h-4" />,
-    iconColor: "text-rose-500",
-    iconBg: "from-rose-100 to-rose-50",
-    // Preserve your existing styles
-    originalTab: "border border-rose-500 px-4 py-3 !bg-rose-50 text-rose-800 hover:opacity-90 shadow-sm shadow-rose-500/50",
-    card: "bg-gradient-to-br from-rose-50 to-white border-l-4 border-rose-200 shadow-sm"
-  },
-  temperature: {
-    tab: "from-blue-500 to-blue-600",
-    icon: <Thermometer className="w-4 h-4" />,
-    iconColor: "text-blue-500",
-    iconBg: "from-blue-100 to-blue-50",
-    originalTab: "border border-blue-500 px-4 py-3 !bg-blue-50 text-blue-800 hover:opacity-90 shadow-sm shadow-blue-500/50",
-    card: "bg-gradient-to-br from-blue-50 to-white border-l-4 border-blue-200 shadow-sm"
-  },
-  squall: {
-    tab: "from-amber-500 to-amber-600",
-    icon: <Wind className="w-4 h-4" />,
-    iconColor: "text-amber-500",
-    iconBg: "from-amber-100 to-amber-50",
-    originalTab: "border border-amber-500 px-4 py-3 !bg-amber-50 text-amber-800 hover:opacity-90 shadow-sm shadow-amber-500/50",
-    card: "bg-gradient-to-br from-amber-50 to-white border-l-4 border-amber-200 shadow-sm"
-  },
-  "V.V": {
-    tab: "from-orange-500 to-orange-600",
-    icon: <Eye className="w-4 h-4" />,
-    iconColor: "text-orange-500",
-    iconBg: "from-orange-100 to-orange-50",
-    originalTab: "border border-orange-500 px-4 py-3 !bg-orange-50 text-orange-800 hover:opacity-90 shadow-sm shadow-orange-500/50",
-    card: "bg-gradient-to-br from-orange-50 to-white border-l-4 border-orange-200 shadow-sm"
-  },
-  meteors: {
-    tab: "from-emerald-500 to-emerald-600",
-    icon: <Flame className="w-4 h-4 text-emerald-500" />,
-    iconColor: "text-emerald-500",
-    iconBg: "from-emerald-100 to-emerald-50",
-    originalTab: "border border-emerald-600 px-4 py-3 !bg-emerald-50 text-emerald-800 hover:bg-emerald-100 shadow-sm shadow-emerald-400/50",
-    card: "bg-gradient-to-br from-emerald-50 via-white to-white border-l-4 border-emerald-300 shadow-sm"
-  },
-  weather: {
-    tab: "from-cyan-500 to-cyan-600",
-    icon: <Cloud className="w-4 h-4" />,
-    iconColor: "text-cyan-500",
-    iconBg: "from-cyan-100 to-cyan-50",
-    originalTab: "border border-cyan-500 px-4 py-3 !bg-cyan-50 text-cyan-800 hover:opacity-90 shadow-sm shadow-cyan-500/50",
-    card: "bg-gradient-to-br from-cyan-50 to-white border-l-4 border-cyan-200 shadow-sm"
-  },
-  summary: {
-    tab: "from-slate-500 to-slate-600",
-    icon: <BarChart3 className="w-4 h-4" />,
-    iconColor: "text-slate-600",
-    iconBg: "from-slate-100 to-slate-50",
-    originalTab: "border border-slate-500 px-4 py-3 !bg-slate-50 text-slate-800 hover:opacity-90 shadow-sm shadow-slate-500/50",
-    card: "bg-gradient-to-br from-slate-50 to-white border-l-4 border-slate-200 shadow-sm"
-  }
-};
+    pressure: {
+      tab: "from-rose-500 to-rose-600",
+      icon: <BarChart3 className="w-4 h-4" />,
+      iconColor: "text-rose-500",
+      iconBg: "from-rose-100 to-rose-50",
+      // Preserve your existing styles
+      originalTab:
+        "border border-rose-500 px-4 py-3 !bg-rose-50 text-rose-800 hover:opacity-90 shadow-sm shadow-rose-500/50",
+      card: "bg-gradient-to-br from-rose-50 to-white border-l-4 border-rose-200 shadow-sm",
+    },
+    temperature: {
+      tab: "from-blue-500 to-blue-600",
+      icon: <Thermometer className="w-4 h-4" />,
+      iconColor: "text-blue-500",
+      iconBg: "from-blue-100 to-blue-50",
+      originalTab:
+        "border border-blue-500 px-4 py-3 !bg-blue-50 text-blue-800 hover:opacity-90 shadow-sm shadow-blue-500/50",
+      card: "bg-gradient-to-br from-blue-50 to-white border-l-4 border-blue-200 shadow-sm",
+    },
+    squall: {
+      tab: "from-amber-500 to-amber-600",
+      icon: <Wind className="w-4 h-4" />,
+      iconColor: "text-amber-500",
+      iconBg: "from-amber-100 to-amber-50",
+      originalTab:
+        "border border-amber-500 px-4 py-3 !bg-amber-50 text-amber-800 hover:opacity-90 shadow-sm shadow-amber-500/50",
+      card: "bg-gradient-to-br from-amber-50 to-white border-l-4 border-amber-200 shadow-sm",
+    },
+    "V.V": {
+      tab: "from-orange-500 to-orange-600",
+      icon: <Eye className="w-4 h-4" />,
+      iconColor: "text-orange-500",
+      iconBg: "from-orange-100 to-orange-50",
+      originalTab:
+        "border border-orange-500 px-4 py-3 !bg-orange-50 text-orange-800 hover:opacity-90 shadow-sm shadow-orange-500/50",
+      card: "bg-gradient-to-br from-orange-50 to-white border-l-4 border-orange-200 shadow-sm",
+    },
+    meteors: {
+      tab: "from-emerald-500 to-emerald-600",
+      icon: <Flame className="w-4 h-4 text-emerald-500" />,
+      iconColor: "text-emerald-500",
+      iconBg: "from-emerald-100 to-emerald-50",
+      originalTab:
+        "border border-emerald-600 px-4 py-3 !bg-emerald-50 text-emerald-800 hover:bg-emerald-100 shadow-sm shadow-emerald-400/50",
+      card: "bg-gradient-to-br from-emerald-50 via-white to-white border-l-4 border-emerald-300 shadow-sm",
+    },
+    weather: {
+      tab: "from-cyan-500 to-cyan-600",
+      icon: <Cloud className="w-4 h-4" />,
+      iconColor: "text-cyan-500",
+      iconBg: "from-cyan-100 to-cyan-50",
+      originalTab:
+        "border border-cyan-500 px-4 py-3 !bg-cyan-50 text-cyan-800 hover:opacity-90 shadow-sm shadow-cyan-500/50",
+      card: "bg-gradient-to-br from-cyan-50 to-white border-l-4 border-cyan-200 shadow-sm",
+    },
+    summary: {
+      tab: "from-slate-500 to-slate-600",
+      icon: <BarChart3 className="w-4 h-4" />,
+      iconColor: "text-slate-600",
+      iconBg: "from-slate-100 to-slate-50",
+      originalTab:
+        "border border-slate-500 px-4 py-3 !bg-slate-50 text-slate-800 hover:opacity-90 shadow-sm shadow-slate-500/50",
+      card: "bg-gradient-to-br from-slate-50 to-white border-l-4 border-slate-200 shadow-sm",
+    },
+  };
 
   // Initialize Formik
   const formik = useFormik<any>({
@@ -763,199 +772,245 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
 
   // Add this function after the handleChange function
   // ✅ Drop-in replacement: shows error if rule is violated (no silent clamp)
-// Rule: Tmin ≤ Dry-bulb ≤ Tmax
-const handleNumericInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const { name, value } = e.target;
+  // Rule: Tmin ≤ Dry-bulb ≤ Tmax
+  const handleNumericInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
 
-  // কেবল ডিজিট—(0-9)। নেগেটিভ/ডেসিমাল প্রয়োজন হলে রেজেক্স বদলান।
-  if (!/^\d*$/.test(value)) {
-    return;
-  }
-
-  // ===== helpers =====
-  const is3 = (s?: string) => !!s && s.length === 3;
-  const toN = (s?: string) => (is3(s) ? Number(s) : undefined);
-
-  // checkMinMax → "Minimum" / "Maximum" / falsy
-  const mode = checkMinMax(selectedHour);
-  const isMinMode = (mode || "").toLowerCase().includes("min");
-  const isMaxMode = (mode || "").toLowerCase().includes("max");
-
-  // রুল চেকার (side: 'as' | 'corr')
-  const violatesRule = (side: "as" | "corr", nextVal: string) => {
-    const dryStr = side === "as" ? formik.values.dryBulbAsRead : formik.values.dryBulbCorrected;
-    if (!is3(dryStr) || !is3(nextVal) || (!isMinMode && !isMaxMode)) return false;
-
-    const dry = Number(dryStr!);
-    const v = Number(nextVal);
-
-    if (isMinMode && v > dry) {
-      toast.error("Minimum temperature নিয়ম ভঙ্গ হয়েছে", {
-        description: "Minimum Dry-bulb মানের চেয়ে বড় হতে পারবে না (Tmin ≤ Dry-bulb).",
-        duration: 3500,
-      });
-      return true;
+    // কেবল ডিজিট—(0-9)। নেগেটিভ/ডেসিমাল প্রয়োজন হলে রেজেক্স বদলান।
+    if (!/^\d*$/.test(value)) {
+      return;
     }
-    if (isMaxMode && v < dry) {
-      toast.error("Maximum temperature নিয়ম ভঙ্গ হয়েছে", {
-        description: "Maximum Dry-bulb মানের চেয়ে ছোট হতে পারবে না (Dry-bulb ≤ Tmax).",
-        duration: 3500,
-      });
-      return true;
-    }
-    return false;
-  };
 
-  // ===== ফিল্ডভিত্তিক হ্যান্ডলিং =====
-  switch (name) {
-    case "dryBulbAsRead":
-    case "wetBulbAsRead":
-    case "maxMinTempAsRead": {
-      // টেম্প ফিল্ড 3 ডিজিটে সীমাবদ্ধ
-      if (value.length <= 3) {
-        // ইউজার max/min টাইপ করছে → আগে রুল চেক
-        if (name === "maxMinTempAsRead") {
-          if (violatesRule("as", value)) return; // ❌ invalid → সেট করব না
-        }
+    // ===== helpers =====
+    const is3 = (s?: string) => !!s && s.length === 3;
+    const toN = (s?: string) => (is3(s) ? Number(s) : undefined);
 
-        formik.setFieldValue(name, value);
+    // checkMinMax → "Minimum" / "Maximum" / falsy
+    const mode = checkMinMax(selectedHour);
+    const isMinMode = (mode || "").toLowerCase().includes("min");
+    const isMaxMode = (mode || "").toLowerCase().includes("max");
 
-        // BMD ভ্যালিডেশন (আগের মতোই)
-        if (name === "dryBulbAsRead" || name === "wetBulbAsRead") {
-          const dryBulb = name === "dryBulbAsRead" ? value : formik.values.dryBulbAsRead;
-          const wetBulb = name === "wetBulbAsRead" ? value : formik.values.wetBulbAsRead;
+    // রুল চেকার (side: 'as' | 'corr')
+    const violatesRule = (side: "as" | "corr", nextVal: string) => {
+      const dryStr =
+        side === "as"
+          ? formik.values.dryBulbAsRead
+          : formik.values.dryBulbCorrected;
+      if (!is3(dryStr) || !is3(nextVal) || (!isMinMode && !isMaxMode))
+        return false;
 
-          if (is3(dryBulb) && is3(wetBulb)) {
-            const validation = validateTemperatureInputs(dryBulb!, wetBulb!);
-            if (!validation.isValid) {
-              toast.error(validation.message, {
-                description: "অনুগ্রহ করে সঠিক তাপমাত্রা প্রবেশ করান।",
-                duration: 4000,
-              });
-              return;
+      const dry = Number(dryStr!);
+      const v = Number(nextVal);
+
+      if (isMinMode && v > dry) {
+        toast.error("Minimum temperature নিয়ম ভঙ্গ হয়েছে", {
+          description:
+            "Minimum Dry-bulb মানের চেয়ে বড় হতে পারবে না (Tmin ≤ Dry-bulb).",
+          duration: 3500,
+        });
+        return true;
+      }
+      if (isMaxMode && v < dry) {
+        toast.error("Maximum temperature নিয়ম ভঙ্গ হয়েছে", {
+          description:
+            "Maximum Dry-bulb মানের চেয়ে ছোট হতে পারবে না (Dry-bulb ≤ Tmax).",
+          duration: 3500,
+        });
+        return true;
+      }
+      return false;
+    };
+
+    // ===== ফিল্ডভিত্তিক হ্যান্ডলিং =====
+    switch (name) {
+      case "dryBulbAsRead":
+      case "wetBulbAsRead":
+      case "maxMinTempAsRead": {
+        // টেম্প ফিল্ড 3 ডিজিটে সীমাবদ্ধ
+        if (value.length <= 3) {
+          // ইউজার max/min টাইপ করছে → আগে রুল চেক
+          if (name === "maxMinTempAsRead") {
+            if (violatesRule("as", value)) return; // ❌ invalid → সেট করব না
+          }
+
+          formik.setFieldValue(name, value);
+
+          // BMD ভ্যালিডেশন (আগের মতোই)
+          if (name === "dryBulbAsRead" || name === "wetBulbAsRead") {
+            const dryBulb =
+              name === "dryBulbAsRead" ? value : formik.values.dryBulbAsRead;
+            const wetBulb =
+              name === "wetBulbAsRead" ? value : formik.values.wetBulbAsRead;
+
+            if (is3(dryBulb) && is3(wetBulb)) {
+              const validation = validateTemperatureInputs(dryBulb!, wetBulb!);
+              if (!validation.isValid) {
+                toast.error(validation.message, {
+                  description: "অনুগ্রহ করে সঠিক তাপমাত্রা প্রবেশ করান।",
+                  duration: 4000,
+                });
+                return;
+              }
+            }
+          }
+
+          // Dry-bulb পাল্টালে আগের max/min রুল ভাঙছে কি না—চেক (সেট করব না)
+          if (
+            name === "dryBulbAsRead" &&
+            is3(value) &&
+            is3(formik.values.maxMinTempAsRead)
+          ) {
+            if (violatesRule("as", formik.values.maxMinTempAsRead!)) {
+              // চাইলে ক্লিয়ার করে দিতে পারেন:
+              // formik.setFieldValue("maxMinTempAsRead", "");
             }
           }
         }
+        break;
+      }
 
-        // Dry-bulb পাল্টালে আগের max/min রুল ভাঙছে কি না—চেক (সেট করব না)
-        if (name === "dryBulbAsRead" && is3(value) && is3(formik.values.maxMinTempAsRead)) {
-          if (violatesRule("as", formik.values.maxMinTempAsRead!)) {
-            // চাইলে ক্লিয়ার করে দিতে পারেন:
-            // formik.setFieldValue("maxMinTempAsRead", "");
+      case "barAsRead":
+      case "correctedForIndex":
+        if (value.length <= 5) {
+          formik.setFieldValue(name, value);
+        }
+        break;
+
+      case "horizontalVisibility":
+        if (value.length <= 3) {
+          formik.setFieldValue(name, value);
+        }
+        break;
+
+      case "presentWeatherWW":
+        if (value.length <= 2) {
+          formik.setFieldValue(name, value);
+        }
+        break;
+
+      case "dryBulbCorrected":
+      case "wetBulbCorrected":
+      case "maxMinTempCorrected": {
+        if (value.length <= 3) {
+          if (name === "maxMinTempCorrected") {
+            if (violatesRule("corr", value)) return; // ❌ invalid → সেট করব না
+          }
+
+          formik.setFieldValue(name, value);
+
+          // Corrected dry-bulb বদলালে—অতীতের max/min valid কি না
+          if (
+            name === "dryBulbCorrected" &&
+            is3(value) &&
+            is3(formik.values.maxMinTempCorrected)
+          ) {
+            if (violatesRule("corr", formik.values.maxMinTempCorrected!)) {
+              // formik.setFieldValue("maxMinTempCorrected", "");
+            }
+          }
+        }
+        break;
+      }
+
+      default:
+        formik.setFieldValue(name, value);
+    }
+
+    // ===== dew point calc (আগের মতোই) =====
+    if (name === "dryBulbAsRead" || name === "wetBulbAsRead") {
+      const dryBulb =
+        name === "dryBulbAsRead" ? value : formik.values.dryBulbAsRead;
+      const wetBulb =
+        name === "wetBulbAsRead" ? value : formik.values.wetBulbAsRead;
+
+      if (is3(dryBulb) && is3(wetBulb)) {
+        calculateDewPointAndHumidity(dryBulb!, wetBulb!);
+      }
+    }
+
+    // ===== as-read → corrected copy (আপনার আগের মতোই) =====
+    if (
+      name === "dryBulbAsRead" ||
+      name === "wetBulbAsRead" ||
+      name === "maxMinTempAsRead"
+    ) {
+      if (name === "dryBulbAsRead") {
+        formik.setFieldValue("dryBulbCorrected", value);
+      }
+      if (name === "wetBulbAsRead") {
+        formik.setFieldValue("wetBulbCorrected", value);
+      }
+      if (name === "maxMinTempAsRead") {
+        // এখানে ভায়োলেশন হলে আগেই return করেছে, তাই এটা সেফ
+        formik.setFieldValue("maxMinTempCorrected", value);
+      }
+    }
+
+    // ===== pressure calc (আগের মতোই) =====
+    if (name === "dryBulbAsRead" || name === "barAsRead") {
+      const dryBulb =
+        name === "dryBulbAsRead" ? value : formik.values.dryBulbAsRead;
+      const barAsRead = name === "barAsRead" ? value : formik.values.barAsRead;
+
+      if (dryBulb && barAsRead) {
+        const stationId = session?.user?.station?.stationId;
+        if (!stationId) {
+          toast.error("Station ID is missing");
+          return;
+        }
+
+        const pressureData = calculatePressureValues(
+          dryBulb,
+          barAsRead,
+          stationId
+        );
+        if (pressureData) {
+          formik.setFieldValue(
+            "stationLevelPressure",
+            pressureData.stationLevelPressure
+          );
+          formik.setFieldValue(
+            "heightDifference",
+            pressureData.heightDifference
+          );
+
+          const prev =
+            timeData?.yesterday?.meteorologicalEntry?.[0]?.stationLevelPressure;
+
+          if (!prev) {
+            formik.setFieldValue("pressureChange24h", "0000");
+          } else {
+            const prevN = Number(prev);
+            const curN = Number(pressureData.stationLevelPressure);
+
+            // ✅ আজ - গতকাল (increase → +, decrease → -)
+            const diff = curN - prevN;
+            const abs = Math.abs(diff);
+            const padded = String(abs).padStart(4, "0");
+            const sign = diff >= 0 ? "+" : "-";
+
+            formik.setFieldValue("pressureChange24h", `${sign}${padded}`);
+          }
+
+          const seaData = calculateSeaLevelPressure(
+            dryBulb,
+            pressureData.stationLevelPressure,
+            stationId
+          );
+          if (seaData) {
+            formik.setFieldValue(
+              "seaLevelReduction",
+              seaData.seaLevelReduction
+            );
+            formik.setFieldValue(
+              "correctedSeaLevelPressure",
+              seaData.correctedSeaLevelPressure
+            );
           }
         }
       }
-      break;
     }
-
-    case "barAsRead":
-    case "correctedForIndex":
-      if (value.length <= 5) {
-        formik.setFieldValue(name, value);
-      }
-      break;
-
-    case "horizontalVisibility":
-      if (value.length <= 3) {
-        formik.setFieldValue(name, value);
-      }
-      break;
-
-    case "presentWeatherWW":
-      if (value.length <= 2) {
-        formik.setFieldValue(name, value);
-      }
-      break;
-
-    case "dryBulbCorrected":
-    case "wetBulbCorrected":
-    case "maxMinTempCorrected": {
-      if (value.length <= 3) {
-        if (name === "maxMinTempCorrected") {
-          if (violatesRule("corr", value)) return; // ❌ invalid → সেট করব না
-        }
-
-        formik.setFieldValue(name, value);
-
-        // Corrected dry-bulb বদলালে—অতীতের max/min valid কি না
-        if (name === "dryBulbCorrected" && is3(value) && is3(formik.values.maxMinTempCorrected)) {
-          if (violatesRule("corr", formik.values.maxMinTempCorrected!)) {
-            // formik.setFieldValue("maxMinTempCorrected", "");
-          }
-        }
-      }
-      break;
-    }
-
-    default:
-      formik.setFieldValue(name, value);
-  }
-
-  // ===== dew point calc (আগের মতোই) =====
-  if (name === "dryBulbAsRead" || name === "wetBulbAsRead") {
-    const dryBulb = name === "dryBulbAsRead" ? value : formik.values.dryBulbAsRead;
-    const wetBulb = name === "wetBulbAsRead" ? value : formik.values.wetBulbAsRead;
-
-    if (is3(dryBulb) && is3(wetBulb)) {
-      calculateDewPointAndHumidity(dryBulb!, wetBulb!);
-    }
-  }
-
-  // ===== as-read → corrected copy (আপনার আগের মতোই) =====
-  if (name === "dryBulbAsRead" || name === "wetBulbAsRead" || name === "maxMinTempAsRead") {
-    if (name === "dryBulbAsRead") {
-      formik.setFieldValue("dryBulbCorrected", value);
-    }
-    if (name === "wetBulbAsRead") {
-      formik.setFieldValue("wetBulbCorrected", value);
-    }
-    if (name === "maxMinTempAsRead") {
-      // এখানে ভায়োলেশন হলে আগেই return করেছে, তাই এটা সেফ
-      formik.setFieldValue("maxMinTempCorrected", value);
-    }
-  }
-
-  // ===== pressure calc (আগের মতোই) =====
-  if (name === "dryBulbAsRead" || name === "barAsRead") {
-    const dryBulb = name === "dryBulbAsRead" ? value : formik.values.dryBulbAsRead;
-    const barAsRead = name === "barAsRead" ? value : formik.values.barAsRead;
-
-    if (dryBulb && barAsRead) {
-      const stationId = session?.user?.station?.stationId;
-      if (!stationId) {
-        toast.error("Station ID is missing");
-        return;
-      }
-
-      const pressureData = calculatePressureValues(dryBulb, barAsRead, stationId);
-      if (pressureData) {
-        formik.setFieldValue("stationLevelPressure", pressureData.stationLevelPressure);
-        formik.setFieldValue("heightDifference", pressureData.heightDifference);
-
-        const prev = timeData?.yesterday?.meteorologicalEntry?.[0]?.stationLevelPressure;
-        if (!prev) {
-          formik.setFieldValue("pressureChange24h", "0000");
-        } else {
-          const prevN = Number(prev);
-          const curN = Number(pressureData.stationLevelPressure);
-          const diff = prevN - curN;
-          const abs = Math.abs(diff);
-          const padded = String(abs).padStart(4, "0");
-          const sign = diff > 0 ? "+" : "-";
-          formik.setFieldValue("pressureChange24h", `${sign}${padded}`);
-        }
-
-        const seaData = calculateSeaLevelPressure(dryBulb, pressureData.stationLevelPressure, stationId);
-        if (seaData) {
-          formik.setFieldValue("seaLevelReduction", seaData.seaLevelReduction);
-          formik.setFieldValue("correctedSeaLevelPressure", seaData.correctedSeaLevelPressure);
-        }
-      }
-    }
-  }
-};
-
-
+  };
 
   // Reset form function
   const handleReset = () => {
@@ -1085,8 +1140,6 @@ const handleNumericInput = (e: React.ChangeEvent<HTMLInputElement>) => {
                 onValueChange={handleTabChange}
                 className="w-full"
               >
-              
-
                 <div className="relative mb-8 p-4">
                   <div className="relative p-1 bg-white/80 backdrop-blur-sm rounded-full shadow-lg border border-gray-200/50 max-w-max mx-auto">
                     <div className="relative flex flex-wrap justify-center items-center gap-1 p-1.5 rounded-full bg-gray-100/50">
@@ -1966,8 +2019,13 @@ const handleNumericInput = (e: React.ChangeEvent<HTMLInputElement>) => {
                 </TabsContent>
 
                 {/* Summary Tab */}
-                <TabsContent value="summary" className="mt-6 transition-all duration-500">
-                  <Card className={cn("overflow-hidden", tabStyles.summary.card)}>
+                <TabsContent
+                  value="summary"
+                  className="mt-6 transition-all duration-500"
+                >
+                  <Card
+                    className={cn("overflow-hidden", tabStyles.summary.card)}
+                  >
                     <div className="p-4 bg-gradient-to-r from-slate-200 to-slate-300 text-slate-800">
                       <h3 className="text-lg font-semibold flex items-center">
                         <BarChart3 className="mr-2" /> Review & Submit
@@ -1980,35 +2038,96 @@ const handleNumericInput = (e: React.ChangeEvent<HTMLInputElement>) => {
                         <div className="grid gap-4 sm:grid-cols-2">
                           <div className="space-y-2">
                             <Label htmlFor="barAsRead">Bar As Read(hPa)</Label>
-                            <Input id="barAsRead" name="barAsRead" value={formik.values.barAsRead || ""} onChange={handleNumericInput} />
+                            <Input
+                              id="barAsRead"
+                              name="barAsRead"
+                              value={formik.values.barAsRead || ""}
+                              onChange={handleNumericInput}
+                            />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="correctedForIndex">Corrected for Index</Label>
-                            <Input id="correctedForIndex" name="correctedForIndex" value={formik.values.correctedForIndex || ""} onChange={handleChange} />
+                            <Label htmlFor="correctedForIndex">
+                              Corrected for Index
+                            </Label>
+                            <Input
+                              id="correctedForIndex"
+                              name="correctedForIndex"
+                              value={formik.values.correctedForIndex || ""}
+                              onChange={handleChange}
+                            />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="heightDifference">Height Difference</Label>
-                            <Input id="heightDifference" name="heightDifference" value={formik.values.heightDifference || ""} onChange={handleChange} readOnly />
+                            <Label htmlFor="heightDifference">
+                              Height Difference
+                            </Label>
+                            <Input
+                              id="heightDifference"
+                              name="heightDifference"
+                              value={formik.values.heightDifference || ""}
+                              onChange={handleChange}
+                              readOnly
+                            />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="stationLevelPressure">Station Level Pressure</Label>
-                            <Input id="stationLevelPressure" name="stationLevelPressure" value={formik.values.stationLevelPressure || ""} onChange={handleChange} readOnly />
+                            <Label htmlFor="stationLevelPressure">
+                              Station Level Pressure
+                            </Label>
+                            <Input
+                              id="stationLevelPressure"
+                              name="stationLevelPressure"
+                              value={formik.values.stationLevelPressure || ""}
+                              onChange={handleChange}
+                              readOnly
+                            />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="seaLevelReduction">Sea Level Reduction</Label>
-                            <Input id="seaLevelReduction" name="seaLevelReduction" value={formik.values.seaLevelReduction || ""} onChange={handleChange} readOnly />
+                            <Label htmlFor="seaLevelReduction">
+                              Sea Level Reduction
+                            </Label>
+                            <Input
+                              id="seaLevelReduction"
+                              name="seaLevelReduction"
+                              value={formik.values.seaLevelReduction || ""}
+                              onChange={handleChange}
+                              readOnly
+                            />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="correctedSeaLevelPressure">Sea-Level Pressure</Label>
-                            <Input id="correctedSeaLevelPressure" name="correctedSeaLevelPressure" value={formik.values.correctedSeaLevelPressure || ""} onChange={handleChange} readOnly />
+                            <Label htmlFor="correctedSeaLevelPressure">
+                              Sea-Level Pressure
+                            </Label>
+                            <Input
+                              id="correctedSeaLevelPressure"
+                              name="correctedSeaLevelPressure"
+                              value={
+                                formik.values.correctedSeaLevelPressure || ""
+                              }
+                              onChange={handleChange}
+                              readOnly
+                            />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="afternoonReading">Altimeter setting (QNH)</Label>
-                            <Input id="afternoonReading" name="afternoonReading" value={formik.values.afternoonReading || ""} onChange={handleChange} />
+                            <Label htmlFor="afternoonReading">
+                              Altimeter setting (QNH)
+                            </Label>
+                            <Input
+                              id="afternoonReading"
+                              name="afternoonReading"
+                              value={formik.values.afternoonReading || ""}
+                              onChange={handleChange}
+                            />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="pressureChange24h">24-Hour Pressure Change</Label>
-                            <Input id="pressureChange24h" name="pressureChange24h" value={formik.values.pressureChange24h || ""} onChange={handleChange} readOnly />
+                            <Label htmlFor="pressureChange24h">
+                              24-Hour Pressure Change
+                            </Label>
+                            <Input
+                              id="pressureChange24h"
+                              name="pressureChange24h"
+                              value={formik.values.pressureChange24h || ""}
+                              onChange={handleChange}
+                              readOnly
+                            />
                           </div>
                         </div>
                       </div>
@@ -2019,40 +2138,92 @@ const handleNumericInput = (e: React.ChangeEvent<HTMLInputElement>) => {
                         <div className="grid gap-4 sm:grid-cols-2">
                           <div className="space-y-2">
                             <Label htmlFor="dryBulbAsRead">Dry-bulb (°C)</Label>
-                            <Input id="dryBulbAsRead" name="dryBulbAsRead" value={formik.values.dryBulbAsRead || ""} onChange={handleNumericInput} />
+                            <Input
+                              id="dryBulbAsRead"
+                              name="dryBulbAsRead"
+                              value={formik.values.dryBulbAsRead || ""}
+                              onChange={handleNumericInput}
+                            />
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="wetBulbAsRead">Wet-bulb (°C)</Label>
-                            <Input id="wetBulbAsRead" name="wetBulbAsRead" value={formik.values.wetBulbAsRead || ""} onChange={handleNumericInput} />
+                            <Input
+                              id="wetBulbAsRead"
+                              name="wetBulbAsRead"
+                              value={formik.values.wetBulbAsRead || ""}
+                              onChange={handleNumericInput}
+                            />
                           </div>
                           {checkMinMax(selectedHour) && (
                             <div className="space-y-2">
-                              <Label htmlFor="maxMinTempAsRead">{checkMinMax(selectedHour)} Temperature (°C)</Label>
-                              <Input id="maxMinTempAsRead" name="maxMinTempAsRead" value={formik.values.maxMinTempAsRead || ""} onChange={handleNumericInput} />
+                              <Label htmlFor="maxMinTempAsRead">
+                                {checkMinMax(selectedHour)} Temperature (°C)
+                              </Label>
+                              <Input
+                                id="maxMinTempAsRead"
+                                name="maxMinTempAsRead"
+                                value={formik.values.maxMinTempAsRead || ""}
+                                onChange={handleNumericInput}
+                              />
                             </div>
                           )}
 
                           <div className="space-y-2">
-                            <Label htmlFor="dryBulbCorrected">Dry-bulb Corrected (°C)</Label>
-                            <Input id="dryBulbCorrected" name="dryBulbCorrected" value={formik.values.dryBulbCorrected || ""} onChange={handleNumericInput} />
+                            <Label htmlFor="dryBulbCorrected">
+                              Dry-bulb Corrected (°C)
+                            </Label>
+                            <Input
+                              id="dryBulbCorrected"
+                              name="dryBulbCorrected"
+                              value={formik.values.dryBulbCorrected || ""}
+                              onChange={handleNumericInput}
+                            />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="wetBulbCorrected">Wet-bulb Corrected (°C)</Label>
-                            <Input id="wetBulbCorrected" name="wetBulbCorrected" value={formik.values.wetBulbCorrected || ""} onChange={handleNumericInput} />
+                            <Label htmlFor="wetBulbCorrected">
+                              Wet-bulb Corrected (°C)
+                            </Label>
+                            <Input
+                              id="wetBulbCorrected"
+                              name="wetBulbCorrected"
+                              value={formik.values.wetBulbCorrected || ""}
+                              onChange={handleNumericInput}
+                            />
                           </div>
                           {checkMinMax(selectedHour) && (
                             <div className="space-y-2">
-                              <Label htmlFor="maxMinTempCorrected">{checkMinMax(selectedHour)} Corrected (°C)</Label>
-                              <Input id="maxMinTempCorrected" name="maxMinTempCorrected" value={formik.values.maxMinTempCorrected || ""} onChange={handleNumericInput} />
+                              <Label htmlFor="maxMinTempCorrected">
+                                {checkMinMax(selectedHour)} Corrected (°C)
+                              </Label>
+                              <Input
+                                id="maxMinTempCorrected"
+                                name="maxMinTempCorrected"
+                                value={formik.values.maxMinTempCorrected || ""}
+                                onChange={handleNumericInput}
+                              />
                             </div>
                           )}
                           <div className="space-y-2">
                             <Label htmlFor="Td">Dew-Point (&deg;C)</Label>
-                            <Input id="Td" name="Td" value={formik.values.Td || ""} onChange={handleChange} readOnly />
+                            <Input
+                              id="Td"
+                              name="Td"
+                              value={formik.values.Td || ""}
+                              onChange={handleChange}
+                              readOnly
+                            />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="relativeHumidity">Relative Humidity (%)</Label>
-                            <Input id="relativeHumidity" name="relativeHumidity" value={formik.values.relativeHumidity || ""} onChange={handleChange} readOnly />
+                            <Label htmlFor="relativeHumidity">
+                              Relative Humidity (%)
+                            </Label>
+                            <Input
+                              id="relativeHumidity"
+                              name="relativeHumidity"
+                              value={formik.values.relativeHumidity || ""}
+                              onChange={handleChange}
+                              readOnly
+                            />
                           </div>
                         </div>
                       </div>
@@ -2064,19 +2235,38 @@ const handleNumericInput = (e: React.ChangeEvent<HTMLInputElement>) => {
                           <div className="grid gap-4 sm:grid-cols-2">
                             <div className="space-y-2">
                               <Label htmlFor="squallForce">Force (KTS)</Label>
-                              <Input id="squallForce" name="squallForce" value={formik.values.squallForce || ""} onChange={handleChange} />
+                              <Input
+                                id="squallForce"
+                                name="squallForce"
+                                value={formik.values.squallForce || ""}
+                                onChange={handleChange}
+                              />
                             </div>
                             <div className="space-y-2">
-                              <Label htmlFor="squallDirection">Direction (°d)</Label>
-                              <Input id="squallDirection" name="squallDirection" value={formik.values.squallDirection || ""} onChange={handleChange} />
+                              <Label htmlFor="squallDirection">
+                                Direction (°d)
+                              </Label>
+                              <Input
+                                id="squallDirection"
+                                name="squallDirection"
+                                value={formik.values.squallDirection || ""}
+                                onChange={handleChange}
+                              />
                             </div>
                             <div className="space-y-2">
                               <Label htmlFor="squallTime">Time (qt)</Label>
-                              <Input id="squallTime" name="squallTime" value={formik.values.squallTime || ""} onChange={handleChange} />
+                              <Input
+                                id="squallTime"
+                                name="squallTime"
+                                value={formik.values.squallTime || ""}
+                                onChange={handleChange}
+                              />
                             </div>
                           </div>
                         ) : (
-                          <div className="p-3 text-slate-600 bg-slate-50 border border-slate-200 rounded-md">Squall measurements skipped</div>
+                          <div className="p-3 text-slate-600 bg-slate-50 border border-slate-200 rounded-md">
+                            Squall measurements skipped
+                          </div>
                         )}
                       </div>
 
@@ -2085,19 +2275,33 @@ const handleNumericInput = (e: React.ChangeEvent<HTMLInputElement>) => {
                         <h4 className="font-semibold mb-3">Visibility</h4>
                         <div className="grid gap-4 sm:grid-cols-2">
                           <div className="space-y-2">
-                            <Label htmlFor="horizontalVisibility">Horizontal Visibility</Label>
-                            <Input id="horizontalVisibility" name="horizontalVisibility" value={formik.values.horizontalVisibility || ""} onChange={handleNumericInput} />
+                            <Label htmlFor="horizontalVisibility">
+                              Horizontal Visibility
+                            </Label>
+                            <Input
+                              id="horizontalVisibility"
+                              name="horizontalVisibility"
+                              value={formik.values.horizontalVisibility || ""}
+                              onChange={handleNumericInput}
+                            />
                           </div>
                         </div>
                       </div>
 
                       {/* Meteors Section */}
                       <div>
-                        <h4 className="font-semibold mb-3">Mise Meteors (Code)</h4>
+                        <h4 className="font-semibold mb-3">
+                          Mise Meteors (Code)
+                        </h4>
                         <div className="grid gap-4 sm:grid-cols-2">
                           <div className="space-y-2">
                             <Label htmlFor="miscMeteors">Misc Meteors</Label>
-                            <Input id="miscMeteors" name="miscMeteors" value={formik.values.miscMeteors || ""} onChange={handleChange} />
+                            <Input
+                              id="miscMeteors"
+                              name="miscMeteors"
+                              value={formik.values.miscMeteors || ""}
+                              onChange={handleChange}
+                            />
                           </div>
                         </div>
                       </div>
@@ -2107,16 +2311,37 @@ const handleNumericInput = (e: React.ChangeEvent<HTMLInputElement>) => {
                         <h4 className="font-semibold mb-3">Weather</h4>
                         <div className="grid gap-4 sm:grid-cols-2">
                           <div className="space-y-2">
-                            <Label htmlFor="pastWeatherW1">Past Weather (W1)</Label>
-                            <Input id="pastWeatherW1" name="pastWeatherW1" value={formik.values.pastWeatherW1 || ""} onChange={handleChange} />
+                            <Label htmlFor="pastWeatherW1">
+                              Past Weather (W1)
+                            </Label>
+                            <Input
+                              id="pastWeatherW1"
+                              name="pastWeatherW1"
+                              value={formik.values.pastWeatherW1 || ""}
+                              onChange={handleChange}
+                            />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="pastWeatherW2">Past Weather (W2)</Label>
-                            <Input id="pastWeatherW2" name="pastWeatherW2" value={formik.values.pastWeatherW2 || ""} onChange={handleChange} />
+                            <Label htmlFor="pastWeatherW2">
+                              Past Weather (W2)
+                            </Label>
+                            <Input
+                              id="pastWeatherW2"
+                              name="pastWeatherW2"
+                              value={formik.values.pastWeatherW2 || ""}
+                              onChange={handleChange}
+                            />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="presentWeatherWW">Present Weather (WW)</Label>
-                            <Input id="presentWeatherWW" name="presentWeatherWW" value={formik.values.presentWeatherWW || ""} onChange={handleNumericInput} />
+                            <Label htmlFor="presentWeatherWW">
+                              Present Weather (WW)
+                            </Label>
+                            <Input
+                              id="presentWeatherWW"
+                              name="presentWeatherWW"
+                              value={formik.values.presentWeatherWW || ""}
+                              onChange={handleNumericInput}
+                            />
                           </div>
                         </div>
                       </div>
@@ -2126,29 +2351,63 @@ const handleNumericInput = (e: React.ChangeEvent<HTMLInputElement>) => {
                         <h4 className="font-semibold mb-3">Meta</h4>
                         <div className="grid gap-4 sm:grid-cols-3">
                           <div className="space-y-2">
-                            <Label htmlFor="subIndicator">1st Card Indicator</Label>
-                            <Input id="subIndicator" name="subIndicator" value={formik.values.subIndicator || ""} onChange={handleChange} readOnly />
+                            <Label htmlFor="subIndicator">
+                              1st Card Indicator
+                            </Label>
+                            <Input
+                              id="subIndicator"
+                              name="subIndicator"
+                              value={formik.values.subIndicator || ""}
+                              onChange={handleChange}
+                              readOnly
+                            />
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="stationNo">Station No</Label>
-                            <Input id="stationNo" name="stationNo" value={formik.values.stationNo || ""} onChange={handleChange} readOnly />
+                            <Input
+                              id="stationNo"
+                              name="stationNo"
+                              value={formik.values.stationNo || ""}
+                              onChange={handleChange}
+                              readOnly
+                            />
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="year">Year</Label>
-                            <Input id="year" name="year" value={formik.values.year || ""} onChange={handleChange} readOnly />
+                            <Input
+                              id="year"
+                              name="year"
+                              value={formik.values.year || ""}
+                              onChange={handleChange}
+                              readOnly
+                            />
                           </div>
                         </div>
                       </div>
                     </CardContent>
                     <CardFooter className="flex flex-col-reverse sm:flex-row justify-between items-stretch sm:items-center gap-4 p-6">
-                      <Button type="button" variant="outline" onClick={prevTab} className="w-full sm:w-auto">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={prevTab}
+                        className="w-full sm:w-auto"
+                      >
                         <ChevronLeft className="mr-2 h-4 w-4" /> Previous
                       </Button>
                       <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
-                        <Button type="button" variant="outline" className="w-full sm:w-auto border-slate-600 hover:bg-slate-100 transition-all duration-300" onClick={handleReset}>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full sm:w-auto border-slate-600 hover:bg-slate-100 transition-all duration-300"
+                          onClick={handleReset}
+                        >
                           Reset
                         </Button>
-                        <Button type="submit" className="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 shadow-sm" disabled={isSubmitting}>
+                        <Button
+                          type="submit"
+                          className="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 shadow-sm"
+                          disabled={isSubmitting}
+                        >
                           {isSubmitting ? "Saving..." : "Submit Data"}
                         </Button>
                       </div>

@@ -1,3 +1,5 @@
+// app/dashboard/data-entry/first-card/page.tsx
+
 export const dynamic = "force-dynamic";
 
 import { FirstCardForm } from "./FirstCardForm";
@@ -7,7 +9,7 @@ export default async function FirstCardPage() {
   const timeInformation = await getTimeData();
 
   // Check if timeInformation is an error object
-  if ('error' in timeInformation) {
+  if ("error" in timeInformation) {
     // Handle the error case
     return (
       <main className="container mx-auto">
