@@ -225,13 +225,14 @@ export function SynopticCode() {
         console.log("generated synoptic", generatedValues);
 
         // Check if today's date matches the generated values
-        const today = new Date();
-        const todayStr = `${today.getFullYear()}-${String(
-          today.getMonth() + 1
-        ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+        const now = new Date();
+        const todayUtcStr = `${now.getUTCFullYear()}-${String(
+          now.getUTCMonth() + 1
+        ).padStart(2, "0")}-${String(now.getUTCDate()).padStart(2, "0")}`;
+
         const valuesDateStr = `${generatedValues.year}-${generatedValues.month}-${generatedValues.day}`;
 
-        const isToday = todayStr === valuesDateStr;
+        const isToday = todayUtcStr === valuesDateStr;
 
         setDataStatus({
           hasToday: isToday,
@@ -269,9 +270,9 @@ export function SynopticCode() {
         setFieldValue("stationNo", "00000");
         setFieldValue("weatherRemark", "");
         setFieldValue("dataType", "SYNOP");
-        setFieldValue("year", now.getFullYear().toString());
-        setFieldValue("month", String(now.getMonth() + 1).padStart(2, "0"));
-        setFieldValue("day", String(now.getDate()).padStart(2, "0"));
+        setFieldValue("year", now.getUTCFullYear().toString());
+        setFieldValue("month", String(now.getUTCMonth() + 1).padStart(2, "0"));
+        setFieldValue("day", String(now.getUTCDate()).padStart(2, "0"));
       }
     };
 

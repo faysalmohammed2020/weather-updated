@@ -1,10 +1,21 @@
-"use client"
-import { useState, useEffect, useImperativeHandle, forwardRef } from "react"
-import type React from "react"
+// app/dashboard/view-and-manage/synoptic-code/page.tsx
 
-import { Button } from "@/components/ui/button"
-import { Loader2, Download, Edit, AlertTriangle, ChevronLeft, ChevronRight, Filter, Radio } from "lucide-react"
-import { useSession } from "@/lib/auth-client"
+"use client";
+import { useState, useEffect, useImperativeHandle, forwardRef } from "react";
+import type React from "react";
+
+import { Button } from "@/components/ui/button";
+import {
+  Loader2,
+  Download,
+  Edit,
+  AlertTriangle,
+  ChevronLeft,
+  ChevronRight,
+  Filter,
+  Radio,
+} from "lucide-react";
+import { useSession } from "@/lib/auth-client";
 import {
   Dialog,
   DialogContent,
@@ -12,18 +23,29 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { toast } from "sonner"
-import { differenceInDays, parseISO, isValid, format } from "date-fns"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { differenceInDays, parseISO, isValid, format } from "date-fns";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Station {
-  id: string
-  stationId: string
-  name: string
+  id: string;
+  stationId: string;
+  name: string;
 }
 
 // Time slots for 3-hour intervals
@@ -36,45 +58,45 @@ const TIME_SLOTS = [
   { label: "15", value: "15" },
   { label: "18", value: "18" },
   { label: "21", value: "21" },
-]
+];
 
 // Determine if a record can be edited based on user role and time elapsed
 const canEditRecord = (record: any, user: any): boolean => {
-  if (!user) return false
-  if (!record.createdAt) return true
+  if (!user) return false;
+  if (!record.createdAt) return true;
   try {
-    const submissionDate = parseISO(record.createdAt)
-    if (!isValid(submissionDate)) return true
-    const now = new Date()
-    const daysDifference = differenceInDays(now, submissionDate)
-    const role = user.role
-    const userId = user.id
-    const userStationId = user.station?.id
-    const recordStationId = record.ObservingTime?.stationId
-    const recordUserId = record.ObservingTime?.userId
+    const submissionDate = parseISO(record.createdAt);
+    if (!isValid(submissionDate)) return true;
+    const now = new Date();
+    const daysDifference = differenceInDays(now, submissionDate);
+    const role = user.role;
+    const userId = user.id;
+    const userStationId = user.station?.id;
+    const recordStationId = record.ObservingTime?.stationId;
+    const recordUserId = record.ObservingTime?.userId;
 
-    if (role === "super_admin") return daysDifference <= 365
+    if (role === "super_admin") return daysDifference <= 365;
     if (role === "station_admin") {
-      return daysDifference <= 30 && userStationId === recordStationId
+      return daysDifference <= 30 && userStationId === recordStationId;
     }
     if (role === "observer") {
-      return daysDifference <= 2 && userId === recordUserId
+      return daysDifference <= 2 && userId === recordUserId;
     }
-    return false
+    return false;
   } catch (e) {
-    console.warn("Error in canEditRecord:", e)
-    return false
+    console.warn("Error in canEditRecord:", e);
+    return false;
   }
-}
+};
 
 const SynopticCodeTable = forwardRef((props, ref) => {
-  const [currentData, setCurrentData] = useState<any[]>([])
-  const [loading, setLoading] = useState<boolean>(true)
-  const [refreshing, setRefreshing] = useState<boolean>(false)
-  const { data: session } = useSession()
-  const user = session?.user
-  const isSuperAdmin = user?.role === "super_admin"
-  const isStationAdmin = user?.role === "station_admin"
+  const [currentData, setCurrentData] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+  const { data: session } = useSession();
+  const user = session?.user;
+  const isSuperAdmin = user?.role === "super_admin";
+  const isStationAdmin = user?.role === "station_admin";
 
   const [headerInfo, setHeaderInfo] = useState({
     dataType: "SY",
@@ -82,22 +104,22 @@ const SynopticCodeTable = forwardRef((props, ref) => {
     year: "24",
     month: "11",
     day: "03",
-  })
+  });
 
   // Filter states
-  const today = format(new Date(), "yyyy-MM-dd")
-  const [startDate, setStartDate] = useState(today)
-  const [endDate, setEndDate] = useState(today)
-  const [dateError, setDateError] = useState<string | null>(null)
-  const [stationFilter, setStationFilter] = useState("all")
-  const [stations, setStations] = useState<Station[]>([])
+  const today = format(new Date(), "yyyy-MM-dd");
+  const [startDate, setStartDate] = useState(today);
+  const [endDate, setEndDate] = useState(today);
+  const [dateError, setDateError] = useState<string | null>(null);
+  const [stationFilter, setStationFilter] = useState("all");
+  const [stations, setStations] = useState<Station[]>([]);
 
   // Edit dialog state
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  const [selectedRecord, setSelectedRecord] = useState<any>(null)
-  const [editFormData, setEditFormData] = useState<any>({})
-  const [isSaving, setIsSaving] = useState(false)
-  const [isPermissionDeniedOpen, setIsPermissionDeniedOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState<any>(null);
+  const [editFormData, setEditFormData] = useState<any>({});
+  const [isSaving, setIsSaving] = useState(false);
+  const [isPermissionDeniedOpen, setIsPermissionDeniedOpen] = useState(false);
 
   // Expose the getData method via ref
   useImperativeHandle(ref, () => ({
@@ -107,174 +129,176 @@ const SynopticCodeTable = forwardRef((props, ref) => {
         dataType: headerInfo.dataType,
         stationNo: headerInfo.stationNo,
         date: item.ObservingTime?.utcTime || new Date().toISOString(),
-      }))
+      }));
     },
-  }))
+  }));
 
   // Function to fetch the most recent data
   const fetchLatestData = async () => {
-    setRefreshing(true)
+    setRefreshing(true);
     try {
       const url = `/api/synoptic-code?startDate=${startDate}&endDate=${endDate}${
         stationFilter !== "all" ? `&stationId=${stationFilter}` : ""
-      }`
-      const res = await fetch(url)
+      }`;
+      const res = await fetch(url);
       if (!res.ok) {
-        throw new Error("Failed to fetch synoptic data")
+        throw new Error("Failed to fetch synoptic data");
       }
-      const data = await res.json()
+      const data = await res.json();
       if (data.length > 0) {
-        setCurrentData(data)
+        setCurrentData(data);
         // Extract header info from the first entry if available
-        const firstEntry = data[0]
+        const firstEntry = data[0];
         const observingTime = firstEntry.ObservingTime?.utcTime
           ? new Date(firstEntry.ObservingTime.utcTime)
-          : new Date()
+          : new Date();
+        // inside fetchLatestData(), after you compute observingTime
         setHeaderInfo({
           dataType: firstEntry.dataType?.substring(0, 2) || "SY",
           stationNo: user?.station?.stationId || "41953",
-          year: observingTime.getFullYear().toString().substring(2),
-          month: (observingTime.getMonth() + 1).toString().padStart(2, "0"),
-          day: observingTime.getDate().toString().padStart(2, "0"),
-        })
+          year: observingTime.getUTCFullYear().toString().substring(2), // ⬅️ UTC
+          month: String(observingTime.getUTCMonth() + 1).padStart(2, "0"), // ⬅️ UTC
+          day: String(observingTime.getUTCDate()).padStart(2, "0"), // ⬅️ UTC
+        });
       } else {
-        setCurrentData([])
+        setCurrentData([]);
       }
     } catch (error) {
-      console.error("Failed to fetch latest data:", error)
-      toast.error("Failed to fetch synoptic data")
+      console.error("Failed to fetch latest data:", error);
+      toast.error("Failed to fetch synoptic data");
     } finally {
-      setLoading(false)
-      setRefreshing(false)
+      setLoading(false);
+      setRefreshing(false);
     }
-  }
+  };
 
   // Fetch stations if super admin
   const fetchStations = async () => {
     if (isSuperAdmin) {
       try {
-        const response = await fetch("/api/stations")
+        const response = await fetch("/api/stations");
         if (!response.ok) {
-          throw new Error("Failed to fetch stations")
+          throw new Error("Failed to fetch stations");
         }
-        const stationsResult = await response.json()
-        setStations(stationsResult)
+        const stationsResult = await response.json();
+        setStations(stationsResult);
       } catch (error) {
-        console.error("Error fetching stations:", error)
-        toast.error("Failed to fetch stations")
+        console.error("Error fetching stations:", error);
+        toast.error("Failed to fetch stations");
       }
     }
-  }
+  };
 
   // Load data on component mount and when filters change
   useEffect(() => {
-    fetchLatestData()
-    fetchStations()
-  }, [startDate, endDate, stationFilter])
+    fetchLatestData();
+    fetchStations();
+  }, [startDate, endDate, stationFilter]);
 
   // Date navigation functions
   const goToPreviousWeek = () => {
-    const start = new Date(startDate)
-    const end = new Date(endDate)
-    const daysInRange = differenceInDays(end, start)
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const daysInRange = differenceInDays(end, start);
     // Calculate the new date range
-    const newStart = new Date(start)
-    newStart.setDate(start.getDate() - (daysInRange + 1))
-    const newEnd = new Date(start)
-    newEnd.setDate(start.getDate() - 1)
+    const newStart = new Date(start);
+    newStart.setDate(start.getDate() - (daysInRange + 1));
+    const newEnd = new Date(start);
+    newEnd.setDate(start.getDate() - 1);
     // Always update the dates when going back
-    setStartDate(format(newStart, "yyyy-MM-dd"))
-    setEndDate(format(newEnd, "yyyy-MM-dd"))
-    setDateError(null)
-  }
+    setStartDate(format(newStart, "yyyy-MM-dd"));
+    setEndDate(format(newEnd, "yyyy-MM-dd"));
+    setDateError(null);
+  };
 
   const goToNextWeek = () => {
-    const start = new Date(startDate)
-    const end = new Date(endDate)
-    const daysInRange = differenceInDays(end, start)
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const daysInRange = differenceInDays(end, start);
     // Calculate the new date range
-    const newStart = new Date(start)
-    newStart.setDate(start.getDate() + (daysInRange + 1))
-    const newEnd = new Date(newStart)
-    newEnd.setDate(newStart.getDate() + daysInRange)
+    const newStart = new Date(start);
+    newStart.setDate(start.getDate() + (daysInRange + 1));
+    const newEnd = new Date(newStart);
+    newEnd.setDate(newStart.getDate() + daysInRange);
     // Get today's date at midnight for comparison
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     // If the new range would go beyond today, adjust it
     if (newEnd > today) {
       // If we're already at or beyond today, don't go further
       if (end >= today) {
-        return
+        return;
       }
       // Otherwise, set the end to today and adjust the start accordingly
-      const adjustedEnd = new Date(today)
-      const adjustedStart = new Date(adjustedEnd)
-      adjustedStart.setDate(adjustedEnd.getDate() - daysInRange)
-      setStartDate(format(adjustedStart, "yyyy-MM-dd"))
-      setEndDate(format(adjustedEnd, "yyyy-MM-dd"))
+      const adjustedEnd = new Date(today);
+      const adjustedStart = new Date(adjustedEnd);
+      adjustedStart.setDate(adjustedEnd.getDate() - daysInRange);
+      setStartDate(format(adjustedStart, "yyyy-MM-dd"));
+      setEndDate(format(adjustedEnd, "yyyy-MM-dd"));
     } else {
       // Update to the new range if it's valid
-      setStartDate(format(newStart, "yyyy-MM-dd"))
-      setEndDate(format(newEnd, "yyyy-MM-dd"))
+      setStartDate(format(newStart, "yyyy-MM-dd"));
+      setEndDate(format(newEnd, "yyyy-MM-dd"));
     }
-    setDateError(null)
-  }
+    setDateError(null);
+  };
 
   // Handle date changes with validation
   const handleDateChange = (type: "start" | "end", newDate: string) => {
-    const date = new Date(newDate)
-    const otherDate = type === "start" ? new Date(endDate) : new Date(startDate)
+    const date = new Date(newDate);
+    const otherDate =
+      type === "start" ? new Date(endDate) : new Date(startDate);
     if (isNaN(date.getTime())) {
-      setDateError("Invalid date format")
-      return
+      setDateError("Invalid date format");
+      return;
     }
     // Reset error if dates are valid
-    setDateError(null)
+    setDateError(null);
     if (type === "start") {
       if (date > otherDate) {
-        setDateError("Start date cannot be after end date")
-        return
+        setDateError("Start date cannot be after end date");
+        return;
       }
-      setStartDate(newDate)
+      setStartDate(newDate);
     } else {
       if (date < otherDate) {
-        setDateError("End date cannot be before start date")
-        return
+        setDateError("End date cannot be before start date");
+        return;
       }
-      setEndDate(newDate)
+      setEndDate(newDate);
     }
-  }
+  };
 
   // Get station name by ID
   const getStationNameById = (stationId: string): string => {
-    const station = stations.find((s) => s.id === stationId)
-    return station ? station.name : stationId
-  }
+    const station = stations.find((s) => s.id === stationId);
+    return station ? station.name : stationId;
+  };
 
   // Handle edit click
   const handleEditClick = (record: any) => {
     if (user && canEditRecord(record, user)) {
-      setSelectedRecord(record)
-      setEditFormData(record)
-      setIsEditDialogOpen(true)
+      setSelectedRecord(record);
+      setEditFormData(record);
+      setIsEditDialogOpen(true);
     } else {
-      setIsPermissionDeniedOpen(true)
+      setIsPermissionDeniedOpen(true);
     }
-  }
+  };
 
   // Handle input changes in edit form
   const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target
+    const { id, value } = e.target;
     setEditFormData((prev: any) => ({
       ...prev,
       [id]: value,
-    }))
-  }
+    }));
+  };
 
   // Save edited data
   const handleSaveEdit = async () => {
-    if (!selectedRecord) return
-    setIsSaving(true)
+    if (!selectedRecord) return;
+    setIsSaving(true);
     try {
       const response = await fetch("/api/synoptic-code", {
         method: "PUT",
@@ -285,76 +309,83 @@ const SynopticCodeTable = forwardRef((props, ref) => {
           id: selectedRecord.id,
           ...editFormData,
         }),
-      })
+      });
       if (!response.ok) {
-        throw new Error("Failed to update record")
+        throw new Error("Failed to update record");
       }
-      const result = await response.json()
+      const result = await response.json();
       // Update local state
       setCurrentData((prevData) =>
-        prevData.map((item) => (item.id === selectedRecord.id ? { ...item, ...editFormData } : item)),
-      )
-      toast.success("Record updated successfully")
-      setIsEditDialogOpen(false)
+        prevData.map((item) =>
+          item.id === selectedRecord.id ? { ...item, ...editFormData } : item
+        )
+      );
+      toast.success("Record updated successfully");
+      setIsEditDialogOpen(false);
     } catch (error) {
-      console.error("Error updating record:", error)
-      toast.error(`Failed to update record: ${error.message}`)
+      console.error("Error updating record:", error);
+      toast.error(`Failed to update record: ${error.message}`);
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
-  }
+  };
 
   // Function to export data as CSV
   const exportToCSV = () => {
-    if (!currentData || currentData.length === 0) return
+    if (!currentData || currentData.length === 0) return;
     // Create headers
     let csvContent =
-      "Time,C1,Iliii,iRiXhvv,Nddff,1SnTTT,2SnTdTdTd,3PPP/4PPP,6RRRtR,7wwW1W2,8NhClCmCh,2SnTnTnTn/InInInIn,56DlDmDh,57CDaEc,C2,GG,58P24P24P24/59P24P24P24,(6RRRtR),8N5Ch5h5,90dqqqt,91fqfqfq,Weather Remarks\n"
+      "Time,C1,Iliii,iRiXhvv,Nddff,1SnTTT,2SnTdTdTd,3PPP/4PPP,6RRRtR,7wwW1W2,8NhClCmCh,2SnTnTnTn/InInInIn,56DlDmDh,57CDaEc,C2,GG,58P24P24P24/59P24P24P24,(6RRRtR),8N5Ch5h5,90dqqqt,91fqfqfq,Weather Remarks\n";
     // Add data rows
     currentData.forEach((entry) => {
-      const observingTime = entry.ObservingTime?.utcTime ? new Date(entry.ObservingTime.utcTime) : new Date()
-      const timeSlot = observingTime.getUTCHours().toString().padStart(2, "0")
-      let row = `${timeSlot},`
-      row += `${entry.C1 || ""},`
-      row += `${entry.Iliii || ""},`
-      row += `${entry.iRiXhvv || ""},`
-      row += `${entry.Nddff || ""},`
-      row += `${entry.S1nTTT || ""},`
-      row += `${entry.S2nTddTddTdd || ""},`
-      row += `${entry.P3PPP4PPPP || ""},`
-      row += `${entry.RRRtR6 || ""},`
-      row += `${entry.wwW1W2 || ""},`
-      row += `${entry.NhClCmCh || ""},`
-      row += `${entry.S2nTnTnTnInInInIn || ""},`
-      row += `${entry.D56DLDMDH || ""},`
-      row += `${entry.CD57DaEc || ""},`
-      row += `${entry.avgTotalCloud || ""},`
-      row += `${entry.C2 || ""},`
-      row += `${entry.GG || ""},`
-      row += `${entry.P24Group58_59 || ""},`
-      row += `${entry.R24Group6_7 || ""},`
-      row += `${entry.NsChshs || ""},`
-      row += `${entry.dqqqt90 || ""},`
-      row += `${entry.fqfqfq91 || ""},`
-      row += `"${(entry.weatherRemark || "").replace(/"/g, '""')}"\n`
-      csvContent += row
-    })
+      const observingTime = entry.ObservingTime?.utcTime
+        ? new Date(entry.ObservingTime.utcTime)
+        : new Date();
+      const timeSlot = observingTime.getUTCHours().toString().padStart(2, "0");
+      let row = `${timeSlot},`;
+      row += `${entry.C1 || ""},`;
+      row += `${entry.Iliii || ""},`;
+      row += `${entry.iRiXhvv || ""},`;
+      row += `${entry.Nddff || ""},`;
+      row += `${entry.S1nTTT || ""},`;
+      row += `${entry.S2nTddTddTdd || ""},`;
+      row += `${entry.P3PPP4PPPP || ""},`;
+      row += `${entry.RRRtR6 || ""},`;
+      row += `${entry.wwW1W2 || ""},`;
+      row += `${entry.NhClCmCh || ""},`;
+      row += `${entry.S2nTnTnTnInInInIn || ""},`;
+      row += `${entry.D56DLDMDH || ""},`;
+      row += `${entry.CD57DaEc || ""},`;
+      row += `${entry.avgTotalCloud || ""},`;
+      row += `${entry.C2 || ""},`;
+      row += `${entry.GG || ""},`;
+      row += `${entry.P24Group58_59 || ""},`;
+      row += `${entry.R24Group6_7 || ""},`;
+      row += `${entry.NsChshs || ""},`;
+      row += `${entry.dqqqt90 || ""},`;
+      row += `${entry.fqfqfq91 || ""},`;
+      row += `"${(entry.weatherRemark || "").replace(/"/g, '""')}"\n`;
+      csvContent += row;
+    });
     // Create download link
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement("a")
-    link.setAttribute("href", url)
-    link.setAttribute("download", `synoptic_data_${headerInfo.year}${headerInfo.month}${headerInfo.day}.csv`)
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-  }
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `synoptic_data_${headerInfo.year}${headerInfo.month}${headerInfo.day}.csv`
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   // Function to export data as TXT (SYNOP format)
   const exportToTXT = () => {
-    if (!currentData || currentData.length === 0) return
-    const currentDate = new Date().toISOString().split("T")[0]
-    const currentTime = new Date().toLocaleTimeString()
+    if (!currentData || currentData.length === 0) return;
+    const currentDate = new Date().toISOString().split("T")[0];
+    const currentTime = new Date().toLocaleTimeString();
     // Create TXT header
     let txtContent = `SYNOPTIC DATA REPORT
 ${"=".repeat(60)}
@@ -365,62 +396,67 @@ REPORT INFORMATION:
   Total Records: ${currentData.length}
 
 SYNOPTIC DATA VALUES:
-${"=".repeat(60)}`
+${"=".repeat(60)}`;
 
     // Add data records
     currentData.forEach((entry, index) => {
-      const observingTime = entry.ObservingTime?.utcTime ? new Date(entry.ObservingTime.utcTime) : new Date()
-      const timeSlot = observingTime.getUTCHours().toString().padStart(2, "0")
-      txtContent += `\nRecord ${index + 1} (Time Slot: ${timeSlot}):\n`
-      txtContent += `${"-".repeat(30)}\n`
+      const observingTime = entry.ObservingTime?.utcTime
+        ? new Date(entry.ObservingTime.utcTime)
+        : new Date();
+      const timeSlot = observingTime.getUTCHours().toString().padStart(2, "0");
+      txtContent += `\nRecord ${index + 1} (Time Slot: ${timeSlot}):\n`;
+      txtContent += `${"-".repeat(30)}\n`;
       // Format each field with label and value
-      txtContent += `C1${" ".repeat(18)} ---> ${entry.C1 || "--"}\n`
-      txtContent += `Iliii${" ".repeat(15)} ---> ${entry.Iliii || "--"}\n`
-      txtContent += `iRiXhvv${" ".repeat(13)} ---> ${entry.iRiXhvv || "--"}\n`
-      txtContent += `Nddff${" ".repeat(15)} ---> ${entry.Nddff || "--"}\n`
-      txtContent += `1SnTTT${" ".repeat(14)} ---> ${entry.S1nTTT || "--"}\n`
-      txtContent += `2SnTdTdTd${" ".repeat(11)} ---> ${entry.S2nTddTddTdd || "--"}\n`
-      txtContent += `3PPP/4PPP${" ".repeat(11)} ---> ${entry.P3PPP4PPPP || "--"}\n`
-      txtContent += `6RRRtR${" ".repeat(14)} ---> ${entry.RRRtR6 || "--"}\n`
-      txtContent += `7wwW1W2${" ".repeat(13)} ---> ${entry.wwW1W2 || "--"}\n`
-      txtContent += `8NhClCmCh${" ".repeat(11)} ---> ${entry.NhClCmCh || "--"}\n`
-      txtContent += `2SnTnTnTn/InInInIn${" ".repeat(4)} ---> ${entry.S2nTnTnTnInInInIn || "--"}\n`
-      txtContent += `56DlDmDh${" ".repeat(12)} ---> ${entry.D56DLDMDH || "--"}\n`
-      txtContent += `57CDaEc${" ".repeat(13)} ---> ${entry.CD57DaEc || "--"}\n`
-      txtContent += `C2${" ".repeat(18)} ---> ${entry.C2 || "--"}\n`
-      txtContent += `GG${" ".repeat(18)} ---> ${entry.GG || "--"}\n`
-      txtContent += `58/59P24${" ".repeat(12)} ---> ${entry.P24Group58_59 || "--"}\n`
-      txtContent += `6RRRtR${" ".repeat(14)} ---> ${entry.R24Group6_7 || "--"}\n`
-      txtContent += `8N5Ch5h5${" ".repeat(12)} ---> ${entry.NsChshs || "--"}\n`
-      txtContent += `90dqqqt${" ".repeat(13)} ---> ${entry.dqqqt90 || "--"}\n`
-      txtContent += `91fqfqfq${" ".repeat(12)} ---> ${entry.fqfqfq91 || "--"}\n`
+      txtContent += `C1${" ".repeat(18)} ---> ${entry.C1 || "--"}\n`;
+      txtContent += `Iliii${" ".repeat(15)} ---> ${entry.Iliii || "--"}\n`;
+      txtContent += `iRiXhvv${" ".repeat(13)} ---> ${entry.iRiXhvv || "--"}\n`;
+      txtContent += `Nddff${" ".repeat(15)} ---> ${entry.Nddff || "--"}\n`;
+      txtContent += `1SnTTT${" ".repeat(14)} ---> ${entry.S1nTTT || "--"}\n`;
+      txtContent += `2SnTdTdTd${" ".repeat(11)} ---> ${entry.S2nTddTddTdd || "--"}\n`;
+      txtContent += `3PPP/4PPP${" ".repeat(11)} ---> ${entry.P3PPP4PPPP || "--"}\n`;
+      txtContent += `6RRRtR${" ".repeat(14)} ---> ${entry.RRRtR6 || "--"}\n`;
+      txtContent += `7wwW1W2${" ".repeat(13)} ---> ${entry.wwW1W2 || "--"}\n`;
+      txtContent += `8NhClCmCh${" ".repeat(11)} ---> ${entry.NhClCmCh || "--"}\n`;
+      txtContent += `2SnTnTnTn/InInInIn${" ".repeat(4)} ---> ${entry.S2nTnTnTnInInInIn || "--"}\n`;
+      txtContent += `56DlDmDh${" ".repeat(12)} ---> ${entry.D56DLDMDH || "--"}\n`;
+      txtContent += `57CDaEc${" ".repeat(13)} ---> ${entry.CD57DaEc || "--"}\n`;
+      txtContent += `C2${" ".repeat(18)} ---> ${entry.C2 || "--"}\n`;
+      txtContent += `GG${" ".repeat(18)} ---> ${entry.GG || "--"}\n`;
+      txtContent += `58/59P24${" ".repeat(12)} ---> ${entry.P24Group58_59 || "--"}\n`;
+      txtContent += `6RRRtR${" ".repeat(14)} ---> ${entry.R24Group6_7 || "--"}\n`;
+      txtContent += `8N5Ch5h5${" ".repeat(12)} ---> ${entry.NsChshs || "--"}\n`;
+      txtContent += `90dqqqt${" ".repeat(13)} ---> ${entry.dqqqt90 || "--"}\n`;
+      txtContent += `91fqfqfq${" ".repeat(12)} ---> ${entry.fqfqfq91 || "--"}\n`;
       // Add weather remarks if available
       if (entry.weatherRemark) {
-        txtContent += `Weather Remarks${" ".repeat(6)} ---> ${entry.weatherRemark.split(" - ")[1] || "--"}\n`
+        txtContent += `Weather Remarks${" ".repeat(6)} ---> ${entry.weatherRemark.split(" - ")[1] || "--"}\n`;
       }
-    })
+    });
     // Add footer
     txtContent += `\n${"=".repeat(60)}
 Report End
-${"=".repeat(60)}`
+${"=".repeat(60)}`;
     // Create and download file
-    const blob = new Blob([txtContent], { type: "text/plain;charset=utf-8;" })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement("a")
-    link.href = url
-    link.download = `synoptic_data_${headerInfo.stationNo}_${headerInfo.year}${headerInfo.month}${headerInfo.day}_${currentDate}.txt`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-  }
+    const blob = new Blob([txtContent], { type: "text/plain;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `synoptic_data_${headerInfo.stationNo}_${headerInfo.year}${headerInfo.month}${headerInfo.day}_${currentDate}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   // Function to export data as TAC (Telecommunications Abbreviated Code) format
   const exportToTAC = () => {
-    if (!currentData || currentData.length === 0) return
+    if (!currentData || currentData.length === 0) return;
 
-    const currentDate = new Date()
-    const currentDateStr = currentDate.toISOString().split("T")[0]
-    const currentTimeStr = currentDate.toISOString().split("T")[1].substring(0, 8)
+    const currentDate = new Date();
+    const currentDateStr = currentDate.toISOString().split("T")[0];
+    const currentTimeStr = currentDate
+      .toISOString()
+      .split("T")[1]
+      .substring(0, 8);
 
     // TAC Message Header
     let tacContent = `ZCZC
@@ -444,142 +480,145 @@ ${"=".repeat(70)}
 SYNOPTIC OBSERVATIONS:
 ${"=".repeat(70)}
 
-`
+`;
 
     // Process each observation
     currentData.forEach((entry, index) => {
-      const observingTime = entry.ObservingTime?.utcTime ? new Date(entry.ObservingTime.utcTime) : new Date()
+      const observingTime = entry.ObservingTime?.utcTime
+        ? new Date(entry.ObservingTime.utcTime)
+        : new Date();
 
-      const day = observingTime.getUTCDate().toString().padStart(2, "0")
-      const hour = observingTime.getUTCHours().toString().padStart(2, "0")
-      const timeGroup = `${day}${hour}`
+      const day = observingTime.getUTCDate().toString().padStart(2, "0");
+      const hour = observingTime.getUTCHours().toString().padStart(2, "0");
+      const timeGroup = `${day}${hour}`;
 
       // Build the TAC message line by line
-      tacContent += `OBSERVATION ${index + 1}:\n`
-      tacContent += `${"-".repeat(50)}\n`
+      tacContent += `OBSERVATION ${index + 1}:\n`;
+      tacContent += `${"-".repeat(50)}\n`;
 
       // Station identifier and time group
-      tacContent += `AAXX ${timeGroup}\n`
+      tacContent += `AAXX ${timeGroup}\n`;
 
       // Station ID (IIiii)
-      const stationId = entry.Iliii || headerInfo.stationNo
-      tacContent += `${stationId}`
+      const stationId = entry.Iliii || headerInfo.stationNo;
+      tacContent += `${stationId}`;
 
       // Build the synoptic groups
-      const synopGroups = []
+      const synopGroups = [];
 
       // Group 1: iRiXhvv (Precipitation indicator, weather station type, visibility)
       if (entry.iRiXhvv) {
-        synopGroups.push(entry.iRiXhvv)
+        synopGroups.push(entry.iRiXhvv);
       }
 
       // Group 2: Nddff (Cloud amount, wind direction and speed)
       if (entry.Nddff) {
-        synopGroups.push(entry.Nddff)
+        synopGroups.push(entry.Nddff);
       }
 
       // Group 3: 1SnTTT (Air temperature)
       if (entry.S1nTTT) {
-        synopGroups.push(entry.S1nTTT)
+        synopGroups.push(entry.S1nTTT);
       }
 
       // Group 4: 2SnTdTdTd (Dew point temperature)
       if (entry.S2nTddTddTdd) {
-        synopGroups.push(entry.S2nTddTddTdd)
+        synopGroups.push(entry.S2nTddTddTdd);
       }
 
       // Group 5: 3P0P0P0 or 4PPPP (Pressure)
       if (entry.P3PPP4PPPP) {
-        synopGroups.push(entry.P3PPP4PPPP)
+        synopGroups.push(entry.P3PPP4PPPP);
       }
 
       // Group 6: 6RRRtR (Precipitation amount and time)
       if (entry.RRRtR6) {
-        synopGroups.push(entry.RRRtR6)
+        synopGroups.push(entry.RRRtR6);
       }
 
       // Group 7: 7wwW1W2 (Present and past weather)
       if (entry.wwW1W2) {
-        synopGroups.push(entry.wwW1W2)
+        synopGroups.push(entry.wwW1W2);
       }
 
       // Group 8: 8NhClCmCh (Cloud information)
       if (entry.NhClCmCh) {
-        synopGroups.push(entry.NhClCmCh)
+        synopGroups.push(entry.NhClCmCh);
       }
 
       // Add groups to the message, breaking lines appropriately
-      let currentLine = ""
+      let currentLine = "";
       synopGroups.forEach((group, groupIndex) => {
         if (currentLine.length + group.length + 1 > 65) {
-          tacContent += ` ${currentLine}\n`
-          currentLine = group
+          tacContent += ` ${currentLine}\n`;
+          currentLine = group;
         } else {
-          currentLine += (currentLine ? " " : "") + group
+          currentLine += (currentLine ? " " : "") + group;
         }
-      })
+      });
 
       if (currentLine) {
-        tacContent += ` ${currentLine}\n`
+        tacContent += ` ${currentLine}\n`;
       }
 
       // Section 3 groups (if available)
-      const section3Groups = []
+      const section3Groups = [];
 
       if (entry.S2nTnTnTnInInInIn) {
-        section3Groups.push(entry.S2nTnTnTnInInInIn)
+        section3Groups.push(entry.S2nTnTnTnInInInIn);
       }
 
       if (entry.D56DLDMDH) {
-        section3Groups.push(entry.D56DLDMDH)
+        section3Groups.push(entry.D56DLDMDH);
       }
 
       if (entry.CD57DaEc) {
-        section3Groups.push(entry.CD57DaEc)
+        section3Groups.push(entry.CD57DaEc);
       }
 
       if (entry.P24Group58_59) {
-        section3Groups.push(entry.P24Group58_59)
+        section3Groups.push(entry.P24Group58_59);
       }
 
       if (entry.NsChshs) {
-        section3Groups.push(entry.NsChshs)
+        section3Groups.push(entry.NsChshs);
       }
 
       if (entry.dqqqt90) {
-        section3Groups.push(entry.dqqqt90)
+        section3Groups.push(entry.dqqqt90);
       }
 
       if (entry.fqfqfq91) {
-        section3Groups.push(entry.fqfqfq91)
+        section3Groups.push(entry.fqfqfq91);
       }
 
       // Add Section 3 if there are groups
       if (section3Groups.length > 0) {
-        tacContent += "333\n"
-        let section3Line = ""
+        tacContent += "333\n";
+        let section3Line = "";
         section3Groups.forEach((group) => {
           if (section3Line.length + group.length + 1 > 65) {
-            tacContent += ` ${section3Line}\n`
-            section3Line = group
+            tacContent += ` ${section3Line}\n`;
+            section3Line = group;
           } else {
-            section3Line += (section3Line ? " " : "") + group
+            section3Line += (section3Line ? " " : "") + group;
           }
-        })
+        });
 
         if (section3Line) {
-          tacContent += ` ${section3Line}\n`
+          tacContent += ` ${section3Line}\n`;
         }
       }
 
       // Add weather remarks if available
       if (entry.weatherRemark) {
-        const remarkText = entry.weatherRemark.split(" - ")[1] || entry.weatherRemark
-        tacContent += `RMK ${remarkText}\n`
+        const remarkText =
+          entry.weatherRemark.split(" - ")[1] || entry.weatherRemark;
+        tacContent += `RMK ${remarkText}\n`;
       }
 
-      tacContent += "=\n\n"
-    })
+      tacContent += "=\n\n";
+    });
 
     // TAC Message Footer
     tacContent += `${"=".repeat(70)}
@@ -592,25 +631,25 @@ MESSAGE SUMMARY:
   Period: ${startDate} to ${endDate}
   Generated: ${currentDateStr} ${currentTimeStr} UTC
 
-NNNN`
+NNNN`;
 
     // Create and download file
-    const blob = new Blob([tacContent], { type: "text/plain;charset=utf-8;" })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement("a")
-    link.href = url
-    link.download = `TAC_SYNOP_${headerInfo.stationNo}_${headerInfo.year}${headerInfo.month}${headerInfo.day}_${currentDateStr.replace(/-/g, "")}.tac`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+    const blob = new Blob([tacContent], { type: "text/plain;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `TAC_SYNOP_${headerInfo.stationNo}_${headerInfo.year}${headerInfo.month}${headerInfo.day}_${currentDateStr.replace(/-/g, "")}.tac`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 
-    toast.success("TAC message exported successfully")
-  }
+    toast.success("TAC message exported successfully");
+  };
 
   // Function to print the table
   const printTable = () => {
-    window.print()
-  }
+    window.print();
+  };
 
   return (
     <div className="space-y-6 print:space-y-0 m-2">
@@ -657,7 +696,9 @@ NNNN`
                 max={endDate}
                 className="text-xs sm:text-sm p-2 border border-slate-300 focus:ring-purple-500 focus:ring-2 rounded w-full sm:w-auto min-w-[120px]"
               />
-              <span className="text-sm text-slate-600 whitespace-nowrap">to</span>
+              <span className="text-sm text-slate-600 whitespace-nowrap">
+                to
+              </span>
               <input
                 type="date"
                 value={endDate}
@@ -689,7 +730,9 @@ NNNN`
                 disabled={!currentData || currentData.length === 0}
               >
                 <Download size={18} className="flex-shrink-0" />
-                <span className="text-sm sm:text-base whitespace-nowrap">Export CSV</span>
+                <span className="text-sm sm:text-base whitespace-nowrap">
+                  Export CSV
+                </span>
               </Button>
               <Button
                 variant="outline"
@@ -698,7 +741,9 @@ NNNN`
                 disabled={!currentData || currentData.length === 0}
               >
                 <Download size={18} className="flex-shrink-0" />
-                <span className="text-sm sm:text-base whitespace-nowrap">Export TXT</span>
+                <span className="text-sm sm:text-base whitespace-nowrap">
+                  Export TXT
+                </span>
               </Button>
               <Button
                 variant="outline"
@@ -707,7 +752,9 @@ NNNN`
                 disabled={!currentData || currentData.length === 0}
               >
                 <Radio size={18} className="flex-shrink-0" />
-                <span className="text-sm sm:text-base whitespace-nowrap">Export TAC</span>
+                <span className="text-sm sm:text-base whitespace-nowrap">
+                  Export TAC
+                </span>
               </Button>
             </div>
           )}
@@ -740,12 +787,18 @@ NNNN`
         </div>
       </div>
 
-      {dateError && <div className="text-red-500 text-sm px-4 print:hidden">{dateError}</div>}
+      {dateError && (
+        <div className="text-red-500 text-sm px-4 print:hidden">
+          {dateError}
+        </div>
+      )}
 
       {loading ? (
         <div className="flex justify-center items-center h-64">
           <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
-          <span className="ml-3 text-lg text-gray-700">Loading synoptic data...</span>
+          <span className="ml-3 text-lg text-gray-700">
+            Loading synoptic data...
+          </span>
         </div>
       ) : !currentData || currentData.length === 0 ? (
         <div className="flex justify-center items-center h-64 bg-blue-50/50 rounded-lg border-2 border-dashed border-blue-200">
@@ -769,8 +822,12 @@ NNNN`
               <path d="M6 16h4" />
               <path d="M14 16h4" />
             </svg>
-            <h3 className="text-xl font-semibold text-gray-800 mb-3">No Data Available</h3>
-            <p className="text-lg text-gray-600 mb-5">There is no synoptic data available for the selected filters.</p>
+            <h3 className="text-xl font-semibold text-gray-800 mb-3">
+              No Data Available
+            </h3>
+            <p className="text-lg text-gray-600 mb-5">
+              There is no synoptic data available for the selected filters.
+            </p>
             <Button
               variant="outline"
               className="bg-white text-blue-700 border-blue-300 hover:bg-blue-50 text-base"
@@ -787,7 +844,9 @@ NNNN`
             <div className="text-center border-b-2 border-blue-200 bg-gradient-to-b from-blue-50 to-white py-4 sm:py-6 print:py-3 rounded-t-lg">
               <div className="flex flex-wrap justify-center gap-4 sm:gap-6 md:gap-8 lg:gap-10 print:gap-6 max-w-full sm:max-w-lg md:max-w-2xl lg:max-w-5xl mx-auto px-3 sm:px-4">
                 <div className="text-left">
-                  <div className="font-bold text-sm sm:text-base mb-2 text-gray-600">DATA TYPE</div>
+                  <div className="font-bold text-sm sm:text-base mb-2 text-gray-600">
+                    DATA TYPE
+                  </div>
                   <div className="flex gap-1 sm:gap-2">
                     {headerInfo.dataType.split("").map((char, i) => (
                       <div
@@ -800,7 +859,9 @@ NNNN`
                   </div>
                 </div>
                 <div className="text-left">
-                  <div className="font-bold text-sm sm:text-base mb-2 text-gray-600">STATION NO.</div>
+                  <div className="font-bold text-sm sm:text-base mb-2 text-gray-600">
+                    STATION NO.
+                  </div>
                   <div className="flex gap-1 sm:gap-2">
                     {headerInfo.stationNo.split("").map((char, i) => (
                       <div
@@ -813,7 +874,9 @@ NNNN`
                   </div>
                 </div>
                 <div className="text-left">
-                  <div className="font-bold text-sm sm:text-base mb-2 text-gray-600">YEAR</div>
+                  <div className="font-bold text-sm sm:text-base mb-2 text-gray-600">
+                    YEAR
+                  </div>
                   <div className="flex gap-1 sm:gap-2">
                     {headerInfo.year.split("").map((char, i) => (
                       <div
@@ -826,7 +889,9 @@ NNNN`
                   </div>
                 </div>
                 <div className="text-left">
-                  <div className="font-bold text-sm sm:text-base mb-2 text-gray-600">MONTH</div>
+                  <div className="font-bold text-sm sm:text-base mb-2 text-gray-600">
+                    MONTH
+                  </div>
                   <div className="flex gap-1 sm:gap-2">
                     {headerInfo.month.split("").map((char, i) => (
                       <div
@@ -839,7 +904,9 @@ NNNN`
                   </div>
                 </div>
                 <div className="text-left">
-                  <div className="font-bold text-sm sm:text-base mb-2 text-gray-600">DAY</div>
+                  <div className="font-bold text-sm sm:text-base mb-2 text-gray-600">
+                    DAY
+                  </div>
                   <div className="flex gap-1 sm:gap-2">
                     {headerInfo.day.split("").map((char, i) => (
                       <div
@@ -859,84 +926,181 @@ NNNN`
             <table className="w-full border-collapse min-w-[1800px] text-base text-gray-800">
               <thead className="bg-gradient-to-b from-blue-600 to-blue-700 text-sm font-bold uppercase text-center text-white print:bg-blue-700">
                 <tr>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Time</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Date</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Station</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">C1</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Iliii</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">iRiXhvv</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Nddff</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">1SnTTT</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">2SnTdTdTd</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">3PPP/4PPP</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">6RRRtR</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">7wwW1W2</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">8NhClCmCh</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">2SnTnTnTn/1SnTxTxTx</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">56DlDmDh</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">57CDaEc</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">C2</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">GG</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">58/59P24</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">(6RRRtR)</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">8N5Ch5h5</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">90dqqqt</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">91fqfqfq</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Remarks</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Action</th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
+                    Time
+                  </th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
+                    Date
+                  </th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
+                    Station
+                  </th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
+                    C1
+                  </th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
+                    Iliii
+                  </th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
+                    iRiXhvv
+                  </th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
+                    Nddff
+                  </th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
+                    1SnTTT
+                  </th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
+                    2SnTdTdTd
+                  </th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
+                    3PPP/4PPP
+                  </th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
+                    6RRRtR
+                  </th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
+                    7wwW1W2
+                  </th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
+                    8NhClCmCh
+                  </th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
+                    2SnTnTnTn/1SnTxTxTx
+                  </th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
+                    56DlDmDh
+                  </th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
+                    57CDaEc
+                  </th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
+                    C2
+                  </th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
+                    GG
+                  </th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
+                    58/59P24
+                  </th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
+                    (6RRRtR)
+                  </th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
+                    8N5Ch5h5
+                  </th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
+                    90dqqqt
+                  </th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
+                    91fqfqfq
+                  </th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
+                    Remarks
+                  </th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
+                    Action
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-blue-100 text-center font-mono">
                 {currentData && currentData.length > 0 ? (
                   currentData.map((entry, index) => {
-                    const observingTime = entry.ObservingTime?.utcTime ? new Date(entry.ObservingTime.utcTime) : null
-                    const timeSlot = observingTime ? observingTime.getUTCHours().toString().padStart(2, "0") : "--"
-                    const canEdit = user && canEditRecord(entry, user)
+                    const observingTime = entry.ObservingTime?.utcTime
+                      ? new Date(entry.ObservingTime.utcTime)
+                      : null;
+                    const timeSlot = observingTime
+                      ? observingTime.getUTCHours().toString().padStart(2, "0")
+                      : "--";
+                    const canEdit = user && canEditRecord(entry, user);
                     return (
-                      <tr key={index} className="bg-white hover:bg-blue-50 print:hover:bg-white">
+                      <tr
+                        key={index}
+                        className="bg-white hover:bg-blue-50 print:hover:bg-white"
+                      >
                         <td className="border border-blue-200 px-4 py-3 whitespace-nowrap font-semibold text-blue-700">
                           {timeSlot}
                         </td>
                         <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
-                          {new Date(entry.ObservingTime?.utcTime).toLocaleDateString()}
+                          {entry.ObservingTime?.utcTime
+                            ? new Date(entry.ObservingTime.utcTime)
+                                .toISOString()
+                                .slice(0, 10) // YYYY-MM-DD (UTC)
+                            : "--"}
                         </td>
+
                         <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
                           {getStationNameById(entry.ObservingTime?.stationId)}
                         </td>
-                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">{entry.C1 || ""}</td>
-                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">{entry.Iliii || ""}</td>
-                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">{entry.iRiXhvv || ""}</td>
-                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">{entry.Nddff || ""}</td>
-                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">{entry.S1nTTT || ""}</td>
+                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
+                          {entry.C1 || ""}
+                        </td>
+                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
+                          {entry.Iliii || ""}
+                        </td>
+                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
+                          {entry.iRiXhvv || ""}
+                        </td>
+                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
+                          {entry.Nddff || ""}
+                        </td>
+                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
+                          {entry.S1nTTT || ""}
+                        </td>
                         <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
                           {entry.S2nTddTddTdd || ""}
                         </td>
-                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">{entry.P3PPP4PPPP || ""}</td>
-                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">{entry.RRRtR6 || ""}</td>
-                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">{entry.wwW1W2 || ""}</td>
-                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">{entry.NhClCmCh || ""}</td>
+                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
+                          {entry.P3PPP4PPPP || ""}
+                        </td>
+                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
+                          {entry.RRRtR6 || ""}
+                        </td>
+                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
+                          {entry.wwW1W2 || ""}
+                        </td>
+                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
+                          {entry.NhClCmCh || ""}
+                        </td>
                         <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
                           {entry.S2nTnTnTnInInInIn || ""}
                         </td>
-                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">{entry.D56DLDMDH || ""}</td>
-                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">{entry.CD57DaEc || ""}</td>
-                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">{entry.C2 || ""}</td>
-                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">{entry.GG || ""}</td>
+                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
+                          {entry.D56DLDMDH || ""}
+                        </td>
+                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
+                          {entry.CD57DaEc || ""}
+                        </td>
+                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
+                          {entry.C2 || ""}
+                        </td>
+                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
+                          {entry.GG || ""}
+                        </td>
                         <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
                           {entry.P24Group58_59 || ""}
                         </td>
                         <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
                           {entry.R24Group6_7 || ""}
                         </td>
-                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">{entry.NsChshs || ""}</td>
-                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">{entry.dqqqt90 || ""}</td>
-                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">{entry.fqfqfq91 || ""}</td>
+                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
+                          {entry.NsChshs || ""}
+                        </td>
+                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
+                          {entry.dqqqt90 || ""}
+                        </td>
+                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
+                          {entry.fqfqfq91 || ""}
+                        </td>
                         <td className="border border-blue-200 px-4 py-3 whitespace-nowrap text-left text-gray-700">
                           {entry.weatherRemark ? (
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center p-1 shadow-inner">
                                 <img
-                                  src={entry.weatherRemark.split(" - ")[0] || "/placeholder.svg"}
+                                  src={
+                                    entry.weatherRemark.split(" - ")[0] ||
+                                    "/placeholder.svg"
+                                  }
                                   alt="Weather Symbol"
                                   className="h-6 w-6 object-contain"
                                 />
@@ -963,13 +1127,15 @@ NNNN`
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent>
-                                {canEdit ? "Edit this record" : "You don't have permission to edit this record"}
+                                {canEdit
+                                  ? "Edit this record"
+                                  : "You don't have permission to edit this record"}
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
                         </td>
                       </tr>
-                    )
+                    );
                   })
                 ) : (
                   <tr>
@@ -982,7 +1148,8 @@ NNNN`
             </table>
             {/* Optional footer */}
             <div className="text-right text-sm text-blue-600 mt-2 pr-4 pb-2 print:hidden">
-              Generated: {new Date().toLocaleString("en-GB", { timeZone: "Asia/Dhaka" })}
+              Generated:{" "}
+              {new Date().toLocaleString("en-GB", { timeZone: "Asia/Dhaka" })}
             </div>
           </div>
         </div>
@@ -992,11 +1159,22 @@ NNNN`
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="w-[90vw] !max-w-[95vw] rounded-xl border-0 bg-gradient-to-br from-blue-50 to-indigo-50 p-6 shadow-xl">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-indigo-800">Edit Synoptic Code Data</DialogTitle>
+            <DialogTitle className="text-2xl font-bold text-indigo-800">
+              Edit Synoptic Code Data
+            </DialogTitle>
             <DialogDescription className="text-slate-600">
-              Editing record from {selectedRecord?.ObservingTime?.station?.name || "Unknown Station"}
+              Editing record from{" "}
+              {selectedRecord?.ObservingTime?.station?.name ||
+                "Unknown Station"}{" "}
               on{" "}
-              {selectedRecord?.createdAt ? format(new Date(selectedRecord.createdAt), "MMMM d, yyyy") : "Unknown Date"}
+              {selectedRecord?.ObservingTime?.utcTime
+                ? new Intl.DateTimeFormat("en-US", {
+                    timeZone: "UTC",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  }).format(new Date(selectedRecord.ObservingTime.utcTime))
+                : "Unknown Date"}
             </DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4 max-h-[65vh] overflow-y-auto pr-2">
@@ -1031,8 +1209,14 @@ NNNN`
                 bg: "bg-indigo-50",
               },
             ].map((field) => (
-              <div key={field.id} className={`space-y-1 p-3 rounded-lg ${field.bg} border border-white shadow-sm`}>
-                <Label htmlFor={field.id} className="text-sm font-medium text-gray-700">
+              <div
+                key={field.id}
+                className={`space-y-1 p-3 rounded-lg ${field.bg} border border-white shadow-sm`}
+              >
+                <Label
+                  htmlFor={field.id}
+                  className="text-sm font-medium text-gray-700"
+                >
                   {field.label}
                 </Label>
                 <Input
@@ -1071,7 +1255,10 @@ NNNN`
       </Dialog>
 
       {/* Permission Denied Dialog */}
-      <Dialog open={isPermissionDeniedOpen} onOpenChange={setIsPermissionDeniedOpen}>
+      <Dialog
+        open={isPermissionDeniedOpen}
+        onOpenChange={setIsPermissionDeniedOpen}
+      >
         <DialogContent className="max-w-md rounded-xl border-0 bg-white p-6 shadow-xl">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-red-600 flex items-center gap-2">
@@ -1080,7 +1267,10 @@ NNNN`
             </DialogTitle>
           </DialogHeader>
           <div className="py-4">
-            <p className="text-slate-700">You don't have permission to edit this record. This could be because:</p>
+            <p className="text-slate-700">
+              You don't have permission to edit this record. This could be
+              because:
+            </p>
             <ul className="mt-2 list-disc pl-5 text-sm text-slate-600 space-y-1">
               <li>The record is too old to edit</li>
               <li>The record belongs to a different station</li>
@@ -1121,9 +1311,9 @@ NNNN`
         }
       `}</style>
     </div>
-  )
-})
+  );
+});
 
-SynopticCodeTable.displayName = "SynopticCodeTable"
+SynopticCodeTable.displayName = "SynopticCodeTable";
 
-export default SynopticCodeTable
+export default SynopticCodeTable;

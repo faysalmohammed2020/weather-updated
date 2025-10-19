@@ -54,8 +54,7 @@ export async function GET() {
     const weatherObs = observingTime?.WeatherObservation[0];
 
     // Get the observation date from the most recent record
-    const observationDate = weatherObs.submittedAt || firstCard.createdAt;
-    const dateObj = new Date(observationDate);
+    const dateObj = new Date(observingTime.utcTime);
 
     // Initialize measurements array
     const measurements: string[] = Array(21).fill("");
@@ -432,9 +431,9 @@ export async function GET() {
     const formValues = {
       dataType: "SYNOP",
       stationNo,
-      year: dateObj.getFullYear().toString(),
-      month: pad(dateObj.getMonth() + 1, 2),
-      day: pad(dateObj.getDate(), 2),
+      year: dateObj.getUTCFullYear().toString(),
+      month: pad(dateObj.getUTCMonth() + 1, 2),
+      day: pad(dateObj.getUTCDate(), 2),
       weatherRemark: weatherObs.observerInitial || "",
       measurements,
     };
