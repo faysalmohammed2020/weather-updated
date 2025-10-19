@@ -1,3 +1,5 @@
+// app/api/synoptic/route.ts
+
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getTodayUtcRange, utcToHour } from "@/lib/utils";
@@ -149,14 +151,17 @@ export async function GET() {
     const rainFallPadded = pad(rainFall.toString().slice(-3), 3); // শেষ ৩ সংখ্যা
 
     const observationTime = new Date(observingTime.utcTime); // H (রিপোর্ট টাইম)
-    
+
     // Handle both new (timeSlots) and old (single start/end) format
     let rainStart: Date | null = null;
     let rainEnd: Date | null = null;
     let isIntermittentRain = false;
 
     // Check for new format (multiple time slots)
-    if (weatherObs.rainfallTimeSlots && Array.isArray(weatherObs.rainfallTimeSlots)) {
+    if (
+      weatherObs.rainfallTimeSlots &&
+      Array.isArray(weatherObs.rainfallTimeSlots)
+    ) {
       const timeSlots = weatherObs.rainfallTimeSlots as Array<{
         id: string;
         timeStart: string;
@@ -212,7 +217,7 @@ export async function GET() {
       if (timeSlots.length === 1) {
         isIntermittentRain = false;
       }
-    } 
+    }
     // Fallback to old format (backward compatibility)
     else {
       rainStart = weatherObs.rainfallTimeStart
@@ -291,11 +296,17 @@ export async function GET() {
     measurements[8] = `7${presentWeather}${pastWeather1}${pastWeather2}`;
 
     // 10. 8NhClCmCh (57-61) - Cloud information
-    const lowAmount = weatherObs.lowCloudAmount || "0";
-    const lowForm = weatherObs.lowCloudForm || "0";
-    const mediumForm = weatherObs.mediumCloudForm || "0";
-    const highForm = weatherObs.highCloudForm || "0";
-    measurements[9] = `8${lowAmount}${lowForm}${mediumForm}${highForm}`;
+
+    const lowAmount = weatherObs.lowCloudAmount || "";
+    const lowForm = weatherObs.lowCloudForm || "";
+    const mediumForm = weatherObs.mediumCloudForm || "";
+    const highForm = weatherObs.highCloudForm || "";
+
+    if (!lowAmount && !lowForm && !mediumForm && !highForm) {
+      measurements[9] = ""; // একেবারেই খালি
+    } else {
+      measurements[9] = `8${lowAmount}${lowForm}${mediumForm}${highForm}`;
+    }
 
     // 11. 2SnTnTnTn/InInInIn (62-66) - Min temperature / ground state
     const minTemp = Number.parseFloat(firstCard.maxMinTempAsRead || "0") / 10;
@@ -306,14 +317,14 @@ export async function GET() {
     } else {
       sN = 1;
     }
-    
+
     const time = utcToHour(observingTime.utcTime.toString());
     if (time === "00" || time === "03") {
       x = 2;
     } else if (time === "09" || time === "12") {
       x = 1;
     }
-    
+
     const conVertMinTemp = pad(Math.abs(Math.round(minTemp * 10)), 3);
     measurements[10] = x ? `${x}${sN}${conVertMinTemp}` : "";
 
