@@ -305,6 +305,9 @@ interface FirstCardTableProps {
   refreshTrigger?: number;
 }
 
+// top of the file
+const formatUtcDate = (iso: string) => new Date(iso).toISOString().slice(0, 10); // "YYYY-MM-DD"
+
 const FirstCardTable = forwardRef(
   ({ refreshTrigger = 0 }: FirstCardTableProps, ref) => {
     const [data, setData] = useState<ObservingTimeEntry[]>([]);
@@ -583,9 +586,7 @@ const FirstCardTable = forwardRef(
         return [
           utcToHour(observingTime?.utcTime || ""),
           record.subIndicator || "--",
-          observingTime?.utcTime
-            ? format(new Date(observingTime.utcTime), "yyyy-MM-dd")
-            : "--",
+          observingTime?.utcTime ? formatUtcDate(observingTime?.utcTime) : "--",
           observingTime?.station?.name +
             " " +
             observingTime?.station?.stationId || "--",
@@ -677,7 +678,7 @@ ${"=".repeat(60)}
         // Format each field with label and value
         txtContent += `Time (GMT)${" ".repeat(10)} ---> ${utcToHour(observingTime?.utcTime || "--")}\n`;
         txtContent += `Indicator${" ".repeat(12)} ---> ${record.subIndicator || "--"}\n`;
-        txtContent += `Date${" ".repeat(16)} ---> ${observingTime?.utcTime ? format(new Date(observingTime.utcTime), "yyyy-MM-dd") : "--"}\n`;
+        txtContent += `Date${" ".repeat(16)} ---> ${observingTime?.utcTime ? formatUtcDate(observingTime?.utcTime) : "--"}\n`;
         txtContent += `Station${" ".repeat(13)} ---> ${(observingTime?.station?.name || "--") + " " + (observingTime?.station?.stationId || "--")}\n`;
         txtContent += `Attached Thermometer ---> ${record.alteredThermometer || "--"}\n`;
         txtContent += `Bar As Read${" ".repeat(9)} ---> ${record.barAsRead || "--"}\n`;
@@ -1476,9 +1477,7 @@ ${"=".repeat(60)}`;
                                 </td>
                                 <td className="border border-slate-300 p-1 font-medium text-indigo-700 whitespace-nowrap">
                                   {" "}
-                                  {new Date(
-                                    observingTime.utcTime
-                                  ).toLocaleDateString()}
+                                  {formatUtcDate(observingTime.utcTime)}
                                 </td>
                                 <td className="border border-slate-300 p-1">
                                   <Badge
