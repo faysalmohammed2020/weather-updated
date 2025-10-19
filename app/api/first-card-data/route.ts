@@ -1,3 +1,5 @@
+// app/api/first-card-data/route.ts
+
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getSession } from "@/lib/getSession";
@@ -28,7 +30,8 @@ export async function POST(req: Request) {
     }
 
     const formattedObservingTime = hourToUtc(data.observingTimeId);
-    const localTime = convertUTCToBDTime(formattedObservingTime);
+    // ✅ LocalTime আর shift হবে না, UTC-ই localTime হিসেবে রাখা হবে
+    const localTime = formattedObservingTime;
 
     const dataType =
       typeof data.dataType === "string"
@@ -154,7 +157,6 @@ export async function POST(req: Request) {
       prisma.meteorologicalEntry.count(),
     ]);
 
-    
     // Log The Action
     await LogAction({
       init: prisma,

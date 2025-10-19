@@ -1,3 +1,5 @@
+// app/dashboard/view-and-manage/first-card-view/page.tsx
+
 "use client";
 import { useState, useEffect, useImperativeHandle, forwardRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
