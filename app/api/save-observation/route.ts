@@ -366,12 +366,18 @@ export async function GET(request: Request) {
       );
     }
 
-    const startTime = startDate
-      ? new Date(startDate)
-      : new Date(new Date().setDate(new Date().getDate() - 7));
-    startTime.setHours(0, 0, 0, 0);
-    const endTime = endDate ? new Date(endDate) : new Date();
-    endTime.setHours(23, 59, 59, 999);
+    // 👇 helper: একটি YYYY-MM-DD স্ট্রিংকে UTC দিনের শুরু/শেষে রূপান্তর
+    const toUtcStart = (d: string) => new Date(`${d}T00:00:00.000Z`);
+    const toUtcEnd = (d: string) => new Date(`${d}T23:59:59.999Z`);
+
+    const todayISO = new Date().toISOString().slice(0, 10); // e.g., "2025-10-19"
+
+    // যদি query না থাকে → আজকের UTC দিন
+    const startISO = startDate ?? todayISO;
+    const endISO = endDate ?? todayISO;
+
+    const startTime = toUtcStart(startISO);
+    const endTime = toUtcEnd(endISO);
 
     const superFilter = session.user.role === "super_admin";
 
