@@ -1,43 +1,232 @@
-"use client"
+// app/dashboard/data-entry/daily-summery/DailySummery.tsx
 
-import { useFormikContext } from "formik"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useEffect, useState } from "react"
-import { useSession } from "@/lib/auth-client"
-import { AlertCircle, Loader2 } from "lucide-react"
-import moment from "moment"
+"use client";
+
+import { useFormikContext } from "formik";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { useSession } from "@/lib/auth-client";
+import { AlertCircle, Loader2 } from "lucide-react";
+import moment from "moment";
 
 // Daily Summary Form Values Interface
 interface DailySummaryFormValues {
-  measurements: string[]
-  dataType: string
-  stationNo: string
-  year: string
-  month: string
-  day: string
+  measurements: string[];
+  dataType: string;
+  stationNo: string;
+  year: string;
+  month: string;
+  day: string;
 }
+
+// ----- helpers: units/rounding/dirs/UTC/rain-slots -----
+const avg = (nums: number[]) =>
+  nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : 0;
+const safeNum = (v: any) => Number.parseFloat(v);
+const round0 = (n: number) => Math.round(n);
+const round1 = (n: number) => Math.round(n * 10) / 10;
+
+// many DB fields (AsRead/Td) are tenths → convert to °C
+const tenthsToC = (v: any) => {
+  const n = Number.parseFloat(v);
+  return isNaN(n) ? NaN : n / 10;
+};
+
+// wind: knots → m/s (UI unit: m/s). If your DB already stores m/s, remove this.
+const knotsToMs = (k: any) => {
+  const n = Number.parseFloat(k);
+  return isNaN(n) ? NaN : n * 0.514444;
+};
+
+// 16-point compass index (0..15) from degrees (0=N, 11.25 step)
+const degTo16PtIndex = (deg: any) => {
+  const d = Number.parseFloat(deg);
+  if (isNaN(d)) return null;
+  const norm = ((d % 360) + 360) % 360;
+  return Math.floor((norm + 11.25) / 22.5) % 16; // 0..15
+};
+
+// Sum rain duration from either timeSlots[] or legacy start/end
+// observation day assumed UTC; safely handles crossing midnight.
+const sumRainMinutes = (obs: any, utcDate: Date) => {
+  let minutes = 0;
+
+  // New format: rainfallTimeSlots: [{timeStart:"HH:mm", timeEnd:"HH:mm"}]
+  if (Array.isArray(obs?.rainfallTimeSlots) && obs.rainfallTimeSlots.length) {
+    for (const slot of obs.rainfallTimeSlots) {
+      if (!slot?.timeStart || !slot?.timeEnd) continue;
+      const [sh, sm] = slot.timeStart.split(":").map(Number);
+      const [eh, em] = slot.timeEnd.split(":").map(Number);
+
+      const start = new Date(
+        Date.UTC(
+          utcDate.getUTCFullYear(),
+          utcDate.getUTCMonth(),
+          utcDate.getUTCDate(),
+          sh || 0,
+          sm || 0,
+          0,
+          0
+        )
+      );
+      let end = new Date(
+        Date.UTC(
+          utcDate.getUTCFullYear(),
+          utcDate.getUTCMonth(),
+          utcDate.getUTCDate(),
+          eh || 0,
+          em || 0,
+          0,
+          0
+        )
+      );
+
+      // crossed midnight case
+      if (end < start) end = new Date(end.getTime() + 24 * 60 * 60 * 1000);
+
+      minutes += Math.max(
+        0,
+        Math.round((end.getTime() - start.getTime()) / 60000)
+      );
+    }
+    return minutes;
+  }
+
+  // Legacy single interval: rainfallTimeStart / rainfallTimeEnd (ISO)
+  if (obs?.rainfallTimeStart && obs?.rainfallTimeEnd) {
+    const start = new Date(obs.rainfallTimeStart);
+    let end = new Date(obs.rainfallTimeEnd);
+    if (end < start) end = new Date(end.getTime() + 24 * 60 * 60 * 1000);
+    minutes += Math.max(
+      0,
+      Math.round((end.getTime() - start.getTime()) / 60000)
+    );
+  }
+
+  return minutes;
+};
+
+// UTC-only yyyy-mm-dd (so local TZ shiftে ভুল হবে না)
+const ymdUTC = (d: Date) =>
+  `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
 
 // Measurements configuration for daily summary
 const measurements = [
-  { id: 0, label: "Av. Station Pressure", range: "14-18", unit: "hPa", category: "pressure" },
-  { id: 1, label: "Av. Sea-Level Pressure", range: "19-23", unit: "hPa", category: "pressure" },
-  { id: 2, label: "Av. Dry-Bulb Temperature", range: "24-26", unit: "°C", category: "temperature" },
-  { id: 3, label: "Av. Wet Bulb Temperature", range: "27-29", unit: "°C", category: "temperature" },
-  { id: 4, label: "Max. Temperature", range: "30-32", unit: "°C", category: "temperature" },
-  { id: 5, label: "Min Temperature", range: "33-35", unit: "°C", category: "temperature" },
-  { id: 6, label: "Total Precipitation", range: "36-39", unit: "mm", category: "precipitation" },
-  { id: 7, label: "Av. Dew Point Temperature", range: "40-42", unit: "°C", category: "temperature" },
-  { id: 8, label: "Av. Rel Humidity", range: "43-45", unit: "%", category: "humidity" },
-  { id: 9, label: "Av. Wind Speed", range: "46-48", unit: "m/s", category: "wind" },
-  { id: 10, label: "Prevailing Wind Direction", range: "49-50", unit: "16Pts", category: "wind" },
-  { id: 11, label: "Max Wind Speed", range: "51-53", unit: "m/s", category: "wind" },
-  { id: 12, label: "Direction of Max Wind", range: "54-55", unit: "16Pts", category: "wind" },
-  { id: 13, label: "Av. Total Cloud", range: "56", unit: "octas", category: "cloud" },
-  { id: 14, label: "Lowest visibility", range: "57-59", unit: "km", category: "visibility" },
-  { id: 15, label: "Total Duration of Rain", range: "60-63", unit: "H-M", category: "precipitation" },
-]
+  {
+    id: 0,
+    label: "Av. Station Pressure",
+    range: "14-18",
+    unit: "hPa",
+    category: "pressure",
+  },
+  {
+    id: 1,
+    label: "Av. Sea-Level Pressure",
+    range: "19-23",
+    unit: "hPa",
+    category: "pressure",
+  },
+  {
+    id: 2,
+    label: "Av. Dry-Bulb Temperature",
+    range: "24-26",
+    unit: "°C",
+    category: "temperature",
+  },
+  {
+    id: 3,
+    label: "Av. Wet Bulb Temperature",
+    range: "27-29",
+    unit: "°C",
+    category: "temperature",
+  },
+  {
+    id: 4,
+    label: "Max. Temperature",
+    range: "30-32",
+    unit: "°C",
+    category: "temperature",
+  },
+  {
+    id: 5,
+    label: "Min Temperature",
+    range: "33-35",
+    unit: "°C",
+    category: "temperature",
+  },
+  {
+    id: 6,
+    label: "Total Precipitation",
+    range: "36-39",
+    unit: "mm",
+    category: "precipitation",
+  },
+  {
+    id: 7,
+    label: "Av. Dew Point Temperature",
+    range: "40-42",
+    unit: "°C",
+    category: "temperature",
+  },
+  {
+    id: 8,
+    label: "Av. Rel Humidity",
+    range: "43-45",
+    unit: "%",
+    category: "humidity",
+  },
+  {
+    id: 9,
+    label: "Av. Wind Speed",
+    range: "46-48",
+    unit: "m/s",
+    category: "wind",
+  },
+  {
+    id: 10,
+    label: "Prevailing Wind Direction",
+    range: "49-50",
+    unit: "16Pts",
+    category: "wind",
+  },
+  {
+    id: 11,
+    label: "Max Wind Speed",
+    range: "51-53",
+    unit: "m/s",
+    category: "wind",
+  },
+  {
+    id: 12,
+    label: "Direction of Max Wind",
+    range: "54-55",
+    unit: "16Pts",
+    category: "wind",
+  },
+  {
+    id: 13,
+    label: "Av. Total Cloud",
+    range: "56",
+    unit: "octas",
+    category: "cloud",
+  },
+  {
+    id: 14,
+    label: "Lowest visibility",
+    range: "57-59",
+    unit: "km",
+    category: "visibility",
+  },
+  {
+    id: 15,
+    label: "Total Duration of Rain",
+    range: "60-63",
+    unit: "H-M",
+    category: "precipitation",
+  },
+];
 
 const categoryColors = {
   pressure: "bg-blue-50 text-blue-700",
@@ -47,22 +236,24 @@ const categoryColors = {
   wind: "bg-emerald-50 text-emerald-700",
   cloud: "bg-slate-50 text-slate-700",
   visibility: "bg-yellow-50 text-yellow-700",
-}
+};
 
 export function DailySummaryForm() {
-  const { values, setFieldValue } = useFormikContext<DailySummaryFormValues>()
-  const { data: session } = useSession()
-  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split("T")[0])
+  const { values, setFieldValue } = useFormikContext<DailySummaryFormValues>();
+  const { data: session } = useSession();
+  const [selectedDate, setSelectedDate] = useState<string>(
+    new Date().toISOString().split("T")[0]
+  );
   const [dataStatus, setDataStatus] = useState<{
-    hasToday: boolean
-    message: string
-    isLoading: boolean
-    error?: string
+    hasToday: boolean;
+    message: string;
+    isLoading: boolean;
+    error?: string;
   }>({
     hasToday: true,
     message: "",
     isLoading: true,
-  })
+  });
 
   useEffect(() => {
     const fetchDailySummaryData = async () => {
@@ -71,161 +262,200 @@ export function DailySummaryForm() {
           ...prev,
           isLoading: true,
           error: undefined,
-        }))
+        }));
 
-        // Fetch meteorological data
-        const firstCardResponse = await fetch("/api/first-card-data")
-        const formatedFirstCardData = await firstCardResponse.json()
-        const todayFirstCardData = await formatedFirstCardData.entries.flatMap((item: any) => item.MeteorologicalEntry)
+        // ---- fetch first & second card ----
+        const firstCardResponse = await fetch("/api/first-card-data");
+        const formatedFirstCardData = await firstCardResponse.json();
+        const todayFirstCardData = formatedFirstCardData.entries.flatMap(
+          (item: any) => item.MeteorologicalEntry
+        );
 
-        // Fetch weather observations
-        const observationsResponse = await fetch("/api/second-card-data")
-        const formatedObservationsData = await observationsResponse.json()
-        const todayWeatherObservations = formatedObservationsData.flatMap((item: any) => item.WeatherObservation)
+        const observationsResponse = await fetch("/api/second-card-data");
+        const formatedObservationsData = await observationsResponse.json();
+        const todayWeatherObservations = formatedObservationsData.flatMap(
+          (item: any) => item.WeatherObservation
+        );
 
-        const calculatedMeasurements = Array(16).fill("")
+        const calculatedMeasurements = Array(16).fill("");
 
-        // Helper function to process meteorological data
-        const processFirstCard = (key: string, id: number, reducer: (arr: number[]) => number) => {
-          const values = todayFirstCardData
-            .map((item: any) => Number.parseFloat(item[key]))
-            .filter((val: number) => !isNaN(val))
-          if (values.length > 0) calculatedMeasurements[id] = Math.round(reducer(values)).toString()
+        // ---- PRESSURE (hPa) ----
+        {
+          const stn = todayFirstCardData
+            .map((x: any) => safeNum(x.stationLevelPressure))
+            .filter((n: number) => !isNaN(n));
+          const slp = todayFirstCardData
+            .map((x: any) => safeNum(x.correctedSeaLevelPressure))
+            .filter((n: number) => !isNaN(n));
+
+          if (stn.length) calculatedMeasurements[0] = String(round0(avg(stn)));
+          if (slp.length) calculatedMeasurements[1] = String(round0(avg(slp)));
         }
 
-        // Calculate pressure measurements
-        processFirstCard("stationLevelPressure", 0, (arr) => arr.reduce((a, b) => a + b, 0) / arr.length)
-        processFirstCard("correctedSeaLevelPressure", 1, (arr) => arr.reduce((a, b) => a + b, 0) / arr.length)
+        // ---- TEMPERATURES (°C) ----
+        {
+          const dry = todayFirstCardData
+            .map((x: any) => tenthsToC(x.dryBulbAsRead))
+            .filter((n: number) => !isNaN(n));
+          const wet = todayFirstCardData
+            .map((x: any) => tenthsToC(x.wetBulbAsRead))
+            .filter((n: number) => !isNaN(n));
+          const td = todayFirstCardData
+            .map((x: any) => tenthsToC(x.Td))
+            .filter((n: number) => !isNaN(n));
 
-        // Calculate temperature measurements
-        processFirstCard("dryBulbAsRead", 2, (arr) => arr.reduce((a, b) => a + b, 0) / arr.length)
-        processFirstCard("wetBulbAsRead", 3, (arr) => arr.reduce((a, b) => a + b, 0) / arr.length)
-        processFirstCard("maxMinTempAsRead", 4, (arr) => Math.max(...arr))
-        processFirstCard("maxMinTempAsRead", 5, (arr) => Math.min(...arr))
-        const rainfallLast24Hours = todayWeatherObservations.map((item: any) => Number.parseFloat(item.rainfallLast24Hours))
-        processFirstCard("Td", 7, (arr) => arr.reduce((a, b) => a + b, 0) / arr.length)
+          const tAll = todayFirstCardData
+            .map((x: any) => tenthsToC(x.maxMinTempAsRead))
+            .filter((n: number) => !isNaN(n));
 
-        // Calculate humidity
-        processFirstCard("relativeHumidity", 8, (arr) => arr.reduce((a, b) => a + b, 0) / arr.length)
-
-        // Calculate visibility
-        processFirstCard("horizontalVisibility", 14, (arr) => Math.min(...arr))
-
-        // Calculate precipitation
-        const totalPrecip = rainfallLast24Hours.reduce((sum: number, item: number) => isNaN(item) ? sum : sum + item, 0)
-        if (totalPrecip > 0) calculatedMeasurements[6] = totalPrecip.toString()
-
-        // Calculate wind measurements
-        const windSpeeds = todayWeatherObservations
-          .map((item: any) => Number.parseFloat(item.windSpeed))
-          .filter((val) => !isNaN(val))
-        if (windSpeeds.length > 0) {
-          calculatedMeasurements[9] = Math.round(windSpeeds.reduce((a, b) => a + b, 0) / windSpeeds.length).toString()
+          if (dry.length) calculatedMeasurements[2] = String(round1(avg(dry)));
+          if (wet.length) calculatedMeasurements[3] = String(round1(avg(wet)));
+          if (tAll.length)
+            calculatedMeasurements[4] = String(round1(Math.max(...tAll)));
+          if (tAll.length)
+            calculatedMeasurements[5] = String(round1(Math.min(...tAll)));
+          if (td.length) calculatedMeasurements[7] = String(round1(avg(td)));
         }
 
-        // Calculate prevailing wind direction
-        const directions = todayWeatherObservations.map((item: any) => item.windDirection)
-        if (directions.length > 0) {
-          const dirCount = directions.reduce((acc: Record<string, number>, dir: string) => {
-            acc[dir] = (acc[dir] || 0) + 1
-            return acc
-          }, {})
-          calculatedMeasurements[10] = Object.entries(dirCount).reduce((a, b) => (a[1] > b[1] ? a : b))[0]
+        // ---- PRECIPITATION (mm) ----
+        {
+          const rf24 = todayWeatherObservations
+            .map((x: any) => safeNum(x.rainfallLast24Hours))
+            .filter((n: number) => !isNaN(n));
+          const totalPrecip = rf24.reduce((s: number, n: number) => s + n, 0);
+          if (totalPrecip > 0)
+            calculatedMeasurements[6] = String(round1(totalPrecip));
         }
 
-        // Calculate max wind speed and direction
-        const windData = todayWeatherObservations
-          .map((item: any) => ({
-            speed: Number.parseFloat(item.windSpeed),
-            direction: item.windDirection,
-          }))
-          .filter((item) => !isNaN(item.speed))
-        if (windData.length > 0) {
-          const maxWind = windData.reduce((max, item) => (item.speed > max.speed ? item : max))
-          calculatedMeasurements[11] = Math.round(maxWind.speed).toString()
-          calculatedMeasurements[12] = maxWind.direction
+        // ---- HUMIDITY (%) ----
+        {
+          const rh = todayFirstCardData
+            .map((x: any) => safeNum(x.relativeHumidity))
+            .filter((n: number) => !isNaN(n));
+          if (rh.length) calculatedMeasurements[8] = String(round0(avg(rh)));
         }
 
-        // Calculate cloud amount
-        const cloudAmounts = todayWeatherObservations
-          .map((item: any) => Number.parseFloat(item.totalCloudAmount))
-          .filter((val) => !isNaN(val))
-        if (cloudAmounts.length > 0) {
-          calculatedMeasurements[13] = Math.round(
-            cloudAmounts.reduce((a, b) => a + b, 0) / cloudAmounts.length,
-          ).toString()
+        // ---- VISIBILITY (km) → lowest ----
+        {
+          const vis = todayFirstCardData
+            .map((x: any) => safeNum(x.horizontalVisibility))
+            .filter((n: number) => !isNaN(n));
+          if (vis.length)
+            calculatedMeasurements[14] = String(round1(Math.min(...vis)));
         }
 
-        // Calculate rain duration
-        const totalRainDuration = todayWeatherObservations.reduce((totalMinutes: number, item: any) => {
-          if (item.rainfallTimeStart && item.rainfallTimeEnd) {
-            const startTime = moment(item.rainfallTimeStart, 'YYYY-MM-DD HH:mm:ss');
-            const endTime = moment(item.rainfallTimeEnd, 'YYYY-MM-DD HH:mm:ss');
-            
-            let duration = moment.duration(endTime.diff(startTime)).asMinutes();
-            
-            if (duration < 0) {
-              duration += 1440; // add 24 hours if crossed midnight
-            }
-            
-            return totalMinutes + duration;
+        // ---- WIND (m/s & 16-pt dir) ----
+        {
+          // যদি DB already m/s হয়, knotsToMs এর জায়গায় safeNum দিন
+          const ws = todayWeatherObservations
+            .map((x: any) => knotsToMs(x.windSpeed))
+            .filter((n: number) => !isNaN(n));
+          if (ws.length) calculatedMeasurements[9] = String(round1(avg(ws)));
+
+          const wdirIdx = todayWeatherObservations
+            .map((x: any) => degTo16PtIndex(x.windDirection))
+            .filter((n: number | null) => n !== null) as number[];
+          if (wdirIdx.length) {
+            const freq: Record<number, number> = {};
+            for (const d of wdirIdx) freq[d] = (freq[d] || 0) + 1;
+            const prevailing = Object.entries(freq).reduce((a, b) =>
+              a[1] > b[1] ? a : b
+            )[0];
+            calculatedMeasurements[10] = String(prevailing);
           }
-          return totalMinutes;
-        }, 0);
-        
-        // Convert total minutes to H:MM format
-        const hours = Math.floor(totalRainDuration / 60);
-        const minutes = Math.round(totalRainDuration % 60);
-        const formattedDuration = `${hours}:${minutes.toString().padStart(2, '0')}`;
-        
-        if (totalRainDuration > 0) {
-          const hours = Math.floor(totalRainDuration / 60);
-          const minutes = totalRainDuration % 60;
-          calculatedMeasurements[15] = `${hours.toString().padStart(2, "0")}${minutes.toString().padStart(2, "0")}`;
+
+          const windPairs = todayWeatherObservations
+            .map((x: any) => ({
+              ms: knotsToMs(x.windSpeed),
+              dirIdx: degTo16PtIndex(x.windDirection),
+            }))
+            .filter((w) => !isNaN(w.ms));
+          if (windPairs.length) {
+            const maxW = windPairs.reduce(
+              (m, x) => (x.ms > m.ms ? x : m),
+              windPairs[0]
+            );
+            calculatedMeasurements[11] = String(round1(maxW.ms));
+            if (maxW.dirIdx !== null && maxW.dirIdx !== undefined) {
+              calculatedMeasurements[12] = String(maxW.dirIdx);
+            }
+          }
         }
 
-        // Check if today's date matches the selected date
-        const today = new Date()
-        const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(
-          today.getDate(),
-        ).padStart(2, "0")}`
-        const isToday = todayStr === selectedDate
+        // ---- CLOUD (octas) avg total ----
+        {
+          const tca = todayWeatherObservations
+            .map((x: any) => safeNum(x.totalCloudAmount))
+            .filter((n: number) => !isNaN(n));
+          if (tca.length) calculatedMeasurements[13] = String(round0(avg(tca)));
+        }
+
+        // ---- RAIN DURATION (HHMM) using timeSlots/legacy, UTC-safe ----
+        {
+          const selUTC = new Date(`${selectedDate}T00:00:00Z`);
+          const totalRainMinutes = todayWeatherObservations.reduce(
+            (sum: number, obs: any) => {
+              return sum + sumRainMinutes(obs, selUTC);
+            },
+            0
+          );
+          if (totalRainMinutes > 0) {
+            const hh = String(Math.floor(totalRainMinutes / 60)).padStart(
+              2,
+              "0"
+            );
+            const mm = String(totalRainMinutes % 60).padStart(2, "0");
+            calculatedMeasurements[15] = `${hh}${mm}`;
+          }
+        }
+
+        // ---- Status (UTC-based today check) ----
+        const nowUTC = new Date();
+        const isToday = ymdUTC(nowUTC) === selectedDate;
 
         setDataStatus({
           hasToday: isToday,
-          message: isToday ? "Using today's weather data" : "No data available for today, using most recent data",
+          message: isToday
+            ? "Using today's weather data"
+            : "No data available for today, using most recent data",
           isLoading: false,
-        })
+        });
 
-        // Update form fields
-        setFieldValue("measurements", calculatedMeasurements)
-        setFieldValue("stationNo", session?.user?.station?.stationId || "41953")
-        setFieldValue("dataType", "SY")
-        setFieldValue("year", new Date(selectedDate).getFullYear().toString())
-        setFieldValue("month", (new Date(selectedDate).getMonth() + 1).toString().padStart(2, "0"))
-        setFieldValue("day", new Date(selectedDate).getDate().toString().padStart(2, "0"))
+        // ---- Form fields (UTC-safe date parts) ----
+        const sel = new Date(`${selectedDate}T00:00:00Z`);
+        setFieldValue("measurements", calculatedMeasurements);
+        setFieldValue(
+          "stationNo",
+          session?.user?.station?.stationId || "41953"
+        );
+        setFieldValue("dataType", "SY");
+        setFieldValue("year", String(sel.getUTCFullYear()));
+        setFieldValue("month", String(sel.getUTCMonth() + 1).padStart(2, "0"));
+        setFieldValue("day", String(sel.getUTCDate()).padStart(2, "0"));
       } catch (error) {
-        console.error("Error fetching daily summary data:", error)
+        console.error("Error fetching daily summary data:", error);
         setDataStatus({
           hasToday: false,
           message: "Error loading weather data",
           isLoading: false,
           error: error instanceof Error ? error.message : "Unknown error",
-        })
+        });
 
-        // Set default values on error
-        const now = new Date(selectedDate)
-        setFieldValue("measurements", Array(16).fill(""))
-        setFieldValue("stationNo", session?.user?.station?.stationId || "41953")
-        setFieldValue("dataType", "SY")
-        setFieldValue("year", now.getFullYear().toString())
-        setFieldValue("month", String(now.getMonth() + 1).padStart(2, "0"))
-        setFieldValue("day", String(now.getDate()).padStart(2, "0"))
+        const sel = new Date(`${selectedDate}T00:00:00Z`);
+        setFieldValue("measurements", Array(16).fill(""));
+        setFieldValue(
+          "stationNo",
+          session?.user?.station?.stationId || "41953"
+        );
+        setFieldValue("dataType", "SY");
+        setFieldValue("year", String(sel.getUTCFullYear()));
+        setFieldValue("month", String(sel.getUTCMonth() + 1).padStart(2, "0"));
+        setFieldValue("day", String(sel.getUTCDate()).padStart(2, "0"));
       }
-    }
+    };
 
-    fetchDailySummaryData()
-  }, [selectedDate, setFieldValue, session])
+    fetchDailySummaryData();
+  }, [selectedDate, setFieldValue, session]);
 
   if (dataStatus.isLoading) {
     return (
@@ -235,7 +465,7 @@ export function DailySummaryForm() {
           <p className="text-gray-500">Loading daily summary data...</p>
         </div>
       </div>
-    )
+    );
   }
 
   // const handleSubmit = async () => {
@@ -272,14 +502,13 @@ export function DailySummaryForm() {
   // }
 
   const handleMeasurementChange = (index: number, value: string) => {
-    const newMeasurements = [...values.measurements]
-    newMeasurements[index] = value
-    setFieldValue("measurements", newMeasurements)
-  }
+    const newMeasurements = [...values.measurements];
+    newMeasurements[index] = value;
+    setFieldValue("measurements", newMeasurements);
+  };
 
   return (
     <div className="space-y-6">
-
       {/* Status Messages */}
       {dataStatus.error ? (
         <div className="p-3 rounded-md bg-red-100 text-red-800 text-sm">
@@ -291,8 +520,11 @@ export function DailySummaryForm() {
       ) : (
         dataStatus.message && (
           <div
-            className={`p-3 rounded-md text-sm ${dataStatus.hasToday ? "bg-blue-100 text-blue-800" : "bg-amber-100 text-amber-800"
-              }`}
+            className={`p-3 rounded-md text-sm ${
+              dataStatus.hasToday
+                ? "bg-blue-100 text-blue-800"
+                : "bg-amber-100 text-amber-800"
+            }`}
           >
             <div className="flex items-center">
               {dataStatus.hasToday ? (
@@ -324,7 +556,9 @@ export function DailySummaryForm() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="border-blue-200 bg-white shadow-sm">
           <CardHeader className="pb-2 pt-4 px-4 bg-blue-50">
-            <CardTitle className="text-sm font-medium text-blue-700">Measurements 1-8</CardTitle>
+            <CardTitle className="text-sm font-medium text-blue-700">
+              Measurements 1-8
+            </CardTitle>
           </CardHeader>
           <CardContent className="p-4">
             <div className="space-y-3">
@@ -337,10 +571,15 @@ export function DailySummaryForm() {
                     {item.id + 1}
                   </div>
                   <div className="col-span-5">
-                    <Label htmlFor={`measurement-${item.id}`} className="text-sm font-medium">
+                    <Label
+                      htmlFor={`measurement-${item.id}`}
+                      className="text-sm font-medium"
+                    >
                       {item.label}
                     </Label>
-                    <div className={`text-xs px-1 py-0.5 rounded mt-1 ${categoryColors[item.category]}`}>
+                    <div
+                      className={`text-xs px-1 py-0.5 rounded mt-1 ${categoryColors[item.category]}`}
+                    >
                       {item.unit}
                     </div>
                   </div>
@@ -351,7 +590,9 @@ export function DailySummaryForm() {
                     <Input
                       id={`measurement-${item.id}`}
                       value={values.measurements[item.id] || ""}
-                      onChange={(e) => handleMeasurementChange(item.id, e.target.value)}
+                      onChange={(e) =>
+                        handleMeasurementChange(item.id, e.target.value)
+                      }
                       className="border-blue-200 bg-white cursor-text disabled:opacity-80 disabled:font-semibold"
                       placeholder="--"
                       disabled
@@ -365,7 +606,9 @@ export function DailySummaryForm() {
 
         <Card className="border-blue-200 bg-white shadow-sm">
           <CardHeader className="pb-2 pt-4 px-4 bg-blue-50">
-            <CardTitle className="text-sm font-medium text-blue-700">Measurements 9-16</CardTitle>
+            <CardTitle className="text-sm font-medium text-blue-700">
+              Measurements 9-16
+            </CardTitle>
           </CardHeader>
           <CardContent className="p-4">
             <div className="space-y-3">
@@ -378,10 +621,15 @@ export function DailySummaryForm() {
                     {item.id + 1}
                   </div>
                   <div className="col-span-5">
-                    <Label htmlFor={`measurement-${item.id}`} className="text-sm font-medium">
+                    <Label
+                      htmlFor={`measurement-${item.id}`}
+                      className="text-sm font-medium"
+                    >
                       {item.label}
                     </Label>
-                    <div className={`text-xs px-1 py-0.5 rounded mt-1 ${categoryColors[item.category]}`}>
+                    <div
+                      className={`text-xs px-1 py-0.5 rounded mt-1 ${categoryColors[item.category]}`}
+                    >
                       {item.unit}
                     </div>
                   </div>
@@ -392,7 +640,9 @@ export function DailySummaryForm() {
                     <Input
                       id={`measurement-${item.id}`}
                       value={values.measurements[item.id] || ""}
-                      onChange={(e) => handleMeasurementChange(item.id, e.target.value)}
+                      onChange={(e) =>
+                        handleMeasurementChange(item.id, e.target.value)
+                      }
                       className="border-blue-200 bg-white cursor-text disabled:opacity-80 disabled:font-semibold"
                       placeholder="--"
                       disabled
@@ -416,7 +666,5 @@ export function DailySummaryForm() {
         </Button>
       </div> */}
     </div>
-  )
+  );
 }
-
-

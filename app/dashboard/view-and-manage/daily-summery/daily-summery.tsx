@@ -1,3 +1,5 @@
+// app/dashboard/view-and-manage/daily-summery/daily-summery.tsx
+
 "use client";
 
 import type React from "react";
@@ -171,9 +173,9 @@ const DailySummaryTable = forwardRef((props, ref) => {
         setHeaderInfo({
           dataType: firstEntry.dataType?.substring(0, 2) || "SY",
           stationNo: user?.station?.stationId || "41953",
-          year: observingTime.getFullYear().toString().substring(2),
-          month: (observingTime.getMonth() + 1).toString().padStart(2, "0"),
-          day: observingTime.getDate().toString().padStart(2, "0"),
+          year: observingTime.getUTCFullYear().toString().substring(2),
+          month: (observingTime.getUTCMonth() + 1).toString().padStart(2, "0"),
+          day: observingTime.getUTCDate().toString().padStart(2, "0"),
         });
       } else {
         setCurrentData([]);
@@ -544,7 +546,7 @@ const DailySummaryTable = forwardRef((props, ref) => {
       const observingTime = entry.ObservingTime?.utcTime
         ? new Date(entry.ObservingTime.utcTime)
         : new Date();
-      const dateStr = observingTime.toLocaleDateString();
+      const dateStr = observingTime.toISOString().split("T")[0]; // YYYY-MM-DD UTC
 
       let row = `${dateStr},`;
       row += `${entry.ObservingTime?.station?.name || ""},`;
@@ -607,7 +609,7 @@ ${"=".repeat(60)}
       const observingTime = entry.ObservingTime?.utcTime
         ? new Date(entry.ObservingTime.utcTime)
         : new Date();
-      const dateStr = observingTime.toLocaleDateString();
+      const dateStr = observingTime.toISOString().split("T")[0];
 
       txtContent += `\nRecord ${index + 1} (Date: ${dateStr}):\n`;
       txtContent += `${"-".repeat(30)}\n`;
@@ -964,7 +966,7 @@ ${"=".repeat(60)}`;
                       >
                         <td className="border border-blue-200 px-4 py-3 whitespace-nowrap font-semibold text-blue-700">
                           {observingTime
-                            ? observingTime.toLocaleDateString()
+                            ? observingTime.toISOString().split("T")[0]
                             : "--"}
                         </td>
                         <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
@@ -1033,8 +1035,7 @@ ${"=".repeat(60)}`;
 
             {/* Optional footer */}
             <div className="text-right text-sm text-blue-600 mt-2 pr-4 pb-2 print:hidden">
-              Generated:{" "}
-              {new Date().toLocaleString("en-GB", { timeZone: "Asia/Dhaka" })}
+              Generated: {new Date().toISOString()}
             </div>
           </div>
         </div>

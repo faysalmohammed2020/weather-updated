@@ -1,3 +1,5 @@
+// app/api/second-card-data/route.ts
+
 import { getSession } from "@/lib/getSession";
 import prisma from "@/lib/prisma";
 import { getTodayUtcRange } from "@/lib/utils";
