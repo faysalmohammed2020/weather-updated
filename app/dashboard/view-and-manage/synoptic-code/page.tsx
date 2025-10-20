@@ -385,7 +385,8 @@ const SynopticCodeTable = forwardRef((props, ref) => {
   const exportToTXT = () => {
     if (!currentData || currentData.length === 0) return;
     const currentDate = new Date().toISOString().split("T")[0];
-    const currentTime = new Date().toLocaleTimeString();
+    const currentTime =
+      new Date().toISOString().split("T")[1].slice(0, 8) + " UTC";
     // Create TXT header
     let txtContent = `SYNOPTIC DATA REPORT
 ${"=".repeat(60)}

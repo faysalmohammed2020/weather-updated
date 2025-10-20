@@ -650,7 +650,8 @@ const FirstCardTable = forwardRef(
       }
 
       const currentDate = new Date().toISOString().split("T")[0];
-      const currentTime = new Date().toLocaleTimeString();
+      const currentTime =
+        new Date().toISOString().split("T")[1].split(".")[0] + " UTC";
 
       // Create TXT header
       let txtContent = `METEOROLOGICAL DATA REPORT

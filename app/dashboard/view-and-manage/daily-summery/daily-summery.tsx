@@ -534,42 +534,54 @@ const DailySummaryTable = forwardRef((props, ref) => {
   };
 
   // Function to export data as CSV
+
   const exportToCSV = () => {
     if (!currentData || currentData.length === 0) return;
 
-    // Create headers
+    // --- CSV Header ---
     let csvContent =
-      "Date,Station,Av Station Pressure,Av Sea-Level Pressure,Av Dry-Bulb Temperature,Av Wet Bulb Temperature,Max Temperature,Min Temperature,Total Precipitation,Av Dew Point Temperature,Av Relative Humidity,Wind Speed,Wind Direction,Max Wind Speed,Max Wind Direction,Av Total Cloud,Lowest Visibility,Total Rain Duration\n";
+      "Date (UTC),Station,Av Station Pressure,Av Sea-Level Pressure,Av Dry-Bulb Temperature,Av Wet Bulb Temperature,Max Temperature,Min Temperature,Total Precipitation,Av Dew Point Temperature,Av Relative Humidity,Wind Speed,Wind Direction,Max Wind Speed,Max Wind Direction,Av Total Cloud,Lowest Visibility,Total Rain Duration\n";
 
-    // Add data rows
+    // --- Escaper helper ---
+    const esc = (v: any) => {
+      const s = (v ?? "").toString();
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+
+    // --- Rows ---
     currentData.forEach((entry) => {
       const observingTime = entry.ObservingTime?.utcTime
         ? new Date(entry.ObservingTime.utcTime)
         : new Date();
-      const dateStr = observingTime.toISOString().split("T")[0]; // YYYY-MM-DD UTC
 
-      let row = `${dateStr},`;
-      row += `${entry.ObservingTime?.station?.name || ""},`;
-      row += `${entry.avStationPressure || ""},`;
-      row += `${entry.avSeaLevelPressure || ""},`;
-      row += `${entry.avDryBulbTemperature || ""},`;
-      row += `${entry.avWetBulbTemperature || ""},`;
-      row += `${entry.maxTemperature || ""},`;
-      row += `${entry.minTemperature || ""},`;
-      row += `${entry.totalPrecipitation || ""},`;
-      row += `${entry.avDewPointTemperature || ""},`;
-      row += `${entry.avRelativeHumidity || ""},`;
-      row += `${entry.windSpeed || ""},`;
-      row += `${entry.windDirectionCode || ""},`;
-      row += `${entry.maxWindSpeed || ""},`;
-      row += `${entry.maxWindDirection || ""},`;
-      row += `${entry.avTotalCloud || ""},`;
-      row += `${entry.lowestVisibility || ""},`;
-      row += `${entry.totalRainDuration || ""}\n`;
-      csvContent += row;
+      // YYYY-MM-DD in UTC
+      const dateStr = observingTime.toISOString().split("T")[0];
+
+      const row = [
+        dateStr,
+        esc(entry.ObservingTime?.station?.name || ""),
+        esc(entry.avStationPressure),
+        esc(entry.avSeaLevelPressure),
+        esc(entry.avDryBulbTemperature),
+        esc(entry.avWetBulbTemperature),
+        esc(entry.maxTemperature),
+        esc(entry.minTemperature),
+        esc(entry.totalPrecipitation),
+        esc(entry.avDewPointTemperature),
+        esc(entry.avRelativeHumidity),
+        esc(entry.windSpeed),
+        esc(entry.windDirectionCode),
+        esc(entry.maxWindSpeed),
+        esc(entry.maxWindDirection),
+        esc(entry.avTotalCloud),
+        esc(entry.lowestVisibility),
+        esc(entry.totalRainDuration),
+      ].join(",");
+
+      csvContent += row + "\n";
     });
 
-    // Create download link
+    // --- Download link ---
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -588,7 +600,8 @@ const DailySummaryTable = forwardRef((props, ref) => {
     if (!currentData || currentData.length === 0) return;
 
     const currentDate = new Date().toISOString().split("T")[0];
-    const currentTime = new Date().toLocaleTimeString();
+    const currentTime =
+      new Date().toISOString().split("T")[1].slice(0, 8) + " UTC";
 
     // Create TXT header
     let txtContent = `DAILY SUMMARY DATA REPORT
