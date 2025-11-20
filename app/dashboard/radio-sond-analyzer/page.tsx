@@ -1,6 +1,7 @@
+import RadiosondeAnalyzer from "@/components/radio-sond-analyzer/RadiosondeAnalyzer";
 import { getSession } from "@/lib/getSession";
 import { redirect } from "next/navigation";
-import RadiosondeAnalyzer from "@/components/RadiosondeAnalyzer";
+
 
 export default async function RadioSondAnalyzerPage() {
   const session = await getSession();
@@ -11,7 +12,7 @@ export default async function RadioSondAnalyzerPage() {
 
   return (
     <main>
-      <RadiosondeAnalyzer />
+      <RadiosondeAnalyzer/>
     </main>
   );
 }
