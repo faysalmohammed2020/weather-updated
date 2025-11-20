@@ -61,6 +61,13 @@ export const auth = betterAuth({
     }),
     twoFactor(),
     customSession(async ({ user, session }) => {
+      // Get the session from database to check for impersonation
+      const dbSession = await prisma.sessions.findUnique({
+        where: {
+          id: session.id,
+        },
+      });
+
       const authUser = await prisma.users.findUnique({
         where: {
           id: session.userId,
@@ -70,8 +77,21 @@ export const auth = betterAuth({
         },
       });
 
+      // If this session is impersonating someone, get the original user info
+      let originalUser = null;
+      if (dbSession?.impersonatedBy) {
+        originalUser = await prisma.users.findUnique({
+          where: {
+            id: dbSession.impersonatedBy,
+          },
+        });
+      }
+
       return {
-        session,
+        session: {
+          ...session,
+          impersonatedBy: dbSession?.impersonatedBy,
+        },
         user: {
           ...user,
           role: authUser?.role,
@@ -79,6 +99,13 @@ export const auth = betterAuth({
           division: authUser?.division,
           district: authUser?.district,
           upazila: authUser?.upazila,
+          isImpersonating: !!dbSession?.impersonatedBy,
+          originalUser: originalUser ? {
+            id: originalUser.id,
+            name: originalUser.name,
+            email: originalUser.email,
+            role: originalUser.role,
+          } : null,
         },
       };
     }),

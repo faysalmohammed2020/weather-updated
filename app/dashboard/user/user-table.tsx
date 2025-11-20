@@ -88,8 +88,9 @@ export const UserTable = () => {
   const [originalRole, setOriginalRole] = useState<string | null>(null);
   const [newRole, setNewRole] = useState<string | null>(null);
   const [editUser, setEditUser] = useState<User | null>(null);
+  const [isImpersonating, setIsImpersonating] = useState(false);
   const [stations, setStations] = useState<Station[]>([]);
-  interface FormData {
+  interface UserFormData {
     name: string;
     email: string;
     password: string;
@@ -100,7 +101,7 @@ export const UserTable = () => {
     stationId: string;
   }
 
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<UserFormData>({
     name: "",
     email: "",
     password: "",
@@ -476,6 +477,62 @@ export const UserTable = () => {
     setEditUser(null);
   };
 
+  const handleImpersonate = async (
+    userId: string,
+    userName: string | null,
+    userRole: string | null
+  ) => {
+    // Prevent impersonating super admins
+    if (userRole === "super_admin") {
+      toast.error("Cannot impersonate super admin users");
+      return;
+    }
+
+    // Prevent self-impersonation
+    if (session?.user?.id === userId) {
+      toast.error("You cannot impersonate yourself");
+      return;
+    }
+
+    try {
+      setIsImpersonating(true);
+
+      const response = await fetch("/api/impersonate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          targetUserId: userId,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to start impersonation");
+      }
+
+      toast.success(
+        `Successfully impersonating ${userName || data.impersonatedUser.email}`
+      );
+
+      // Redirect to dashboard after successful impersonation
+      setTimeout(() => {
+        window.location.href = "/dashboard";
+      }, 1500);
+    } catch (error) {
+      console.error("Impersonation failed:", error);
+      toast.error(
+        typeof error === "object" && error instanceof Error
+          ? error.message
+          : "Failed to impersonate user"
+      );
+    } finally {
+      setIsImpersonating(false);
+    }
+  };
+
   const openEditDialog = async (user: User) => {
     if (user.role === "super_admin") {
       toast.error("Super admin roles cannot be modified");
@@ -499,12 +556,12 @@ export const UserTable = () => {
 
     setFormData({
       name: user.name || "",
-      email: user.email,
+      email: user.email || "",
       password: "", // Don't set password when editing
       role: (user.role as UserRole) || "observer",
-      division: user.division,
-      district: user.district,
-      upazila: user.upazila,
+      division: user.division || "",
+      district: user.district || "",
+      upazila: user.upazila || "",
       stationId: user.stationId || "",
     });
     setOpenDialog(true);
@@ -677,7 +734,7 @@ export const UserTable = () => {
                   value={
                     stations.find(
                       (station) => station.id === formData.stationId
-                    )?.stationId
+                    )?.stationId || ""
                   }
                   className="bg-gray-100"
                   disabled
@@ -695,7 +752,7 @@ export const UserTable = () => {
                   value={
                     stations.find(
                       (station) => station.id === formData.stationId
-                    )?.securityCode
+                    )?.securityCode || ""
                   }
                   className="bg-gray-100"
                   disabled
@@ -914,6 +971,7 @@ export const UserTable = () => {
                       >
                         Edit
                       </Button>
+
                       {session?.user.role === "super_admin" && (
                         <Button
                           variant="destructive"
@@ -925,6 +983,21 @@ export const UserTable = () => {
                           Delete
                         </Button>
                       )}
+
+                      {session?.user.role === "super_admin" &&
+                        user.role !== "super_admin" &&
+                        user.id !== session?.user?.id && (
+                          <Button
+                            variant="default"
+                            size="sm"
+                            onClick={() =>
+                              handleImpersonate(user.id, user.name, user.role)
+                            }
+                            disabled={isImpersonating}
+                          >
+                            {isImpersonating ? "..." : "Impersonate"}
+                          </Button>
+                        )}
                     </div>
                   </TableCell>
                 </TableRow>
