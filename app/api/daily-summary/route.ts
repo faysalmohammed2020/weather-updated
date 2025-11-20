@@ -217,8 +217,6 @@ export async function GET(req: Request) {
       },
     });
 
-    console.log("Raw Summaries:", rawSummaries);
-
     // Group by stationId + date
     const grouped: Record<string, any[]> = {};
 
