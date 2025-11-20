@@ -59,3 +59,47 @@ export const getNextRange = (
   };
 };
 
+export const validateDateChange = (
+  type: "start" | "end",
+  value: string,
+  range: DateRange
+): { range: DateRange; error: string | null } => {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return { range, error: "Invalid date format" };
+  }
+
+  const otherDate =
+    type === "start" ? new Date(range.endDate) : new Date(range.startDate);
+
+  if (type === "start" && date > otherDate) {
+    return { range, error: "Start date cannot be after end date" };
+  }
+
+  if (type === "end") {
+    if (date < otherDate) {
+      return { range, error: "End date cannot be before start date" };
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (date > today) {
+      return {
+        range,
+        error: "End date cannot be in the future",
+      };
+    }
+  }
+
+  return {
+    range: {
+      ...range,
+      startDate: type === "start" ? value : range.startDate,
+      endDate: type === "end" ? value : range.endDate,
+    },
+    error: null,
+  };
+};
+
+export const todayISO = () => format(new Date(), "yyyy-MM-dd");
+
