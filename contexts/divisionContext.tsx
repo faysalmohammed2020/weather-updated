@@ -81,7 +81,9 @@ const buildDivisionsQuery = (): string => {
   `;
 };
 
-// Fetch administrative boundaries using Overpass API with retry logic
+// Fetch administrative boundaries using Overpass API with retry logic.
+// If the API is slow/unavailable (504, 5xx, timeout), we just log a warning
+// and return an empty array so the caller can use local fallback data.
 const fetchBoundaries = async (query: string, retries = 2): Promise<any[]> => {
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
@@ -94,20 +96,29 @@ const fetchBoundaries = async (query: string, retries = 2): Promise<any[]> => {
       });
       return response.data.elements || [];
     } catch (error: any) {
-      console.error(`Overpass API error (attempt ${attempt + 1}):`, error.message);
-      
-      // If this is the last attempt, throw the error
+      const status = error?.response?.status;
+      const isTimeout = error.code === "ECONNABORTED";
+
+      // Only log a light warning; this is expected sometimes
+      console.warn(
+        `Overpass API issue (attempt ${attempt + 1})${
+          status ? `, status ${status}` : isTimeout ? ", timeout" : ""
+        }. Falling back if needed.`
+      );
+
+      // If this is the last attempt, never throw for 5xx/timeout – just trigger fallback
       if (attempt === retries) {
-        // Check if it's a timeout or network error
-        if (error.code === 'ECONNABORTED' || error.response?.status >= 500) {
-          console.warn("Overpass API is unavailable, will use fallback data");
-          return []; // Return empty array to trigger fallback
+        if (isTimeout || status >= 500) {
+          return [];
         }
+        // For client errors (4xx) that are not timeout, still bubble up
         throw error;
       }
-      
+
       // Wait before retrying (exponential backoff)
-      await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+      await new Promise((resolve) =>
+        setTimeout(resolve, Math.pow(2, attempt) * 1000)
+      );
     }
   }
   return [];
@@ -261,8 +272,8 @@ export const LocationProvider = ({
 
         setDivisions(processedDivisions);
       } catch (err: any) {
-        console.error("Error loading divisions:", err);
-        
+        console.warn("Overpass divisions load failed, using fallback divisions.");
+
         // Use fallback data even when there's an error
         const fallbackDivisions: AdministrativeArea[] = [
           { name: "Dhaka", osmId: 3921322, coordinates: [23.7779, 90.3995], adminLevel: ADMIN_LEVELS.DIVISION },
@@ -343,8 +354,7 @@ export const LocationProvider = ({
 
         setDistricts(processedDistricts);
       } catch (err: any) {
-        console.error("Error loading districts:", err);
-        console.warn("Districts API failed, setting empty districts list");
+        console.warn("Overpass districts load failed, setting empty districts list.");
         setDistricts([]);
       } finally {
         setLoading(false);
@@ -393,8 +403,7 @@ export const LocationProvider = ({
 
         setUpazilas(processedUpazilas);
       } catch (err: any) {
-        console.error("Error loading upazilas:", err);
-        console.warn("Upazilas API failed, setting empty upazilas list");
+        console.warn("Overpass upazilas load failed, setting empty upazilas list.");
         setUpazilas([]);
       } finally {
         setLoading(false);

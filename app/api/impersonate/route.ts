@@ -154,6 +154,15 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
+    // Load both original admin and impersonated user for accurate logging
+    const originalUser = await prisma.users.findUnique({
+      where: { id: currentSession.impersonatedBy },
+    });
+
+    const impersonatedUser = await prisma.users.findUnique({
+      where: { id: session.user.id },
+    });
+
     // Restore the original user session
     await prisma.sessions.update({
       where: {
@@ -166,19 +175,24 @@ export async function DELETE(request: NextRequest) {
     });
 
     // Log the stop impersonation action
+    // Actor = original admin (who started impersonation)
+    // Target = user who was being impersonated
+    const logActor = originalUser || impersonatedUser || session.user;
+    const logTarget = impersonatedUser || originalUser || session.user;
+
     await LogAction({
       init: prisma,
       action: LogActionType.DELETE,
       actionText: "User Impersonation Stopped",
-      role: session.user.role!,
-      actorId: session.user.id,
-      targetId: session.user.id,
-      actorEmail: session.user.email,
-      targetEmail: session.user.email,
+      role: (logActor as any).role || session.user.role!,
+      actorId: (logActor as any).id || session.user.id,
+      targetId: (logTarget as any).id || session.user.id,
+      actorEmail: (logActor as any).email || session.user.email,
+      targetEmail: (logTarget as any).email || session.user.email,
       module: LogModule.USER,
       details: {
-        stoppedImpersonation: true
-      }
+        stoppedImpersonation: true,
+      },
     });
 
     return NextResponse.json({

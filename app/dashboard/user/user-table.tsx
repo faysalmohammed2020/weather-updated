@@ -984,7 +984,10 @@ export const UserTable = () => {
                         </Button>
                       )}
 
-                      {session?.user.role === "super_admin" &&
+                      {(session?.user.role === "super_admin" ||
+                        (session?.user.role === "station_admin" &&
+                          user.stationId &&
+                          user.stationId === (session.user as any)?.station?.id)) &&
                         user.role !== "super_admin" &&
                         user.id !== session?.user?.id && (
                           <Button
