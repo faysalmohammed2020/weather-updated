@@ -1,5 +1,5 @@
-import DailySummaryTable from "./daily-summery";
+import DailySummaryView from "./DailySummaryView";
 
 export default function DailySummeryPage() {
-  return <DailySummaryTable />
+  return <DailySummaryView />;
 }

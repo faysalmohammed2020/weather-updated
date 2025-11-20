@@ -1,9 +1,24 @@
 import { differenceInDays, isValid, parseISO } from "date-fns";
-import type { SynopticRecord, SynopticUser } from "@/lib/types/synoptic";
+
+export interface EditableRecordMeta {
+  createdAt?: string | null;
+  ObservingTime?: {
+    stationId?: string | null;
+    userId?: string | null;
+  } | null;
+}
+
+export interface UserRoleContext {
+  id: string;
+  role: string;
+  station?: {
+    id?: string | null;
+  } | null;
+}
 
 export const canEditRecord = (
-  record: SynopticRecord,
-  user?: SynopticUser | null
+  record: EditableRecordMeta,
+  user?: UserRoleContext | null
 ): boolean => {
   if (!user) {
     return false;

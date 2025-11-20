@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
 import { useSession } from "@/lib/auth-client"
 import dynamic from "next/dynamic"
-import DailySummaryTable from "../daily-summery/daily-summery"
+import DailySummaryTable from "../daily-summery"
 import MargeTable from "@/components/margeTable"
 
 const CompactPDFExportButton = dynamic(() => import("../PdfExportComponent"), { ssr: false })
