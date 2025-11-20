@@ -17,7 +17,6 @@ import HumidityAnimation from "../Animation/humidity-animation"
 import VisibilityAnimation from "../Animation/visibility-animation"
 import PressureAnimation from "../Animation/pressure-animation"
 import DewpointAnimation from "../Animation/dewpoint-animation"
-import TimeSeriesGraph from "./timeSeriseGraph"
 
 
 

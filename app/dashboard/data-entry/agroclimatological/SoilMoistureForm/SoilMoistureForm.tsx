@@ -252,39 +252,9 @@ export function SoilMoistureForm() {
     }
   };
 
-  // if (!canSubmit && lastSubmission) {
-  //   const nextSubmissionDate = new Date(lastSubmission);
-  //   nextSubmissionDate.setDate(nextSubmissionDate.getDate() + 7);
-
-  //   return (
-  //     <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
-  //       <h2 className="text-2xl font-bold mb-4 text-center">Submission Limit Reached</h2>
-  //       <p className="mb-4 text-center">
-  //         Soil moisture data can only be submitted once every 7 days.
-  //       </p>
-  //       <p className="text-center">
-  //         Your next submission will be available on: {' '}
-  //         <span className="font-semibold">
-  //           {nextSubmissionDate.toLocaleDateString()}
-  //         </span>
-  //       </p>
-  //     </div>
-  //   );
-  // }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100 p-4">
       <div className="container mx-auto max-w-7xl">
-        {/* <div className="mb-8 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-violet-500 to-purple-600 rounded-full mb-4 shadow-lg">
-            <Layers className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent mb-2">
-            Soil Moisture Data Collection
-          </h1>
-          <div className="w-24 h-1 bg-gradient-to-r from-violet-500 to-purple-600 mx-auto mt-4 rounded-full"></div>
-        </div> */}
-
         <motion.form
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

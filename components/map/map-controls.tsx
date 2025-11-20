@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -24,12 +22,7 @@ interface Station {
 }
 
 export default function MapControls({
-  selectedRegion,
   setSelectedRegion,
-  selectedPeriod,
-  setSelectedPeriod,
-  selectedIndex,
-  setSelectedIndex,
   selectedStation,
   setSelectedStation,
 }: {
@@ -46,44 +39,6 @@ export default function MapControls({
   const [stations, setStations] = useState<Station[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Fetch stations based on user role
-  // useEffect(() => {
-  //   const fetchStations = async () => {
-  //     setLoading(true);
-  //     setError(null);
-  //     try {
-  //       const response = await fetch("/api/stationlocation");
-  //       if (!response.ok) {
-  //         throw new Error(`Error: ${response.status}`);
-  //       }
-  //       const data = await response.json();
-  //       setStations(data);
-
-  //       // If user is station_admin or observer, auto-select their station
-  //       if (
-  //         session?.user?.role === "station_admin" ||
-  //         session?.user?.role === "observer"
-  //       ) {
-  //         const userStation = data.find(
-  //           (station: Station) => station.stationId === session?.user?.station?.stationId
-  //         );
-  //         if (userStation) {
-  //           setSelectedStation(userStation);
-  //           setSelectedRegion("station");
-  //         }
-  //       }
-  //     } catch (err) {
-  //       setError("Failed to fetch stations");
-  //       console.error("Error fetching stations:", err);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchStations();
-  // }, [session, setSelectedStation, setSelectedRegion]);
-
   useEffect(() => {
     const fetchStations = async () => {
       setLoading(true);
