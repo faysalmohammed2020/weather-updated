@@ -206,6 +206,12 @@ const Sidebar = () => {
       roles: ["super_admin", "station_admin"],
     },
     {
+      href: "/dashboard/activity-logs",
+      icon: <Eye className="w-5 h-5" />,
+      label: "Activity Logs",
+      roles: ["super_admin", "station_admin"],
+    },
+    {
       href: "/dashboard/stations",
       icon: <CloudFog className="w-5 h-5" />,
       label: "Station Management",

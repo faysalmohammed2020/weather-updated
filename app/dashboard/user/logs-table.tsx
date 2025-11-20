@@ -26,23 +26,23 @@ export const LogsTable = ({
 }) => {
   // Handle error case or missing data
   const logs = Array.isArray(rawLogs) ? rawLogs : [];
-  const total = typeof rawTotal === 'number' ? rawTotal : logs.length;
+  const total = typeof rawTotal === "number" ? rawTotal : logs.length;
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentPage = parseInt(searchParams.get("page") || "1");
-  
+
   const [selectedDetails, setSelectedDetails] = useState<JSON | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  
+
   // Navigate to a specific page without resetting scroll position
   const goToPage = (page: number) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("page", page.toString());
-    
+
     // Use router.replace with scroll: false option to prevent scroll reset
-    router.replace(`${pathname}?${params.toString()}`, { 
-      scroll: false 
+    router.replace(`${pathname}?${params.toString()}`, {
+      scroll: false,
     });
   };
 
@@ -66,7 +66,7 @@ export const LogsTable = ({
   };
   return (
     <>
-      <h1 className="text-2xl font-bold mb-6">Logs</h1>
+      <h1 className="text-2xl font-bold mb-6">Activity Logs</h1>
       <div className=" bg-white py-6 rounded-xl border shadow">
         <div className="overflow-auto">
           <table className="w-full">
@@ -158,16 +158,22 @@ export const LogsTable = ({
             </tbody>
           </table>
         </div>
-        
+
         {/* Pagination */}
         {total > limit && (
           <div className="border-t pt-4 px-4">
             <div className="flex justify-between items-center">
               <div>
                 <p className="text-sm text-gray-700">
-                  Showing <span className="font-medium">{total > 0 ? (currentPage - 1) * limit + 1 : 0}</span> to{' '}
-                  <span className="font-medium">{Math.min(currentPage * limit, total)}</span> of{' '}
-                  <span className="font-medium">{total}</span> results
+                  Showing{" "}
+                  <span className="font-medium">
+                    {total > 0 ? (currentPage - 1) * limit + 1 : 0}
+                  </span>{" "}
+                  to{" "}
+                  <span className="font-medium">
+                    {Math.min(currentPage * limit, total)}
+                  </span>{" "}
+                  of <span className="font-medium">{total}</span> results
                 </p>
               </div>
               <div className="flex items-center space-x-2">
@@ -182,11 +188,13 @@ export const LogsTable = ({
                 </Button>
 
                 {/* Page numbers */}
-                {Array.from({ length: Math.min(5, Math.ceil(total / limit)) }).map((_, i) => {
+                {Array.from({
+                  length: Math.min(5, Math.ceil(total / limit)),
+                }).map((_, i) => {
                   // Calculate page number based on current page to show a window of pages
                   let pageNum;
                   const totalPages = Math.ceil(total / limit);
-                  
+
                   if (totalPages <= 5) {
                     // If 5 or fewer pages, show all pages
                     pageNum = i + 1;
@@ -200,9 +208,9 @@ export const LogsTable = ({
                     // Otherwise show 2 pages before and 2 pages after current
                     pageNum = currentPage - 2 + i;
                   }
-                  
+
                   if (pageNum <= 0 || pageNum > totalPages) return null;
-                  
+
                   return (
                     <Button
                       key={pageNum}
@@ -219,7 +227,11 @@ export const LogsTable = ({
                 {/* Next page button */}
                 <Button
                   variant="outline"
-                  onClick={() => goToPage(Math.min(Math.ceil(total / limit), currentPage + 1))}
+                  onClick={() =>
+                    goToPage(
+                      Math.min(Math.ceil(total / limit), currentPage + 1)
+                    )
+                  }
                   disabled={currentPage >= Math.ceil(total / limit)}
                   size="sm"
                 >
