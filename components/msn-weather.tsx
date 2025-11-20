@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useSession } from "@/lib/auth-client";
-import { toast } from "sonner";
 import {
   Thermometer,
   Droplets,

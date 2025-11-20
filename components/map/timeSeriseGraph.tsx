@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from "react"
 import dynamic from "next/dynamic"
+import type { Layout, Config } from "plotly.js"
+import Plotly from "plotly.js"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
 import { ChevronLeft, ChevronRight, Loader2, AlertTriangle } from "lucide-react"
 import { format, differenceInDays } from "date-fns"
 import { useSession } from "@/lib/auth-client"
@@ -272,19 +273,23 @@ export default function TimeSeriesGraph({ selectedStationId }: TimeSeriesGraphPr
     }
 
     // Plotly configuration
-    const plotConfig = {
+    const plotConfig: Partial<Config> = {
         displayModeBar: true,
         displaylogo: false,
-        modeBarButtonsToRemove: ["pan2d", "lasso2d", "select2d"],
+        modeBarButtonsToRemove: [
+            'pan2d',
+            'lasso2d',
+            'select2d'
+        ] as unknown as Plotly.ModeBarDefaultButtons[],
         responsive: true,
     }
 
-    const commonLayout = {
+    const commonLayout: Partial<Layout> = {
         font: { size: 12 },
         margin: { l: 60, r: 40, t: 40, b: 60 },
         showlegend: false,
         xaxis: {
-            title: "Time",
+            title: { text: "Time" },
             type: "date" as const,
             tickangle: -45,
         },
@@ -389,8 +394,8 @@ export default function TimeSeriesGraph({ selectedStationId }: TimeSeriesGraphPr
                                 ]}
                                 layout={{
                                     ...commonLayout,
-                                    yaxis: { title: "Temperature (°C)" },
-                                    title: "Temperature Over Time",
+                                    yaxis: { title: { text: "Temperature (°C)" } },
+                                    title: { text: "Temperature Over Time" },
                                 }}
                                 config={plotConfig}
                                 style={{ width: "100%", height: "300px" }}
@@ -418,8 +423,8 @@ export default function TimeSeriesGraph({ selectedStationId }: TimeSeriesGraphPr
                                 ]}
                                 layout={{
                                     ...commonLayout,
-                                    yaxis: { title: "Relative Humidity (%)" },
-                                    title: "Humidity Over Time",
+                                    yaxis: { title: { text: "Relative Humidity (%)" } },
+                                    title: { text: "Humidity Over Time" },
                                 }}
                                 config={plotConfig}
                                 style={{ width: "100%", height: "300px" }}
@@ -447,8 +452,8 @@ export default function TimeSeriesGraph({ selectedStationId }: TimeSeriesGraphPr
                                 ]}
                                 layout={{
                                     ...commonLayout,
-                                    yaxis: { title: "Visibility (km)" },
-                                    title: "Visibility Over Time",
+                                    yaxis: { title: { text: "Visibility (km)" } },
+                                    title: { text: "Visibility Over Time" },
                                 }}
                                 config={plotConfig}
                                 style={{ width: "100%", height: "300px" }}
@@ -476,8 +481,8 @@ export default function TimeSeriesGraph({ selectedStationId }: TimeSeriesGraphPr
                                 ]}
                                 layout={{
                                     ...commonLayout,
-                                    yaxis: { title: "Rainfall (mm)" },
-                                    title: "Rainfall Over Time",
+                                    yaxis: { title: { text: "Rainfall (mm)" } },
+                                    title: { text: "Rainfall Over Time" },
                                 }}
                                 config={plotConfig}
                                 style={{ width: "100%", height: "300px" }}
@@ -505,8 +510,8 @@ export default function TimeSeriesGraph({ selectedStationId }: TimeSeriesGraphPr
                                 ]}
                                 layout={{
                                     ...commonLayout,
-                                    yaxis: { title: "Wind Speed (KTS)" },
-                                    title: "Wind Speed Over Time",
+                                    yaxis: { title: { text: "Wind Speed (KTS)" } },
+                                    title: { text: "Wind Speed Over Time" },
                                 }}
                                 config={plotConfig}
                                 style={{ width: "100%", height: "300px" }}
