@@ -1,112 +1,60 @@
-import type {
-  MeteorologicalEntry,
-  ObservingTimeEntry,
-} from "@/types/meteorological";
-import { formatUtcDate, utcToHour } from "@/lib/utils/table-utils";
-import type { ExportResult } from "./types";
+import { triggerDownload } from "@/lib/export/download";
+import type { SynopticHeaderInfo, SynopticRecord } from "@/lib/types/synoptic";
 
-export interface CsvExportOptions {
-  startDate: string;
-  endDate: string;
-  observingTimes: ObservingTimeEntry[];
-  flattenedData: MeteorologicalEntry[];
-}
+const CSV_HEADERS =
+  "Time,C1,Iliii,iRiXhvv,Nddff,1SnTTT,2SnTdTdTd,3PPP/4PPP,6RRRtR,7wwW1W2,8NhClCmCh,2SnTnTnTn/InInInIn,56DlDmDh,57CDaEc,C2,GG,58P24P24P24/59P24P24P24,(6RRRtR),8N5Ch5h5,90dqqqt,91fqfqfq,Weather Remarks\n";
 
-const CSV_HEADERS = [
-  "Time (GMT)",
-  "Indicator",
-  "Date",
-  "Station Name & ID",
-  "Station Name",
-  "Attached Thermometer (°C)",
-  "Bar As Read (hPa)",
-  "Corrected for Index",
-  "Height Difference Correction (hPa)",
-  "Station Level Pressure (QFE)",
-  "Sea Level Reduction",
-  "Sea Level Pressure (QNH)",
-  "Afternoon Reading",
-  "24-Hour Pressure Change",
-  "Dry Bulb As Read (°C)",
-  "Wet Bulb As Read (°C)",
-  "MAX/MIN Temp As Read (°C)",
-  "Dry Bulb Corrected (°C)",
-  "Wet Bulb Corrected (°C)",
-  "MAX/MIN Temp Corrected (°C)",
-  "Dew Point Temperature (°C)",
-  "Relative Humidity (%)",
-  "Squall Force (KTS)",
-  "Squall Direction (°)",
-  "Squall Time",
-  "Horizontal Visibility (km)",
-  "Misc Meteors (Code)",
-  "Past Weather (W1)",
-  "Past Weather (W2)",
-  "Present Weather (ww)",
-  "C2 Indicator",
-];
+export const exportSynopticCSV = (
+  records: SynopticRecord[],
+  headerInfo: SynopticHeaderInfo
+): boolean => {
+  if (!records?.length) {
+    return false;
+  }
 
-export const exportToCSV = ({
-  startDate,
-  endDate,
-  observingTimes,
-  flattenedData,
-}: CsvExportOptions): ExportResult => {
-  const observingTimeMap = new Map(
-    observingTimes.map((ot) => [ot.id, ot] as const)
-  );
+  let csvContent = CSV_HEADERS;
 
-  const rows = flattenedData.map((record) => {
-    const observingTime = observingTimeMap.get(record.observingTimeId);
-    const stationLabel = observingTime
-      ? `${observingTime.station?.name ?? "--"} ${
-          observingTime.station?.stationId ?? "--"
-        }`
-      : "--";
+  records.forEach((entry) => {
+    const observingTime = entry.ObservingTime?.utcTime
+      ? new Date(entry.ObservingTime.utcTime)
+      : new Date();
+    const timeSlot = observingTime.getUTCHours().toString().padStart(2, "0");
+    const remark = (entry.weatherRemark || "").replace(/"/g, '""');
 
-    return [
-      utcToHour(observingTime?.utcTime || ""),
-      record.subIndicator || "--",
-      observingTime?.utcTime ? formatUtcDate(observingTime.utcTime) : "--",
-      stationLabel,
-      observingTime?.station?.name || "--",
-      record.alteredThermometer || "--",
-      record.barAsRead || "--",
-      record.correctedForIndex || "--",
-      record.heightDifference || "--",
-      record.stationLevelPressure || "--",
-      record.seaLevelReduction || "--",
-      record.correctedSeaLevelPressure || "--",
-      record.afternoonReading || "--",
-      record.pressureChange24h || "--",
-      record.dryBulbAsRead || "--",
-      record.wetBulbAsRead || "--",
-      record.maxMinTempAsRead || "--",
-      record.dryBulbCorrected || "--",
-      record.wetBulbCorrected || "--",
-      record.maxMinTempCorrected || "--",
-      record.Td || "--",
-      record.relativeHumidity || "--",
-      record.squallForce || "--",
-      record.squallDirection || "--",
-      record.squallTime || "--",
-      record.horizontalVisibility || "--",
-      record.miscMeteors || "--",
-      record.pastWeatherW1 || "--",
-      record.pastWeatherW2 || "--",
-      record.presentWeatherWW || "--",
-      record.c2Indicator || "--",
-    ];
+    const row = [
+      timeSlot,
+      entry.C1 || "",
+      entry.Iliii || "",
+      entry.iRiXhvv || "",
+      entry.Nddff || "",
+      entry.S1nTTT || "",
+      entry.S2nTddTddTdd || "",
+      entry.P3PPP4PPPP || "",
+      entry.RRRtR6 || "",
+      entry.wwW1W2 || "",
+      entry.NhClCmCh || "",
+      entry.S2nTnTnTnInInInIn || "",
+      entry.D56DLDMDH || "",
+      entry.CD57DaEc || "",
+      entry.avgTotalCloud || "",
+      entry.C2 || "",
+      entry.GG || "",
+      entry.P24Group58_59 || "",
+      entry.R24Group6_7 || "",
+      entry.NsChshs || "",
+      entry.dqqqt90 || "",
+      entry.fqfqfq91 || "",
+      `"${remark}"`,
+    ].join(",");
+
+    csvContent += `${row}\n`;
   });
 
-  const csvContent = [CSV_HEADERS, ...rows]
-    .map((row) => row.map((field) => `"${field}"`).join(","))
-    .join("\n");
+  triggerDownload(
+    csvContent,
+    `synoptic_data_${headerInfo.year}${headerInfo.month}${headerInfo.day}.csv`,
+    "text/csv;charset=utf-8;"
+  );
 
-  return {
-    filename: `meteorological_data_${startDate}_to_${endDate}.csv`,
-    mime: "text/csv;charset=utf-8;",
-    content: csvContent,
-  };
+  return true;
 };
-

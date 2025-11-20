@@ -15,8 +15,8 @@ import type {
   ObservingTimeEntry,
 } from "@/types/meteorological";
 import { useMeteorologicalEntries, useStationsQuery } from "@/lib/queries/meteorological";
-import { exportToCSV as buildCsv } from "@/lib/export/exportCSV";
-import { exportToTXT as buildTxt } from "@/lib/export/exportTXT";
+import { exportToCSV as buildCsv } from "@/lib/export/meteorologicalCSV";
+import { exportToTXT as buildTxt } from "@/lib/export/meteorologicalTXT";
 import { getNextRange, getPreviousRange } from "@/lib/utils/date-utils";
 import { CloudSun } from "lucide-react";
 
