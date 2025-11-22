@@ -6,7 +6,6 @@ import { useSession } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useState } from "react";
-import { ImpersonationLoader } from "./impersonation-loader";
 
 export const ImpersonationBanner = () => {
   const { data: session } = useSession();
@@ -59,13 +58,6 @@ export const ImpersonationBanner = () => {
 
   return (
     <>
-      <ImpersonationLoader
-        isLoading={isStoppingImpersonation}
-        userName={session?.user?.name || session?.user?.email || "User"}
-        userEmail={session?.user?.email || ""}
-        userRole={session?.user?.role || ""}
-        mode="stop"
-      />
       {/* ✨ ENHANCEMENT 1: Darker background for visibility */}
       <div className="bg-slate-700 p-4 mb-4 shadow-xl">
         <div className="flex items-center justify-between">

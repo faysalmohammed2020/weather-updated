@@ -30,7 +30,6 @@ import { toast } from "sonner";
 import { useLocation } from "@/contexts/divisionContext";
 import { Station } from "@/data/stations";
 import { useSession } from "@/lib/auth-client";
-import { ImpersonationLoader } from "@/components/impersonation-loader";
 
 // Define the User type based on Prisma schema
 interface User {
@@ -91,11 +90,6 @@ export const UserTable = () => {
   const [editUser, setEditUser] = useState<User | null>(null);
   const [isImpersonating, setIsImpersonating] = useState(false);
   const [stations, setStations] = useState<Station[]>([]);
-  const [impersonatingUserInfo, setImpersonatingUserInfo] = useState<{
-    name: string;
-    email: string;
-    role: string;
-  } | null>(null);
   interface UserFormData {
     name: string;
     email: string;
@@ -502,11 +496,6 @@ export const UserTable = () => {
 
     try {
       setIsImpersonating(true);
-      setImpersonatingUserInfo({
-        name: userName || "User",
-        email: "",
-        role: userRole || "observer",
-      });
 
       const response = await fetch("/api/impersonate", {
         method: "POST",
@@ -524,13 +513,6 @@ export const UserTable = () => {
         throw new Error(data.error || "Failed to start impersonation");
       }
 
-      // Update email after successful response
-      setImpersonatingUserInfo({
-        name: userName || "User",
-        email: data.impersonatedUser?.email || "",
-        role: userRole || "observer",
-      });
-
       toast.success("Impersonation Started", {
         description: `Now impersonating ${userName || data.impersonatedUser.email} (${userRole}). Redirecting...`,
         duration: 2000,
@@ -543,7 +525,6 @@ export const UserTable = () => {
     } catch (error) {
       console.error("Impersonation failed:", error);
       setIsImpersonating(false);
-      setImpersonatingUserInfo(null);
       toast.error("Cannot Start Impersonation", {
         description:
           typeof error === "object" && error instanceof Error
@@ -607,13 +588,6 @@ export const UserTable = () => {
 
   return (
     <div className="mb-8">
-      <ImpersonationLoader
-        isLoading={isImpersonating}
-        userName={impersonatingUserInfo?.name || "User"}
-        userEmail={impersonatingUserInfo?.email || ""}
-        userRole={impersonatingUserInfo?.role || ""}
-        mode="start"
-      />
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">User Management</h1>
 
