@@ -12,9 +12,12 @@ const ActivityLogsPage = async ({
 }) => {
   const session = await getSession();
 
+  // Only observers are not allowed to view activity logs
   if (session?.user?.role === "observer") {
     redirect("/dashboard");
   }
+
+  // super_admin and station_admin can view activity logs
 
   const { page, limit } = await searchParams;
   const parsedPage = parseInt(page || "1");
@@ -23,12 +26,18 @@ const ActivityLogsPage = async ({
 
   const logsData = await getLogs({ limit: parsedLimit, offset });
 
+  // Handle error case
+  if ("error" in logsData) {
+    return (
+      <div className="text-red-600">Error loading logs: {logsData.error}</div>
+    );
+  }
+
   return (
     <LogsTable
-      logs={logsData.logs}
+      logs={logsData.logs || []}
       total={logsData.total}
       limit={parsedLimit}
-      offset={offset}
     />
   );
 };

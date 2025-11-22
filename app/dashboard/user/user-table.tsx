@@ -30,6 +30,7 @@ import { toast } from "sonner";
 import { useLocation } from "@/contexts/divisionContext";
 import { Station } from "@/data/stations";
 import { useSession } from "@/lib/auth-client";
+import { ImpersonationLoader } from "@/components/impersonation-loader";
 
 // Define the User type based on Prisma schema
 interface User {
@@ -90,6 +91,11 @@ export const UserTable = () => {
   const [editUser, setEditUser] = useState<User | null>(null);
   const [isImpersonating, setIsImpersonating] = useState(false);
   const [stations, setStations] = useState<Station[]>([]);
+  const [impersonatingUserInfo, setImpersonatingUserInfo] = useState<{
+    name: string;
+    email: string;
+    role: string;
+  } | null>(null);
   interface UserFormData {
     name: string;
     email: string;
@@ -496,6 +502,11 @@ export const UserTable = () => {
 
     try {
       setIsImpersonating(true);
+      setImpersonatingUserInfo({
+        name: userName || "User",
+        email: "",
+        role: userRole || "observer",
+      });
 
       const response = await fetch("/api/impersonate", {
         method: "POST",
@@ -513,9 +524,17 @@ export const UserTable = () => {
         throw new Error(data.error || "Failed to start impersonation");
       }
 
-      toast.success(
-        `Successfully impersonating ${userName || data.impersonatedUser.email}`
-      );
+      // Update email after successful response
+      setImpersonatingUserInfo({
+        name: userName || "User",
+        email: data.impersonatedUser?.email || "",
+        role: userRole || "observer",
+      });
+
+      toast.success("Impersonation Started", {
+        description: `Now impersonating ${userName || data.impersonatedUser.email} (${userRole}). Redirecting...`,
+        duration: 2000,
+      });
 
       // Redirect to dashboard after successful impersonation
       setTimeout(() => {
@@ -523,13 +542,15 @@ export const UserTable = () => {
       }, 1500);
     } catch (error) {
       console.error("Impersonation failed:", error);
-      toast.error(
-        typeof error === "object" && error instanceof Error
-          ? error.message
-          : "Failed to impersonate user"
-      );
-    } finally {
       setIsImpersonating(false);
+      setImpersonatingUserInfo(null);
+      toast.error("Cannot Start Impersonation", {
+        description:
+          typeof error === "object" && error instanceof Error
+            ? error.message
+            : "An unexpected error occurred. Please try again.",
+        duration: 3000,
+      });
     }
   };
 
@@ -586,6 +607,13 @@ export const UserTable = () => {
 
   return (
     <div className="mb-8">
+      <ImpersonationLoader
+        isLoading={isImpersonating}
+        userName={impersonatingUserInfo?.name || "User"}
+        userEmail={impersonatingUserInfo?.email || ""}
+        userRole={impersonatingUserInfo?.role || ""}
+        mode="start"
+      />
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">User Management</h1>
 
@@ -987,7 +1015,9 @@ export const UserTable = () => {
                       {(session?.user.role === "super_admin" ||
                         (session?.user.role === "station_admin" &&
                           user.stationId &&
-                          user.stationId === (session.user as any)?.station?.id)) &&
+                          user.stationId ===
+                            (session.user as any)?.station?.id &&
+                          user.role === "observer")) &&
                         user.role !== "super_admin" &&
                         user.id !== session?.user?.id && (
                           <Button

@@ -20,19 +20,61 @@ export async function getLogs({
       };
     }
 
-    // Define the where condition based on user role
-    const whereCondition = {
-      AND: [
-        {
-          role: session.user.role === "super_admin" ? undefined : "observer",
-        },
-        {
-          actor: {
-            stationId: session.user.role === "super_admin" ? undefined : session.user.station?.id,
+    // For super_admin: show all logs
+    // For station_admin: show observer logs + impersonation logs for their station users
+    // For observer: not allowed to view logs (blocked in page.tsx)
+    let whereCondition;
+
+    if (session.user.role === "super_admin") {
+      // Super admin sees all logs
+      whereCondition = {};
+    } else if (session.user.role === "station_admin") {
+      // Station admin sees:
+      // 1. Observer logs in their station
+      // 2. Impersonation logs where they impersonated observers in their station
+      whereCondition = {
+        OR: [
+          // Observer logs in their station
+          {
+            AND: [
+              { role: "observer" },
+              {
+                actor: {
+                  stationId: session.user.station?.id,
+                },
+              },
+            ],
           },
-        },
-      ],
-    };
+          // Impersonation logs where station_admin impersonated someone in their station
+          {
+            AND: [
+              { actionText: "User Impersonation Started" },
+              {
+                actor: {
+                  id: session.user.id, // The station_admin who did the impersonation
+                },
+              },
+            ],
+          },
+          // Stop impersonation logs
+          {
+            AND: [
+              { actionText: "User Impersonation Stopped" },
+              {
+                actor: {
+                  id: session.user.id, // The station_admin who stopped the impersonation
+                },
+              },
+            ],
+          },
+        ],
+      };
+    } else {
+      // Observer role - shouldn't reach here but just in case
+      whereCondition = {
+        AND: [{ role: "observer" }],
+      };
+    }
 
     // Get logs with pagination
     const [logs, total] = await Promise.all([

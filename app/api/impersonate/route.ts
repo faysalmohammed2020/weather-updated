@@ -7,11 +7,25 @@ import { LogAction, LogActionType, LogModule } from "@/lib/log";
 export async function POST(request: NextRequest) {
   try {
     const session = await getSession();
-    
-    // Check if user is authenticated and is super admin
-    if (!session || !session.user || session.user.role !== "super_admin") {
+
+    // Check if user is authenticated
+    if (!session || !session.user) {
       return NextResponse.json(
-        { error: "Unauthorized. Only super admins can impersonate users." },
+        { error: "Unauthorized. User not authenticated." },
+        { status: 403 }
+      );
+    }
+
+    // Check if user has impersonation permissions
+    if (
+      session.user.role !== "super_admin" &&
+      session.user.role !== "station_admin"
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Unauthorized. Only super admins and station admins can impersonate users.",
+        },
         { status: 403 }
       );
     }
@@ -28,7 +42,7 @@ export async function POST(request: NextRequest) {
     // Check if target user exists
     const targetUser = await prisma.users.findUnique({
       where: { id: targetUserId },
-      include: { Station: true }
+      include: { Station: true },
     });
 
     if (!targetUser) {
@@ -46,6 +60,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // If station_admin, ensure they can only impersonate observers in their station
+    if (session.user.role === "station_admin") {
+      if (targetUser.role !== "observer") {
+        return NextResponse.json(
+          { error: "Station admins can only impersonate observers" },
+          { status: 403 }
+        );
+      }
+
+      if (targetUser.stationId !== (session.user as any).stationId) {
+        return NextResponse.json(
+          {
+            error:
+              "Station admins can only impersonate observers in their own station",
+          },
+          { status: 403 }
+        );
+      }
+    }
+
     // Prevent self-impersonation
     if (targetUserId === session.user.id) {
       return NextResponse.json(
@@ -61,8 +95,8 @@ export async function POST(request: NextRequest) {
         userId: session.user.id,
       },
       orderBy: {
-        createdAt: 'desc'
-      }
+        createdAt: "desc",
+      },
     });
 
     if (!currentSession) {
@@ -99,9 +133,9 @@ export async function POST(request: NextRequest) {
           id: targetUser.id,
           email: targetUser.email,
           role: targetUser.role,
-          name: targetUser.name
-        }
-      }
+          name: targetUser.name,
+        },
+      },
     });
 
     return NextResponse.json({
@@ -111,10 +145,9 @@ export async function POST(request: NextRequest) {
         id: targetUser.id,
         name: targetUser.name,
         email: targetUser.email,
-        role: targetUser.role
-      }
+        role: targetUser.role,
+      },
     });
-
   } catch (error) {
     console.error("Impersonation error:", error);
     return NextResponse.json(
@@ -128,12 +161,9 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const session = await getSession();
-    
+
     if (!session || !session.user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Stop impersonation by restoring the original session
@@ -143,8 +173,8 @@ export async function DELETE(request: NextRequest) {
         impersonatedBy: { not: null },
       },
       orderBy: {
-        createdAt: 'desc'
-      }
+        createdAt: "desc",
+      },
     });
 
     if (!currentSession || !currentSession.impersonatedBy) {
@@ -197,9 +227,8 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: "Successfully stopped impersonation"
+      message: "Successfully stopped impersonation",
     });
-
   } catch (error) {
     console.error("Stop impersonation error:", error);
     return NextResponse.json(

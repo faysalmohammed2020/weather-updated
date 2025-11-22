@@ -7,11 +7,13 @@ export async function GET() {
   try {
     const session = await getSession();
 
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     let stations;
+
+    if (!session?.user) {
+      // If no session, return all stations (public access)
+      stations = await prisma.station.findMany();
+      return NextResponse.json(stations);
+    }
 
     // Filter stations based on user role
     if (session.user.role === "super_admin") {
