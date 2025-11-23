@@ -4,15 +4,44 @@ import { signOut, useSession } from "@/lib/auth-client";
 import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
+import { useState, useEffect } from "react";
 
 const Profile = () => {
   const router = useRouter();
   const { data: session, isPending } = useSession();
+  const [isClient, setIsClient] = useState(false);
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) {
+    return (
+      <div className="flex items-center gap-6 h-12">
+        <div className="flex flex-col">
+          <span className="whitespace-nowrap text-xs md:text-md md:font-medium text-white uppercase text-shadow">
+            Loading...
+          </span>
+          <span className="uppercase text-xs md:text-md text-white text-shadow">
+            Loading...
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center gap-6 h-12">
       {isPending ? (
-        <div>Loading...</div>
+        <div className="flex flex-col">
+          <span className="whitespace-nowrap text-xs md:text-md md:font-medium text-white uppercase text-shadow">
+            Loading...
+          </span>
+          <span className="uppercase text-xs md:text-md text-white text-shadow">
+            Loading...
+          </span>
+        </div>
       ) : (
         <>
           <div className="flex flex-col">
