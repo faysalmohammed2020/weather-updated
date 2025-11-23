@@ -1,15 +1,14 @@
 // app/dashboard/data-entry/daily-summery/DailySummery.tsx
-
 "use client";
 
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useFormikContext } from "formik";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useEffect, useState } from "react";
 import { useSession } from "@/lib/auth-client";
-import { AlertCircle, Loader2 } from "lucide-react";
-import moment from "moment";
+import { AlertCircle } from "lucide-react";
+import DailySummerySkeleton from "./DailySummerySkeleton"; // ✅ new skeleton
 
 // Daily Summary Form Values Interface
 interface DailySummaryFormValues {
@@ -22,6 +21,7 @@ interface DailySummaryFormValues {
 }
 
 // ----- helpers: units/rounding/dirs/UTC/rain-slots -----
+// ❗️(UNCHANGED)
 const avg = (nums: number[]) =>
   nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : 0;
 const safeNum = (v: any) => Number.parseFloat(v);
@@ -53,7 +53,6 @@ const degTo16PtIndex = (deg: any) => {
 const sumRainMinutes = (obs: any, utcDate: Date) => {
   let minutes = 0;
 
-  // New format: rainfallTimeSlots: [{timeStart:"HH:mm", timeEnd:"HH:mm"}]
   if (Array.isArray(obs?.rainfallTimeSlots) && obs.rainfallTimeSlots.length) {
     for (const slot of obs.rainfallTimeSlots) {
       if (!slot?.timeStart || !slot?.timeEnd) continue;
@@ -83,7 +82,6 @@ const sumRainMinutes = (obs: any, utcDate: Date) => {
         )
       );
 
-      // crossed midnight case
       if (end < start) end = new Date(end.getTime() + 24 * 60 * 60 * 1000);
 
       minutes += Math.max(
@@ -94,7 +92,6 @@ const sumRainMinutes = (obs: any, utcDate: Date) => {
     return minutes;
   }
 
-  // Legacy single interval: rainfallTimeStart / rainfallTimeEnd (ISO)
   if (obs?.rainfallTimeStart && obs?.rainfallTimeEnd) {
     const start = new Date(obs.rainfallTimeStart);
     let end = new Date(obs.rainfallTimeEnd);
@@ -108,127 +105,31 @@ const sumRainMinutes = (obs: any, utcDate: Date) => {
   return minutes;
 };
 
-// UTC-only yyyy-mm-dd (so local TZ shiftে ভুল হবে না)
 const ymdUTC = (d: Date) =>
   `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
 
 // Measurements configuration for daily summary
+// ❗️(UNCHANGED)
 const measurements = [
-  {
-    id: 0,
-    label: "Av. Station Pressure",
-    range: "14-18",
-    unit: "hPa",
-    category: "pressure",
-  },
-  {
-    id: 1,
-    label: "Av. Sea-Level Pressure",
-    range: "19-23",
-    unit: "hPa",
-    category: "pressure",
-  },
-  {
-    id: 2,
-    label: "Av. Dry-Bulb Temperature",
-    range: "24-26",
-    unit: "°C",
-    category: "temperature",
-  },
-  {
-    id: 3,
-    label: "Av. Wet Bulb Temperature",
-    range: "27-29",
-    unit: "°C",
-    category: "temperature",
-  },
-  {
-    id: 4,
-    label: "Max. Temperature",
-    range: "30-32",
-    unit: "°C",
-    category: "temperature",
-  },
-  {
-    id: 5,
-    label: "Min Temperature",
-    range: "33-35",
-    unit: "°C",
-    category: "temperature",
-  },
-  {
-    id: 6,
-    label: "Total Precipitation",
-    range: "36-39",
-    unit: "mm",
-    category: "precipitation",
-  },
-  {
-    id: 7,
-    label: "Av. Dew Point Temperature",
-    range: "40-42",
-    unit: "°C",
-    category: "temperature",
-  },
-  {
-    id: 8,
-    label: "Av. Rel Humidity",
-    range: "43-45",
-    unit: "%",
-    category: "humidity",
-  },
-  {
-    id: 9,
-    label: "Av. Wind Speed",
-    range: "46-48",
-    unit: "m/s",
-    category: "wind",
-  },
-  {
-    id: 10,
-    label: "Prevailing Wind Direction",
-    range: "49-50",
-    unit: "16Pts",
-    category: "wind",
-  },
-  {
-    id: 11,
-    label: "Max Wind Speed",
-    range: "51-53",
-    unit: "m/s",
-    category: "wind",
-  },
-  {
-    id: 12,
-    label: "Direction of Max Wind",
-    range: "54-55",
-    unit: "16Pts",
-    category: "wind",
-  },
-  {
-    id: 13,
-    label: "Av. Total Cloud",
-    range: "56",
-    unit: "octas",
-    category: "cloud",
-  },
-  {
-    id: 14,
-    label: "Lowest visibility",
-    range: "57-59",
-    unit: "km",
-    category: "visibility",
-  },
-  {
-    id: 15,
-    label: "Total Duration of Rain",
-    range: "60-63",
-    unit: "H-M",
-    category: "precipitation",
-  },
-];
+  { id: 0, label: "Av. Station Pressure", range: "14-18", unit: "hPa", category: "pressure" },
+  { id: 1, label: "Av. Sea-Level Pressure", range: "19-23", unit: "hPa", category: "pressure" },
+  { id: 2, label: "Av. Dry-Bulb Temperature", range: "24-26", unit: "°C", category: "temperature" },
+  { id: 3, label: "Av. Wet Bulb Temperature", range: "27-29", unit: "°C", category: "temperature" },
+  { id: 4, label: "Max. Temperature", range: "30-32", unit: "°C", category: "temperature" },
+  { id: 5, label: "Min Temperature", range: "33-35", unit: "°C", category: "temperature" },
+  { id: 6, label: "Total Precipitation", range: "36-39", unit: "mm", category: "precipitation" },
+  { id: 7, label: "Av. Dew Point Temperature", range: "40-42", unit: "°C", category: "temperature" },
+  { id: 8, label: "Av. Rel Humidity", range: "43-45", unit: "%", category: "humidity" },
+  { id: 9, label: "Av. Wind Speed", range: "46-48", unit: "m/s", category: "wind" },
+  { id: 10, label: "Prevailing Wind Direction", range: "49-50", unit: "16Pts", category: "wind" },
+  { id: 11, label: "Max Wind Speed", range: "51-53", unit: "m/s", category: "wind" },
+  { id: 12, label: "Direction of Max Wind", range: "54-55", unit: "16Pts", category: "wind" },
+  { id: 13, label: "Av. Total Cloud", range: "56", unit: "octas", category: "cloud" },
+  { id: 14, label: "Lowest visibility", range: "57-59", unit: "km", category: "visibility" },
+  { id: 15, label: "Total Duration of Rain", range: "60-63", unit: "H-M", category: "precipitation" },
+] as const;
 
-const categoryColors = {
+const categoryColors: Record<string, string> = {
   pressure: "bg-blue-50 text-blue-700",
   temperature: "bg-amber-50 text-amber-700",
   precipitation: "bg-cyan-50 text-cyan-700",
@@ -238,12 +139,16 @@ const categoryColors = {
   visibility: "bg-yellow-50 text-yellow-700",
 };
 
+type MeasurementItem = (typeof measurements)[number];
+
 export function DailySummaryForm() {
   const { values, setFieldValue } = useFormikContext<DailySummaryFormValues>();
   const { data: session } = useSession();
-  const [selectedDate, setSelectedDate] = useState<string>(
+
+  const [selectedDate] = useState<string>(
     new Date().toISOString().split("T")[0]
   );
+
   const [dataStatus, setDataStatus] = useState<{
     hasToday: boolean;
     message: string;
@@ -264,7 +169,6 @@ export function DailySummaryForm() {
           error: undefined,
         }));
 
-        // ---- fetch first & second card ----
         const firstCardResponse = await fetch("/api/first-card-data");
         const formatedFirstCardData = await firstCardResponse.json();
         const todayFirstCardData = formatedFirstCardData.entries.flatMap(
@@ -346,7 +250,6 @@ export function DailySummaryForm() {
 
         // ---- WIND (m/s & 16-pt dir) ----
         {
-          // যদি DB already m/s হয়, knotsToMs এর জায়গায় safeNum দিন
           const ws = todayWeatherObservations
             .map((x: any) => knotsToMs(x.windSpeed))
             .filter((n: number) => !isNaN(n));
@@ -390,26 +293,20 @@ export function DailySummaryForm() {
           if (tca.length) calculatedMeasurements[13] = String(round0(avg(tca)));
         }
 
-        // ---- RAIN DURATION (HHMM) using timeSlots/legacy, UTC-safe ----
+        // ---- RAIN DURATION (HHMM) ----
         {
           const selUTC = new Date(`${selectedDate}T00:00:00Z`);
           const totalRainMinutes = todayWeatherObservations.reduce(
-            (sum: number, obs: any) => {
-              return sum + sumRainMinutes(obs, selUTC);
-            },
+            (sum: number, obs: any) => sum + sumRainMinutes(obs, selUTC),
             0
           );
           if (totalRainMinutes > 0) {
-            const hh = String(Math.floor(totalRainMinutes / 60)).padStart(
-              2,
-              "0"
-            );
+            const hh = String(Math.floor(totalRainMinutes / 60)).padStart(2, "0");
             const mm = String(totalRainMinutes % 60).padStart(2, "0");
             calculatedMeasurements[15] = `${hh}${mm}`;
           }
         }
 
-        // ---- Status (UTC-based today check) ----
         const nowUTC = new Date();
         const isToday = ymdUTC(nowUTC) === selectedDate;
 
@@ -421,7 +318,6 @@ export function DailySummaryForm() {
           isLoading: false,
         });
 
-        // ---- Form fields (UTC-safe date parts) ----
         const sel = new Date(`${selectedDate}T00:00:00Z`);
         setFieldValue("measurements", calculatedMeasurements);
         setFieldValue(
@@ -457,55 +353,22 @@ export function DailySummaryForm() {
     fetchDailySummaryData();
   }, [selectedDate, setFieldValue, session]);
 
+  // ✅ keep hook order safe — define handler before return (no behavior change)
+  const handleMeasurementChange = useCallback(
+    (index: number, value: string) => {
+      const newMeasurements = [...values.measurements];
+      newMeasurements[index] = value;
+      setFieldValue("measurements", newMeasurements);
+    },
+    [values.measurements, setFieldValue]
+  );
+
+  const firstHalf = useMemo(() => measurements.slice(0, 8), []);
+  const secondHalf = useMemo(() => measurements.slice(8), []);
+
   if (dataStatus.isLoading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="flex flex-col items-center">
-          <Loader2 className="h-12 w-12 animate-spin text-blue-500 mb-4" />
-          <p className="text-gray-500">Loading daily summary data...</p>
-        </div>
-      </div>
-    );
+    return <DailySummerySkeleton />;
   }
-
-  // const handleSubmit = async () => {
-  //   try {
-  //     const payload = {
-  //       dataType: values.dataType || "SY",
-  //       measurements: values.measurements,
-  //       windDirection: values.measurements[10] || "",
-  //     }
-
-  //     const response = await fetch("/api/daily-summary", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify(payload),
-  //     })
-
-  //     const result = await response.json()
-
-  //     if (!result.success) {
-  //       return toast.error(result.error)
-  //     }
-
-  //     if (!response.ok) {
-  //       return toast.error(result.error)
-  //     }
-
-  //     if (result.success) {
-  //       toast.success(result.message)
-  //     }
-  //   } catch (error) {
-  //     console.error("Submit error:", error)
-  //     toast.error("❌ Something went wrong")
-  //   }
-  // }
-
-  const handleMeasurementChange = (index: number, value: string) => {
-    const newMeasurements = [...values.measurements];
-    newMeasurements[index] = value;
-    setFieldValue("measurements", newMeasurements);
-  };
 
   return (
     <div className="space-y-6">
@@ -561,46 +424,11 @@ export function DailySummaryForm() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4">
-            <div className="space-y-3">
-              {measurements.slice(0, 8).map((item) => (
-                <div
-                  key={item.id}
-                  className="grid grid-cols-12 items-center gap-2 p-2 rounded-md hover:bg-blue-50 transition-colors"
-                >
-                  <div className="col-span-1 text-sm font-medium text-blue-700 bg-blue-100 rounded-full w-6 h-6 flex items-center justify-center">
-                    {item.id + 1}
-                  </div>
-                  <div className="col-span-5">
-                    <Label
-                      htmlFor={`measurement-${item.id}`}
-                      className="text-sm font-medium"
-                    >
-                      {item.label}
-                    </Label>
-                    <div
-                      className={`text-xs px-1 py-0.5 rounded mt-1 ${categoryColors[item.category]}`}
-                    >
-                      {item.unit}
-                    </div>
-                  </div>
-                  <div className="col-span-2 text-xs text-blue-600 font-mono bg-blue-50 px-1 py-0.5 rounded">
-                    {item.range}
-                  </div>
-                  <div className="col-span-4">
-                    <Input
-                      id={`measurement-${item.id}`}
-                      value={values.measurements[item.id] || ""}
-                      onChange={(e) =>
-                        handleMeasurementChange(item.id, e.target.value)
-                      }
-                      className="border-blue-200 bg-white cursor-text disabled:opacity-80 disabled:font-semibold"
-                      placeholder="--"
-                      disabled
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
+            <MeasurementList
+              items={firstHalf}
+              values={values}
+              onChange={handleMeasurementChange}
+            />
           </CardContent>
         </Card>
 
@@ -611,60 +439,72 @@ export function DailySummaryForm() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4">
-            <div className="space-y-3">
-              {measurements.slice(8).map((item) => (
-                <div
-                  key={item.id}
-                  className="grid grid-cols-12 items-center gap-2 p-2 rounded-md hover:bg-blue-50 transition-colors"
-                >
-                  <div className="col-span-1 text-sm font-medium text-blue-700 bg-blue-100 rounded-full w-6 h-6 flex items-center justify-center">
-                    {item.id + 1}
-                  </div>
-                  <div className="col-span-5">
-                    <Label
-                      htmlFor={`measurement-${item.id}`}
-                      className="text-sm font-medium"
-                    >
-                      {item.label}
-                    </Label>
-                    <div
-                      className={`text-xs px-1 py-0.5 rounded mt-1 ${categoryColors[item.category]}`}
-                    >
-                      {item.unit}
-                    </div>
-                  </div>
-                  <div className="col-span-2 text-xs text-blue-600 font-mono bg-blue-50 px-1 py-0.5 rounded">
-                    {item.range}
-                  </div>
-                  <div className="col-span-4">
-                    <Input
-                      id={`measurement-${item.id}`}
-                      value={values.measurements[item.id] || ""}
-                      onChange={(e) =>
-                        handleMeasurementChange(item.id, e.target.value)
-                      }
-                      className="border-blue-200 bg-white cursor-text disabled:opacity-80 disabled:font-semibold"
-                      placeholder="--"
-                      disabled
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
+            <MeasurementList
+              items={secondHalf}
+              values={values}
+              onChange={handleMeasurementChange}
+            />
           </CardContent>
         </Card>
       </div>
+    </div>
+  );
+}
 
-      {/* Submit Button */}
-      {/* <div className="flex justify-end mt-6">
-        <Button
-          type="button"
-          className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-md shadow-sm text-lg"
-          onClick={handleSubmit}
+/* ================= Reusable list (UI same, logic same) ================= */
+
+function MeasurementList({
+  items,
+  values,
+  onChange,
+}: {
+  items: readonly MeasurementItem[];
+  values: DailySummaryFormValues;
+  onChange: (index: number, value: string) => void;
+}) {
+  return (
+    <div className="space-y-3">
+      {items.map((item) => (
+        <div
+          key={item.id}
+          className="grid grid-cols-12 items-center gap-2 p-2 rounded-md hover:bg-blue-50 transition-colors"
         >
-          Submit Daily Summary
-        </Button>
-      </div> */}
+          <div className="col-span-1 text-sm font-medium text-blue-700 bg-blue-100 rounded-full w-6 h-6 flex items-center justify-center">
+            {item.id + 1}
+          </div>
+
+          <div className="col-span-5">
+            <Label
+              htmlFor={`measurement-${item.id}`}
+              className="text-sm font-medium"
+            >
+              {item.label}
+            </Label>
+            <div
+              className={`text-xs px-1 py-0.5 rounded mt-1 ${
+                categoryColors[item.category]
+              }`}
+            >
+              {item.unit}
+            </div>
+          </div>
+
+          <div className="col-span-2 text-xs text-blue-600 font-mono bg-blue-50 px-1 py-0.5 rounded">
+            {item.range}
+          </div>
+
+          <div className="col-span-4">
+            <Input
+              id={`measurement-${item.id}`}
+              value={values.measurements[item.id] || ""}
+              onChange={(e) => onChange(item.id, e.target.value)}
+              className="border-blue-200 bg-white cursor-text disabled:opacity-80 disabled:font-semibold"
+              placeholder="--"
+              disabled
+            />
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
