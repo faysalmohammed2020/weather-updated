@@ -1,13 +1,12 @@
 /**
- * Refactored User Table Component
- * 100% Production-Grade with Full Maintainability
- * + Skeleton Loader
- * + Lazy Loaded Dialogs
+ * Client Component for User Table
+ * Receives server-fetched data as props and handles client-side interactions
  */
 
 "use client";
 
 import React, { Suspense, lazy, useState, useEffect, useCallback, useMemo } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -19,13 +18,13 @@ import {
 } from "@/components/ui/table";
 import { toast } from "sonner";
 import { useLocation } from "@/contexts/divisionContext";
-import { useSession } from "@/lib/auth-client";
 import {
   USER_ROLES,
   PAGINATION,
   ERROR_MESSAGES,
+  API_ENDPOINTS,
 } from "@/lib/constants/user-management";
-import { UserRole } from "@/lib/constants/user-management";
+import type { UserRole } from "@/lib/constants/user-management";
 import {
   validateUserForm,
   formatDate,
@@ -34,15 +33,13 @@ import {
   buildUserUpdatePayload,
 } from "@/lib/utils/user-management";
 import {
-  useUsers,
-  useStations,
   useUserOperations,
-  usePagination,
   type User,
-} from "@/hooks/use-user-management";
-import UserTableSkeletonRows from "./UserTableSkeletonRows"; // ✅ new skeleton rows
+  type Station,
+} from "@/hooks/use-user-management-client";
+import UserTableSkeletonRows from "./UserTableSkeletonRows";
 
-// ✅ Lazy dialogs (no logic change, just bundle optimize)
+// Lazy dialogs
 const CreateEditUserDialog = lazy(() =>
   import("@/components/user-management/CreateEditUserDialog").then((m) => ({
     default: m.CreateEditUserDialog,
@@ -70,11 +67,32 @@ interface UserFormData {
   stationId: string;
 }
 
-export const UserTable = () => {
+interface UserTableClientProps {
+  initialUsers: User[];
+  initialTotalUsers: number;
+  initialStations: Station[];
+  initialPage: number;
+  pageSize: number;
+  session: any;
+}
+
+export const UserTableClient = ({
+  initialUsers,
+  initialTotalUsers,
+  initialStations,
+  initialPage,
+  pageSize,
+  session,
+}: UserTableClientProps) => {
+  // ============================================================================
+  // ROUTER & SEARCH PARAMS
+  // ============================================================================
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   // ============================================================================
   // HOOKS & CONTEXT
   // ============================================================================
-  const { data: session } = useSession();
   const {
     divisions,
     districts,
@@ -88,18 +106,14 @@ export const UserTable = () => {
   } = useLocation();
 
   // ============================================================================
-  // PAGINATION & DATA FETCHING
+  // STATE MANAGEMENT
   // ============================================================================
-  const {
-    pageIndex,
-    pageSize,
-    nextPage,
-    prevPage,
-    reset: resetPagination,
-  } = usePagination(PAGINATION.DEFAULT_PAGE_SIZE);
+  const [users, setUsers] = useState<User[]>(initialUsers);
+  const [totalUsers, setTotalUsers] = useState(initialTotalUsers);
+  const [stations, setStations] = useState<Station[]>(initialStations);
+  const [pageIndex, setPageIndex] = useState(initialPage);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const { users, totalUsers, isLoading, fetchUsers } = useUsers(pageSize);
-  const { stations, fetchStations, isLoading: loadingStations } = useStations();
   const { isOperating, createUser, updateUser, deleteUser, impersonateUser } =
     useUserOperations();
 
@@ -126,8 +140,8 @@ export const UserTable = () => {
   const [editUser, setEditUser] = useState<User | null>(null);
   const [userToDelete, setUserToDelete] = useState<string | null>(null);
   const [roleChangeData, setRoleChangeData] = useState<{
-    originalRole: UserRole | null;
-    newRole: UserRole | null;
+    originalRole: string | null;
+    newRole: string | null;
   }>({ originalRole: null, newRole: null });
 
   // ============================================================================
@@ -147,7 +161,6 @@ export const UserTable = () => {
     [locationLoading]
   );
 
-  // ✅ stations lookup map (perf only, no logic change)
   const stationNameById = useMemo(() => {
     const map = new Map<string, string>();
     stations.forEach((s) => map.set(s.id, s.name));
@@ -155,15 +168,70 @@ export const UserTable = () => {
   }, [stations]);
 
   // ============================================================================
-  // EFFECTS - INITIAL DATA LOAD
+  // DATA REFRESH FUNCTION
   // ============================================================================
-  useEffect(() => {
-    fetchStations();
-  }, [fetchStations]);
+  const refreshUsers = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000';
+      const response = await fetch(
+        `${baseUrl}${API_ENDPOINTS.USERS}?limit=${pageSize}&offset=${pageIndex * pageSize}`,
+        {
+          cache: 'no-store',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
-  useEffect(() => {
-    fetchUsers(pageIndex);
-  }, [pageIndex, fetchUsers]);
+      if (!response.ok) {
+        throw new Error('Failed to refresh users');
+      }
+
+      const data = await response.json();
+      setUsers(data.users || []);
+      setTotalUsers(data.total || 0);
+    } catch (error) {
+      console.error('Error refreshing users:', error);
+      toast.error('Failed to refresh users');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [pageIndex, pageSize]);
+
+  // ============================================================================
+  // PAGINATION FUNCTIONS
+  // ============================================================================
+  const updatePageInUrl = useCallback((newPage: number) => {
+    const params = new URLSearchParams(searchParams);
+    if (newPage === 0) {
+      params.delete('page');
+    } else {
+      params.set('page', newPage.toString());
+    }
+    router.push(`/dashboard/user?${params.toString()}`, { scroll: false });
+  }, [router, searchParams]);
+
+  const nextPage = useCallback(() => {
+    if ((pageIndex + 1) * pageSize < totalUsers) {
+      const newPage = pageIndex + 1;
+      setPageIndex(newPage);
+      updatePageInUrl(newPage);
+    }
+  }, [pageIndex, pageSize, totalUsers, updatePageInUrl]);
+
+  const prevPage = useCallback(() => {
+    if (pageIndex > 0) {
+      const newPage = pageIndex - 1;
+      setPageIndex(newPage);
+      updatePageInUrl(newPage);
+    }
+  }, [pageIndex, updatePageInUrl]);
+
+  const resetPagination = useCallback(() => {
+    setPageIndex(0);
+    updatePageInUrl(0);
+  }, [updatePageInUrl]);
 
   // ============================================================================
   // FORM MANAGEMENT FUNCTIONS
@@ -216,9 +284,9 @@ export const UserTable = () => {
     if (result.success) {
       handleCloseDialog();
       resetPagination();
-      fetchUsers(0);
+      refreshUsers();
     }
-  }, [formData, createUser, handleCloseDialog, resetPagination, fetchUsers]);
+  }, [formData, createUser, handleCloseDialog, resetPagination, refreshUsers]);
 
   // ============================================================================
   // USER EDITING
@@ -258,7 +326,7 @@ export const UserTable = () => {
     }
 
     setRoleChangeData({
-      originalRole: editUser.role as UserRole,
+      originalRole: editUser.role,
       newRole: formData.role,
     });
     setOpenRoleUpdateDialog(true);
@@ -275,21 +343,14 @@ export const UserTable = () => {
 
     setOpenRoleUpdateDialog(false);
 
-    const payload = buildUserUpdatePayload(editUser, formData as any);
+    const payload = buildUserUpdatePayload(editUser, formData);
     const result = await updateUser(payload);
 
     if (result.success) {
       handleCloseDialog();
-      fetchUsers(pageIndex);
+      refreshUsers();
     }
-  }, [
-    editUser,
-    formData,
-    updateUser,
-    handleCloseDialog,
-    pageIndex,
-    fetchUsers,
-  ]);
+  }, [editUser, formData, updateUser, handleCloseDialog, refreshUsers]);
 
   // ============================================================================
   // USER DELETION
@@ -316,9 +377,9 @@ export const UserTable = () => {
     if (result.success) {
       setOpenDeleteDialog(false);
       setUserToDelete(null);
-      fetchUsers(pageIndex);
+      refreshUsers();
     }
-  }, [userToDelete, deleteUser, pageIndex, fetchUsers]);
+  }, [userToDelete, deleteUser, refreshUsers]);
 
   // ============================================================================
   // USER IMPERSONATION
@@ -465,7 +526,7 @@ export const UserTable = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => prevPage()}
+              onClick={prevPage}
               disabled={pageIndex === 0}
             >
               Previous
@@ -473,7 +534,7 @@ export const UserTable = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => nextPage(totalUsers)}
+              onClick={nextPage}
               disabled={(pageIndex + 1) * pageSize >= totalUsers}
             >
               Next
@@ -494,13 +555,13 @@ export const UserTable = () => {
           onCancel={handleCloseDialog}
           isLoading={isOperating}
           stations={stations}
-          loadingStations={loadingStations}
+          loadingStations={false}
           divisions={divisions.map(d => ({ osmId: d.osmId.toString(), name: d.name }))}
           districts={districts.map(d => ({ osmId: d.osmId.toString(), name: d.name }))}
           upazilas={upazilas.map(u => ({ osmId: u.osmId.toString(), name: u.name }))}
-          selectedDivision={selectedDivision}
+          selectedDivision={selectedDivision ? { osmId: selectedDivision.osmId.toString(), name: selectedDivision.name } : null}
           onDivisionChange={setSelectedDivision}
-          selectedDistrict={selectedDistrict}
+          selectedDistrict={selectedDistrict ? { osmId: selectedDistrict.osmId.toString(), name: selectedDistrict.name } : null}
           onDistrictChange={setSelectedDistrict}
           onUpazilaChange={setSelectedUpazila}
           loadingDivisions={canLoadingLocationData.loadingDivisions}
@@ -532,7 +593,7 @@ export const UserTable = () => {
 };
 
 // ============================================================================
-// ACTION BUTTONS SUBCOMPONENT (unchanged)
+// ACTION BUTTONS SUBCOMPONENT
 // ============================================================================
 interface UserActionButtonsProps {
   user: User;
