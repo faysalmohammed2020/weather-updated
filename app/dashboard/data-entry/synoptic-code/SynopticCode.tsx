@@ -1,5 +1,4 @@
 // app/dashboard/data-entry/synoptic-code/SynopticCode.tsx
-
 "use client";
 
 import { useFormikContext } from "formik";
@@ -9,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { SynopticFormValues } from "@/lib/generateSynopticCode";
 import { getRemarksFromPresentWeather } from "@/lib/generateSynopticCode";
 
-import { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {
@@ -19,6 +18,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { AlertTriangle } from "lucide-react";
+import SynopticCodeSkeleton from "./SynopticCodeSkeleton";
 
 const measurements = [
   { id: 0, label: "C1", range: "16" },
@@ -184,10 +184,13 @@ const measurements = [
     ),
     range: "39-43",
   },
-];
+] as const;
+
+type MeasurementItem = (typeof measurements)[number];
 
 export function SynopticCode() {
   const { values, setFieldValue } = useFormikContext<SynopticFormValues>();
+
   const [dataStatus, setDataStatus] = useState<{
     hasToday: boolean;
     message: string;
@@ -199,12 +202,34 @@ export function SynopticCode() {
     isLoading: true,
   });
 
-  const [manuallyChangedFields, setManuallyChangedFields] = useState<
-    Set<number>
-  >(new Set());
+  const [manuallyChangedFields, setManuallyChangedFields] = useState<Set<number>>(
+    new Set()
+  );
 
-  const specialFields = [2, 7, 12, 19, 20]; // iRiXhvv, 6RRRtr, 57CDaEc, 90dqqqt, 91fqfqfq
-  const isSpecialField = (index: number) => specialFields.includes(index);
+  // ✅ hooks must stay above any early return
+  const specialFieldsSet = useMemo(() => new Set([2, 7, 12, 19, 20]), []);
+  const isSpecialField = useCallback(
+    (index: number) => specialFieldsSet.has(index),
+    [specialFieldsSet]
+  );
+
+  const editableSet = specialFieldsSet;
+
+  const handleMeasurementChange = useCallback(
+    (index: number, value: string) => {
+      const newMeasurements = [...values.measurements];
+      newMeasurements[index] = value;
+      setFieldValue("measurements", newMeasurements);
+
+      if (isSpecialField(index)) {
+        setManuallyChangedFields((prev) => new Set([...prev, index]));
+      }
+    },
+    [values.measurements, setFieldValue, isSpecialField]
+  );
+
+  const firstHalf = useMemo(() => measurements.slice(0, 11), []);
+  const secondHalf = useMemo(() => measurements.slice(11), []);
 
   useEffect(() => {
     const fetchSynopticData = async () => {
@@ -224,14 +249,12 @@ export function SynopticCode() {
 
         console.log("generated synoptic", generatedValues);
 
-        // Check if today's date matches the generated values
         const now = new Date();
         const todayUtcStr = `${now.getUTCFullYear()}-${String(
           now.getUTCMonth() + 1
         ).padStart(2, "0")}-${String(now.getUTCDate()).padStart(2, "0")}`;
 
         const valuesDateStr = `${generatedValues.year}-${generatedValues.month}-${generatedValues.day}`;
-
         const isToday = todayUtcStr === valuesDateStr;
 
         setDataStatus({
@@ -242,7 +265,6 @@ export function SynopticCode() {
           isLoading: false,
         });
 
-        // Update all form fields
         setFieldValue("measurements", generatedValues.measurements);
         setFieldValue("stationNo", generatedValues.stationNo);
         setFieldValue("weatherRemark", generatedValues.weatherRemark);
@@ -250,10 +272,9 @@ export function SynopticCode() {
         setFieldValue("year", generatedValues.year);
         setFieldValue("month", generatedValues.month);
         setFieldValue("day", generatedValues.day);
-        const presentWeather = generatedValues.measurements[8].substring(1, 3); // '7' বাদ দিয়ে শুধু 'ww' নেওয়া
-        const weatherRemark = getRemarksFromPresentWeather(presentWeather);
 
-        // Form এর weatherRemark মান সেট করুন
+        const presentWeather = generatedValues.measurements[8].substring(1, 3);
+        const weatherRemark = getRemarksFromPresentWeather(presentWeather);
         setFieldValue("weatherRemark", weatherRemark);
       } catch (error) {
         console.error("Error fetching synoptic data:", error);
@@ -264,7 +285,6 @@ export function SynopticCode() {
           error: error instanceof Error ? error.message : "Unknown error",
         });
 
-        // Set default values on error
         const now = new Date();
         setFieldValue("measurements", Array(21).fill(""));
         setFieldValue("stationNo", "00000");
@@ -279,12 +299,9 @@ export function SynopticCode() {
     fetchSynopticData();
   }, [setFieldValue]);
 
+  // ✅ early return AFTER hooks (fixes hook order error)
   if (dataStatus.isLoading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
-      </div>
-    );
+    return <SynopticCodeSkeleton />;
   }
 
   const handleSubmit = async () => {
@@ -292,7 +309,6 @@ export function SynopticCode() {
       const payload = {
         dataType: values.dataType || "SYNOP",
         weatherRemark: values.weatherRemark,
-        // Individual measurement fields
         C1: values.measurements[0] || null,
         Iliii: values.measurements[1] || null,
         iRiXhvv: values.measurements[2] || null,
@@ -323,31 +339,12 @@ export function SynopticCode() {
 
       const result = await response.json();
 
-      if (!result.success) {
-        return toast.error(result.error);
-      }
-
-      if (!response.ok) {
-        return toast.error(result.error);
-      }
-
-      if (result.success) {
-        toast.success(result.message);
-      }
+      if (!result.success) return toast.error(result.error);
+      if (!response.ok) return toast.error(result.error);
+      if (result.success) toast.success(result.message);
     } catch (error) {
       console.error("Submit error:", error);
       toast.error("❌ Something went wrong");
-    }
-  };
-
-  const handleMeasurementChange = (index: number, value: string) => {
-    const newMeasurements = [...values.measurements];
-    newMeasurements[index] = value;
-    setFieldValue("measurements", newMeasurements);
-
-    // Track manually changed special fields
-    if (isSpecialField(index)) {
-      setManuallyChangedFields((prev) => new Set([...prev, index]));
     }
   };
 
@@ -375,77 +372,7 @@ export function SynopticCode() {
         Synoptic Code Measurements
       </h2>
 
-      {dataStatus.error ? (
-        <div className="p-3 rounded-md bg-red-100 text-red-800 text-sm">
-          <div className="flex items-center">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="mr-2"
-            >
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            Error: {dataStatus.error}
-          </div>
-        </div>
-      ) : (
-        dataStatus.message && (
-          <div
-            className={`p-3 rounded-md text-sm ${
-              dataStatus.hasToday
-                ? "bg-green-100 text-green-800"
-                : "bg-amber-100 text-amber-800"
-            }`}
-          >
-            <div className="flex items-center">
-              {dataStatus.hasToday ? (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="mr-2"
-                >
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                </svg>
-              ) : (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="mr-2"
-                >
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <line x1="12" y1="8" x2="12" y2="12"></line>
-                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                </svg>
-              )}
-              {dataStatus.message}
-            </div>
-          </div>
-        )
-      )}
+      <StatusBanner dataStatus={dataStatus} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="border-green-200 bg-white shadow-sm">
@@ -455,73 +382,14 @@ export function SynopticCode() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4">
-            <div className="space-y-6">
-              {measurements.slice(0, 11).map((item) => (
-                <div
-                  key={item.id}
-                  className="grid grid-cols-12 items-center gap-2 p-2 rounded-md hover:bg-green-50 transition-colors"
-                >
-                  <div className="col-span-1 text-sm font-medium text-green-700 bg-green-100 rounded-full w-6 h-6 flex items-center justify-center">
-                    {item.id + 1}
-                  </div>
-                  <div className="col-span-6">
-                    <Label
-                      htmlFor={`measurement-${item.id}`}
-                      className="text-sm font-medium"
-                    >
-                      {item.label}
-                    </Label>
-                  </div>
-                  <div className="col-span-2 text-xs text-green-600 font-mono bg-green-50 px-1 py-0.5">
-                    {item.range}
-                  </div>
-                  <div className="col-span-3 relative">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div className="relative">
-                            <Input
-                              id={`measurement-${item.id}`}
-                              value={values.measurements[item.id] || ""}
-                              onChange={(e) =>
-                                handleMeasurementChange(item.id, e.target.value)
-                              }
-                              className={`border-green-200 bg-white cursor-text ${
-                                isSpecialField(item.id)
-                                  ? "bg-yellow-100 border-yellow-300 focus:border-yellow-500"
-                                  : ""
-                              }`}
-                              readOnly={![2, 7, 12, 19, 20].includes(item.id)}
-                            />
-                            {isSpecialField(item.id) &&
-                              manuallyChangedFields.has(item.id) && (
-                                <div className="absolute -bottom-6 left-0 right-0">
-                                  <div className="flex items-center text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded border border-amber-200">
-                                    <AlertTriangle className="w-3 h-3 mr-1" />
-                                    <span>Analyze with card data</span>
-                                  </div>
-                                </div>
-                              )}
-                          </div>
-                        </TooltipTrigger>
-                        {isSpecialField(item.id) && (
-                          <TooltipContent
-                            side="top"
-                            className="bg-amber-100 border-amber-300"
-                          >
-                            <p className="text-sm text-amber-800">
-                              Please Double Check The Corresponding
-                              <br /> Data In First & Second Card!.There is no
-                              logic!
-                            </p>
-                          </TooltipContent>
-                        )}
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <MeasurementList
+              items={firstHalf}
+              values={values}
+              manuallyChangedFields={manuallyChangedFields}
+              isSpecialField={isSpecialField}
+              editableSet={editableSet}
+              onChange={handleMeasurementChange}
+            />
           </CardContent>
         </Card>
 
@@ -532,77 +400,17 @@ export function SynopticCode() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4">
-            <div className="space-y-6">
-              {measurements.slice(11).map((item) => (
-                <div
-                  key={item.id}
-                  className="grid grid-cols-12 items-center gap-2 p-2 rounded-md hover:bg-green-50 transition-colors"
-                >
-                  <div className="col-span-1 text-sm font-medium text-green-700 bg-green-100 rounded-full w-6 h-6 flex items-center justify-center">
-                    {item.id + 1}
-                  </div>
-                  <div className="col-span-6">
-                    <Label
-                      htmlFor={`measurement-${item.id}`}
-                      className="text-sm font-medium"
-                    >
-                      {item.label}
-                    </Label>
-                  </div>
-                  <div className="col-span-2 text-xs text-green-600 font-mono bg-green-50 px-1 py-0.5 rounded">
-                    {item.range}
-                  </div>
-                  <div className="col-span-3 relative">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div className="relative">
-                            <Input
-                              id={`measurement-${item.id}`}
-                              value={values.measurements[item.id] || ""}
-                              onChange={(e) =>
-                                handleMeasurementChange(item.id, e.target.value)
-                              }
-                              className={`border-green-200 bg-white cursor-text ${
-                                isSpecialField(item.id)
-                                  ? "bg-yellow-100 border-yellow-300 focus:border-yellow-500"
-                                  : ""
-                              }`}
-                              readOnly={![2, 7, 12, 19, 20].includes(item.id)}
-                            />
-                            {isSpecialField(item.id) &&
-                              manuallyChangedFields.has(item.id) && (
-                                <div className="absolute -bottom-6 left-0 right-0">
-                                  <div className="flex items-center text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded border border-amber-200">
-                                    <AlertTriangle className="w-3 h-3 mr-1" />
-                                    <span>Analyze with card data</span>
-                                  </div>
-                                </div>
-                              )}
-                          </div>
-                        </TooltipTrigger>
-                        {isSpecialField(item.id) && (
-                          <TooltipContent
-                            side="top"
-                            className="bg-amber-100 border-amber-300"
-                          >
-                            <p className="text-sm text-amber-800">
-                              Please Double Check The Corresponding
-                              <br /> Data In First & Second Card!.There is no
-                              logic!
-                            </p>
-                          </TooltipContent>
-                        )}
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <MeasurementList
+              items={secondHalf}
+              values={values}
+              manuallyChangedFields={manuallyChangedFields}
+              isSpecialField={isSpecialField}
+              editableSet={editableSet}
+              onChange={handleMeasurementChange}
+            />
 
-            {/* Weather Remark Field */}
             <div className="mt-4">
-              <Card className="border border-green-100  shadow-sm rounded-xl">
+              <Card className="border border-green-100 shadow-sm rounded-xl">
                 <CardHeader className="pb-2 pt-4 px-4 bg-green-100 rounded-t-xl">
                   <CardTitle className="text-sm font-semibold text-green-800">
                     Weather Remark
@@ -629,6 +437,7 @@ export function SynopticCode() {
           </CardContent>
         </Card>
       </div>
+
       <div className="flex justify-end mt-6">
         <Button
           type="button"
@@ -638,6 +447,186 @@ export function SynopticCode() {
           Submit
         </Button>
       </div>
+    </div>
+  );
+}
+
+/* ===================== Sub Components (same as yours) ===================== */
+
+function StatusBanner({
+  dataStatus,
+}: {
+  dataStatus: {
+    hasToday: boolean;
+    message: string;
+    error?: string;
+  };
+}) {
+  if (dataStatus.error) {
+    return (
+      <div className="p-3 rounded-md bg-red-100 text-red-800 text-sm">
+        <div className="flex items-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="mr-2"
+          >
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          Error: {dataStatus.error}
+        </div>
+      </div>
+    );
+  }
+
+  if (!dataStatus.message) return null;
+
+  return (
+    <div
+      className={`p-3 rounded-md text-sm ${
+        dataStatus.hasToday
+          ? "bg-green-100 text-green-800"
+          : "bg-amber-100 text-amber-800"
+      }`}
+    >
+      <div className="flex items-center">
+        {dataStatus.hasToday ? (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="mr-2"
+          >
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+        ) : (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="mr-2"
+          >
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        )}
+        {dataStatus.message}
+      </div>
+    </div>
+  );
+}
+
+function MeasurementList({
+  items,
+  values,
+  manuallyChangedFields,
+  isSpecialField,
+  editableSet,
+  onChange,
+}: {
+  items: readonly MeasurementItem[];
+  values: SynopticFormValues;
+  manuallyChangedFields: Set<number>;
+  isSpecialField: (i: number) => boolean;
+  editableSet: Set<number>;
+  onChange: (index: number, value: string) => void;
+}) {
+  return (
+    <div className="space-y-6">
+      {items.map((item) => {
+        const special = isSpecialField(item.id);
+        const readOnly = !editableSet.has(item.id);
+
+        return (
+          <div
+            key={item.id}
+            className="grid grid-cols-12 items-center gap-2 p-2 rounded-md hover:bg-green-50 transition-colors"
+          >
+            <div className="col-span-1 text-sm font-medium text-green-700 bg-green-100 rounded-full w-6 h-6 flex items-center justify-center">
+              {item.id + 1}
+            </div>
+
+            <div className="col-span-6">
+              <Label
+                htmlFor={`measurement-${item.id}`}
+                className="text-sm font-medium"
+              >
+                {item.label}
+              </Label>
+            </div>
+
+            <div className="col-span-2 text-xs text-green-600 font-mono bg-green-50 px-1 py-0.5 rounded">
+              {item.range}
+            </div>
+
+            <div className="col-span-3 relative">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="relative">
+                      <Input
+                        id={`measurement-${item.id}`}
+                        value={values.measurements[item.id] || ""}
+                        onChange={(e) => onChange(item.id, e.target.value)}
+                        className={`border-green-200 bg-white cursor-text ${
+                          special
+                            ? "bg-yellow-100 border-yellow-300 focus:border-yellow-500"
+                            : ""
+                        }`}
+                        readOnly={readOnly}
+                      />
+
+                      {special && manuallyChangedFields.has(item.id) && (
+                        <div className="absolute -bottom-6 left-0 right-0">
+                          <div className="flex items-center text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded border border-amber-200">
+                            <AlertTriangle className="w-3 h-3 mr-1" />
+                            <span>Analyze with card data</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </TooltipTrigger>
+
+                  {special && (
+                    <TooltipContent
+                      side="top"
+                      className="bg-amber-100 border-amber-300"
+                    >
+                      <p className="text-sm text-amber-800">
+                        Please Double Check The Corresponding
+                        <br /> Data In First & Second Card!.There is no logic!
+                      </p>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
