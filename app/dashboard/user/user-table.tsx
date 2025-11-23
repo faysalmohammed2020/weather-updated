@@ -1,11 +1,13 @@
 /**
  * Refactored User Table Component
  * 100% Production-Grade with Full Maintainability
+ * + Skeleton Loader
+ * + Lazy Loaded Dialogs
  */
 
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import React, { Suspense, lazy, useState, useEffect, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -36,13 +38,25 @@ import {
   useUserOperations,
   usePagination,
   type User,
-  type Station,
 } from "@/hooks/use-user-management";
-import { CreateEditUserDialog } from "@/components/user-management/CreateEditUserDialog";
-import {
-  DeleteConfirmationDialog,
-  RoleChangeConfirmationDialog,
-} from "@/components/user-management/ConfirmationDialogs";
+import UserTableSkeletonRows from "./UserTableSkeletonRows"; // ✅ new skeleton rows
+
+// ✅ Lazy dialogs (no logic change, just bundle optimize)
+const CreateEditUserDialog = lazy(() =>
+  import("@/components/user-management/CreateEditUserDialog").then((m) => ({
+    default: m.CreateEditUserDialog,
+  }))
+);
+const DeleteConfirmationDialog = lazy(() =>
+  import("@/components/user-management/ConfirmationDialogs").then((m) => ({
+    default: m.DeleteConfirmationDialog,
+  }))
+);
+const RoleChangeConfirmationDialog = lazy(() =>
+  import("@/components/user-management/ConfirmationDialogs").then((m) => ({
+    default: m.RoleChangeConfirmationDialog,
+  }))
+);
 
 interface UserFormData {
   name: string;
@@ -83,8 +97,7 @@ export const UserTable = () => {
     reset: resetPagination,
   } = usePagination(PAGINATION.DEFAULT_PAGE_SIZE);
 
-  const { users, totalUsers, isLoading, fetchUsers, setUsers } =
-    useUsers(pageSize);
+  const { users, totalUsers, isLoading, fetchUsers } = useUsers(pageSize);
   const { stations, fetchStations, isLoading: loadingStations } = useStations();
   const { isOperating, createUser, updateUser, deleteUser, impersonateUser } =
     useUserOperations();
@@ -133,6 +146,13 @@ export const UserTable = () => {
     [locationLoading]
   );
 
+  // ✅ stations lookup map (perf only, no logic change)
+  const stationNameById = useMemo(() => {
+    const map = new Map<string, string>();
+    stations.forEach((s) => map.set(s.id, s.name));
+    return map;
+  }, [stations]);
+
   // ============================================================================
   // EFFECTS - INITIAL DATA LOAD
   // ============================================================================
@@ -175,14 +195,12 @@ export const UserTable = () => {
   // USER CREATION
   // ============================================================================
   const handleCreateUser = useCallback(async () => {
-    // Validate form
     const validation = validateUserForm(formData, false);
     if (!validation.isValid) {
       toast.error(validation.error);
       return;
     }
 
-    // Create user via API
     const result = await createUser({
       name: formData.name,
       email: formData.email,
@@ -227,20 +245,17 @@ export const UserTable = () => {
   const confirmRoleUpdate = useCallback(() => {
     if (!editUser) return;
 
-    // Validate form
     const validation = validateUserForm(formData, true);
     if (!validation.isValid) {
       toast.error(validation.error);
       return;
     }
 
-    // Check if role is actually changing
     if (editUser.role === formData.role) {
       handleUpdateUser();
       return;
     }
 
-    // Show role change confirmation
     setRoleChangeData({
       originalRole: editUser.role,
       newRole: formData.role,
@@ -251,20 +266,15 @@ export const UserTable = () => {
   const handleUpdateUser = useCallback(async () => {
     if (!editUser) return;
 
-    // Validate form
     const validation = validateUserForm(formData, true);
     if (!validation.isValid) {
       toast.error(validation.error);
       return;
     }
 
-    // Close role update dialog if open
     setOpenRoleUpdateDialog(false);
 
-    // Build payload
     const payload = buildUserUpdatePayload(editUser, formData as any);
-
-    // Update user via API
     const result = await updateUser(payload);
 
     if (result.success) {
@@ -335,9 +345,7 @@ export const UserTable = () => {
   const tableRows = useMemo(
     () =>
       users.map((user) => {
-        const stationName = stations.find(
-          (station) => station.id === user.stationId
-        )?.name;
+        const stationName = stationNameById.get(user.stationId);
 
         return (
           <TableRow key={user.id}>
@@ -372,7 +380,7 @@ export const UserTable = () => {
       }),
     [
       users,
-      stations,
+      stationNameById,
       isUserSuperAdmin,
       session?.user?.id,
       openEditDialog,
@@ -425,13 +433,10 @@ export const UserTable = () => {
               </TableHead>
             </TableRow>
           </TableHeader>
+
           <TableBody>
             {isLoading ? (
-              <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">
-                  Loading users...
-                </TableCell>
-              </TableRow>
+              <UserTableSkeletonRows rows={pageSize} />
             ) : users.length > 0 ? (
               tableRows
             ) : (
@@ -476,55 +481,57 @@ export const UserTable = () => {
         </div>
       </div>
 
-      {/* Dialogs */}
-      <CreateEditUserDialog
-        open={openDialog}
-        onOpenChange={setOpenDialog}
-        editUser={editUser}
-        formData={formData}
-        onFormDataChange={setFormData}
-        onSubmit={editUser ? confirmRoleUpdate : handleCreateUser}
-        onCancel={handleCloseDialog}
-        isLoading={isOperating}
-        stations={stations}
-        loadingStations={loadingStations}
-        divisions={divisions}
-        districts={districts}
-        upazilas={upazilas}
-        selectedDivision={selectedDivision}
-        onDivisionChange={setSelectedDivision}
-        selectedDistrict={selectedDistrict}
-        onDistrictChange={setSelectedDistrict}
-        onUpazilaChange={setSelectedUpazila}
-        loadingDivisions={canLoadingLocationData.loadingDivisions}
-        loadingDistricts={canLoadingLocationData.loadingDistricts}
-        loadingUpazilas={canLoadingLocationData.loadingUpazilas}
-        canShowRoleSelector={isUserSuperAdmin}
-      />
+      {/* Dialogs (Lazy + Suspense) */}
+      <Suspense fallback={null}>
+        <CreateEditUserDialog
+          open={openDialog}
+          onOpenChange={setOpenDialog}
+          editUser={editUser}
+          formData={formData}
+          onFormDataChange={setFormData}
+          onSubmit={editUser ? confirmRoleUpdate : handleCreateUser}
+          onCancel={handleCloseDialog}
+          isLoading={isOperating}
+          stations={stations}
+          loadingStations={loadingStations}
+          divisions={divisions}
+          districts={districts}
+          upazilas={upazilas}
+          selectedDivision={selectedDivision}
+          onDivisionChange={setSelectedDivision}
+          selectedDistrict={selectedDistrict}
+          onDistrictChange={setSelectedDistrict}
+          onUpazilaChange={setSelectedUpazila}
+          loadingDivisions={canLoadingLocationData.loadingDivisions}
+          loadingDistricts={canLoadingLocationData.loadingDistricts}
+          loadingUpazilas={canLoadingLocationData.loadingUpazilas}
+          canShowRoleSelector={isUserSuperAdmin}
+        />
 
-      {isUserSuperAdmin && (
-        <DeleteConfirmationDialog
-          open={openDeleteDialog}
-          onOpenChange={setOpenDeleteDialog}
-          onConfirm={handleDeleteUser}
+        {isUserSuperAdmin && (
+          <DeleteConfirmationDialog
+            open={openDeleteDialog}
+            onOpenChange={setOpenDeleteDialog}
+            onConfirm={handleDeleteUser}
+            isLoading={isOperating}
+          />
+        )}
+
+        <RoleChangeConfirmationDialog
+          open={openRoleUpdateDialog}
+          onOpenChange={setOpenRoleUpdateDialog}
+          originalRole={roleChangeData.originalRole}
+          newRole={roleChangeData.newRole}
+          onConfirm={handleUpdateUser}
           isLoading={isOperating}
         />
-      )}
-
-      <RoleChangeConfirmationDialog
-        open={openRoleUpdateDialog}
-        onOpenChange={setOpenRoleUpdateDialog}
-        originalRole={roleChangeData.originalRole}
-        newRole={roleChangeData.newRole}
-        onConfirm={handleUpdateUser}
-        isLoading={isOperating}
-      />
+      </Suspense>
     </div>
   );
 };
 
 // ============================================================================
-// ACTION BUTTONS SUBCOMPONENT
+// ACTION BUTTONS SUBCOMPONENT (unchanged)
 // ============================================================================
 interface UserActionButtonsProps {
   user: User;

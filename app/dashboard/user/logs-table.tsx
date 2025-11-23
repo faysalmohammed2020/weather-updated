@@ -1,8 +1,8 @@
 "use client";
 
+import React, { useCallback, useMemo, useState } from "react";
 import { logs } from "@prisma/client";
 import moment from "moment";
-import { useState } from "react";
 import { Eye } from "lucide-react";
 import {
   Dialog,
@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { LogActionType } from "@/lib/log";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import LogsTableSkeleton from "./LogsTableSkeleton"; // ✅ skeleton
 
 export const LogsTable = ({
   logs: rawLogs,
@@ -24,9 +25,17 @@ export const LogsTable = ({
   total?: number;
   limit?: number;
 }) => {
-  // Handle error case or missing data
-  const logs = Array.isArray(rawLogs) ? rawLogs : [];
-  const total = typeof rawTotal === "number" ? rawTotal : logs.length;
+  /**
+   * ✅ Skeleton trigger:
+   * rawLogs যদি undefined/null হয় => skeleton দেখাবে
+   * rawLogs [] হলে => loading না, empty state (same as before)
+   */
+  const isLoading = rawLogs == null;
+
+  // Handle error case or missing data (unchanged)
+  const logsArr = Array.isArray(rawLogs) ? rawLogs : [];
+  const total = typeof rawTotal === "number" ? rawTotal : logsArr.length;
+
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -35,35 +44,71 @@ export const LogsTable = ({
   const [selectedDetails, setSelectedDetails] = useState<JSON | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // Navigate to a specific page without resetting scroll position
-  const goToPage = (page: number) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("page", page.toString());
+  // ✅ stable badge style map (same output)
+  const badgeStyleByAction = useMemo(
+    () => ({
+      [LogActionType.CREATE]: "bg-green-100 text-green-800 border-green-300",
+      [LogActionType.UPDATE]: "bg-blue-100 text-blue-800 border-blue-300",
+      [LogActionType.DELETE]: "bg-red-100 text-red-800 border-red-300",
+      default: "bg-gray-100 text-gray-800 border-gray-300",
+    }),
+    []
+  );
 
-    // Use router.replace with scroll: false option to prevent scroll reset
-    router.replace(`${pathname}?${params.toString()}`, {
-      scroll: false,
-    });
-  };
+  const getActionBadgeStyle = useCallback(
+    (action: string) =>
+      (badgeStyleByAction as any)[action] ?? badgeStyleByAction.default,
+    [badgeStyleByAction]
+  );
 
-  const handleViewDetails = (details: JSON) => {
+  // Navigate to a specific page without resetting scroll position (same behavior)
+  const goToPage = useCallback(
+    (page: number) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("page", page.toString());
+
+      router.replace(`${pathname}?${params.toString()}`, {
+        scroll: false,
+      });
+    },
+    [router, pathname, searchParams]
+  );
+
+  const handleViewDetails = useCallback((details: JSON) => {
     setSelectedDetails(details);
     setIsDialogOpen(true);
-  };
+  }, []);
 
-  // Function to get badge color based on action type
-  const getActionBadgeStyle = (action: string) => {
-    switch (action) {
-      case LogActionType.CREATE:
-        return "bg-green-100 text-green-800 border-green-300";
-      case LogActionType.UPDATE:
-        return "bg-blue-100 text-blue-800 border-blue-300";
-      case LogActionType.DELETE:
-        return "bg-red-100 text-red-800 border-red-300";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-300";
-    }
-  };
+  // ✅ memo page-number list (same logic, just precomputed)
+  const pageNumbers = useMemo(() => {
+    const totalPages = Math.ceil(total / limit);
+    const size = Math.min(5, totalPages);
+
+    return Array.from({ length: size }).map((_, i) => {
+      let pageNum;
+
+      if (totalPages <= 5) pageNum = i + 1;
+      else if (currentPage <= 3) pageNum = i + 1;
+      else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + i;
+      else pageNum = currentPage - 2 + i;
+
+      if (pageNum <= 0 || pageNum > totalPages) return null;
+      return pageNum;
+    });
+  }, [total, limit, currentPage]);
+
+  // ✅ Skeleton UI (no logic change except UX)
+  if (isLoading) {
+    return (
+      <>
+        <h1 className="text-2xl font-bold mb-6">Activity Logs</h1>
+        <div className=" bg-white py-6 rounded-xl border shadow">
+          <LogsTableSkeleton rows={limit} />
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <h1 className="text-2xl font-bold mb-6">Activity Logs</h1>
@@ -105,7 +150,7 @@ export const LogsTable = ({
               </tr>
             </thead>
             <tbody>
-              {logs.map((log) => (
+              {logsArr.map((log) => (
                 <tr key={log.id} className="border-b">
                   <td className="p-3 text-left truncate max-w-[250px]">
                     {moment(log.createdAt).format("YYYY-MM-DD HH:mm:ss")}
@@ -159,7 +204,7 @@ export const LogsTable = ({
           </table>
         </div>
 
-        {/* Pagination */}
+        {/* Pagination (same logic) */}
         {total > limit && (
           <div className="border-t pt-4 px-4">
             <div className="flex justify-between items-center">
@@ -177,7 +222,6 @@ export const LogsTable = ({
                 </p>
               </div>
               <div className="flex items-center space-x-2">
-                {/* Previous page button */}
                 <Button
                   variant="outline"
                   onClick={() => goToPage(Math.max(1, currentPage - 1))}
@@ -187,31 +231,8 @@ export const LogsTable = ({
                   Previous
                 </Button>
 
-                {/* Page numbers */}
-                {Array.from({
-                  length: Math.min(5, Math.ceil(total / limit)),
-                }).map((_, i) => {
-                  // Calculate page number based on current page to show a window of pages
-                  let pageNum;
-                  const totalPages = Math.ceil(total / limit);
-
-                  if (totalPages <= 5) {
-                    // If 5 or fewer pages, show all pages
-                    pageNum = i + 1;
-                  } else if (currentPage <= 3) {
-                    // If near the start, show first 5 pages
-                    pageNum = i + 1;
-                  } else if (currentPage >= totalPages - 2) {
-                    // If near the end, show last 5 pages
-                    pageNum = totalPages - 4 + i;
-                  } else {
-                    // Otherwise show 2 pages before and 2 pages after current
-                    pageNum = currentPage - 2 + i;
-                  }
-
-                  if (pageNum <= 0 || pageNum > totalPages) return null;
-
-                  return (
+                {pageNumbers.map((pageNum) =>
+                  pageNum ? (
                     <Button
                       key={pageNum}
                       variant={currentPage === pageNum ? "default" : "outline"}
@@ -221,10 +242,9 @@ export const LogsTable = ({
                     >
                       {pageNum}
                     </Button>
-                  );
-                })}
+                  ) : null
+                )}
 
-                {/* Next page button */}
                 <Button
                   variant="outline"
                   onClick={() =>
@@ -243,7 +263,7 @@ export const LogsTable = ({
         )}
       </div>
 
-      {/* Details Dialog */}
+      {/* Details Dialog (unchanged) */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
