@@ -213,7 +213,41 @@ export async function GET(request: Request) {
     const [data, total] = await Promise.all([
       prisma.agroclimatologicalData.findMany({
         where,
-        include: {
+        select: {
+          id: true,
+          createdAt: true,
+          updatedAt: true,
+          elevation: true,
+          date: true,
+          utcTime: true,
+          solarRadiation: true,
+          sunShineHour: true,
+          airTempDry05m: true,
+          airTempWet05m: true,
+          airTempDry12m: true,
+          airTempWet12m: true,
+          airTempDry22m: true,
+          airTempWet22m: true,
+          minTemp: true,
+          maxTemp: true,
+          meanTemp: true,
+          grassMinTemp: true,
+          soilTemp5cm: true,
+          soilTemp10cm: true,
+          soilTemp20cm: true,
+          soilTemp30cm: true,
+          soilTemp50cm: true,
+          soilMoisture0to20cm: true,
+          soilMoisture20to50cm: true,
+          panWaterEvap: true,
+          relativeHumidity: true,
+          evaporation: true,
+          dewPoint: true,
+          windSpeed: true,
+          duration: true,
+          rainfall: true,
+          userId: true,
+          stationId: true,
           user: { select: { id: true, name: true, email: true } },
           station: { select: { id: true, name: true } },
         },
@@ -224,9 +258,17 @@ export async function GET(request: Request) {
       prisma.agroclimatologicalData.count({ where }),
     ])
 
+    // Convert Date objects to ISO strings for consistent serialization
+    const serializedData = data.map(record => ({
+      ...record,
+      createdAt: record.createdAt.toISOString(),
+      updatedAt: record.updatedAt.toISOString(),
+      date: record.date.toISOString(),
+    }))
+
     return NextResponse.json({
       success: true,
-      data,
+      data: serializedData,
       pagination: {
         total,
         limit,
