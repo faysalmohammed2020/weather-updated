@@ -1,13 +1,16 @@
 "use client";
 
-import FirstCardTable from "@/components/first-card-table/FirstCardTable";
+import { forwardRef, type Ref } from "react";
+import FirstCardTable, { type FirstCardTableHandle } from "@/components/first-card-table/FirstCardTable";
 
-const FirstCardViewPage = () => {
+const FirstCardViewPage = forwardRef<FirstCardTableHandle>((props: unknown, ref: Ref<FirstCardTableHandle>) => {
   return (
     <div className=" py-6">
-      <FirstCardTable />
+      <FirstCardTable ref={ref} />
     </div>
   );
-};
+});
+
+FirstCardViewPage.displayName = "FirstCardViewPage";
 
 export default FirstCardViewPage;

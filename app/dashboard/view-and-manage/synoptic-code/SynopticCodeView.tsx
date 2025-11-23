@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, forwardRef, useImperativeHandle, Ref } from "react";
 import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { DateFilters } from "@/components/synoptic/Filters/DateFilters";
@@ -21,6 +21,10 @@ import { canEditRecord } from "@/lib/utils/role-utils";
 import { exportSynopticCSV } from "@/lib/export/exportCSV";
 import { exportSynopticTXT } from "@/lib/export/exportTXT";
 import { exportSynopticTAC } from "@/lib/export/exportTAC";
+
+export interface SynopticCodeViewHandle {
+  getData: () => SynopticRecord[];
+}
 
 const buildDefaultHeaderInfo = (user?: SynopticUser): SynopticHeaderInfo => {
   const now = new Date();
@@ -57,7 +61,7 @@ const deriveHeaderInfo = (
   };
 };
 
-export const SynopticCodeView = () => {
+const SynopticCodeViewComponent = (props: {}, ref: Ref<SynopticCodeViewHandle>) => {
   const { data: session } = useSession();
   const user = session?.user as SynopticUser | undefined;
   const isSuperAdmin = user?.role === "super_admin";
@@ -84,6 +88,10 @@ export const SynopticCodeView = () => {
   );
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isPermissionDeniedOpen, setIsPermissionDeniedOpen] = useState(false);
+
+  useImperativeHandle(ref, () => ({
+    getData: () => records
+  }), [records]);
 
   const stationQuery =
     stationFilter !== "all" ? { stationId: stationFilter } : undefined;
@@ -285,5 +293,7 @@ export const SynopticCodeView = () => {
     </div>
   );
 };
+
+export const SynopticCodeView = forwardRef<SynopticCodeViewHandle>(SynopticCodeViewComponent);
 
 export default SynopticCodeView;

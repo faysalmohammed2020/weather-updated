@@ -24,6 +24,16 @@ export default function AllViewAndManagePage() {
   const synopticRef = useRef<any>(null)
   const dailySummeryRef = useRef<any>(null)
 
+  const CompactPDFExportButton = dynamic(() => import("../PdfExportComponent"), {
+  ssr: false,
+  loading: () => (
+    <Button disabled className="flex items-center gap-2 bg-red-600 text-white">
+      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+      Loading PDF...
+    </Button>
+  )
+})
+
 const exportToExcel = () => {
   const wb = XLSX.utils.book_new();
 

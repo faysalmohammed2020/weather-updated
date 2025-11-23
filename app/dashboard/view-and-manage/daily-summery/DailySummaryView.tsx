@@ -30,7 +30,7 @@ import { canEditRecord } from "@/lib/utils/role-utils";
 import { exportDailySummaryCSV } from "@/lib/export/exportDailyCSV";
 import { exportDailySummaryTXT } from "@/lib/export/exportDailyTXT";
 
-interface DailySummaryViewHandle {
+export interface DailySummaryViewHandle {
   getData: () => DailySummaryRecord[];
 }
 
@@ -371,6 +371,6 @@ const DailySummaryViewComponent = (_: unknown, ref: Ref<DailySummaryViewHandle>)
   );
 };
 
-export const DailySummaryView = forwardRef(DailySummaryViewComponent);
+export const DailySummaryView = forwardRef<DailySummaryViewHandle>(DailySummaryViewComponent);
 
 export default DailySummaryView;

@@ -1,5 +1,9 @@
-import DailySummaryView from "./DailySummaryView";
+"use client";
 
-export default function DailySummeryPage() {
-  return <DailySummaryView />;
-}
+import { forwardRef, type ForwardedRef } from "react";
+import DailySummaryView from "./DailySummaryView";
+import type { DailySummaryViewHandle } from "./DailySummaryView";
+
+export default forwardRef(function DailySummeryPage(props: unknown, ref: ForwardedRef<DailySummaryViewHandle>) {
+  return <DailySummaryView ref={ref} />;
+});
