@@ -19,7 +19,7 @@ import type {
 import type { Station } from "@/lib/types/station";
 import type { DateRange } from "@/lib/utils/date-utils";
 import { todayISO } from "@/lib/utils/date-utils";
-import { differenceInDays, format } from "date-fns";
+import { differenceInDays, format, parseISO, isValid } from "date-fns";
 import { fetchDailySummary, fetchStations } from "@/lib/api/dailySummary";
 import { DailySummaryTable } from "@/components/dailySummary/Table/DailySummaryTable";
 import { FilterPanel } from "@/components/dailySummary/Filters/FilterPanel";
@@ -32,6 +32,11 @@ import { exportDailySummaryTXT } from "@/lib/export/exportDailyTXT";
 
 export interface DailySummaryViewHandle {
   getData: () => DailySummaryRecord[];
+}
+
+interface DailySummaryViewProps {
+  initialRecords?: DailySummaryRecord[];
+  initialStations?: Station[];
 }
 
 const buildDefaultHeaderInfo = (
@@ -72,7 +77,10 @@ const deriveHeaderInfo = (
   };
 };
 
-const DailySummaryViewComponent = (_: unknown, ref: Ref<DailySummaryViewHandle>) => {
+const DailySummaryViewComponent = (
+  { initialRecords, initialStations }: DailySummaryViewProps,
+  ref: Ref<DailySummaryViewHandle>
+) => {
   const { data: session } = useSession();
   const user = session?.user as DailySummaryUser | undefined;
   const isSuperAdmin = user?.role === "super_admin";
@@ -84,18 +92,40 @@ const DailySummaryViewComponent = (_: unknown, ref: Ref<DailySummaryViewHandle>)
   });
   const [dateError, setDateError] = useState<string | null>(null);
   const [stationFilter, setStationFilter] = useState("all");
-  const [records, setRecords] = useState<DailySummaryRecord[]>([]);
-  const [stations, setStations] = useState<Station[]>([]);
+  const [records, setRecords] = useState<DailySummaryRecord[]>(initialRecords || []);
+  const [stations, setStations] = useState<Station[]>(initialStations || []);
   const [headerInfo, setHeaderInfo] = useState<DailySummaryHeaderInfo>(() =>
     buildDefaultHeaderInfo(user)
   );
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false); // Start with false since we have initial data
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<DailySummaryRecord | null>(null);
   const [isPermissionDeniedOpen, setIsPermissionDeniedOpen] = useState(false);
 
   const stationQuery =
     isSuperAdmin && stationFilter !== "all" ? stationFilter : undefined;
+
+  // Safe date formatting utility
+  const formatDate = useCallback((dateValue: string | Date | null | undefined): string => {
+    try {
+      if (!dateValue) return "N/A";
+      
+      if (typeof dateValue === 'string') {
+        const date = parseISO(dateValue);
+        if (isValid(date)) {
+          return format(date, "MMM d, yyyy");
+        }
+      } else if (dateValue instanceof Date) {
+        if (isValid(dateValue)) {
+          return format(dateValue, "MMM d, yyyy");
+        }
+      }
+      return "Invalid Date";
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "Invalid Date";
+    }
+  }, []);
 
   const loadDailySummary = useCallback(async () => {
     setIsLoading(true);
@@ -122,8 +152,7 @@ const DailySummaryViewComponent = (_: unknown, ref: Ref<DailySummaryViewHandle>)
   }, [loadDailySummary]);
 
   useEffect(() => {
-    if (!isSuperAdmin) {
-      setStations([]);
+    if (!isSuperAdmin || initialStations?.length) {
       return;
     }
 
@@ -144,7 +173,7 @@ const DailySummaryViewComponent = (_: unknown, ref: Ref<DailySummaryViewHandle>)
     return () => {
       active = false;
     };
-  }, [isSuperAdmin]);
+  }, [isSuperAdmin, initialStations]);
 
   useImperativeHandle(ref, () => ({
     getData: () =>
@@ -371,6 +400,6 @@ const DailySummaryViewComponent = (_: unknown, ref: Ref<DailySummaryViewHandle>)
   );
 };
 
-export const DailySummaryView = forwardRef<DailySummaryViewHandle>(DailySummaryViewComponent);
+export const DailySummaryView = forwardRef<DailySummaryViewHandle, DailySummaryViewProps>(DailySummaryViewComponent);
 
 export default DailySummaryView;

@@ -208,10 +208,38 @@ export async function GET(req: Request) {
           utcTime: "desc",
         },
       },
-      include: {
+      select: {
+        id: true,
+        dataType: true,
+        createdAt: true,
+        avStationPressure: true,
+        avSeaLevelPressure: true,
+        avDryBulbTemperature: true,
+        avWetBulbTemperature: true,
+        maxTemperature: true,
+        minTemperature: true,
+        totalPrecipitation: true,
+        avDewPointTemperature: true,
+        avRelativeHumidity: true,
+        windSpeed: true,
+        windDirectionCode: true,
+        maxWindSpeed: true,
+        maxWindDirection: true,
+        avTotalCloud: true,
+        lowestVisibility: true,
+        totalRainDuration: true,
         ObservingTime: {
-          include: {
-            station: true,
+          select: {
+            utcTime: true,
+            stationId: true,
+            userId: true,
+            station: {
+              select: {
+                id: true,
+                stationId: true,
+                name: true,
+              },
+            },
           },
         },
       },
@@ -256,7 +284,17 @@ export async function GET(req: Request) {
       };
     });
 
-    return NextResponse.json(averagedSummaries);
+    // Convert Date objects to ISO strings for consistent serialization
+    const serializedSummaries = averagedSummaries.map(summary => ({
+      ...summary,
+      createdAt: summary.createdAt ? summary.createdAt.toISOString() : null,
+      ObservingTime: summary.ObservingTime ? {
+        ...summary.ObservingTime,
+        utcTime: summary.ObservingTime.utcTime.toISOString(),
+      } : null,
+    }));
+
+    return NextResponse.json(serializedSummaries);
   } catch (error) {
     console.error("Error fetching daily summary data:", error);
     return NextResponse.json(

@@ -3,8 +3,8 @@ import type { Station } from "./station";
 export interface DailyObservingTimeMeta {
   utcTime?: string;
   stationId?: string;
+  userId?: string | null;
   station?: Station;
-  userId?: string;
 }
 
 export interface DailySummaryRecord {
