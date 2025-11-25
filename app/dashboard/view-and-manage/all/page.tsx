@@ -8,12 +8,22 @@ import SynopticCodeTable from "../synoptic-code/page"
 import * as XLSX from "xlsx"
 import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
-import { useSession } from "@/lib/auth-client"
+// ✅ CHANGED: useSession now from next-auth
+import { useSession } from "next-auth/react"
 import dynamic from "next/dynamic"
 import DailySummaryTable from "../daily-summery"
 import MargeTable from "@/components/margeTable"
 
-const CompactPDFExportButton = dynamic(() => import("../PdfExportComponent"), { ssr: false })
+// ✅ CHANGED: keep only one dynamic import (no redeclare inside component)
+const CompactPDFExportButton = dynamic(() => import("../PdfExportComponent"), {
+  ssr: false,
+  loading: () => (
+    <Button disabled className="flex items-center gap-2 bg-red-600 text-white">
+      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+      Loading PDF...
+    </Button>
+  ),
+})
 
 export default function AllViewAndManagePage() {
   const [activeTab, setActiveTab] = useState("full-table")
@@ -24,125 +34,114 @@ export default function AllViewAndManagePage() {
   const synopticRef = useRef<any>(null)
   const dailySummeryRef = useRef<any>(null)
 
-  const CompactPDFExportButton = dynamic(() => import("../PdfExportComponent"), {
-  ssr: false,
-  loading: () => (
-    <Button disabled className="flex items-center gap-2 bg-red-600 text-white">
-      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-      Loading PDF...
-    </Button>
-  )
-})
+  const exportToExcel = () => {
+    const wb = XLSX.utils.book_new();
 
-const exportToExcel = () => {
-  const wb = XLSX.utils.book_new();
+    const firstCardData = firstCardRef.current?.getData?.() || [];
+    const secondCardData = secondCardRef.current?.getData?.() || [];
+    const synopticData = synopticRef.current?.getData?.() || [];
+    const dailySummaryData = dailySummeryRef.current?.getData?.() || [];
 
-  const firstCardData = firstCardRef.current?.getData?.() || [];
-  const secondCardData = secondCardRef.current?.getData?.() || [];
-  const synopticData = synopticRef.current?.getData?.() || [];
-  const dailySummaryData = dailySummeryRef.current?.getData?.() || [];
+    const excludedKeys = [
+      'id',
+      'stationId',
+      'stationCode',
+      'stationName',
+      'submittedAt',
+      'createdAt',
+      'updatedAt',
+      'tabActive',
+      'observingTime',
+      'observingTimeId',
+      'localTime',
+      'c2Indicator'
+    ];
 
-  const excludedKeys = [
-    'id',
-    'stationId',
-    'stationCode',
-    'stationName',
-    'submittedAt',
-    'createdAt',
-    'updatedAt',
-    'tabActive',
-    'observingTime',
-    'observingTimeId',
-    'localTime',
-    'c2Indicator'
-  ];
-
-  const cleanFirst = firstCardData.map(item => {
-    const cleaned = {};
-    Object.keys(item).forEach(key => {
-      if (!excludedKeys.includes(key)) {
-        cleaned[key] = item[key];
-      }
+    const cleanFirst = firstCardData.map(item => {
+      const cleaned: any = {};
+      Object.keys(item).forEach(key => {
+        if (!excludedKeys.includes(key)) {
+          cleaned[key] = item[key];
+        }
+      });
+      return cleaned;
     });
-    return cleaned;
-  });
 
-  const cleanSecond = secondCardData.map(item => {
-    const cleaned = {};
-    Object.keys(item).forEach(key => {
-      if (!excludedKeys.includes(key)) {
-        cleaned[key] = item[key];
-      }
+    const cleanSecond = secondCardData.map(item => {
+      const cleaned: any = {};
+      Object.keys(item).forEach(key => {
+        if (!excludedKeys.includes(key)) {
+          cleaned[key] = item[key];
+        }
+      });
+      return cleaned;
     });
-    return cleaned;
-  });
 
-  const firstKeys = Object.keys(cleanFirst[0] || {});
-  const secondKeys = Object.keys(cleanSecond[0] || {});
+    const firstKeys = Object.keys(cleanFirst[0] || {});
+    const secondKeys = Object.keys(cleanSecond[0] || {});
 
-  const firstHeader = Array(firstKeys.length).fill("First Card");
-  const secondHeader = Array(secondKeys.length).fill("Second Card");
+    const firstHeader = Array(firstKeys.length).fill("First Card");
+    const secondHeader = Array(secondKeys.length).fill("Second Card");
 
-  const fullHeaderRow = [...firstHeader, ...secondHeader];
-  const subHeaderRow = [...firstKeys, ...secondKeys];
+    const fullHeaderRow = [...firstHeader, ...secondHeader];
+    const subHeaderRow = [...firstKeys, ...secondKeys];
 
-  const maxLength = Math.max(cleanFirst.length, cleanSecond.length);
-  const mergedRows = [];
+    const maxLength = Math.max(cleanFirst.length, cleanSecond.length);
+    const mergedRows: any[] = [];
 
-  for (let i = 0; i < maxLength; i++) {
-    const firstRow = cleanFirst[i] || {};
-    const secondRow = cleanSecond[i] || {};
+    for (let i = 0; i < maxLength; i++) {
+      const firstRow = cleanFirst[i] || {};
+      const secondRow = cleanSecond[i] || {};
 
-    mergedRows.push([
-      ...firstKeys.map(k => firstRow[k] || ""),
-      ...secondKeys.map(k => secondRow[k] || "")
-    ]);
-  }
+      mergedRows.push([
+        ...firstKeys.map(k => firstRow[k] || ""),
+        ...secondKeys.map(k => secondRow[k] || "")
+      ]);
+    }
 
-  const finalData = [fullHeaderRow, subHeaderRow, ...mergedRows];
-  const mergedSheet = XLSX.utils.aoa_to_sheet(finalData);
+    const finalData = [fullHeaderRow, subHeaderRow, ...mergedRows];
+    const mergedSheet = XLSX.utils.aoa_to_sheet(finalData);
 
-  // Merge headers
-  mergedSheet["!merges"] = [
-    { s: { r: 0, c: 0 }, e: { r: 0, c: firstKeys.length - 1 } },
-    { s: { r: 0, c: firstKeys.length }, e: { r: 0, c: firstKeys.length + secondKeys.length - 1 } }
-  ];
+    // Merge headers
+    mergedSheet["!merges"] = [
+      { s: { r: 0, c: 0 }, e: { r: 0, c: firstKeys.length - 1 } },
+      { s: { r: 0, c: firstKeys.length }, e: { r: 0, c: firstKeys.length + secondKeys.length - 1 } }
+    ];
 
-  // Add merged sheet
-  XLSX.utils.book_append_sheet(wb, mergedSheet, "First+Second Card");
+    // Add merged sheet
+    XLSX.utils.book_append_sheet(wb, mergedSheet, "First+Second Card");
 
-  // Synoptic
-  const cleanSynoptic = synopticData.map(item => {
-    const cleaned = {};
-    Object.keys(item).forEach(key => {
-      if (!excludedKeys.includes(key)) {
-        cleaned[key] = item[key];
-      }
+    // Synoptic
+    const cleanSynoptic = synopticData.map(item => {
+      const cleaned: any = {};
+      Object.keys(item).forEach(key => {
+        if (!excludedKeys.includes(key)) {
+          cleaned[key] = item[key];
+        }
+      });
+      return cleaned;
     });
-    return cleaned;
-  });
-  const synopticSheet = XLSX.utils.json_to_sheet(cleanSynoptic);
-  XLSX.utils.book_append_sheet(wb, synopticSheet, "Synoptic");
+    const synopticSheet = XLSX.utils.json_to_sheet(cleanSynoptic);
+    XLSX.utils.book_append_sheet(wb, synopticSheet, "Synoptic");
 
-  // Daily Summary
-  const cleanSummary = dailySummaryData.map(item => {
-    const cleaned = {};
-    Object.keys(item).forEach(key => {
-      if (!excludedKeys.includes(key)) {
-        cleaned[key] = item[key];
-      }
+    // Daily Summary
+    const cleanSummary = dailySummaryData.map(item => {
+      const cleaned: any = {};
+      Object.keys(item).forEach(key => {
+        if (!excludedKeys.includes(key)) {
+          cleaned[key] = item[key];
+        }
+      });
+      return cleaned;
     });
-    return cleaned;
-  });
-  const summarySheet = XLSX.utils.json_to_sheet(cleanSummary);
-  XLSX.utils.book_append_sheet(wb, summarySheet, "Daily Summary");
+    const summarySheet = XLSX.utils.json_to_sheet(cleanSummary);
+    XLSX.utils.book_append_sheet(wb, summarySheet, "Daily Summary");
 
-  // Export
-  XLSX.writeFile(wb, "Weather_Data_All_Tabs.xlsx");
-};
+    // Export
+    XLSX.writeFile(wb, "Weather_Data_All_Tabs.xlsx");
+  };
 
-const MargeTableRef = useRef<any>(null);
-
+  const MargeTableRef = useRef<any>(null);
 
   // Prepare station info for PDF
   const stationInfo = {
