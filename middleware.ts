@@ -1,10 +1,16 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getSessionCookie } from "better-auth/cookies";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
 
 export async function middleware(request: NextRequest) {
-  const session = getSessionCookie(request);
-
   const { pathname } = request.nextUrl;
+
+  // JWT token read (edge-safe)
+  const token = await getToken({
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET,
+  });
+  // token null => not logged in
 
   type RoutePrefix = `/${string}/`;
   const authRoutePrefix = ["/sign-in", "/sign-up"];
@@ -19,20 +25,22 @@ export async function middleware(request: NextRequest) {
     protectedRoutePrefix.some((prefix) => pathname.startsWith(prefix));
 
   // 🔐 Block access to protected routes if no session
-  if (isProtectedRoute && !session) {
+  if (isProtectedRoute && !token) {
     return NextResponse.redirect(new URL("/sign-in", request.url));
   }
 
   // 🔐 Redirect signed-in users away from auth pages
-  if (isAuthRoute && session) {
+  if (isAuthRoute && token) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
-  // ✅ Role-specific protection starts here
+  // ✅ Role-specific protection
   const forbiddenRoutesForObserver = ["/dashboard/user", "/dashboard/stations"];
 
+  const role = (token as any)?.role;
+
   if (
-    session?.user?.role === "observer" &&
+    role === "observer" &&
     forbiddenRoutesForObserver.some((route) => pathname.startsWith(route))
   ) {
     return NextResponse.redirect(new URL("/dashboard", request.url));

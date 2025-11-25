@@ -52,7 +52,7 @@ export async function getUsersServer(pageIndex: number = 0, pageSize: number = 1
     const headersList = await headers();
     const cookie = headersList.get('cookie');
     
-    const baseUrl = process.env.NEXTAUTH_URL || process.env.VERCEL_URL || 'http://localhost:3000';
+    const baseUrl = process.env.BETTER_AUTH_URL || process.env.VERCEL_URL || 'http://localhost:3000';
     const response = await fetch(
       `${baseUrl}${API_ENDPOINTS.USERS}?limit=${pageSize}&offset=${pageIndex * pageSize}`,
       {
@@ -90,7 +90,7 @@ export async function getStationsServer(): Promise<Station[]> {
     const headersList = await headers();
     const cookie = headersList.get('cookie');
     
-    const baseUrl = process.env.NEXTAUTH_URL || process.env.VERCEL_URL || 'http://localhost:3000';
+    const baseUrl = process.env.BETTER_AUTH_URL || process.env.VERCEL_URL || 'http://localhost:3000';
     const response = await fetch(
       `${baseUrl}${API_ENDPOINTS.STATIONS}`,
       {

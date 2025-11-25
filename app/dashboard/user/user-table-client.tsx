@@ -173,7 +173,7 @@ export const UserTableClient = ({
   const refreshUsers = useCallback(async () => {
     setIsLoading(true);
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000';
+      const baseUrl = process.env.BETTER_AUTH_URL || process.env.BETTER_AUTH_URL || 'http://localhost:3000';
       const response = await fetch(
         `${baseUrl}${API_ENDPOINTS.USERS}?limit=${pageSize}&offset=${pageIndex * pageSize}`,
         {

@@ -24,7 +24,7 @@ import {
   Code2,
   BarChart2,
 } from "lucide-react";
-import { useSession } from "@/lib/auth-client";
+import { useSession } from "next-auth/react";
 import {
   Collapsible,
   CollapsibleTrigger,

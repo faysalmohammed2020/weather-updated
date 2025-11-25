@@ -25,7 +25,6 @@ import {
   PAGINATION,
   ERROR_MESSAGES,
 } from "@/lib/constants/user-management";
-import { UserRole } from "@/lib/constants/user-management";
 import {
   validateUserForm,
   formatDate,
@@ -63,7 +62,7 @@ interface UserFormData {
   name: string;
   email: string;
   password: string;
-  role: UserRole | null;
+  role: string | null;
   division: string;
   district: string;
   upazila: string;
@@ -126,8 +125,8 @@ export const UserTable = () => {
   const [editUser, setEditUser] = useState<User | null>(null);
   const [userToDelete, setUserToDelete] = useState<string | null>(null);
   const [roleChangeData, setRoleChangeData] = useState<{
-    originalRole: UserRole | null;
-    newRole: UserRole | null;
+    originalRole: string | null;
+    newRole: string | null;
   }>({ originalRole: null, newRole: null });
 
   // ============================================================================
@@ -234,7 +233,7 @@ export const UserTable = () => {
       name: user.name || "",
       email: user.email || "",
       password: "",
-      role: user.role as UserRole,
+      role: user.role as string,
       division: user.division || "",
       district: user.district || "",
       upazila: user.upazila || "",
@@ -258,7 +257,7 @@ export const UserTable = () => {
     }
 
     setRoleChangeData({
-      originalRole: editUser.role as UserRole,
+      originalRole: editUser.role,
       newRole: formData.role,
     });
     setOpenRoleUpdateDialog(true);
@@ -495,9 +494,9 @@ export const UserTable = () => {
           isLoading={isOperating}
           stations={stations}
           loadingStations={loadingStations}
-          divisions={divisions.map(d => ({ osmId: d.osmId.toString(), name: d.name }))}
-          districts={districts.map(d => ({ osmId: d.osmId.toString(), name: d.name }))}
-          upazilas={upazilas.map(u => ({ osmId: u.osmId.toString(), name: u.name }))}
+          divisions={divisions}
+          districts={districts}
+          upazilas={upazilas}
           selectedDivision={selectedDivision}
           onDivisionChange={setSelectedDivision}
           selectedDistrict={selectedDistrict}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { signIn } from "next-auth/react";
 import {
   Mail,
   Lock,
@@ -115,98 +116,89 @@ export default function SignInForm() {
   };
 
   const handleCredentialsSubmit = async (
-    e: React.FormEvent<HTMLFormElement>
-  ) => {
-    e.preventDefault();
+  e: React.FormEvent<HTMLFormElement>
+) => {
+  e.preventDefault();
 
-    // Client-side validation first
-    if (!role) {
-      setFormError("Please select a role");
+  if (!role) {
+    setFormError("Please select a role");
+    return;
+  }
+
+  const formData = new FormData(e.currentTarget as HTMLFormElement);
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+
+  if (!email || !password) {
+    setFormError("Please enter both email and password");
+    return;
+  }
+
+  const station = stations.find((s) => s.name === selectedStation);
+  if (!station) {
+    setFormError("Invalid station selection");
+    return;
+  }
+
+  setLoading(true);
+  setFormError("");
+
+  try {
+    // ✅ NextAuth client signIn (cookie browser-এ সেট হবে)
+    const res = await signIn("credentials", {
+      email,
+      password,
+
+      // extra fields পাঠানো হলো (authorize() চাইলে চেক করতে পারে)
+      role,
+      stationId: station.stationId,
+
+      redirect: false,          // আমরা নিজে redirect করবো
+      callbackUrl: "/dashboard" // target
+    });
+
+    // 2FA হলে তোমার authorize() থেকে "OTP_REQUIRED" throw করতে পারো
+    if (res?.error === "OTP_REQUIRED") {
+      router.replace("/2fa");
       return;
     }
 
-    const formData = new FormData(e.currentTarget as HTMLFormElement);
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
-
-    if (!email || !password) {
-      setFormError("Please enter both email and password");
+    if (res?.ok) {
+      toast.success("Login successful");
+      router.replace("/dashboard");
+      router.refresh();
       return;
     }
 
-    // Find the selected station
-    const station = stations.find((s) => s.name === selectedStation);
-    if (!station) {
-      setFormError("Invalid station selection");
-      return;
+    // error handle
+    let errorMessage = res?.error || "An error occurred during sign in";
+
+    if (errorMessage.includes("credentials")) {
+      errorMessage = "Invalid email or password";
+    } else if (
+      errorMessage.includes("permission") ||
+      errorMessage.includes("role")
+    ) {
+      errorMessage =
+        "You don't have permission to access this station with the selected role";
+    } else if (errorMessage.includes("security code")) {
+      errorMessage = "The security code doesn't match your account";
+    } else if (errorMessage.includes("station")) {
+      errorMessage = "Your account is not associated with this station";
+    } else if (errorMessage.includes("another device")) {
+      errorMessage = "You are already logged in from another device";
     }
 
-    setLoading(true);
-    setFormError("");
+    setFormError(errorMessage);
+  } catch (error) {
+    setFormError(
+      error instanceof Error ? error.message : "An unexpected error occurred"
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
-    try {
-      // Call our custom API route for comprehensive authentication
-      const response = await fetch("/api/auth/sign-in", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-          role,
-          securityCode,
-          stationId: station.stationId,
-          stationName: station.name,
-        }),
-        // Important: include credentials to allow cookies to be set
-        credentials: "include",
-      });
-
-      const data = await response.json();
-
-      if (data.twoFactorRedirect) {
-        router.push("/2fa");
-        return;
-      }
-
-      // If the response is successful, redirect to dashboard
-      if (response.ok) {
-        // Success - show toast and redirect to dashboard
-        toast.success("Login successful");
-        router.push("/dashboard");
-        router.refresh();
-        return;
-      }
-
-      // Handle error responses
-      let errorMessage =
-        data.error || data.message || "An error occurred during sign in";
-
-      // Provide user-friendly error messages
-      if (errorMessage.includes("credentials")) {
-        errorMessage = "Invalid email or password";
-      } else if (
-        errorMessage.includes("permission") ||
-        errorMessage.includes("role")
-      ) {
-        errorMessage =
-          "You don't have permission to access this station with the selected role";
-      } else if (errorMessage.includes("security code")) {
-        errorMessage = "The security code doesn't match your account";
-      } else if (errorMessage.includes("station")) {
-        errorMessage = "Your account is not associated with this station";
-      }
-
-      setFormError(errorMessage);
-    } catch (error) {
-      setFormError(
-        error instanceof Error ? error.message : "An unexpected error occurred"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Filter roles based on station (you can customize this logic)
   const getAvailableRoles = () => {
