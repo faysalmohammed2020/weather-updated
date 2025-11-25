@@ -5,7 +5,14 @@
 
 "use client";
 
-import React, { Suspense, lazy, useState, useEffect, useCallback, useMemo } from "react";
+import React, {
+  Suspense,
+  lazy,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+} from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -173,27 +180,27 @@ export const UserTableClient = ({
   const refreshUsers = useCallback(async () => {
     setIsLoading(true);
     try {
-      const baseUrl = process.env.BETTER_AUTH_URL || process.env.BETTER_AUTH_URL || 'http://localhost:3000';
+      const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
       const response = await fetch(
         `${baseUrl}${API_ENDPOINTS.USERS}?limit=${pageSize}&offset=${pageIndex * pageSize}`,
         {
-          cache: 'no-store',
+          cache: "no-store",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         }
       );
 
       if (!response.ok) {
-        throw new Error('Failed to refresh users');
+        throw new Error("Failed to refresh users");
       }
 
       const data = await response.json();
       setUsers(data.users || []);
       setTotalUsers(data.total || 0);
     } catch (error) {
-      console.error('Error refreshing users:', error);
-      toast.error('Failed to refresh users');
+      console.error("Error refreshing users:", error);
+      toast.error("Failed to refresh users");
     } finally {
       setIsLoading(false);
     }
@@ -202,15 +209,18 @@ export const UserTableClient = ({
   // ============================================================================
   // PAGINATION FUNCTIONS
   // ============================================================================
-  const updatePageInUrl = useCallback((newPage: number) => {
-    const params = new URLSearchParams(searchParams);
-    if (newPage === 0) {
-      params.delete('page');
-    } else {
-      params.set('page', newPage.toString());
-    }
-    router.push(`/dashboard/user?${params.toString()}`, { scroll: false });
-  }, [router, searchParams]);
+  const updatePageInUrl = useCallback(
+    (newPage: number) => {
+      const params = new URLSearchParams(searchParams);
+      if (newPage === 0) {
+        params.delete("page");
+      } else {
+        params.set("page", newPage.toString());
+      }
+      router.push(`/dashboard/user?${params.toString()}`, { scroll: false });
+    },
+    [router, searchParams]
+  );
 
   const nextPage = useCallback(() => {
     if ((pageIndex + 1) * pageSize < totalUsers) {
@@ -556,12 +566,35 @@ export const UserTableClient = ({
           isLoading={isOperating}
           stations={stations}
           loadingStations={false}
-          divisions={divisions.map(d => ({ osmId: d.osmId.toString(), name: d.name }))}
-          districts={districts.map(d => ({ osmId: d.osmId.toString(), name: d.name }))}
-          upazilas={upazilas.map(u => ({ osmId: u.osmId.toString(), name: u.name }))}
-          selectedDivision={selectedDivision ? { osmId: selectedDivision.osmId.toString(), name: selectedDivision.name } : null}
+          divisions={divisions.map((d) => ({
+            osmId: d.osmId.toString(),
+            name: d.name,
+          }))}
+          districts={districts.map((d) => ({
+            osmId: d.osmId.toString(),
+            name: d.name,
+          }))}
+          upazilas={upazilas.map((u) => ({
+            osmId: u.osmId.toString(),
+            name: u.name,
+          }))}
+          selectedDivision={
+            selectedDivision
+              ? {
+                  osmId: selectedDivision.osmId.toString(),
+                  name: selectedDivision.name,
+                }
+              : null
+          }
           onDivisionChange={setSelectedDivision}
-          selectedDistrict={selectedDistrict ? { osmId: selectedDistrict.osmId.toString(), name: selectedDistrict.name } : null}
+          selectedDistrict={
+            selectedDistrict
+              ? {
+                  osmId: selectedDistrict.osmId.toString(),
+                  name: selectedDistrict.name,
+                }
+              : null
+          }
           onDistrictChange={setSelectedDistrict}
           onUpazilaChange={setSelectedUpazila}
           loadingDivisions={canLoadingLocationData.loadingDivisions}

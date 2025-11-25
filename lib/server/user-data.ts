@@ -47,18 +47,24 @@ export interface UsersResponse {
 /**
  * Fetch users with pagination - Server Side
  */
-export async function getUsersServer(pageIndex: number = 0, pageSize: number = 10): Promise<UsersResponse> {
+export async function getUsersServer(
+  pageIndex: number = 0,
+  pageSize: number = 10
+): Promise<UsersResponse> {
   try {
     const headersList = await headers();
-    const cookie = headersList.get('cookie');
-    
-    const baseUrl = process.env.BETTER_AUTH_URL || process.env.VERCEL_URL || 'http://localhost:3000';
+    const cookie = headersList.get("cookie");
+
+    const baseUrl =
+      process.env.NEXTAUTH_URL ||
+      process.env.VERCEL_URL ||
+      "http://localhost:3000";
     const response = await fetch(
       `${baseUrl}${API_ENDPOINTS.USERS}?limit=${pageSize}&offset=${pageIndex * pageSize}`,
       {
-        cache: 'no-store', // Ensure fresh data
+        cache: "no-store", // Ensure fresh data
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           ...(cookie && { cookie }),
         },
       }
@@ -74,7 +80,7 @@ export async function getUsersServer(pageIndex: number = 0, pageSize: number = 1
       total: data.total || 0,
     };
   } catch (error) {
-    console.error('Error fetching users:', error);
+    console.error("Error fetching users:", error);
     return {
       users: [],
       total: 0,
@@ -88,19 +94,19 @@ export async function getUsersServer(pageIndex: number = 0, pageSize: number = 1
 export async function getStationsServer(): Promise<Station[]> {
   try {
     const headersList = await headers();
-    const cookie = headersList.get('cookie');
-    
-    const baseUrl = process.env.BETTER_AUTH_URL || process.env.VERCEL_URL || 'http://localhost:3000';
-    const response = await fetch(
-      `${baseUrl}${API_ENDPOINTS.STATIONS}`,
-      {
-        cache: 'no-store', // Ensure fresh data
-        headers: {
-          'Content-Type': 'application/json',
-          ...(cookie && { cookie }),
-        },
-      }
-    );
+    const cookie = headersList.get("cookie");
+
+    const baseUrl =
+      process.env.NEXTAUTH_URL ||
+      process.env.VERCEL_URL ||
+      "http://localhost:3000";
+    const response = await fetch(`${baseUrl}${API_ENDPOINTS.STATIONS}`, {
+      cache: "no-store", // Ensure fresh data
+      headers: {
+        "Content-Type": "application/json",
+        ...(cookie && { cookie }),
+      },
+    });
 
     if (!response.ok) {
       throw new Error(`Failed to fetch stations: ${response.statusText}`);
@@ -109,7 +115,7 @@ export async function getStationsServer(): Promise<Station[]> {
     const data = await response.json();
     return data || [];
   } catch (error) {
-    console.error('Error fetching stations:', error);
+    console.error("Error fetching stations:", error);
     return [];
   }
 }

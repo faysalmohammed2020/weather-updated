@@ -1,11 +1,93 @@
+// app/api/impersonate/route.ts
+
 import { NextRequest, NextResponse } from "next/server";
+import { encode as encodeJwt, getToken } from "next-auth/jwt";
+
 import { getSession } from "@/lib/getSession";
-import { admin } from "@/lib/auth-client";
 import prisma from "@/lib/prisma";
 import { LogAction, LogActionType, LogModule } from "@/lib/log";
+import { authOptions, authSecret } from "@/lib/auth";
 
+const SESSION_MAX_AGE = authOptions.session?.maxAge ?? 60 * 60 * 24 * 30;
+
+const getSessionCookieName = (request: NextRequest) => {
+  const cookies = request.cookies;
+
+  if (cookies.has("__Secure-next-auth.session-token")) {
+    return "__Secure-next-auth.session-token";
+  }
+
+  if (cookies.has("next-auth.session-token")) {
+    return "next-auth.session-token";
+  }
+
+  return process.env.NODE_ENV === "production"
+    ? "__Secure-next-auth.session-token"
+    : "next-auth.session-token";
+};
+
+const buildStationPayload = (
+  station?:
+    | {
+        id: string;
+        stationId: string;
+        name: string;
+      }
+    | null
+) => {
+  if (!station) return null;
+
+  return {
+    id: station.id,
+    stationId: station.stationId,
+    name: station.name,
+  };
+};
+
+const buildUserClaims = (user: any) => ({
+  id: user.id,
+  sub: user.id,
+  name: user.name,
+  email: user.email,
+  role: user.role ?? "observer",
+  division: user.division,
+  district: user.district,
+  upazila: user.upazila,
+  stationId: user.stationId,
+  station: buildStationPayload(user.Station ?? user.station ?? null),
+});
+
+const ensureSecret = () =>
+  authSecret || process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET || "";
+
+const setSessionCookie = (
+  response: NextResponse,
+  request: NextRequest,
+  value: string
+) => {
+  const cookieName = getSessionCookieName(request);
+
+  response.cookies.set(cookieName, value, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: SESSION_MAX_AGE,
+  });
+};
+
+// Start impersonation
 export async function POST(request: NextRequest) {
   try {
+    const secret = ensureSecret();
+
+    if (!secret) {
+      return NextResponse.json(
+        { error: "Auth secret not configured on the server" },
+        { status: 500 }
+      );
+    }
+
     const session = await getSession();
 
     // Check if user is authenticated
@@ -13,6 +95,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "Unauthorized. User not authenticated." },
         { status: 403 }
+      );
+    }
+
+    if ((session.user as any).isImpersonating) {
+      return NextResponse.json(
+        { error: "You are already impersonating a user. Stop impersonation first." },
+        { status: 400 }
       );
     }
 
@@ -88,33 +177,36 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create impersonation session by updating the current session
-    // First, get the current session token
-    const currentSession = await prisma.sessions.findFirst({
-      where: {
-        userId: session.user.id,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+    const baseToken = await getToken({ req: request, secret });
 
-    if (!currentSession) {
+    if (!baseToken) {
       return NextResponse.json(
-        { error: "Current session not found" },
-        { status: 500 }
+        { error: "Unable to read the current session" },
+        { status: 401 }
       );
     }
 
-    // Update the session to impersonate the target user
-    await prisma.sessions.update({
-      where: {
-        id: currentSession.id,
+    const impersonationTokenPayload: Record<string, any> = {
+      ...baseToken,
+      ...buildUserClaims(targetUser),
+      isImpersonating: true,
+      originalUser: {
+        id: session.user.id,
+        name: session.user.name,
+        email: session.user.email,
+        role: session.user.role,
+        stationId: (session.user as any).stationId,
+        division: (session.user as any).division,
+        district: (session.user as any).district,
+        upazila: (session.user as any).upazila,
+        station: (session.user as any).station ?? null,
       },
-      data: {
-        userId: targetUserId,
-        impersonatedBy: session.user.id,
-      },
+    };
+
+    const sessionToken = await encodeJwt({
+      token: impersonationTokenPayload,
+      secret,
+      maxAge: SESSION_MAX_AGE,
     });
 
     // Log the impersonation action
@@ -138,7 +230,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       message: `Successfully started impersonating ${targetUser.name || targetUser.email}`,
       impersonatedUser: {
@@ -148,6 +240,10 @@ export async function POST(request: NextRequest) {
         role: targetUser.role,
       },
     });
+
+    setSessionCookie(response, request, sessionToken);
+
+    return response;
   } catch (error) {
     console.error("Impersonation error:", error);
     return NextResponse.json(
@@ -160,55 +256,75 @@ export async function POST(request: NextRequest) {
 // Stop impersonation endpoint
 export async function DELETE(request: NextRequest) {
   try {
+    const secret = ensureSecret();
+
+    if (!secret) {
+      return NextResponse.json(
+        { error: "Auth secret not configured on the server" },
+        { status: 500 }
+      );
+    }
+
     const session = await getSession();
 
     if (!session || !session.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Stop impersonation by restoring the original session
-    const currentSession = await prisma.sessions.findFirst({
-      where: {
-        userId: session.user.id,
-        impersonatedBy: { not: null },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+    const originalUserFromToken = (session.user as any).originalUser;
 
-    if (!currentSession || !currentSession.impersonatedBy) {
+    if (!(session.user as any).isImpersonating || !originalUserFromToken) {
       return NextResponse.json(
         { error: "No active impersonation session found" },
         { status: 400 }
       );
     }
 
-    // Load both original admin and impersonated user for accurate logging
-    const originalUser = await prisma.users.findUnique({
-      where: { id: currentSession.impersonatedBy },
+    const baseToken = await getToken({ req: request, secret });
+
+    if (!baseToken) {
+      return NextResponse.json(
+        { error: "Unable to read the current session" },
+        { status: 401 }
+      );
+    }
+
+    const originalUserRecord = originalUserFromToken?.id
+      ? await prisma.users.findUnique({
+          where: { id: originalUserFromToken.id },
+          include: { Station: true },
+        })
+      : null;
+
+    const restoredUser = originalUserRecord ?? originalUserFromToken;
+
+    if (!restoredUser) {
+      return NextResponse.json(
+        { error: "Unable to restore the original session" },
+        { status: 400 }
+      );
+    }
+
+    const restoredTokenPayload: Record<string, any> = {
+      ...baseToken,
+      ...buildUserClaims(restoredUser),
+      isImpersonating: false,
+      originalUser: null,
+    };
+
+    const sessionToken = await encodeJwt({
+      token: restoredTokenPayload,
+      secret,
+      maxAge: SESSION_MAX_AGE,
     });
 
+    // Load both original admin and impersonated user for accurate logging
     const impersonatedUser = await prisma.users.findUnique({
       where: { id: session.user.id },
     });
 
-    // Restore the original user session
-    await prisma.sessions.update({
-      where: {
-        id: currentSession.id,
-      },
-      data: {
-        userId: currentSession.impersonatedBy,
-        impersonatedBy: null,
-      },
-    });
-
-    // Log the stop impersonation action
-    // Actor = original admin (who started impersonation)
-    // Target = user who was being impersonated
-    const logActor = originalUser || impersonatedUser || session.user;
-    const logTarget = impersonatedUser || originalUser || session.user;
+    const logActor = originalUserRecord || originalUserFromToken || session.user;
+    const logTarget = impersonatedUser || session.user;
 
     await LogAction({
       init: prisma,
@@ -222,13 +338,18 @@ export async function DELETE(request: NextRequest) {
       module: LogModule.USER,
       details: {
         stoppedImpersonation: true,
+        restoredUserId: (logActor as any).id || session.user.id,
       },
     });
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       message: "Successfully stopped impersonation",
     });
+
+    setSessionCookie(response, request, sessionToken);
+
+    return response;
   } catch (error) {
     console.error("Stop impersonation error:", error);
     return NextResponse.json(

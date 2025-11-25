@@ -8,7 +8,7 @@ export async function middleware(request: NextRequest) {
   // JWT token read (edge-safe)
   const token = await getToken({
     req: request,
-    secret: process.env.NEXTAUTH_SECRET,
+    secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET,
   });
   // token null => not logged in
 

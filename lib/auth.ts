@@ -7,6 +7,10 @@ import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 
+// Single source of truth for signing/decoding NextAuth JWTs
+export const authSecret =
+  process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET;
+
 /**
  * BetterAuth legacy scrypt hash verify
  * Format usually: scrypt$ln=16,r=8,p=1$saltBase64$hashBase64
@@ -55,6 +59,7 @@ function verifyBetterAuthScryptColon(plain: string, stored: string) {
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
+  secret: authSecret,
   session: {
     strategy: "jwt",
     maxAge: 60 * 15,
@@ -242,6 +247,8 @@ return {
       // ✅ IMPORTANT
       token.station = (user as any).station;
     }
+    token.isImpersonating = (token as any).isImpersonating ?? false;
+    token.originalUser = (token as any).originalUser ?? null;
     return token;
   },
 
@@ -256,6 +263,10 @@ return {
 
       // ✅ IMPORTANT
       (session.user as any).station = (token as any).station ?? null;
+      (session.user as any).isImpersonating =
+        Boolean((token as any).isImpersonating);
+      (session.user as any).originalUser =
+        (token as any).originalUser ?? null;
     }
     return session;
   },
