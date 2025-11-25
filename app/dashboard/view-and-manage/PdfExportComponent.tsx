@@ -1,10 +1,19 @@
-"use client"
-import React from "react"
-import { Document, Page, Text, View, StyleSheet, PDFDownloadLink, Image } from "@react-pdf/renderer"
-import { Button } from "@/components/ui/button"
-import { FileText } from "lucide-react"
-import moment from 'moment';
-import { useSession } from "@/lib/auth-client"
+"use client";
+
+import React from "react";
+import {
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet,
+  PDFDownloadLink,
+  Image,
+} from "@react-pdf/renderer";
+import { Button } from "@/components/ui/button";
+import { FileText } from "lucide-react";
+import moment from "moment";
+import { useSession } from "next-auth/react"; // ✅ NextAuth hook
 
 // Compact PDF Styles for single A3 page
 const styles = StyleSheet.create({
@@ -150,29 +159,23 @@ const styles = StyleSheet.create({
   compactSection: {
     marginBottom: 6,
   },
-})
+});
 
 interface CompactWeatherPDFProps {
-  firstCardData: any[]
-  secondCardData: any[]
-  synopticData: any[]
-  dailySummeryData: any[]
+  firstCardData: any[];
+  secondCardData: any[];
+  synopticData: any[];
+  dailySummeryData: any[];
   stationInfo: {
-    stationId: string
-    stationName: string
-    date: string
-  }
+    stationId: string;
+    stationName: string;
+    date: string;
+  };
+  session: any; // ✅ session parent থেকে আসবে
 }
 
-// Session wrapper component to use hooks in PDF document
-const PDFDocumentWithSession: React.FC<CompactWeatherPDFProps> = (props) => {
-  const { data: session } = useSession()
-  
-  return <CompactWeatherPDFDocument {...props} session={session} />
-}
-
-// Compact PDF Document Component
-const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps & { session: any }> = ({
+// ✅ Compact PDF Document Component (NO HOOKS HERE)
+const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
   firstCardData,
   secondCardData,
   synopticData,
@@ -181,47 +184,50 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps & { session: an
   session,
 }) => {
   const formatValue = (value: any) => {
-    if (value === null || value === undefined || value === "") return "--"
-    return String(value).substring(0, 10)
-  }
+    if (value === null || value === undefined || value === "") return "--";
+    return String(value).substring(0, 10);
+  };
 
-  const superAdmin = session?.user?.role === "super_admin"
+  const superAdmin = session?.user?.role === "super_admin";
 
   const formatTime = (utcTime: string) => {
-    if (!utcTime) return "--"
+    if (!utcTime) return "--";
     try {
       return new Date(utcTime).toLocaleTimeString("en-US", {
         hour: "2-digit",
         minute: "2-digit",
         timeZone: "UTC",
-      })
-    } catch (error) {
-      return "--"
+      });
+    } catch {
+      return "--";
     }
-  }
+  };
 
   // Fix for the synoptic data remark field that was causing JSX error
   const renderRemark = (record: any) => {
-    if (!record.weatherRemark) return "--"
-    
+    if (!record.weatherRemark) return "--";
+
     try {
-      const parts = record.weatherRemark.split(" - ")
+      const parts = record.weatherRemark.split(" - ");
       if (parts.length >= 2 && parts[0].startsWith("http")) {
         return (
-          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
-            <Image 
-              style={{ width: 10, height: 10, marginRight: 2 }} 
-              src={parts[0]} 
-            />
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Image style={{ width: 10, height: 10, marginRight: 2 }} src={parts[0]} />
             <Text>{parts[1]}</Text>
           </View>
-        )
+        );
       }
-      return <Text>{record.weatherRemark}</Text>
-    } catch (error) {
-      return <Text>{record.weatherRemark}</Text>
+      return <Text>{record.weatherRemark}</Text>;
+    } catch {
+      return <Text>{record.weatherRemark}</Text>;
     }
-  }
+  };
 
   return (
     <Document>
@@ -231,11 +237,19 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps & { session: an
           <View>
             <Text style={styles.title}>Weather Station Data Report</Text>
             <Text style={styles.subtitle}>
-              {superAdmin && firstCardData.length > 0 ? formatValue(firstCardData[0].stationName) : formatValue(stationInfo.stationName)} 
-              ({superAdmin && firstCardData.length > 0 ? formatValue(firstCardData[0].stationCode) : formatValue(stationInfo.stationId)})
+              {superAdmin && firstCardData.length > 0
+                ? formatValue(firstCardData[0].stationName)
+                : formatValue(stationInfo.stationName)}
+              (
+              {superAdmin && firstCardData.length > 0
+                ? formatValue(firstCardData[0].stationCode)
+                : formatValue(stationInfo.stationId)}
+              )
             </Text>
           </View>
-          <Text style={{ fontSize: 7, color: "#64748b" }}>Generated: {new Date().toLocaleDateString()}</Text>
+          <Text style={{ fontSize: 7, color: "#64748b" }}>
+            Generated: {new Date().toLocaleDateString()}
+          </Text>
         </View>
 
         {/* Station Info */}
@@ -247,34 +261,44 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps & { session: an
           <View style={styles.stationItem}>
             <Text style={styles.stationLabel}>STATION NO</Text>
             <Text style={styles.stationValue}>
-              {superAdmin && firstCardData.length > 0 ? formatValue(firstCardData[0].stationCode) : formatValue(stationInfo.stationId)}
+              {superAdmin && firstCardData.length > 0
+                ? formatValue(firstCardData[0].stationCode)
+                : formatValue(stationInfo.stationId)}
             </Text>
           </View>
           <View style={styles.stationItem}>
             <Text style={styles.stationLabel}>STATION NAME</Text>
             <Text style={styles.stationValue}>
-              {superAdmin && firstCardData.length > 0 ? formatValue(firstCardData[0].stationName) : formatValue(stationInfo.stationName)}
+              {superAdmin && firstCardData.length > 0
+                ? formatValue(firstCardData[0].stationName)
+                : formatValue(stationInfo.stationName)}
             </Text>
           </View>
           <View style={styles.stationItem}>
             <Text style={styles.stationLabel}>DATE</Text>
             <Text style={styles.stationValue}>
-              {firstCardData.length > 0 ? moment(firstCardData[0].utcTime).format("ll") : stationInfo.date}
+              {firstCardData.length > 0
+                ? moment(firstCardData[0].utcTime).format("ll")
+                : stationInfo.date}
             </Text>
           </View>
         </View>
 
-        {/* First Card Data - Compact */}
+        {/* ---------- First Card Data ---------- */}
         {firstCardData.length > 0 && (
           <View style={styles.compactSection}>
-            <Text style={styles.sectionTitle}>First Card - Meteorological Data</Text>
+            <Text style={styles.sectionTitle}>
+              First Card - Meteorological Data
+            </Text>
             <View style={styles.table}>
-              {/* First Card Headers - Compact */}
+              {/* Headers */}
               <View style={styles.tableRow}>
                 <Text style={[styles.tableCellHeader, { width: "4%" }]}>Time</Text>
                 <Text style={[styles.tableCellHeader, { width: "5%" }]}>Date</Text>
                 <Text style={[styles.tableCellHeader, { width: "3%" }]}>Indicator</Text>
-                <Text style={[styles.tableCellHeader, { width: "5%" }]}>Attached Thermometer (°C)</Text>
+                <Text style={[styles.tableCellHeader, { width: "5%" }]}>
+                  Attached Thermometer (°C)
+                </Text>
                 <Text style={[styles.tableCellHeader, { width: "3%" }]}>Bar As Read (hPa)</Text>
                 <Text style={[styles.tableCellHeader, { width: "3%" }]}>Corrected For Index</Text>
                 <Text style={[styles.tableCellHeader, { width: "3%" }]}>Height Difference (hPa)</Text>
@@ -302,6 +326,8 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps & { session: an
                 <Text style={[styles.tableCellHeader, { width: "3%" }]}>Past Weather (W₂)</Text>
                 <Text style={[styles.tableCellHeader, { width: "3%" }]}>Present Weather (ww)</Text>
               </View>
+
+              {/* Rows */}
               {firstCardData.slice(0, 8).map((record, index) => (
                 <View key={index} style={styles.tableRow}>
                   <Text style={[styles.tableCell, { width: "4%" }]}>{formatTime(record.utcTime)}</Text>
@@ -340,12 +366,13 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps & { session: an
           </View>
         )}
 
-        {/* Second Card Data - Compact */}
+        {/* ---------- Second Card Data ---------- */}
         {secondCardData.length > 0 && (
           <View style={styles.compactSection}>
-            <Text style={styles.sectionTitle}>Second Card - Weather Observations</Text>
+            <Text style={styles.sectionTitle}>
+              Second Card - Weather Observations
+            </Text>
             <View style={styles.table}>
-              {/* Second Card Headers - Compact */}
               <View style={styles.tableRow}>
                 <Text style={[styles.tableCellHeader, { width: "3%" }]}>Time</Text>
                 <Text style={[styles.tableCellHeader, { width: "4%" }]}>Date</Text>
@@ -385,7 +412,7 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps & { session: an
                 <Text style={[styles.tableCellHeader, { width: "2.5%" }]}>Wind Direction</Text>
                 <Text style={[styles.tableCellHeader, { width: "8%" }]}>Observer Initial</Text>
               </View>
-              {/* Second Card Data Rows - Limited to 6 rows */}
+
               {secondCardData.slice(0, 8).map((record, index) => (
                 <View key={index} style={styles.tableRow}>
                   <Text style={[styles.tableCell, { width: "3%" }]}>{formatTime(record.utcTime)}</Text>
@@ -431,12 +458,11 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps & { session: an
           </View>
         )}
 
-        {/* Synoptic Code Data - Compact */}
+        {/* ---------- Synoptic Code Data ---------- */}
         {synopticData.length > 0 && (
           <View style={styles.compactSection}>
             <Text style={styles.sectionTitle}>Synoptic Code Data</Text>
             <View style={styles.table}>
-              {/* Synoptic Headers - Compact */}
               <View style={styles.tableRow}>
                 <Text style={[styles.tableCellHeaderSynoptic, { width: "4%" }]}>Time</Text>
                 <Text style={[styles.tableCellHeaderSynoptic, { width: "4%" }]}>Date</Text>
@@ -462,7 +488,7 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps & { session: an
                 <Text style={[styles.tableCellHeaderSynoptic, { width: "4%" }]}>91fqfqfq</Text>
                 <Text style={[styles.tableCellHeaderSynoptic, { width: "12%" }]}>Remark</Text>
               </View>
-              {/* Synoptic Data Rows - Limited to 6 rows */}
+
               {synopticData.slice(0, 8).map((record, index) => (
                 <View key={index} style={styles.tableRow}>
                   <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>{formatTime(record.GG)}</Text>
@@ -496,12 +522,11 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps & { session: an
           </View>
         )}
 
-        {/* Daily Summary Data - Compact */}
+        {/* ---------- Daily Summary Data ---------- */}
         {dailySummeryData.length > 0 && (
           <View style={styles.compactSection}>
             <Text style={styles.sectionTitle}>Daily Summary Data</Text>
             <View style={styles.table}>
-              {/* Daily Summary Headers - Compact */}
               <View style={styles.tableRow}>
                 <Text style={[styles.tableCellHeaderSynoptic, { width: "5.5%" }]}>Time</Text>
                 <Text style={[styles.tableCellHeaderSynoptic, { width: "5.5%" }]}>Date</Text>
@@ -522,7 +547,7 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps & { session: an
                 <Text style={[styles.tableCellHeaderSynoptic, { width: "5.5%" }]}>Lowest Visibility (km)</Text>
                 <Text style={[styles.tableCellHeaderSynoptic, { width: "5.5%" }]}>Total Rain Duration (H-M)</Text>
               </View>
-              {/* Synoptic Data Rows - Limited to 6 rows */}
+
               {dailySummeryData.slice(0, 8).map((record, index) => (
                 <View key={index} style={styles.tableRow}>
                   <Text style={[styles.tableCellSynoptic, { width: "5.5%" }]}>{formatTime(record.date)}</Text>
@@ -552,26 +577,33 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps & { session: an
         {/* Footer */}
         <View style={styles.footer}>
           <Text>
-            Weather Station Data Report - {superAdmin && firstCardData.length > 0 ? formatValue(firstCardData[0].stationName) : formatValue(stationInfo.stationName)} 
-            ({superAdmin && firstCardData.length > 0 ? formatValue(firstCardData[0].stationCode) : formatValue(stationInfo.stationId)}) - {stationInfo.date}
+            Weather Station Data Report -{" "}
+            {superAdmin && firstCardData.length > 0
+              ? formatValue(firstCardData[0].stationName)
+              : formatValue(stationInfo.stationName)}{" "}
+            (
+            {superAdmin && firstCardData.length > 0
+              ? formatValue(firstCardData[0].stationCode)
+              : formatValue(stationInfo.stationId)}
+            ) - {stationInfo.date}
           </Text>
         </View>
       </Page>
     </Document>
-  )
-}
+  );
+};
 
 // Main Compact PDF Export Component
 interface CompactPDFExportButtonProps {
-  firstCardRef: React.RefObject<any>
-  secondCardRef: React.RefObject<any>
-  synopticRef: React.RefObject<any>
-  dailySummeryRef: React.RefObject<any>
+  firstCardRef: React.RefObject<any>;
+  secondCardRef: React.RefObject<any>;
+  synopticRef: React.RefObject<any>;
+  dailySummeryRef: React.RefObject<any>;
   stationInfo?: {
-    stationId: string
-    stationName: string
-    date: string
-  }
+    stationId: string;
+    stationName: string;
+    date: string;
+  };
 }
 
 export const CompactPDFExportButton: React.FC<CompactPDFExportButtonProps> = ({
@@ -585,13 +617,14 @@ export const CompactPDFExportButton: React.FC<CompactPDFExportButtonProps> = ({
     date: new Date().toLocaleDateString(),
   },
 }) => {
-  const [isGenerating, setIsGenerating] = React.useState(false)
+  const [isGenerating, setIsGenerating] = React.useState(false);
+  const { data: session } = useSession(); // ✅ hook normal React tree তে
 
   const generatePDFData = React.useCallback(() => {
-    const firstCardData = firstCardRef.current?.getData?.() || []
-    const secondCardData = secondCardRef.current?.getData?.() || []
-    const synopticData = synopticRef.current?.getData?.() || []
-    const dailySummeryData = dailySummeryRef.current?.getData?.() || []
+    const firstCardData = firstCardRef.current?.getData?.() || [];
+    const secondCardData = secondCardRef.current?.getData?.() || [];
+    const synopticData = synopticRef.current?.getData?.() || [];
+    const dailySummeryData = dailySummeryRef.current?.getData?.() || [];
 
     return {
       firstCardData,
@@ -599,23 +632,23 @@ export const CompactPDFExportButton: React.FC<CompactPDFExportButtonProps> = ({
       synopticData,
       dailySummeryData,
       stationInfo,
-    }
-  }, [firstCardRef, secondCardRef, synopticRef, dailySummeryRef, stationInfo])
+    };
+  }, [firstCardRef, secondCardRef, synopticRef, dailySummeryRef, stationInfo]);
 
-  const fileName = `Weather_Data_Compact_${stationInfo.date.replace(/\//g, "-")}.pdf`
+  const fileName = `Weather_Data_Compact_${stationInfo.date.replace(/\//g, "-")}.pdf`;
 
   return (
     <PDFDownloadLink
-      document={<PDFDocumentWithSession {...generatePDFData()} />}
+      document={<CompactWeatherPDFDocument {...generatePDFData()} session={session} />}
       fileName={fileName}
     >
-      {({ blob, url, loading, error }) => (
+      {({ loading }) => (
         <Button
           disabled={loading || isGenerating}
           className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white w-full sm:w-auto"
           onClick={() => {
-            setIsGenerating(true)
-            setTimeout(() => setIsGenerating(false), 1000)
+            setIsGenerating(true);
+            setTimeout(() => setIsGenerating(false), 1000);
           }}
         >
           {loading || isGenerating ? (
@@ -632,7 +665,7 @@ export const CompactPDFExportButton: React.FC<CompactPDFExportButtonProps> = ({
         </Button>
       )}
     </PDFDownloadLink>
-  )
-}
+  );
+};
 
-export default CompactPDFExportButton
+export default CompactPDFExportButton;
