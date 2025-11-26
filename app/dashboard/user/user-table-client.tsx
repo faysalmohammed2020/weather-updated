@@ -177,35 +177,41 @@ export const UserTableClient = ({
   // ============================================================================
   // DATA REFRESH FUNCTION
   // ============================================================================
-const refreshUsers = useCallback(async () => {
-  setIsLoading(true);
-  try {
-    const response = await fetch(
-      `${API_ENDPOINTS.USERS}?limit=${pageSize}&offset=${pageIndex * pageSize}`,
-      {
-        cache: "no-store",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
+  const refreshUsers = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(
+        `${API_ENDPOINTS.USERS}?limit=${pageSize}&offset=${
+          pageIndex * pageSize
+        }`,
+        {
+          cache: "no-store",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) {
+        const text = await response.text();
+        console.error("Refresh failed:", response.status, text);
+        throw new Error("Failed to refresh users");
       }
-    );
 
-    if (!response.ok) {
-      const text = await response.text();
-      console.error("Refresh failed:", response.status, text);
-      throw new Error("Failed to refresh users");
+      const data = await response.json();
+      setUsers(data.users ?? []);
+      setTotalUsers(data.total ?? 0);
+    } catch (error) {
+      console.error("Error refreshing users:", error);
+      toast.error("Failed to refresh users");
+    } finally {
+      setIsLoading(false);
     }
+  }, [pageIndex, pageSize]);
 
-    const data = await response.json();
-    setUsers(data.users ?? []);
-    setTotalUsers(data.total ?? 0);
-  } catch (error) {
-    console.error("Error refreshing users:", error);
-    toast.error("Failed to refresh users");
-  } finally {
-    setIsLoading(false);
-  }
-}, [pageIndex, pageSize]);
-
+  // ✅ IMPORTANT: pageIndex change hole auto refresh
+  useEffect(() => {
+    refreshUsers();
+  }, [pageIndex, refreshUsers]);
 
   // ============================================================================
   // PAGINATION FUNCTIONS
@@ -464,6 +470,21 @@ const refreshUsers = useCallback(async () => {
   );
 
   // ============================================================================
+  // SEARCH STATE
+  // ============================================================================
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Filter users based on search term (name or email)
+  const filteredUsers = useMemo(() => {
+    if (!searchTerm.trim()) return users;
+    const term = searchTerm.toLowerCase();
+    return users.filter(user => 
+      user.name?.toLowerCase().includes(term) || 
+      user.email?.toLowerCase().includes(term)
+    );
+  }, [users, searchTerm]);
+
+  // ============================================================================
   // RENDER
   // ============================================================================
   return (
@@ -479,6 +500,24 @@ const refreshUsers = useCallback(async () => {
             + Create User
           </Button>
         )}
+      </div>
+
+      {/* Search Bar */}
+      <div className="mb-6">
+        <div className="relative max-w-md">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <input
+            type="text"
+            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 sm:text-sm"
+            placeholder="Search users by name or email..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
       </div>
 
       {/* User Table */}
@@ -510,8 +549,40 @@ const refreshUsers = useCallback(async () => {
           <TableBody>
             {isLoading ? (
               <UserTableSkeletonRows rows={pageSize} />
-            ) : users.length > 0 ? (
-              tableRows
+            ) : filteredUsers.length > 0 ? (
+              filteredUsers.map((user) => {
+                const stationName = stationNameById.get(user.stationId);
+                return (
+                  <TableRow key={user.id}>
+                    <TableCell className="p-3 text-left truncate max-w-[250px] text-base">
+                      {user.name || "N/A"}
+                    </TableCell>
+                    <TableCell className="p-3 text-left truncate max-w-[250px] text-base">
+                      {user.email}
+                    </TableCell>
+                    <TableCell className="p-3 text-left truncate max-w-[250px] text-base">
+                      {user.role || "N/A"}
+                    </TableCell>
+                    <TableCell className="p-3 text-left truncate max-w-[250px] text-base">
+                      {stationName || "N/A"}
+                    </TableCell>
+                    <TableCell className="p-3 text-left truncate max-w-[250px] text-base">
+                      {formatDate(user.createdAt)}
+                    </TableCell>
+                    <TableCell>
+                      <UserActionButtons
+                        user={user}
+                        isSuper={isUserSuperAdmin}
+                        currentUserId={session?.user?.id}
+                        onEdit={openEditDialog}
+                        onDelete={openDeleteConfirmation}
+                        onImpersonate={handleImpersonate}
+                        isImpersonating={isOperating}
+                      />
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             ) : (
               <TableRow>
                 <TableCell colSpan={6} className="h-24 text-center">
@@ -538,7 +609,7 @@ const refreshUsers = useCallback(async () => {
               variant="outline"
               size="sm"
               onClick={prevPage}
-              disabled={pageIndex === 0}
+              disabled={pageIndex === 0 || isLoading}
             >
               Previous
             </Button>
@@ -546,7 +617,7 @@ const refreshUsers = useCallback(async () => {
               variant="outline"
               size="sm"
               onClick={nextPage}
-              disabled={(pageIndex + 1) * pageSize >= totalUsers}
+              disabled={(pageIndex + 1) * pageSize >= totalUsers || isLoading}
             >
               Next
             </Button>
