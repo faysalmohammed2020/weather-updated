@@ -177,34 +177,35 @@ export const UserTableClient = ({
   // ============================================================================
   // DATA REFRESH FUNCTION
   // ============================================================================
-  const refreshUsers = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
-      const response = await fetch(
-        `${baseUrl}${API_ENDPOINTS.USERS}?limit=${pageSize}&offset=${pageIndex * pageSize}`,
-        {
-          cache: "no-store",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to refresh users");
+const refreshUsers = useCallback(async () => {
+  setIsLoading(true);
+  try {
+    const response = await fetch(
+      `${API_ENDPOINTS.USERS}?limit=${pageSize}&offset=${pageIndex * pageSize}`,
+      {
+        cache: "no-store",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
       }
+    );
 
-      const data = await response.json();
-      setUsers(data.users || []);
-      setTotalUsers(data.total || 0);
-    } catch (error) {
-      console.error("Error refreshing users:", error);
-      toast.error("Failed to refresh users");
-    } finally {
-      setIsLoading(false);
+    if (!response.ok) {
+      const text = await response.text();
+      console.error("Refresh failed:", response.status, text);
+      throw new Error("Failed to refresh users");
     }
-  }, [pageIndex, pageSize]);
+
+    const data = await response.json();
+    setUsers(data.users ?? []);
+    setTotalUsers(data.total ?? 0);
+  } catch (error) {
+    console.error("Error refreshing users:", error);
+    toast.error("Failed to refresh users");
+  } finally {
+    setIsLoading(false);
+  }
+}, [pageIndex, pageSize]);
+
 
   // ============================================================================
   // PAGINATION FUNCTIONS
