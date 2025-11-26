@@ -1,17 +1,17 @@
 const stationPressure = {
-  "station": {
-    "name": "1st Class Observatory, Kutubdia",
-    "station_no": "41989",
-    "latitude": "21° 49' N",
-    "longitude": "91° 51' E",
-    "elevation_m": 2.74,
-    "bar_cistern_height_m_above_msl": 4.27,
-    "bar_cistern_height_m_above_station": 1.53
+  station: {
+    name: "1st Class Observatory, Kutubdia",
+    station_no: "41989",
+    latitude: "21° 49' N",
+    longitude: "91° 51' E",
+    elevation_m: 2.74,
+    bar_cistern_height_m_above_msl: 4.27,
+    bar_cistern_height_m_above_station: 1.53,
   },
-  "correction_table": [
+  correction_table: [
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 1.0,
+      height: 1.53,
+      dry_bulb_temp_c: 1.0,
       "cistern _level_pressure": {
         "970": 0.19,
         "975": 0.19,
@@ -25,12 +25,12 @@ const stationPressure = {
         "1015": 0.19,
         "1020": 0.2,
         "1025": 0.2,
-        "1030": 0.2
-      }
+        "1030": 0.2,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 2.0,
+      height: 1.53,
+      dry_bulb_temp_c: 2.0,
       "cistern _level_pressure": {
         "970": 0.18,
         "975": 0.19,
@@ -44,12 +44,12 @@ const stationPressure = {
         "1015": 0.19,
         "1020": 0.19,
         "1025": 0.2,
-        "1030": 0.2
-      }
+        "1030": 0.2,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 3.0,
+      height: 1.53,
+      dry_bulb_temp_c: 3.0,
       "cistern _level_pressure": {
         "970": 0.18,
         "975": 0.18,
@@ -63,12 +63,12 @@ const stationPressure = {
         "1015": 0.19,
         "1020": 0.19,
         "1025": 0.2,
-        "1030": 0.2
-      }
+        "1030": 0.2,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 4.0,
+      height: 1.53,
+      dry_bulb_temp_c: 4.0,
       "cistern _level_pressure": {
         "970": 0.18,
         "975": 0.18,
@@ -82,12 +82,12 @@ const stationPressure = {
         "1015": 0.19,
         "1020": 0.19,
         "1025": 0.19,
-        "1030": 0.19
-      }
+        "1030": 0.19,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 5.0,
+      height: 1.53,
+      dry_bulb_temp_c: 5.0,
       "cistern _level_pressure": {
         "970": 0.18,
         "975": 0.18,
@@ -101,12 +101,12 @@ const stationPressure = {
         "1015": 0.19,
         "1020": 0.19,
         "1025": 0.19,
-        "1030": 0.19
-      }
+        "1030": 0.19,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 6.0,
+      height: 1.53,
+      dry_bulb_temp_c: 6.0,
       "cistern _level_pressure": {
         "970": 0.18,
         "975": 0.18,
@@ -120,12 +120,12 @@ const stationPressure = {
         "1015": 0.19,
         "1020": 0.19,
         "1025": 0.19,
-        "1030": 0.19
-      }
+        "1030": 0.19,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 7.0,
+      height: 1.53,
+      dry_bulb_temp_c: 7.0,
       "cistern _level_pressure": {
         "970": 0.18,
         "975": 0.18,
@@ -139,12 +139,12 @@ const stationPressure = {
         "1015": 0.19,
         "1020": 0.19,
         "1025": 0.19,
-        "1030": 0.19
-      }
+        "1030": 0.19,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 8.0,
+      height: 1.53,
+      dry_bulb_temp_c: 8.0,
       "cistern _level_pressure": {
         "970": 0.18,
         "975": 0.18,
@@ -158,12 +158,12 @@ const stationPressure = {
         "1015": 0.19,
         "1020": 0.19,
         "1025": 0.19,
-        "1030": 0.19
-      }
+        "1030": 0.19,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 9.0,
+      height: 1.53,
+      dry_bulb_temp_c: 9.0,
       "cistern _level_pressure": {
         "970": 0.18,
         "975": 0.18,
@@ -177,12 +177,12 @@ const stationPressure = {
         "1015": 0.19,
         "1020": 0.19,
         "1025": 0.19,
-        "1030": 0.19
-      }
+        "1030": 0.19,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 10.0,
+      height: 1.53,
+      dry_bulb_temp_c: 10.0,
       "cistern _level_pressure": {
         "970": 0.18,
         "975": 0.18,
@@ -196,12 +196,12 @@ const stationPressure = {
         "1015": 0.19,
         "1020": 0.19,
         "1025": 0.19,
-        "1030": 0.19
-      }
+        "1030": 0.19,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 11.0,
+      height: 1.53,
+      dry_bulb_temp_c: 11.0,
       "cistern _level_pressure": {
         "970": 0.18,
         "975": 0.18,
@@ -215,12 +215,12 @@ const stationPressure = {
         "1015": 0.19,
         "1020": 0.19,
         "1025": 0.19,
-        "1030": 0.19
-      }
+        "1030": 0.19,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 12.0,
+      height: 1.53,
+      dry_bulb_temp_c: 12.0,
       "cistern _level_pressure": {
         "970": 0.18,
         "975": 0.18,
@@ -234,12 +234,12 @@ const stationPressure = {
         "1015": 0.19,
         "1020": 0.19,
         "1025": 0.19,
-        "1030": 0.19
-      }
+        "1030": 0.19,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 13.0,
+      height: 1.53,
+      dry_bulb_temp_c: 13.0,
       "cistern _level_pressure": {
         "970": 0.18,
         "975": 0.18,
@@ -253,12 +253,12 @@ const stationPressure = {
         "1015": 0.19,
         "1020": 0.19,
         "1025": 0.19,
-        "1030": 0.19
-      }
+        "1030": 0.19,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 14.0,
+      height: 1.53,
+      dry_bulb_temp_c: 14.0,
       "cistern _level_pressure": {
         "970": 0.18,
         "975": 0.18,
@@ -272,12 +272,12 @@ const stationPressure = {
         "1015": 0.18,
         "1020": 0.19,
         "1025": 0.19,
-        "1030": 0.19
-      }
+        "1030": 0.19,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 15.0,
+      height: 1.53,
+      dry_bulb_temp_c: 15.0,
       "cistern _level_pressure": {
         "970": 0.18,
         "975": 0.18,
@@ -291,12 +291,12 @@ const stationPressure = {
         "1015": 0.18,
         "1020": 0.19,
         "1025": 0.19,
-        "1030": 0.19
-      }
+        "1030": 0.19,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 16.0,
+      height: 1.53,
+      dry_bulb_temp_c: 16.0,
       "cistern _level_pressure": {
         "970": 0.18,
         "975": 0.18,
@@ -310,12 +310,12 @@ const stationPressure = {
         "1015": 0.18,
         "1020": 0.18,
         "1025": 0.19,
-        "1030": 0.19
-      }
+        "1030": 0.19,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 17.0,
+      height: 1.53,
+      dry_bulb_temp_c: 17.0,
       "cistern _level_pressure": {
         "970": 0.17,
         "975": 0.18,
@@ -329,12 +329,12 @@ const stationPressure = {
         "1015": 0.18,
         "1020": 0.18,
         "1025": 0.18,
-        "1030": 0.19
-      }
+        "1030": 0.19,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 18.0,
+      height: 1.53,
+      dry_bulb_temp_c: 18.0,
       "cistern _level_pressure": {
         "970": 0.17,
         "975": 0.18,
@@ -348,12 +348,12 @@ const stationPressure = {
         "1015": 0.18,
         "1020": 0.18,
         "1025": 0.18,
-        "1030": 0.19
-      }
+        "1030": 0.19,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 19.0,
+      height: 1.53,
+      dry_bulb_temp_c: 19.0,
       "cistern _level_pressure": {
         "970": 0.17,
         "975": 0.17,
@@ -367,12 +367,12 @@ const stationPressure = {
         "1015": 0.18,
         "1020": 0.18,
         "1025": 0.18,
-        "1030": 0.18
-      }
+        "1030": 0.18,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 20.0,
+      height: 1.53,
+      dry_bulb_temp_c: 20.0,
       "cistern _level_pressure": {
         "970": 0.17,
         "975": 0.17,
@@ -386,12 +386,12 @@ const stationPressure = {
         "1015": 0.18,
         "1020": 0.18,
         "1025": 0.18,
-        "1030": 0.18
-      }
+        "1030": 0.18,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 21.0,
+      height: 1.53,
+      dry_bulb_temp_c: 21.0,
       "cistern _level_pressure": {
         "970": 0.17,
         "975": 0.17,
@@ -405,12 +405,12 @@ const stationPressure = {
         "1015": 0.18,
         "1020": 0.18,
         "1025": 0.18,
-        "1030": 0.18
-      }
+        "1030": 0.18,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 22.0,
+      height: 1.53,
+      dry_bulb_temp_c: 22.0,
       "cistern _level_pressure": {
         "970": 0.17,
         "975": 0.17,
@@ -424,12 +424,12 @@ const stationPressure = {
         "1015": 0.18,
         "1020": 0.18,
         "1025": 0.18,
-        "1030": 0.18
-      }
+        "1030": 0.18,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 23.0,
+      height: 1.53,
+      dry_bulb_temp_c: 23.0,
       "cistern _level_pressure": {
         "970": 0.17,
         "975": 0.17,
@@ -443,12 +443,12 @@ const stationPressure = {
         "1015": 0.18,
         "1020": 0.18,
         "1025": 0.18,
-        "1030": 0.18
-      }
+        "1030": 0.18,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 24.0,
+      height: 1.53,
+      dry_bulb_temp_c: 24.0,
       "cistern _level_pressure": {
         "970": 0.17,
         "975": 0.17,
@@ -462,12 +462,12 @@ const stationPressure = {
         "1015": 0.18,
         "1020": 0.18,
         "1025": 0.18,
-        "1030": 0.18
-      }
+        "1030": 0.18,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 25.0,
+      height: 1.53,
+      dry_bulb_temp_c: 25.0,
       "cistern _level_pressure": {
         "970": 0.17,
         "975": 0.17,
@@ -481,12 +481,12 @@ const stationPressure = {
         "1015": 0.18,
         "1020": 0.18,
         "1025": 0.18,
-        "1030": 0.18
-      }
+        "1030": 0.18,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 26.0,
+      height: 1.53,
+      dry_bulb_temp_c: 26.0,
       "cistern _level_pressure": {
         "970": 0.17,
         "975": 0.17,
@@ -500,12 +500,12 @@ const stationPressure = {
         "1015": 0.18,
         "1020": 0.18,
         "1025": 0.18,
-        "1030": 0.18
-      }
+        "1030": 0.18,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 27.0,
+      height: 1.53,
+      dry_bulb_temp_c: 27.0,
       "cistern _level_pressure": {
         "970": 0.17,
         "975": 0.17,
@@ -519,12 +519,12 @@ const stationPressure = {
         "1015": 0.18,
         "1020": 0.18,
         "1025": 0.18,
-        "1030": 0.18
-      }
+        "1030": 0.18,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 28.0,
+      height: 1.53,
+      dry_bulb_temp_c: 28.0,
       "cistern _level_pressure": {
         "970": 0.17,
         "975": 0.17,
@@ -538,12 +538,12 @@ const stationPressure = {
         "1015": 0.18,
         "1020": 0.18,
         "1025": 0.18,
-        "1030": 0.18
-      }
+        "1030": 0.18,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 29.0,
+      height: 1.53,
+      dry_bulb_temp_c: 29.0,
       "cistern _level_pressure": {
         "970": 0.17,
         "975": 0.17,
@@ -557,12 +557,12 @@ const stationPressure = {
         "1015": 0.18,
         "1020": 0.18,
         "1025": 0.18,
-        "1030": 0.18
-      }
+        "1030": 0.18,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 30.0,
+      height: 1.53,
+      dry_bulb_temp_c: 30.0,
       "cistern _level_pressure": {
         "970": 0.17,
         "975": 0.17,
@@ -576,12 +576,12 @@ const stationPressure = {
         "1015": 0.18,
         "1020": 0.18,
         "1025": 0.18,
-        "1030": 0.18
-      }
+        "1030": 0.18,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 31.0,
+      height: 1.53,
+      dry_bulb_temp_c: 31.0,
       "cistern _level_pressure": {
         "970": 0.17,
         "975": 0.17,
@@ -595,12 +595,12 @@ const stationPressure = {
         "1015": 0.17,
         "1020": 0.18,
         "1025": 0.18,
-        "1030": 0.18
-      }
+        "1030": 0.18,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 32.0,
+      height: 1.53,
+      dry_bulb_temp_c: 32.0,
       "cistern _level_pressure": {
         "970": 0.17,
         "975": 0.17,
@@ -614,12 +614,12 @@ const stationPressure = {
         "1015": 0.17,
         "1020": 0.17,
         "1025": 0.18,
-        "1030": 0.18
-      }
+        "1030": 0.18,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 33.0,
+      height: 1.53,
+      dry_bulb_temp_c: 33.0,
       "cistern _level_pressure": {
         "970": 0.17,
         "975": 0.17,
@@ -633,12 +633,12 @@ const stationPressure = {
         "1015": 0.17,
         "1020": 0.17,
         "1025": 0.18,
-        "1030": 0.18
-      }
+        "1030": 0.18,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 34.0,
+      height: 1.53,
+      dry_bulb_temp_c: 34.0,
       "cistern _level_pressure": {
         "970": 0.17,
         "975": 0.17,
@@ -652,12 +652,12 @@ const stationPressure = {
         "1015": 0.17,
         "1020": 0.17,
         "1025": 0.17,
-        "1030": 0.18
-      }
+        "1030": 0.18,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 35.0,
+      height: 1.53,
+      dry_bulb_temp_c: 35.0,
       "cistern _level_pressure": {
         "970": 0.16,
         "975": 0.17,
@@ -671,12 +671,12 @@ const stationPressure = {
         "1015": 0.17,
         "1020": 0.17,
         "1025": 0.17,
-        "1030": 0.17
-      }
+        "1030": 0.17,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 36.0,
+      height: 1.53,
+      dry_bulb_temp_c: 36.0,
       "cistern _level_pressure": {
         "970": 0.16,
         "975": 0.16,
@@ -690,12 +690,12 @@ const stationPressure = {
         "1015": 0.17,
         "1020": 0.17,
         "1025": 0.17,
-        "1030": 0.17
-      }
+        "1030": 0.17,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 37.0,
+      height: 1.53,
+      dry_bulb_temp_c: 37.0,
       "cistern _level_pressure": {
         "970": 0.16,
         "975": 0.16,
@@ -709,12 +709,12 @@ const stationPressure = {
         "1015": 0.17,
         "1020": 0.17,
         "1025": 0.17,
-        "1030": 0.17
-      }
+        "1030": 0.17,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 38.0,
+      height: 1.53,
+      dry_bulb_temp_c: 38.0,
       "cistern _level_pressure": {
         "970": 0.16,
         "975": 0.16,
@@ -728,12 +728,12 @@ const stationPressure = {
         "1015": 0.17,
         "1020": 0.17,
         "1025": 0.17,
-        "1030": 0.17
-      }
+        "1030": 0.17,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 39.0,
+      height: 1.53,
+      dry_bulb_temp_c: 39.0,
       "cistern _level_pressure": {
         "970": 0.16,
         "975": 0.16,
@@ -747,12 +747,12 @@ const stationPressure = {
         "1015": 0.17,
         "1020": 0.17,
         "1025": 0.17,
-        "1030": 0.17
-      }
+        "1030": 0.17,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 40.0,
+      height: 1.53,
+      dry_bulb_temp_c: 40.0,
       "cistern _level_pressure": {
         "970": 0.16,
         "975": 0.16,
@@ -766,12 +766,12 @@ const stationPressure = {
         "1015": 0.17,
         "1020": 0.17,
         "1025": 0.17,
-        "1030": 0.17
-      }
+        "1030": 0.17,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 41.0,
+      height: 1.53,
+      dry_bulb_temp_c: 41.0,
       "cistern _level_pressure": {
         "970": 0.16,
         "975": 0.16,
@@ -785,12 +785,12 @@ const stationPressure = {
         "1015": 0.17,
         "1020": 0.17,
         "1025": 0.17,
-        "1030": 0.17
-      }
+        "1030": 0.17,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 42.0,
+      height: 1.53,
+      dry_bulb_temp_c: 42.0,
       "cistern _level_pressure": {
         "970": 0.16,
         "975": 0.16,
@@ -804,12 +804,12 @@ const stationPressure = {
         "1015": 0.17,
         "1020": 0.17,
         "1025": 0.17,
-        "1030": 0.17
-      }
+        "1030": 0.17,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 43.0,
+      height: 1.53,
+      dry_bulb_temp_c: 43.0,
       "cistern _level_pressure": {
         "970": 0.16,
         "975": 0.16,
@@ -823,12 +823,12 @@ const stationPressure = {
         "1015": 0.17,
         "1020": 0.17,
         "1025": 0.17,
-        "1030": 0.17
-      }
+        "1030": 0.17,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 44.0,
+      height: 1.53,
+      dry_bulb_temp_c: 44.0,
       "cistern _level_pressure": {
         "970": 0.16,
         "975": 0.16,
@@ -842,12 +842,12 @@ const stationPressure = {
         "1015": 0.17,
         "1020": 0.17,
         "1025": 0.17,
-        "1030": 0.17
-      }
+        "1030": 0.17,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 45.0,
+      height: 1.53,
+      dry_bulb_temp_c: 45.0,
       "cistern _level_pressure": {
         "970": 0.16,
         "975": 0.16,
@@ -861,12 +861,12 @@ const stationPressure = {
         "1015": 0.17,
         "1020": 0.17,
         "1025": 0.17,
-        "1030": 0.17
-      }
+        "1030": 0.17,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 46.0,
+      height: 1.53,
+      dry_bulb_temp_c: 46.0,
       "cistern _level_pressure": {
         "970": 0.16,
         "975": 0.16,
@@ -880,12 +880,12 @@ const stationPressure = {
         "1015": 0.17,
         "1020": 0.17,
         "1025": 0.17,
-        "1030": 0.17
-      }
+        "1030": 0.17,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 47.0,
+      height: 1.53,
+      dry_bulb_temp_c: 47.0,
       "cistern _level_pressure": {
         "970": 0.16,
         "975": 0.16,
@@ -899,12 +899,12 @@ const stationPressure = {
         "1015": 0.17,
         "1020": 0.17,
         "1025": 0.17,
-        "1030": 0.17
-      }
+        "1030": 0.17,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 48.0,
+      height: 1.53,
+      dry_bulb_temp_c: 48.0,
       "cistern _level_pressure": {
         "970": 0.16,
         "975": 0.16,
@@ -918,12 +918,12 @@ const stationPressure = {
         "1015": 0.17,
         "1020": 0.17,
         "1025": 0.17,
-        "1030": 0.17
-      }
+        "1030": 0.17,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 49.0,
+      height: 1.53,
+      dry_bulb_temp_c: 49.0,
       "cistern _level_pressure": {
         "970": 0.16,
         "975": 0.16,
@@ -937,12 +937,12 @@ const stationPressure = {
         "1015": 0.16,
         "1020": 0.17,
         "1025": 0.17,
-        "1030": 0.17
-      }
+        "1030": 0.17,
+      },
     },
     {
-      "height": 1.53,
-      "dry_bulb_temp_c": 50.0,
+      height: 1.53,
+      dry_bulb_temp_c: 50.0,
       "cistern _level_pressure": {
         "970": 0.16,
         "975": 0.16,
@@ -956,7 +956,7 @@ const stationPressure = {
         "1015": 0.16,
         "1020": 0.17,
         "1025": 0.17,
-        "1030": 0.17
+        "1030": 0.17,
       },
     },
   ],
