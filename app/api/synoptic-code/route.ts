@@ -181,21 +181,27 @@ export async function GET(req: Request) {
   const userStationId = session.user.station?.id;
   const isSuperAdmin = session.user.role === "super_admin";
 
-const startTime = startDate
-      ? new Date(startDate)
-      : new Date(new Date().setDate(new Date().getDate() - 7));
-    startTime.setHours(0, 0, 0, 0); // Start of day
+  // ✅ Pure UTC range (first-card-data এর মতো)
+  // যদি startDate/endDate না দেয়, ডিফল্ট last 7 UTC days
+  const todayUtcStr = new Date().toISOString().slice(0, 10); // YYYY-MM-DD (UTC)
 
-    const endTime = endDate ? new Date(endDate) : new Date();
-    endTime.setHours(23, 59, 59, 999); // End of day
+  const start =
+    startDate
+      ? new Date(`${startDate}T00:00:00.000Z`)
+      : new Date(
+          `${new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+            .toISOString()
+            .slice(0, 10)}T00:00:00.000Z`
+        );
 
-    const { startToday, endToday } = getTodayBDRange();
-
-    const start = startDate ? startTime : startToday;
-    const end = endDate ? endTime : endToday;
+  const end =
+    endDate
+      ? new Date(`${endDate}T23:59:59.999Z`)
+      : new Date(`${todayUtcStr}T23:59:59.999Z`);
 
   // Determine which station ID to use
-  const stationId = stationIdParam || (!isSuperAdmin ? userStationId : undefined);
+  const stationId =
+    stationIdParam || (!isSuperAdmin ? userStationId : undefined);
 
   // For non-super admins, station ID is mandatory
   if (!stationId && !isSuperAdmin) {
@@ -242,6 +248,7 @@ const startTime = startDate
     );
   }
 }
+
 
 
 export async function PUT(req: Request) {
