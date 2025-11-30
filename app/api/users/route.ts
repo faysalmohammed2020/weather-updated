@@ -10,10 +10,6 @@ import { LogAction, LogActionType, LogModule } from "@/lib/log";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth"; // <-- তোমার authOptions export থাকতে হবে
 
-async function getSession() {
-  return await getServerSession(authOptions);
-}
-
 // ✅ BetterAuth admin.revokeUserSessions replacement
 async function revokeUserSessions(userId: string) {
   await prisma.sessions.deleteMany({
@@ -170,7 +166,7 @@ export async function PUT(request: NextRequest) {
         action: LogActionType.UPDATE,
         actionText: "User Updated",
         role: session.user.role!,
-        actorId: session.user.id,
+        actorId: session.user.id!,
         targetId: id,
         actorEmail: session.user.email!,
         targetEmail: existingUser.email,
@@ -305,7 +301,7 @@ export async function POST(request: NextRequest) {
         actorEmail: session.user.email!,
         targetEmail: newUser.email,
         role: session.user.role!,
-        actorId: session.user.id,
+        actorId: session.user.id!,
         targetId: newUser.id,
         module: LogModule.USER,
       });
@@ -383,7 +379,7 @@ export async function DELETE(request: NextRequest) {
         action: LogActionType.DELETE,
         actionText: "User Deleted",
         role: session.user.role!,
-        actorId: session.user.id,
+        actorId: session.user.id!,
         targetId: userToDelete.id,
         actorEmail: session.user.email!,
         targetEmail: userToDelete.email,
