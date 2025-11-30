@@ -1,18 +1,18 @@
 const seaLevelPressure = {
-  "station": {
-    "name": "1st Class Observatory, Kutubdia",
-    "station_no": "41989",
-    "latitude": "21° 49' N",
-    "longitude": "91° 51' E",
-    "elevation_m": 2.74,
-    "bar_cistern_height_m_above_msl": 4.27,
-    "bar_cistern_height_m_above_station": 1.53
+  station: {
+    name: "1st Class Observatory, Kutubdia",
+    station_no: "41989",
+    latitude: "21° 49' N",
+    longitude: "91° 51' E",
+    elevation_m: 2.74,
+    bar_cistern_height_m_above_msl: 4.27,
+    bar_cistern_height_m_above_station: 1.53,
   },
-  "correction_table": [
+  correction_table: [
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 1.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 1.0,
+      station_level_pressure: {
         "970": 0.33,
         "975": 0.33,
         "980": 0.33,
@@ -25,13 +25,13 @@ const seaLevelPressure = {
         "1015": 0.35,
         "1020": 0.35,
         "1025": 0.35,
-        "1030": 0.35
-      }
+        "1030": 0.35,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 2.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 2.0,
+      station_level_pressure: {
         "970": 0.33,
         "975": 0.33,
         "980": 0.33,
@@ -44,13 +44,13 @@ const seaLevelPressure = {
         "1015": 0.35,
         "1020": 0.35,
         "1025": 0.35,
-        "1030": 0.35
-      }
+        "1030": 0.35,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 3.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 3.0,
+      station_level_pressure: {
         "970": 0.33,
         "975": 0.33,
         "980": 0.33,
@@ -63,13 +63,13 @@ const seaLevelPressure = {
         "1015": 0.34,
         "1020": 0.35,
         "1025": 0.35,
-        "1030": 0.35
-      }
+        "1030": 0.35,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 4.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 4.0,
+      station_level_pressure: {
         "970": 0.33,
         "975": 0.33,
         "980": 0.33,
@@ -82,13 +82,13 @@ const seaLevelPressure = {
         "1015": 0.34,
         "1020": 0.34,
         "1025": 0.35,
-        "1030": 0.35
-      }
+        "1030": 0.35,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 5.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 5.0,
+      station_level_pressure: {
         "970": 0.33,
         "975": 0.33,
         "980": 0.33,
@@ -101,13 +101,13 @@ const seaLevelPressure = {
         "1015": 0.34,
         "1020": 0.34,
         "1025": 0.35,
-        "1030": 0.35
-      }
+        "1030": 0.35,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 6.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 6.0,
+      station_level_pressure: {
         "970": 0.33,
         "975": 0.33,
         "980": 0.33,
@@ -120,13 +120,13 @@ const seaLevelPressure = {
         "1015": 0.34,
         "1020": 0.34,
         "1025": 0.34,
-        "1030": 0.35
-      }
+        "1030": 0.35,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 7.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 7.0,
+      station_level_pressure: {
         "970": 0.32,
         "975": 0.33,
         "980": 0.33,
@@ -139,13 +139,13 @@ const seaLevelPressure = {
         "1015": 0.34,
         "1020": 0.34,
         "1025": 0.34,
-        "1030": 0.34
-      }
+        "1030": 0.34,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 8.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 8.0,
+      station_level_pressure: {
         "970": 0.32,
         "975": 0.32,
         "980": 0.33,
@@ -158,13 +158,13 @@ const seaLevelPressure = {
         "1015": 0.34,
         "1020": 0.34,
         "1025": 0.34,
-        "1030": 0.34
-      }
+        "1030": 0.34,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 9.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 9.0,
+      station_level_pressure: {
         "970": 0.32,
         "975": 0.32,
         "980": 0.33,
@@ -177,13 +177,13 @@ const seaLevelPressure = {
         "1015": 0.34,
         "1020": 0.34,
         "1025": 0.34,
-        "1030": 0.34
-      }
+        "1030": 0.34,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 10.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 10.0,
+      station_level_pressure: {
         "970": 0.32,
         "975": 0.32,
         "980": 0.32,
@@ -196,13 +196,13 @@ const seaLevelPressure = {
         "1015": 0.34,
         "1020": 0.34,
         "1025": 0.34,
-        "1030": 0.34
-      }
+        "1030": 0.34,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 11.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 11.0,
+      station_level_pressure: {
         "970": 0.32,
         "975": 0.32,
         "980": 0.32,
@@ -215,13 +215,13 @@ const seaLevelPressure = {
         "1015": 0.33,
         "1020": 0.34,
         "1025": 0.34,
-        "1030": 0.34
-      }
+        "1030": 0.34,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 12.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 12.0,
+      station_level_pressure: {
         "970": 0.32,
         "975": 0.32,
         "980": 0.32,
@@ -234,13 +234,13 @@ const seaLevelPressure = {
         "1015": 0.33,
         "1020": 0.34,
         "1025": 0.34,
-        "1030": 0.34
-      }
+        "1030": 0.34,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 13.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 13.0,
+      station_level_pressure: {
         "970": 0.32,
         "975": 0.32,
         "980": 0.32,
@@ -253,13 +253,13 @@ const seaLevelPressure = {
         "1015": 0.33,
         "1020": 0.33,
         "1025": 0.34,
-        "1030": 0.34
-      }
+        "1030": 0.34,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 14.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 14.0,
+      station_level_pressure: {
         "970": 0.32,
         "975": 0.32,
         "980": 0.32,
@@ -272,13 +272,13 @@ const seaLevelPressure = {
         "1015": 0.33,
         "1020": 0.33,
         "1025": 0.33,
-        "1030": 0.34
-      }
+        "1030": 0.34,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 15.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 15.0,
+      station_level_pressure: {
         "970": 0.32,
         "975": 0.32,
         "980": 0.32,
@@ -291,13 +291,13 @@ const seaLevelPressure = {
         "1015": 0.33,
         "1020": 0.33,
         "1025": 0.33,
-        "1030": 0.33
-      }
+        "1030": 0.33,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 16.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 16.0,
+      station_level_pressure: {
         "970": 0.31,
         "975": 0.32,
         "980": 0.32,
@@ -310,13 +310,13 @@ const seaLevelPressure = {
         "1015": 0.33,
         "1020": 0.33,
         "1025": 0.33,
-        "1030": 0.33
-      }
+        "1030": 0.33,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 17.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 17.0,
+      station_level_pressure: {
         "970": 0.31,
         "975": 0.31,
         "980": 0.32,
@@ -329,13 +329,13 @@ const seaLevelPressure = {
         "1015": 0.33,
         "1020": 0.33,
         "1025": 0.33,
-        "1030": 0.33
-      }
+        "1030": 0.33,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 18.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 18.0,
+      station_level_pressure: {
         "970": 0.31,
         "975": 0.31,
         "980": 0.32,
@@ -348,13 +348,13 @@ const seaLevelPressure = {
         "1015": 0.33,
         "1020": 0.33,
         "1025": 0.33,
-        "1030": 0.33
-      }
+        "1030": 0.33,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 19.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 19.0,
+      station_level_pressure: {
         "970": 0.31,
         "975": 0.31,
         "980": 0.31,
@@ -367,13 +367,13 @@ const seaLevelPressure = {
         "1015": 0.33,
         "1020": 0.33,
         "1025": 0.33,
-        "1030": 0.33
-      }
+        "1030": 0.33,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 20.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 20.0,
+      station_level_pressure: {
         "970": 0.31,
         "975": 0.31,
         "980": 0.31,
@@ -386,13 +386,13 @@ const seaLevelPressure = {
         "1015": 0.32,
         "1020": 0.33,
         "1025": 0.33,
-        "1030": 0.33
-      }
+        "1030": 0.33,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 21.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 21.0,
+      station_level_pressure: {
         "970": 0.31,
         "975": 0.31,
         "980": 0.31,
@@ -405,13 +405,13 @@ const seaLevelPressure = {
         "1015": 0.32,
         "1020": 0.32,
         "1025": 0.33,
-        "1030": 0.33
-      }
+        "1030": 0.33,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 22.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 22.0,
+      station_level_pressure: {
         "970": 0.31,
         "975": 0.31,
         "980": 0.31,
@@ -424,13 +424,13 @@ const seaLevelPressure = {
         "1015": 0.32,
         "1020": 0.32,
         "1025": 0.33,
-        "1030": 0.33
-      }
+        "1030": 0.33,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 23.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 23.0,
+      station_level_pressure: {
         "970": 0.31,
         "975": 0.31,
         "980": 0.31,
@@ -443,13 +443,13 @@ const seaLevelPressure = {
         "1015": 0.32,
         "1020": 0.32,
         "1025": 0.32,
-        "1030": 0.33
-      }
+        "1030": 0.33,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 24.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 24.0,
+      station_level_pressure: {
         "970": 0.31,
         "975": 0.31,
         "980": 0.31,
@@ -462,14 +462,14 @@ const seaLevelPressure = {
         "1015": 0.32,
         "1020": 0.32,
         "1025": 0.32,
-        "1030": 0.32
-      }
+        "1030": 0.32,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 25.0,
-      "station_level_pressure": {
-        "970": 0.30,
+      height: 2.74,
+      dry_bulb_temp_c: 25.0,
+      station_level_pressure: {
+        "970": 0.3,
         "975": 0.31,
         "980": 0.31,
         "985": 0.31,
@@ -481,14 +481,14 @@ const seaLevelPressure = {
         "1015": 0.32,
         "1020": 0.32,
         "1025": 0.32,
-        "1030": 0.32
-      }
+        "1030": 0.32,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 26.0,
-      "station_level_pressure": {
-        "970": 0.30,
+      height: 2.74,
+      dry_bulb_temp_c: 26.0,
+      station_level_pressure: {
+        "970": 0.3,
         "975": 0.31,
         "980": 0.31,
         "985": 0.31,
@@ -500,15 +500,15 @@ const seaLevelPressure = {
         "1015": 0.32,
         "1020": 0.32,
         "1025": 0.32,
-        "1030": 0.32
-      }
+        "1030": 0.32,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 27.0,
-      "station_level_pressure": {
-        "970": 0.30,
-        "975": 0.30,
+      height: 2.74,
+      dry_bulb_temp_c: 27.0,
+      station_level_pressure: {
+        "970": 0.3,
+        "975": 0.3,
         "980": 0.31,
         "985": 0.31,
         "990": 0.31,
@@ -519,16 +519,16 @@ const seaLevelPressure = {
         "1015": 0.32,
         "1020": 0.32,
         "1025": 0.32,
-        "1030": 0.32
-      }
+        "1030": 0.32,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 28.0,
-      "station_level_pressure": {
-        "970": 0.30,
-        "975": 0.30,
-        "980": 0.30,
+      height: 2.74,
+      dry_bulb_temp_c: 28.0,
+      station_level_pressure: {
+        "970": 0.3,
+        "975": 0.3,
+        "980": 0.3,
         "985": 0.31,
         "990": 0.31,
         "995": 0.31,
@@ -538,16 +538,16 @@ const seaLevelPressure = {
         "1015": 0.32,
         "1020": 0.32,
         "1025": 0.32,
-        "1030": 0.32
-      }
+        "1030": 0.32,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 29.0,
-      "station_level_pressure": {
-        "970": 0.30,
-        "975": 0.30,
-        "980": 0.30,
+      height: 2.74,
+      dry_bulb_temp_c: 29.0,
+      station_level_pressure: {
+        "970": 0.3,
+        "975": 0.3,
+        "980": 0.3,
         "985": 0.31,
         "990": 0.31,
         "995": 0.31,
@@ -557,17 +557,17 @@ const seaLevelPressure = {
         "1015": 0.31,
         "1020": 0.32,
         "1025": 0.32,
-        "1030": 0.32
-      }
+        "1030": 0.32,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 30.0,
-      "station_level_pressure": {
-        "970": 0.30,
-        "975": 0.30,
-        "980": 0.30,
-        "985": 0.30,
+      height: 2.74,
+      dry_bulb_temp_c: 30.0,
+      station_level_pressure: {
+        "970": 0.3,
+        "975": 0.3,
+        "980": 0.3,
+        "985": 0.3,
         "990": 0.31,
         "995": 0.31,
         "1000": 0.31,
@@ -576,18 +576,18 @@ const seaLevelPressure = {
         "1015": 0.31,
         "1020": 0.32,
         "1025": 0.32,
-        "1030": 0.32
-      }
+        "1030": 0.32,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 31.0,
-      "station_level_pressure": {
-        "970": 0.30,
-        "975": 0.30,
-        "980": 0.30,
-        "985": 0.30,
-        "990": 0.30,
+      height: 2.74,
+      dry_bulb_temp_c: 31.0,
+      station_level_pressure: {
+        "970": 0.3,
+        "975": 0.3,
+        "980": 0.3,
+        "985": 0.3,
+        "990": 0.3,
         "995": 0.31,
         "1000": 0.31,
         "1005": 0.31,
@@ -595,18 +595,18 @@ const seaLevelPressure = {
         "1015": 0.31,
         "1020": 0.31,
         "1025": 0.32,
-        "1030": 0.32
-      }
+        "1030": 0.32,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 32.0,
-      "station_level_pressure": {
-        "970": 0.30,
-        "975": 0.30,
-        "980": 0.30,
-        "985": 0.30,
-        "990": 0.30,
+      height: 2.74,
+      dry_bulb_temp_c: 32.0,
+      station_level_pressure: {
+        "970": 0.3,
+        "975": 0.3,
+        "980": 0.3,
+        "985": 0.3,
+        "990": 0.3,
         "995": 0.31,
         "1000": 0.31,
         "1005": 0.31,
@@ -614,241 +614,241 @@ const seaLevelPressure = {
         "1015": 0.31,
         "1020": 0.31,
         "1025": 0.31,
-        "1030": 0.32
-      }
+        "1030": 0.32,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 33.0,
-      "station_level_pressure": {
-        "970": 0.30,
-        "975": 0.30,
-        "980": 0.30,
-        "985": 0.30,
-        "990": 0.30,
-        "995": 0.30,
+      height: 2.74,
+      dry_bulb_temp_c: 33.0,
+      station_level_pressure: {
+        "970": 0.3,
+        "975": 0.3,
+        "980": 0.3,
+        "985": 0.3,
+        "990": 0.3,
+        "995": 0.3,
         "1000": 0.31,
         "1005": 0.31,
         "1010": 0.31,
         "1015": 0.31,
         "1020": 0.31,
         "1025": 0.31,
-        "1030": 0.32
-      }
+        "1030": 0.32,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 34.0,
-      "station_level_pressure": {
-        "970": 0.30,
-        "975": 0.30,
-        "980": 0.30,
-        "985": 0.30,
-        "990": 0.30,
-        "995": 0.30,
-        "1000": 0.30,
+      height: 2.74,
+      dry_bulb_temp_c: 34.0,
+      station_level_pressure: {
+        "970": 0.3,
+        "975": 0.3,
+        "980": 0.3,
+        "985": 0.3,
+        "990": 0.3,
+        "995": 0.3,
+        "1000": 0.3,
         "1005": 0.31,
         "1010": 0.31,
         "1015": 0.31,
         "1020": 0.31,
         "1025": 0.31,
-        "1030": 0.31
-      }
+        "1030": 0.31,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 35.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 35.0,
+      station_level_pressure: {
         "970": 0.29,
-        "975": 0.30,
-        "980": 0.30,
-        "985": 0.30,
-        "990": 0.30,
-        "995": 0.30,
-        "1000": 0.30,
+        "975": 0.3,
+        "980": 0.3,
+        "985": 0.3,
+        "990": 0.3,
+        "995": 0.3,
+        "1000": 0.3,
         "1005": 0.31,
         "1010": 0.31,
         "1015": 0.31,
         "1020": 0.31,
         "1025": 0.31,
-        "1030": 0.31
-      }
+        "1030": 0.31,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 36.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 36.0,
+      station_level_pressure: {
         "970": 0.29,
-        "975": 0.30,
-        "980": 0.30,
-        "985": 0.30,
-        "990": 0.30,
-        "995": 0.30,
-        "1000": 0.30,
-        "1005": 0.30,
+        "975": 0.3,
+        "980": 0.3,
+        "985": 0.3,
+        "990": 0.3,
+        "995": 0.3,
+        "1000": 0.3,
+        "1005": 0.3,
         "1010": 0.31,
         "1015": 0.31,
         "1020": 0.31,
         "1025": 0.31,
-        "1030": 0.31
-      }
+        "1030": 0.31,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 37.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 37.0,
+      station_level_pressure: {
         "970": 0.29,
         "975": 0.29,
-        "980": 0.30,
-        "985": 0.30,
-        "990": 0.30,
-        "995": 0.30,
-        "1000": 0.30,
-        "1005": 0.30,
+        "980": 0.3,
+        "985": 0.3,
+        "990": 0.3,
+        "995": 0.3,
+        "1000": 0.3,
+        "1005": 0.3,
         "1010": 0.31,
         "1015": 0.31,
         "1020": 0.31,
         "1025": 0.31,
-        "1030": 0.31
-      }
+        "1030": 0.31,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 38.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 38.0,
+      station_level_pressure: {
         "970": 0.29,
         "975": 0.29,
-        "980": 0.30,
-        "985": 0.30,
-        "990": 0.30,
-        "995": 0.30,
-        "1000": 0.30,
-        "1005": 0.30,
-        "1010": 0.30,
+        "980": 0.3,
+        "985": 0.3,
+        "990": 0.3,
+        "995": 0.3,
+        "1000": 0.3,
+        "1005": 0.3,
+        "1010": 0.3,
         "1015": 0.31,
         "1020": 0.31,
         "1025": 0.31,
-        "1030": 0.31
-      }
+        "1030": 0.31,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 39.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 39.0,
+      station_level_pressure: {
         "970": 0.29,
         "975": 0.29,
         "980": 0.29,
-        "985": 0.30,
-        "990": 0.30,
-        "995": 0.30,
-        "1000": 0.30,
-        "1005": 0.30,
-        "1010": 0.30,
-        "1015": 0.30,
+        "985": 0.3,
+        "990": 0.3,
+        "995": 0.3,
+        "1000": 0.3,
+        "1005": 0.3,
+        "1010": 0.3,
+        "1015": 0.3,
         "1020": 0.31,
         "1025": 0.31,
-        "1030": 0.31
-      }
+        "1030": 0.31,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 40.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 40.0,
+      station_level_pressure: {
         "970": 0.29,
         "975": 0.29,
         "980": 0.29,
         "985": 0.29,
-        "990": 0.30,
-        "995": 0.30,
-        "1000": 0.30,
-        "1005": 0.30,
-        "1010": 0.30,
-        "1015": 0.30,
+        "990": 0.3,
+        "995": 0.3,
+        "1000": 0.3,
+        "1005": 0.3,
+        "1010": 0.3,
+        "1015": 0.3,
         "1020": 0.31,
         "1025": 0.31,
-        "1030": 0.31
-      }
+        "1030": 0.31,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 41.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 41.0,
+      station_level_pressure: {
         "970": 0.29,
         "975": 0.29,
         "980": 0.29,
         "985": 0.29,
-        "990": 0.30,
-        "995": 0.30,
-        "1000": 0.30,
-        "1005": 0.30,
-        "1010": 0.30,
-        "1015": 0.30,
-        "1020": 0.30,
+        "990": 0.3,
+        "995": 0.3,
+        "1000": 0.3,
+        "1005": 0.3,
+        "1010": 0.3,
+        "1015": 0.3,
+        "1020": 0.3,
         "1025": 0.31,
-        "1030": 0.31
-      }
+        "1030": 0.31,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 42.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 42.0,
+      station_level_pressure: {
         "970": 0.29,
         "975": 0.29,
         "980": 0.29,
         "985": 0.29,
         "990": 0.29,
-        "995": 0.30,
-        "1000": 0.30,
-        "1005": 0.30,
-        "1010": 0.30,
-        "1015": 0.30,
-        "1020": 0.30,
-        "1025": 0.30,
-        "1030": 0.31
-      }
+        "995": 0.3,
+        "1000": 0.3,
+        "1005": 0.3,
+        "1010": 0.3,
+        "1015": 0.3,
+        "1020": 0.3,
+        "1025": 0.3,
+        "1030": 0.31,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 43.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 43.0,
+      station_level_pressure: {
         "970": 0.29,
         "975": 0.29,
         "980": 0.29,
         "985": 0.29,
         "990": 0.29,
         "995": 0.29,
-        "1000": 0.30,
-        "1005": 0.30,
-        "1010": 0.30,
-        "1015": 0.30,
-        "1020": 0.30,
-        "1025": 0.30,
-        "1030": 0.31
-      }
+        "1000": 0.3,
+        "1005": 0.3,
+        "1010": 0.3,
+        "1015": 0.3,
+        "1020": 0.3,
+        "1025": 0.3,
+        "1030": 0.31,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 44.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 44.0,
+      station_level_pressure: {
         "970": 0.29,
         "975": 0.29,
         "980": 0.29,
         "985": 0.29,
         "990": 0.29,
         "995": 0.29,
-        "1000": 0.30,
-        "1005": 0.30,
-        "1010": 0.30,
-        "1015": 0.30,
-        "1020": 0.30,
-        "1025": 0.30,
-        "1030": 0.30
-      }
+        "1000": 0.3,
+        "1005": 0.3,
+        "1010": 0.3,
+        "1015": 0.3,
+        "1020": 0.3,
+        "1025": 0.3,
+        "1030": 0.3,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 45.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 45.0,
+      station_level_pressure: {
         "970": 0.29,
         "975": 0.29,
         "980": 0.29,
@@ -856,18 +856,18 @@ const seaLevelPressure = {
         "990": 0.29,
         "995": 0.29,
         "1000": 0.29,
-        "1005": 0.30,
-        "1010": 0.30,
-        "1015": 0.30,
-        "1020": 0.30,
-        "1025": 0.30,
-        "1030": 0.30
-      }
+        "1005": 0.3,
+        "1010": 0.3,
+        "1015": 0.3,
+        "1020": 0.3,
+        "1025": 0.3,
+        "1030": 0.3,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 46.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 46.0,
+      station_level_pressure: {
         "970": 0.28,
         "975": 0.29,
         "980": 0.29,
@@ -876,17 +876,17 @@ const seaLevelPressure = {
         "995": 0.29,
         "1000": 0.29,
         "1005": 0.29,
-        "1010": 0.30,
-        "1015": 0.30,
-        "1020": 0.30,
-        "1025": 0.30,
-        "1030": 0.30
-      }
+        "1010": 0.3,
+        "1015": 0.3,
+        "1020": 0.3,
+        "1025": 0.3,
+        "1030": 0.3,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 47.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 47.0,
+      station_level_pressure: {
         "970": 0.28,
         "975": 0.29,
         "980": 0.29,
@@ -895,17 +895,17 @@ const seaLevelPressure = {
         "995": 0.29,
         "1000": 0.29,
         "1005": 0.29,
-        "1010": 0.30,
-        "1015": 0.30,
-        "1020": 0.30,
-        "1025": 0.30,
-        "1030": 0.30
-      }
+        "1010": 0.3,
+        "1015": 0.3,
+        "1020": 0.3,
+        "1025": 0.3,
+        "1030": 0.3,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 48.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 48.0,
+      station_level_pressure: {
         "970": 0.28,
         "975": 0.28,
         "980": 0.29,
@@ -915,16 +915,16 @@ const seaLevelPressure = {
         "1000": 0.29,
         "1005": 0.29,
         "1010": 0.29,
-        "1015": 0.30,
-        "1020": 0.30,
-        "1025": 0.30,
-        "1030": 0.30
-      }
+        "1015": 0.3,
+        "1020": 0.3,
+        "1025": 0.3,
+        "1030": 0.3,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 49.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 49.0,
+      station_level_pressure: {
         "970": 0.28,
         "975": 0.28,
         "980": 0.28,
@@ -934,16 +934,16 @@ const seaLevelPressure = {
         "1000": 0.29,
         "1005": 0.29,
         "1010": 0.29,
-        "1015": 0.30,
-        "1020": 0.30,
-        "1025": 0.30,
-        "1030": 0.30
-      }
+        "1015": 0.3,
+        "1020": 0.3,
+        "1025": 0.3,
+        "1030": 0.3,
+      },
     },
     {
-      "height": 2.74,
-      "dry_bulb_temp_c": 50.0,
-      "station_level_pressure": {
+      height: 2.74,
+      dry_bulb_temp_c: 50.0,
+      station_level_pressure: {
         "970": 0.28,
         "975": 0.28,
         "980": 0.28,
@@ -954,9 +954,9 @@ const seaLevelPressure = {
         "1005": 0.29,
         "1010": 0.29,
         "1015": 0.29,
-        "1020": 0.30,
-        "1025": 0.30,
-        "1030": 0.30
+        "1020": 0.3,
+        "1025": 0.3,
+        "1030": 0.3,
       },
     },
   ],

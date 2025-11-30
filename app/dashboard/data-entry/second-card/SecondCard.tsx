@@ -826,7 +826,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
       }
 
       toast.success(data.message, {
-        description: `Entry #${data.dataCount} saved`,
+        description: `Second Card Entry Saved Successfully`,
       });
 
       resetForm();

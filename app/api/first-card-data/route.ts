@@ -204,10 +204,7 @@ export async function GET(req: Request) {
     const endDate = searchParams.get("endDate");
     const stationIdParam = searchParams.get("stationId");
 
-    // Use the station ID from the query parameter if provided, otherwise use the user's station
     const stationId = stationIdParam || session.user.station?.id;
-
-    // Super admin can view all stations if no specific station is requested
     if (!stationId && session.user.role !== "super_admin") {
       return NextResponse.json(
         { message: "Station ID is required" },
@@ -215,30 +212,21 @@ export async function GET(req: Request) {
       );
     }
 
-    const startTime = startDate
-      ? new Date(startDate)
-      : new Date(new Date().setDate(new Date().getDate() - 7));
-    startTime.setHours(0, 0, 0, 0); // Start of day
+    // ✅ UTC day range বানানো (কোনো setHours নয়)
+    const start = startDate
+      ? new Date(`${startDate}T00:00:00.000Z`)
+      : new Date(new Date().toISOString().slice(0, 10) + "T00:00:00.000Z");
 
-    const endTime = endDate ? new Date(endDate) : new Date();
-    endTime.setHours(23, 59, 59, 999); // End of day
-
-    const { startToday, endToday } = getTodayBDRange();
-
-    const start = startDate ? startTime : startToday;
-    const end = endDate ? endTime : endToday;
+    const end = endDate
+      ? new Date(`${endDate}T23:59:59.999Z`)
+      : new Date(new Date().toISOString().slice(0, 10) + "T23:59:59.999Z");
 
     const superFilter = session.user.role === "super_admin";
 
     const entries = await prisma.observingTime.findMany({
       where: {
         AND: [
-          {
-            utcTime: {
-              gte: start,
-              lte: end,
-            },
-          },
+          { utcTime: { gte: start, lte: end } },
           ...(superFilter
             ? stationIdParam
               ? [{ stationId: stationIdParam }]
@@ -250,9 +238,7 @@ export async function GET(req: Request) {
         station: true,
         MeteorologicalEntry: true,
       },
-      orderBy: {
-        utcTime: "desc",
-      },
+      orderBy: { utcTime: "desc" },
       take: 100,
     });
 
@@ -265,6 +251,7 @@ export async function GET(req: Request) {
     );
   }
 }
+
 
 export async function PUT(req: Request) {
   try {
