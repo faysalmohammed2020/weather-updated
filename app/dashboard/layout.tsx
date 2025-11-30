@@ -15,7 +15,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             <Profile />
           </div>
 
-          <div className="grow overflow-y-auto relative p-6">
+          <div className="grow overflow-y-auto relative">
             <ImpersonationBanner />
             <LocationProvider>
               <HourProvider>{children}</HourProvider>

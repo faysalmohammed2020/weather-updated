@@ -172,9 +172,11 @@ export default async function AgroclimatologicalDataTablePage() {
   ])
 
   return (
-    <AgroclimatologicalDataTable 
+    <div className="p-6">
+      <AgroclimatologicalDataTable 
       initialData={initialData}
       initialStations={stations}
     />
+    </div>
   )
 }

@@ -4,10 +4,19 @@ export const dynamic = "force-dynamic";
 
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/getSession";
-import { getUsersServer, getStationsServer, type User, type Station } from "@/lib/server/user-data";
+import {
+  getUsersServer,
+  getStationsServer,
+  type User,
+  type Station,
+} from "@/lib/server/user-data";
 import { UserTableClient } from "./user-table-client";
 
-const UserPage = async ({ searchParams }: { searchParams: Promise<{ page?: string }> }) => {
+const UserPage = async ({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) => {
   const session = await getSession();
 
   // Block access if user role is observer
@@ -27,14 +36,16 @@ const UserPage = async ({ searchParams }: { searchParams: Promise<{ page?: strin
   ]);
 
   return (
-    <UserTableClient
-      initialUsers={usersData.users}
-      initialTotalUsers={usersData.total}
-      initialStations={stations}
-      initialPage={page}
-      pageSize={pageSize}
-      session={session}
-    />
+    <div className="p-6">
+      <UserTableClient
+        initialUsers={usersData.users}
+        initialTotalUsers={usersData.total}
+        initialStations={stations}
+        initialPage={page}
+        pageSize={pageSize}
+        session={session}
+      />
+    </div>
   );
 };
 

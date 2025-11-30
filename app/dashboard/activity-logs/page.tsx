@@ -56,11 +56,13 @@ const ActivityLogsPage = async ({
   }
 
   return (
-    <LogsTable
-      logs={logsData.logs || []}
-      total={logsData.total}
-      limit={parsedLimit}
-    />
+    <div className="p-6">
+      <LogsTable
+        logs={logsData.logs || []}
+        total={logsData.total}
+        limit={parsedLimit}
+      />
+    </div>
   );
 };
 
