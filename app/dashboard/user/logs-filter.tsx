@@ -17,6 +17,7 @@ export const LogsFilter = () => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const searchParamsRef = useRef(searchParams);
 
   const [search, setSearch] = useState(searchParams.get("search") || "");
   const [action, setAction] = useState(searchParams.get("action") || "");
@@ -26,6 +27,11 @@ export const LogsFilter = () => {
     searchParams.get("startDate") || ""
   );
   const [endDate, setEndDate] = useState(searchParams.get("endDate") || "");
+
+  // Keep a ref of the latest search params so pagination changes don't retrigger filter submits
+  useEffect(() => {
+    searchParamsRef.current = searchParams;
+  }, [searchParams]);
 
   // Debounce timer for search
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -40,7 +46,7 @@ export const LogsFilter = () => {
       startDateVal: string,
       endDateVal: string
     ) => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(searchParamsRef.current.toString());
 
       // Reset to page 1 when applying filters
       params.set("page", "1");
@@ -86,7 +92,7 @@ export const LogsFilter = () => {
         scroll: false,
       });
     },
-    [router, pathname, searchParams]
+    [router, pathname]
   );
 
   // Real-time filter effect
