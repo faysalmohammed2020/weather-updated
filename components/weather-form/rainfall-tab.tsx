@@ -182,13 +182,11 @@ export default function RainfallTab() {
       setFieldValue("rainfall.date-start", selectedDate);
       setFieldValue("rainfall.date-end", selectedDate);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedHour]);
 
   // Keep rainfall type in sync
   useEffect(() => {
     detectRainfallType(timeSlots);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeSlots]);
 
   // ---------- UX: slot summary ----------

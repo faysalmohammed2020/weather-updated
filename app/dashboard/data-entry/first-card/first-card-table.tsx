@@ -1215,13 +1215,13 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
             </DialogHeader>
             <div className="py-4">
               <p className="text-slate-700">
-                You don't have permission to edit this record. This could be
+                You don&apos;t have permission to edit this record. This could be
                 because:
               </p>
               <ul className="mt-2 list-disc pl-5 text-sm text-slate-600 space-y-1">
                 <li>The record is too old to edit</li>
                 <li>The record belongs to a different station</li>
-                <li>You don't have the required role permissions</li>
+                <li>You don&apos;t have the required role permissions</li>
               </ul>
             </div>
             <DialogFooter>

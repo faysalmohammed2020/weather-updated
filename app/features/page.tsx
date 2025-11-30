@@ -53,7 +53,7 @@ export default function FeaturesPage() {
               </h1>
               <p className="max-w-[700px] text-muted-foreground md:text-xl">
                 Explore the powerful features of our weather dashboard designed
-                specifically for Bangladesh's unique climate.
+                specifically for Bangladesh&apos;s unique climate.
               </p>
             </motion.div>
           </div>

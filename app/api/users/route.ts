@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import moment from "moment";
+import { getSession } from "@/lib/getSession";
 import { diff } from "deep-object-diff";
 import { revalidateTag } from "next/cache";
 import { LogAction, LogActionType, LogModule } from "@/lib/log";

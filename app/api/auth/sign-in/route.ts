@@ -46,26 +46,22 @@ export async function POST(request: NextRequest) {
       where: { userId: user.id },
       orderBy: {
         // schema-তে expiresAt থাকলে এটা কাজ করবে
-        // @ts-ignore
-        expiresAt: "desc",
+        expiresAt: "desc" as any,
       },
     }).catch(() =>
       prisma.sessions.findFirst({
         where: { userId: user.id },
         orderBy: {
           // schema-তে expires থাকলে এটা কাজ করবে
-          // @ts-ignore
-          expires: "desc",
+          expires: "desc" as any,
         },
       })
     );
 
     if (existingSession) {
       const exp =
-        // @ts-ignore
-        existingSession.expiresAt ??
-        // @ts-ignore
-        existingSession.expires;
+        (existingSession as any).expiresAt ??
+        (existingSession as any).expires;
 
       if (exp && !moment(exp).isBefore()) {
         return NextResponse.json(

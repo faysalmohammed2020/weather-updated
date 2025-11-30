@@ -582,7 +582,6 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
         session.user.station?.stationId || ""
       );
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session]);
 
   // Set observation time on initial load (only runs once)
@@ -591,13 +590,11 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
       const utcHour = new Date().getUTCHours().toString().padStart(2, "0");
       formik.setFieldValue("observer.observation-time", utcHour);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Sync formik values with the store
   useEffect(() => {
     updateFields(formik.values);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formik.values]);
 
   // Update the handleNext function to validate the current tab before proceeding

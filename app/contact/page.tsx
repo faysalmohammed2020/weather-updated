@@ -29,7 +29,7 @@ export default function ContactPage() {
                 Get in Touch
               </h1>
               <p className="max-w-[700px] text-muted-foreground md:text-xl">
-                Have questions about our weather dashboard? We're here to help.
+                Have questions about our weather dashboard? We&apos;re here to help.
               </p>
             </motion.div>
           </div>

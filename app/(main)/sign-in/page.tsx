@@ -30,7 +30,6 @@ import {
 import { motion } from "framer-motion";
 // Authentication is now handled by our custom API route
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { toast } from "sonner";
 import { FormError } from "@/components/ui/form-error";
 import { Station } from "@/data/stations";

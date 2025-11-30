@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-import { useSession, twoFactor } from "@/lib/auth-client";
+import { useSession } from "@/lib/auth-client";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +24,22 @@ import {
 const Settings = () => {
   const { data: session, isPending } = useSession();
   const router = useRouter();
+
+  // Initialize all hooks first (before any conditional logic)
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [setupStep, setSetupStep] = useState<"password" | "qrcode" | "verify">(
+    "password"
+  );
+  const [totpUri, setTotpUri] = useState("");
+  const [verificationCode, setVerificationCode] = useState("");
+  const [backupCodes, setBackupCodes] = useState<string[]>([]);
+  const [disableDialogOpen, setDisableDialogOpen] = useState(false);
+  const [disablePassword, setDisablePassword] = useState("");
+  const [disableError, setDisableError] = useState("");
+  const [isDisableLoading, setIsDisableLoading] = useState(false);
 
   // Early redirect and loading state
   useEffect(() => {
@@ -52,23 +68,8 @@ const Settings = () => {
     return null;
   }
 
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [setupStep, setSetupStep] = useState<"password" | "qrcode" | "verify">(
-    "password"
-  );
-  const [totpUri, setTotpUri] = useState("");
-  const [verificationCode, setVerificationCode] = useState("");
-  const [backupCodes, setBackupCodes] = useState<string[]>([]);
-
   // Get 2FA status from session
   const isTwoFactorEnabled = session?.user?.twoFactorEnabled || false;
-  const [disableDialogOpen, setDisableDialogOpen] = useState(false);
-  const [disablePassword, setDisablePassword] = useState("");
-  const [disableError, setDisableError] = useState("");
-  const [isDisableLoading, setIsDisableLoading] = useState(false);
 
   const handleToggle2FA = async (checked: boolean) => {
     if (checked) {

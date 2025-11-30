@@ -483,10 +483,10 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
     return !fieldsToValidate.some((field) => {
       const fieldParts = field.split(".");
       if (fieldParts.length === 2) {
-        // @ts-ignore
+        // @ts-expect-error
         return formik.errors[fieldParts[0]]?.[fieldParts[1]];
       } else if (fieldParts.length === 3) {
-        // @ts-ignore
+        // @ts-expect-error
         return formik.errors[fieldParts[0]]?.[fieldParts[1]]?.[fieldParts[2]];
       }
       return false;
@@ -759,7 +759,6 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
         session.user.station?.stationId || ""
       );
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session]);
 
   useEffect(() => {
@@ -767,7 +766,6 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
       const utcHour = new Date().getUTCHours().toString().padStart(2, "0");
       formik.setFieldValue("observer.observation-time", utcHour);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

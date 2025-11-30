@@ -1,0 +1,648 @@
+
+> weather-forecast-bd@0.1.0 lint
+> next lint
+
+
+./app/(main)/sign-in/page.tsx
+33:8  Error: 'Link' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/actions/synoptic-code-data.ts
+55:54  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+65:23  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/actions/weather-code-data.ts
+7:54  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+17:23  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/api/agroclimatological-data/check-duplicate/route.ts
+58:19  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/api/agroclimatological-data/create/route.ts
+26:19  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+80:19  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/api/agroclimatological-data/list/route.ts
+24:18  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+73:19  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/api/agroclimatological-data/route.ts
+9:29  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+113:19  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+168:18  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+279:19  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/api/auth/sign-in/route.ts
+49:9  Error: Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free.  @typescript-eslint/ban-ts-comment
+57:11  Error: Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free.  @typescript-eslint/ban-ts-comment
+65:9  Error: Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free.  @typescript-eslint/ban-ts-comment
+67:9  Error: Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free.  @typescript-eslint/ban-ts-comment
+
+./app/api/daily-summary/route.ts
+107:11  Error: 'entry' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+249:35  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+267:46  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+321:17  Error: 'ObservingTime' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/first-card-data/route.ts
+6:10  Error: 'convertUTCToBDTime' is defined but never used.  @typescript-eslint/no-unused-vars
+260:19  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+303:36  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+303:47  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+310:38  Error: A `require()` style import is forbidden.  @typescript-eslint/no-require-imports
+385:19  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/api/impersonate/route.ts
+47:32  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+101:26  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+161:53  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+189:53  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+198:37  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+199:36  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+200:36  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+201:35  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+202:35  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+274:52  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+276:27  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+308:48  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+333:26  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+334:29  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+335:31  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+336:32  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+337:34  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+341:38  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/api/save-observation/route.ts
+442:36  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+442:47  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+449:38  Error: A `require()` style import is forbidden.  @typescript-eslint/no-require-imports
+
+./app/api/soil-moisture/route.ts
+17:34  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+113:34  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/api/sunshine/route.ts
+56:19  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+62:27  Error: 'req' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/synoptic/route.ts
+176:19  Error: 'baseDate' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/synoptic-code/route.ts
+258:17  Error: 'ObservingTime' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/users/route.ts
+4:8  Error: 'moment' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/contact/page.tsx
+32:63  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+120:51  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./app/dashboard/data-entry/agroclimatological/agroclimatological-form.tsx
+77:10  Error: 'duplicateData' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+77:54  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+139:34  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+147:6  Warning: React Hook useEffect has a missing dependency: 'formik'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+158:33  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+233:6  Warning: React Hook useEffect has a missing dependency: 'formik'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+348:36  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+358:35  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+456:6  Warning: React Hook useEffect has a missing dependency: 'formik'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+558:48  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/dashboard/data-entry/agroclimatological/page.tsx
+10:10  Error: 'ChevronRight' is defined but never used.  @typescript-eslint/no-unused-vars
+10:24  Error: 'ChevronLeft' is defined but never used.  @typescript-eslint/no-unused-vars
+44:9  Error: 'nextTab' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+52:9  Error: 'prevTab' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+192:10  Error: 'Button' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/dashboard/data-entry/agroclimatological/SoilMoistureForm/SoilMoistureForm.tsx
+38:9  Error: 'router' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+41:10  Error: 'canSubmit' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+42:10  Error: 'lastSubmission' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+44:10  Error: 'showConfirmation' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+44:28  Error: 'setShowConfirmation' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+130:6  Warning: React Hook useEffect has a missing dependency: 'formik'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+237:9  Error: 'nextTab' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./app/dashboard/data-entry/agroclimatological/SunshineTracker/sunshineTracker.tsx
+49:10  Error: 'loading' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+155:19  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+158:16  Error: '_' is defined but never used.  @typescript-eslint/no-unused-vars
+172:21  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/dashboard/data-entry/daily-summery/DailySummery.tsx
+27:21  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+32:23  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+38:23  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+44:30  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+53:30  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+175:18  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+181:18  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+189:22  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+192:22  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+202:22  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+205:22  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+208:22  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+212:22  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+227:22  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+237:22  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+245:22  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+254:22  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+259:22  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+271:22  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+291:22  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+300:32  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/dashboard/data-entry/first-card/calculations.ts
+41:11  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/dashboard/data-entry/first-card/first-card-table.tsx
+112:59  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+146:10  Error: 'flattenedData' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+153:10  Error: 'dateError' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+218:6  Warning: React Hook useEffect has a missing dependency: 'fetchData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+1218:24  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+1224:28  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./app/dashboard/data-entry/first-card/tabs/MeteorsTab.tsx
+12:11  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/dashboard/data-entry/first-card/tabs/PressureTab.tsx
+12:11  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/dashboard/data-entry/first-card/tabs/SquallTab.tsx
+12:11  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/dashboard/data-entry/first-card/tabs/SummaryTab.tsx
+13:11  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/dashboard/data-entry/first-card/tabs/TemperatureTab.tsx
+19:11  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/dashboard/data-entry/first-card/tabs/VisibilityTab.tsx
+12:11  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/dashboard/data-entry/first-card/tabs/WeatherTab.tsx
+12:11  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/dashboard/data-entry/first-card/useFirstCardForm.ts
+49:28  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+251:6  Warning: React Hook useEffect has missing dependencies: 'formik' and 'session?.user?.station?.id'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+597:56  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+604:56  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+610:52  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/dashboard/data-entry/second-card/SecondCard.tsx
+20:29  Error: 'TabsList' is defined but never used.  @typescript-eslint/no-unused-vars
+20:39  Error: 'TabsTrigger' is defined but never used.  @typescript-eslint/no-unused-vars
+903:9  Error: 'truncateText' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+2170:3  Error: 'onChange' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/dashboard/data-entry/second-card/SecondCardTable.tsx
+60:18  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+85:18  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+118:67  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+168:10  Error: 'isRefreshing' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+168:24  Error: 'setIsRefreshing' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+180:10  Error: 'dateError' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+224:6  Warning: React Hook useEffect has a missing dependency: 'fetchData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+227:9  Error: 'goToPreviousDay' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+235:9  Error: 'goToNextDay' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./app/dashboard/data-entry/synoptic-code/SynopticCode.tsx
+422:23  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./app/dashboard/netcdf-visualizer/page.tsx
+4:8  Error: 'NetCDFCsvHeatmap' is defined but never used.  @typescript-eslint/no-unused-vars
+6:8  Error: 'UploadAndVisualize' is defined but never used.  @typescript-eslint/no-unused-vars
+7:8  Error: 'UploadAndVisualizeCsv' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/dashboard/settings/page.tsx
+55:43  Error: React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  react-hooks/rules-of-hooks
+56:35  Error: React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  react-hooks/rules-of-hooks
+57:37  Error: React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  react-hooks/rules-of-hooks
+58:29  Error: React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  react-hooks/rules-of-hooks
+59:37  Error: React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  react-hooks/rules-of-hooks
+62:33  Error: React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  react-hooks/rules-of-hooks
+63:51  Error: React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  react-hooks/rules-of-hooks
+64:41  Error: React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  react-hooks/rules-of-hooks
+68:53  Error: React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  react-hooks/rules-of-hooks
+69:49  Error: React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  react-hooks/rules-of-hooks
+70:43  Error: React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  react-hooks/rules-of-hooks
+71:51  Error: React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  react-hooks/rules-of-hooks
+
+./app/dashboard/stations/page.tsx
+5:45  Error: 'ServerStation' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/dashboard/stations/station-management-client.tsx
+3:20  Error: 'useEffect' is defined but never used.  @typescript-eslint/no-unused-vars
+33:12  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+38:3  Error: 'session' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/dashboard/user/logs-table.tsx
+60:30  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/dashboard/user/page.tsx
+7:50  Error: 'User' is defined but never used.  @typescript-eslint/no-unused-vars
+7:61  Error: 'Station' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/dashboard/user/user-table-client.tsx
+30:3  Error: 'PAGINATION' is defined but never used.  @typescript-eslint/no-unused-vars
+83:12  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+120:20  Error: 'setStations' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+350:6  Warning: React Hook useCallback has a missing dependency: 'handleUpdateUser'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+424:9  Error: 'tableRows' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./app/dashboard/user/user-table-refactored.tsx
+39:8  Error: 'Station' is defined but never used.  @typescript-eslint/no-unused-vars
+86:53  Error: 'setUsers' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+249:6  Warning: React Hook useCallback has a missing dependency: 'handleUpdateUser'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+265:66  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/dashboard/user/user-table.tsx
+264:6  Warning: React Hook useCallback has a missing dependency: 'handleUpdateUser'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+277:66  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/dashboard/view-and-manage/agroclimatological-data-table/agroclimatological-data-table.tsx
+104:10  Error: 'error' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+285:14  Error: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/dashboard/view-and-manage/agroclimatological-data-table/page.tsx
+91:18  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/dashboard/view-and-manage/all/page.tsx
+32:31  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+33:32  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+34:30  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+35:34  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+61:22  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+71:22  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+90:23  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+116:22  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+129:22  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+144:32  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/dashboard/view-and-manage/daily-summery/DailySummaryView.tsx
+109:9  Error: 'formatDate' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./app/dashboard/view-and-manage/daily-summery/page.tsx
+2:15  Error: 'DailySummaryViewHandle' is defined but never used.  @typescript-eslint/no-unused-vars
+3:35  Error: 'DailySummaryUser' is defined but never used.  @typescript-eslint/no-unused-vars
+8:10  Error: 'parseISO' is defined but never used.  @typescript-eslint/no-unused-vars
+8:20  Error: 'isValid' is defined but never used.  @typescript-eslint/no-unused-vars
+10:11  Error: 'DailySummaryPageProps' is defined but never used.  @typescript-eslint/no-unused-vars
+38:18  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+97:35  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+115:46  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/dashboard/view-and-manage/PdfExportComponent.tsx
+165:18  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+166:19  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+167:17  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+168:21  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+174:12  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+186:31  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+207:33  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+221:13  Warning: Image elements must have an alt prop, either with meaningful text, or an empty string for decorative images.  jsx-a11y/alt-text
+598:33  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+599:34  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+600:32  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+601:36  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/dashboard/view-and-manage/synoptic-code/SynopticCodeView.tsx
+64:43  Error: The `{}` ("empty object") type allows any non-nullish value, including literals like `0` and `""`.
+- If that's what you want, disable this lint rule with an inline comment or configure the 'allowObjectTypes' rule option.
+- If you want a type meaning "any object", you probably want `object` instead.
+- If you want a type meaning "any value", you probably want `unknown` instead.  @typescript-eslint/no-empty-object-type
+
+./app/features/page.tsx
+56:44  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+375:27  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./app/not-found.tsx
+15:7  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./app/page.tsx
+8:19  Error: 'Sun' is defined but never used.  @typescript-eslint/no-unused-vars
+8:24  Error: 'Moon' is defined but never used.  @typescript-eslint/no-unused-vars
+28:11  Error: 'theme' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+28:18  Error: 'setTheme' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./components/Animation/cloud-animation.tsx
+92:18  Warning: The ref value 'mountRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'mountRef.current' to a variable inside the effect, and use that variable in the cleanup function.  react-hooks/exhaustive-deps
+97:6  Warning: React Hook useEffect has a missing dependency: 'updatePosition'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+104:13  Error: 'totalCloudAmount' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+158:6  Warning: React Hook useEffect has a missing dependency: 'updatePosition'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./components/Animation/dewpoint-animation.tsx
+86:18  Warning: The ref value 'mountRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'mountRef.current' to a variable inside the effect, and use that variable in the cleanup function.  react-hooks/exhaustive-deps
+91:6  Warning: React Hook useEffect has a missing dependency: 'updatePosition'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+139:6  Warning: React Hook useEffect has a missing dependency: 'updatePosition'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./components/Animation/humidity-animation.tsx
+94:18  Warning: The ref value 'mountRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'mountRef.current' to a variable inside the effect, and use that variable in the cleanup function.  react-hooks/exhaustive-deps
+99:6  Warning: React Hook useEffect has a missing dependency: 'updatePosition'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+142:6  Warning: React Hook useEffect has a missing dependency: 'updatePosition'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./components/Animation/pressure-animation.tsx
+81:18  Warning: The ref value 'mountRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'mountRef.current' to a variable inside the effect, and use that variable in the cleanup function.  react-hooks/exhaustive-deps
+86:6  Warning: React Hook useEffect has a missing dependency: 'updatePosition'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+151:6  Warning: React Hook useEffect has a missing dependency: 'updatePosition'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./components/Animation/rainfall-animation.tsx
+120:18  Warning: The ref value 'mountRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'mountRef.current' to a variable inside the effect, and use that variable in the cleanup function.  react-hooks/exhaustive-deps
+125:6  Warning: React Hook useEffect has a missing dependency: 'updatePosition'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+185:6  Warning: React Hook useEffect has a missing dependency: 'updatePosition'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./components/Animation/rainFall.tsx
+136:18  Warning: The ref value 'mountRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'mountRef.current' to a variable inside the effect, and use that variable in the cleanup function.  react-hooks/exhaustive-deps
+143:6  Warning: React Hook useEffect has a missing dependency: 'updatePosition'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+211:6  Warning: React Hook useEffect has a missing dependency: 'updatePosition'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./components/Animation/temperature-animation.tsx
+89:18  Warning: The ref value 'mountRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'mountRef.current' to a variable inside the effect, and use that variable in the cleanup function.  react-hooks/exhaustive-deps
+94:6  Warning: React Hook useEffect has a missing dependency: 'updatePosition'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+140:6  Warning: React Hook useEffect has a missing dependency: 'updatePosition'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./components/Animation/visibility-animation.tsx
+90:18  Warning: The ref value 'mountRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'mountRef.current' to a variable inside the effect, and use that variable in the cleanup function.  react-hooks/exhaustive-deps
+95:6  Warning: React Hook useEffect has a missing dependency: 'updatePosition'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+145:6  Warning: React Hook useEffect has a missing dependency: 'updatePosition'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./components/Animation/wind/DhakaWindOverlay.tsx
+23:44  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/Animation/wind/windAnimation.tsx
+240:18  Warning: The ref value 'mountRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'mountRef.current' to a variable inside the effect, and use that variable in the cleanup function.  react-hooks/exhaustive-deps
+249:6  Warning: React Hook useEffect has missing dependencies: 'particleCount' and 'updatePosition'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+253:6  Warning: React Hook useEffect has a missing dependency: 'updatePosition'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./components/Animation/wind/WindArroe.tsx
+79:18  Warning: The ref value 'mountRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'mountRef.current' to a variable inside the effect, and use that variable in the cleanup function.  react-hooks/exhaustive-deps
+84:6  Warning: React Hook useEffect has a missing dependency: 'updatePosition'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+88:6  Warning: React Hook useEffect has a missing dependency: 'updatePosition'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./components/Animation/wind/WindArrowOverlay.tsx
+31:22  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+75:9  Error: Missing "key" prop for element in iterator  react/jsx-key
+
+./components/Animation/wind-animation.tsx
+106:18  Warning: The ref value 'mountRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'mountRef.current' to a variable inside the effect, and use that variable in the cleanup function.  react-hooks/exhaustive-deps
+111:6  Warning: React Hook useEffect has missing dependencies: 'updatePosition', 'windDirection', and 'windSpeed'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+193:6  Warning: React Hook useEffect has a missing dependency: 'updatePosition'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./components/debug-panel.tsx
+7:11  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/first-card-table/form/SquallFields.tsx
+27:28  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/map/DailySummaryChart.tsx
+57:83  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+58:12  Error: 'stationName' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+58:25  Error: 'setStationName' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+179:53  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+200:8  Warning: React Hook React.useCallback has a missing dependency: 'selectedStation.id'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+214:15  Error: 'days' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+216:15  Error: 'station' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./components/map/index.tsx
+118:41  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+245:27  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+292:35  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+309:64  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+334:6  Warning: React Hook useEffect has missing dependencies: 'onEachFeature' and 'style'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+341:6  Warning: React Hook useEffect has a missing dependency: 'style'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./components/map/map-controls.tsx
+44:26  Error: 'status' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./components/map/MapComponent.tsx
+62:11  Error: 'WeatherLayerData' is defined but never used.  @typescript-eslint/no-unused-vars
+192:41  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+232:3  Error: 'weatherData' is defined but never used.  @typescript-eslint/no-unused-vars
+239:18  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+240:19  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+248:13  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+251:13  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+397:17  Error: 'setError' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+495:21  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+620:54  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+621:56  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+675:67  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/map/timeSeriseGraph.tsx
+64:12  Error: 'data' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+124:68  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+126:35  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+197:8  Warning: React Hook useEffect has a missing dependency: 'fetchData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./components/margeTable.tsx
+128:18  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+171:10  Error: 'firstCardData' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+172:10  Error: 'secondCardData' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+178:10  Error: 'dateError' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+621:6  Warning: React Hook useEffect has a missing dependency: 'fetchAllData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./components/MeteorologicalAnalysis.tsx
+12:13  Error: 'd3' is defined but never used.  @typescript-eslint/no-unused-vars
+503:37  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+565:36  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/msn-weather.tsx
+70:20  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+73:9  Error: 'role' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./components/NetCDFCsvHeatmap.tsx
+17:16  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+18:17  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+32:29  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+33:48  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+35:56  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+38:56  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+56:28  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+57:28  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+63:27  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+65:30  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+110:13  Error: 'windOverlay' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+124:30  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/NetCDFVisualizer copy.tsx
+18:3  Error: 'Globe' is defined but never used.  @typescript-eslint/no-unused-vars
+32:44  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+40:52  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+66:10  Error: 'activeTab' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+179:33  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+1066:29  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/NetCDFVisualizer.tsx
+45:44  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+53:52  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+76:10  Error: 'versionWarning' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+259:33  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+564:9  Error: 'exportToCSV' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+576:9  Error: 'exportToJSON' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./components/PlotlyWrapper.tsx
+10:12  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/radio-sond-analyzer/radiosondeDecoders.ts
+62:7  Error: 'decodeTemperature' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+89:7  Error: 'decodeWind' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+332:9  Error: '_station' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+334:9  Error: '_day' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+335:9  Error: '_time' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./components/radio-sond-analyzer/useRadiosondeAnalyzer.ts
+7:57  Error: 'DecodedLevel' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/second-card-table/SecondCardTable.tsx
+13:10  Error: 'Badge' is defined but never used.  @typescript-eslint/no-unused-vars
+130:9  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/SecondCard/Cloud.tsx
+15:11  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/SecondCard/Observer.tsx
+14:11  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/SecondCard/Rainfall.tsx
+14:11  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+22:3  Error: 'formik' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/SecondCard/SecondCard.tsx
+12:3  Error: 'Loader2' is defined but never used.  @typescript-eslint/no-unused-vars
+17:10  Error: 'Button' is defined but never used.  @typescript-eslint/no-unused-vars
+32:8  Error: 'RainfallTab' is defined but never used.  @typescript-eslint/no-unused-vars
+449:26  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+486:9  Error: Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free.  @typescript-eslint/ban-ts-comment
+489:9  Error: Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free.  @typescript-eslint/ban-ts-comment
+728:23  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+787:6  Warning: React Hook useEffect has a missing dependency: 'updateFields'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./components/SecondCard/SecondCardSummary.tsx
+12:3  Error: 'BarChart3' is defined but never used.  @typescript-eslint/no-unused-vars
+27:11  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+28:12  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/SecondCard/shared/CloudLevelSection.tsx
+7:10  Error: 'cn' is defined but never used.  @typescript-eslint/no-unused-vars
+134:6  Warning: React Hook useMemo has missing dependencies: 'highCloudFormOptions', 'lowCloudFormOptions', and 'mediumCloudFormOptions'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./components/SecondCard/SignificantCloud.tsx
+15:11  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/SecondCard/TotalCloud.tsx
+15:11  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/SecondCard/Wind.tsx
+15:11  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/sections/hero-section.tsx
+25:3  Error: 'Legend' is defined but never used.  @typescript-eslint/no-unused-vars
+76:9  Error: 'weeklyForecast' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./components/sections/how-it-works-section.tsx
+8:3  Error: 'BarChart' is defined but never used.  @typescript-eslint/no-unused-vars
+9:3  Error: 'Bar' is defined but never used.  @typescript-eslint/no-unused-vars
+12:3  Error: 'LineChart' is defined but never used.  @typescript-eslint/no-unused-vars
+13:3  Error: 'Line' is defined but never used.  @typescript-eslint/no-unused-vars
+16:3  Error: 'CartesianGrid' is defined but never used.  @typescript-eslint/no-unused-vars
+36:7  Error: 'rainfallData' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./components/sections/testimonials-section.tsx
+57:15  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+59:38  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+102:15  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+103:42  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+104:51  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+147:15  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+149:38  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+
+./components/sections/weather-alerts-section.tsx
+4:8  Error: 'Image' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/sidebar.tsx
+96:6  Warning: React Hook useEffect has a missing dependency: 'sidebarLinks'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./components/synoptic/Dialogs/EditSynopticDialog.tsx
+62:62  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/synoptic/Dialogs/PermissionDeniedDialog.tsx
+24:18  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+29:22  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./components/synoptic/Table/SynopticTableRow.tsx
+114:17  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/TwoFactorSetup.ts
+63:9  Error: Parsing error: '>' expected.
+
+./components/UploadAndVisualize.tsx
+143:23  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/user-management/ConfirmationDialogs.tsx
+12:3  Error: 'DialogFooter' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/user-management/CreateEditUserDialog.tsx
+59:21  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+60:32  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+61:21  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+62:32  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+63:30  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+294:23  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+295:23  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/weather-form/rainfall-tab.tsx
+232:6  Warning: React Hook useMemo has missing dependencies: 'diffMinutes' and 'gapMinutes'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./lib/auth.config.ts
+16:39  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+21:26  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./lib/auth.ts
+191:40  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+192:47  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+251:16  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+267:29  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+268:31  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+269:36  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+270:35  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+271:35  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+272:34  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+275:34  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+277:41  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+278:38  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+284:26  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+285:26  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+286:26  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+287:26  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+288:26  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+289:26  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+292:26  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+292:51  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+293:26  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+294:21  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+296:26  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+297:21  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./lib/fetchers/useWeatherData.ts
+62:9  Warning: The 'records' logical expression could make the dependencies of useMemo Hook (at line 65) change on every render. To fix this, wrap the initialization of 'records' in its own useMemo() Hook.  react-hooks/exhaustive-deps
+
+./lib/generateSynopticCode.ts
+168:7  Error: 'conVertMinTemp' is never reassigned. Use 'const' instead.  prefer-const
+211:7  Error: 'lowFormSig' is never reassigned. Use 'const' instead.  prefer-const
+212:7  Error: 'mediumFormSig' is never reassigned. Use 'const' instead.  prefer-const
+213:7  Error: 'highFormSig' is never reassigned. Use 'const' instead.  prefer-const
+215:7  Error: 'lowAmountSig' is never reassigned. Use 'const' instead.  prefer-const
+216:7  Error: 'mediumAmountSig' is never reassigned. Use 'const' instead.  prefer-const
+217:7  Error: 'highAmountSig' is never reassigned. Use 'const' instead.  prefer-const
+219:7  Error: 'lowHeightSig' is never reassigned. Use 'const' instead.  prefer-const
+223:7  Error: 'mediumHeightSig' is never reassigned. Use 'const' instead.  prefer-const
+227:7  Error: 'highHeightSig' is never reassigned. Use 'const' instead.  prefer-const
+
+./lib/utils/user-management.ts
+148:33  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules

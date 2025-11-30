@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import moment from "moment"
 
 interface DailySummaryResult {

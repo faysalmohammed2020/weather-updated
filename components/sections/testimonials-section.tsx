@@ -54,9 +54,9 @@ export default function TestimonialsSection() {
               </div>
             </div>
             <p className="text-gray-600 dark:text-gray-300 italic">
-              "The rainfall forecasting has been instrumental in helping farmers
+              &quot;The rainfall forecasting has been instrumental in helping farmers
               in our region plan their planting and harvesting schedules. The
-              accuracy is impressive."
+              accuracy is impressive.&quot;
             </p>
             <div className="flex text-amber-400">
               <svg className="h-5 w-5 fill-current" viewBox="0 0 20 20">
@@ -99,9 +99,9 @@ export default function TestimonialsSection() {
               </div>
             </div>
             <p className="text-gray-600 dark:text-gray-300 italic">
-              "The early warning system for cyclones has been a game-changer for
-              our coastal communities. We've been able to evacuate people well
-              in advance of severe weather events."
+              &quot;The early warning system for cyclones has been a game-changer for
+              our coastal communities. We&apos;ve been able to evacuate people well
+              in advance of severe weather events.&quot;
             </p>
             <div className="flex text-amber-400">
               <svg className="h-5 w-5 fill-current" viewBox="0 0 20 20">
@@ -144,9 +144,9 @@ export default function TestimonialsSection() {
               </div>
             </div>
             <p className="text-gray-600 dark:text-gray-300 italic">
-              "The historical data analysis tools have been invaluable for our
+              &quot;The historical data analysis tools have been invaluable for our
               climate change research. We can now identify long-term trends with
-              much greater precision."
+              much greater precision.&quot;
             </p>
             <div className="flex text-amber-400">
               <svg className="h-5 w-5 fill-current" viewBox="0 0 20 20">

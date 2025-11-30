@@ -439,14 +439,14 @@ export async function PUT(request: Request) {
       );
     }
 
-    const canEditRecord = (record: any, user: any): boolean => {
+    const canEditRecord = async (record: any, user: any): Promise<boolean> => {
       if (!user) return false;
 
       // If no createdAt date (shouldn't happen with Prisma defaults)
       if (!record.createdAt) return true;
 
       try {
-        const { differenceInDays } = require("date-fns");
+        const { differenceInDays } = await import("date-fns");
 
         // createdAt is already a Date object from Prisma
         const submissionDate = record.createdAt;
@@ -508,7 +508,7 @@ export async function PUT(request: Request) {
       else if (userRole === "observer" && isOwner) canEdit = true;
 
       // Add the time-based permission check
-      if (canEdit && !canEditRecord(existing, session.user)) {
+      if (canEdit && !(await canEditRecord(existing, session.user))) {
         return NextResponse.json(
           {
             success: false,

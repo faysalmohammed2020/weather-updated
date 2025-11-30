@@ -165,7 +165,7 @@ export function generateSynopticCode(): SynopticFormValues {
     sN = 1;
     x = 2;
   }
-  let conVertMinTemp = pad(Math.abs(Math.round(minTemp * 10)), 3);
+  const conVertMinTemp = pad(Math.abs(Math.round(minTemp * 10)), 3);
   measurements[10] = `${x}${sN}${conVertMinTemp}`;
 
   // 12. 56DlDmDh (67-71) - Cloud directions
@@ -208,23 +208,23 @@ export function generateSynopticCode(): SynopticFormValues {
   measurements[17] = `(${measurements[7]})`;
 
   // 19. 8N5Ch5h5 (29-33) - Cloud information
-  let lowFormSig = weatherObs.significantClouds?.layer1?.form || "0";
-  let mediumFormSig = weatherObs.significantClouds?.layer2?.form || "0";
-  let highFormSig = weatherObs.significantClouds?.layer3?.form || "0";
+  const lowFormSig = weatherObs.significantClouds?.layer1?.form || "0";
+  const mediumFormSig = weatherObs.significantClouds?.layer2?.form || "0";
+  const highFormSig = weatherObs.significantClouds?.layer3?.form || "0";
 
-  let lowAmountSig = weatherObs.significantClouds?.layer1?.amount || "0";
-  let mediumAmountSig = weatherObs.significantClouds?.layer2?.amount || "0";
-  let highAmountSig = weatherObs.significantClouds?.layer3?.amount || "0";
+  const lowAmountSig = weatherObs.significantClouds?.layer1?.amount || "0";
+  const mediumAmountSig = weatherObs.significantClouds?.layer2?.amount || "0";
+  const highAmountSig = weatherObs.significantClouds?.layer3?.amount || "0";
 
-  let lowHeightSig = pad(
+  const lowHeightSig = pad(
     (Number(weatherObs.significantClouds?.layer1?.height) || 0) * 10,
     2
   );
-  let mediumHeightSig = pad(
+  const mediumHeightSig = pad(
     (Number(weatherObs.significantClouds?.layer2?.height) || 0) * 10,
     2
   );
-  let highHeightSig = pad(
+  const highHeightSig = pad(
     (Number(weatherObs.significantClouds?.layer3?.height) || 0) * 10,
     2
   );

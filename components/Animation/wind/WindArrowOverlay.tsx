@@ -71,8 +71,9 @@ const WindArrowOverlay = ({ map, visible }: Props) => {
         />
       ))}
 
-      {windData.map((w) => (
+      {windData.map((w, idx) => (
         <WindFlowTrailAnimation
+          key={idx}
           visible={visible}
           windSpeed={w.windSpeed}
           windDirection={w.windDirection}

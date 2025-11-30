@@ -7,7 +7,7 @@ import { SoilMoistureForm } from "./SoilMoistureForm/SoilMoistureForm";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { ChevronRight, ChevronLeft, Sun, Thermometer, Droplets } from "lucide-react";
+import { Sun, Thermometer, Droplets } from "lucide-react";
 import { motion } from "framer-motion";
 
 const AgroclimatologicalPage = () => {
@@ -39,22 +39,6 @@ const AgroclimatologicalPage = () => {
 
   const handleTabChange = (tabName: string) => {
     setActiveTab(tabName);
-  };
-
-  const nextTab = () => {
-    const tabs = Object.keys(tabStyles);
-    const currentIndex = tabs.indexOf(activeTab);
-    if (currentIndex < tabs.length - 1) {
-      setActiveTab(tabs[currentIndex + 1]);
-    }
-  };
-
-  const prevTab = () => {
-    const tabs = Object.keys(tabStyles);
-    const currentIndex = tabs.indexOf(activeTab);
-    if (currentIndex > 0) {
-      setActiveTab(tabs[currentIndex - 1]);
-    }
   };
 
   return (
@@ -187,37 +171,3 @@ const AgroclimatologicalPage = () => {
 };
 
 export default AgroclimatologicalPage;
-
-// Button component for consistency
-function Button({
-  children,
-  onClick,
-  type = "button",
-  variant = "default",
-  disabled = false,
-  className = "",
-}: {
-  children: React.ReactNode;
-  onClick?: () => void;
-  type?: "button" | "submit" | "reset";
-  variant?: "default" | "outline";
-  disabled?: boolean;
-  className?: string;
-}) {
-  const baseClasses = "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background";
-  const variantClasses = {
-    default: "bg-primary text-primary-foreground hover:bg-primary/90",
-    outline: "border border-input hover:bg-accent hover:text-accent-foreground",
-  };
-
-  return (
-    <button
-      type={type}
-      onClick={onClick}
-      disabled={disabled}
-      className={cn(baseClasses, variantClasses[variant], className)}
-    >
-      {children}
-    </button>
-  );
-}
