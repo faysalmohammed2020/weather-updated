@@ -118,7 +118,7 @@ export default function BasicInfoTab({ onFieldChange, isLoading }: BasicInfoTabP
   }
 
   return (
-    <div className="space-y-4 mb-6">
+    <div className="space-y-4 p-6">
       <h2 className="text-lg font-semibold text-slate-700 flex items-center">
         <span className="w-8 h-8 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center mr-2">
           <svg

@@ -349,7 +349,7 @@ export function SynopticCode() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       <h2 className="text-lg font-semibold text-green-700 flex items-center">
         <span className="w-8 h-8 rounded-full bg-green-100 text-green-700 flex items-center justify-center mr-2">
           <svg
