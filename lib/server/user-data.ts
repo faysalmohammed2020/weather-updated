@@ -1,10 +1,13 @@
 /**
  * Server-side data fetching functions for User Management
  * These functions are designed to run in Server Components
+ * Build-safe (no internal HTTP fetch)
  */
 
-import { API_ENDPOINTS } from "@/lib/constants/user-management";
-import { headers } from "next/headers";
+import {
+  getUsersForSession,
+  getStationsForSession,
+} from "@/lib/server/user-management-data";
 
 export interface User {
   id: string;
@@ -45,75 +48,35 @@ export interface UsersResponse {
 }
 
 /**
- * Fetch users with pagination - Server Side
+ * Fetch users with pagination - Server Side (build-safe)
  */
 export async function getUsersServer(
   pageIndex: number = 0,
   pageSize: number = 10
 ): Promise<UsersResponse> {
   try {
-    const headersList = await headers();
-    const cookie = headersList.get("cookie");
+    const { users, total } = await getUsersForSession({
+      limit: pageSize,
+      offset: pageIndex * pageSize,
+    });
 
-    const baseUrl =
-      process.env.NEXTAUTH_URL ||
-      process.env.VERCEL_URL ||
-      "http://localhost:3000";
-    const response = await fetch(
-      `${baseUrl}${API_ENDPOINTS.USERS}?limit=${pageSize}&offset=${pageIndex * pageSize}`,
-      {
-        cache: "no-store", // Ensure fresh data
-        headers: {
-          "Content-Type": "application/json",
-          ...(cookie && { cookie }),
-        },
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch users: ${response.statusText}`);
-    }
-
-    const data = await response.json();
     return {
-      users: data.users || [],
-      total: data.total || 0,
+      users: (users as User[]) || [],
+      total: total || 0,
     };
   } catch (error) {
     console.error("Error fetching users:", error);
-    return {
-      users: [],
-      total: 0,
-    };
+    return { users: [], total: 0 };
   }
 }
 
 /**
- * Fetch all stations - Server Side
+ * Fetch all stations - Server Side (build-safe)
  */
 export async function getStationsServer(): Promise<Station[]> {
   try {
-    const headersList = await headers();
-    const cookie = headersList.get("cookie");
-
-    const baseUrl =
-      process.env.NEXTAUTH_URL ||
-      process.env.VERCEL_URL ||
-      "http://localhost:3000";
-    const response = await fetch(`${baseUrl}${API_ENDPOINTS.STATIONS}`, {
-      cache: "no-store", // Ensure fresh data
-      headers: {
-        "Content-Type": "application/json",
-        ...(cookie && { cookie }),
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch stations: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    return data || [];
+    const stations = await getStationsForSession();
+    return (stations as Station[]) || [];
   } catch (error) {
     console.error("Error fetching stations:", error);
     return [];
