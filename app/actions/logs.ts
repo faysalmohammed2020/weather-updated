@@ -6,9 +6,21 @@ import { getSession } from "@/lib/getSession";
 export async function getLogs({
   limit = 10,
   offset = 0,
+  search = "",
+  action = "",
+  role = "",
+  module = "",
+  startDate,
+  endDate,
 }: {
   limit?: number;
   offset?: number;
+  search?: string;
+  action?: string;
+  role?: string;
+  module?: string;
+  startDate?: Date;
+  endDate?: Date;
 } = {}) {
   try {
     const session = await getSession();
@@ -21,9 +33,9 @@ export async function getLogs({
     }
 
     // For super_admin: show all logs
-    // For station_admin: show observer logs + impersonation logs for their station users
+    // For station_admin: show observer logs + impersonation logs for their station
     // For observer: not allowed to view logs (blocked in page.tsx)
-    let whereCondition;
+    let whereCondition: any;
 
     if (session.user.role === "super_admin") {
       // Super admin sees all logs
@@ -73,6 +85,48 @@ export async function getLogs({
       // Observer role - shouldn't reach here but just in case
       whereCondition = {
         AND: [{ role: "observer" }],
+      };
+    }
+
+    // Apply search filters
+    const searchFilters: any[] = [];
+
+    if (search && search.trim()) {
+      searchFilters.push({
+        OR: [
+          { actorEmail: { contains: search, mode: "insensitive" } },
+          { targetEmail: { contains: search, mode: "insensitive" } },
+          { actionText: { contains: search, mode: "insensitive" } },
+          { actor: { name: { contains: search, mode: "insensitive" } } },
+          { targetUser: { name: { contains: search, mode: "insensitive" } } },
+        ],
+      });
+    }
+
+    if (action && action.trim()) {
+      searchFilters.push({ action: { equals: action, mode: "insensitive" } });
+    }
+
+    if (role && role.trim()) {
+      searchFilters.push({ role: { equals: role, mode: "insensitive" } });
+    }
+
+    if (module && module.trim()) {
+      searchFilters.push({ module: { contains: module, mode: "insensitive" } });
+    }
+
+    if (startDate) {
+      searchFilters.push({ createdAt: { gte: startDate } });
+    }
+
+    if (endDate) {
+      searchFilters.push({ createdAt: { lte: endDate } });
+    }
+
+    // Combine role-based condition with search filters
+    if (searchFilters.length > 0) {
+      whereCondition = {
+        AND: [whereCondition, ...searchFilters],
       };
     }
 

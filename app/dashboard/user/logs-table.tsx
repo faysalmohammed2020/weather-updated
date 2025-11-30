@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { LogActionType } from "@/lib/log";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import LogsTableSkeleton from "./LogsTableSkeleton"; // ✅ skeleton
+import { LogsFilter } from "./logs-filter";
 
 export const LogsTable = ({
   logs: rawLogs,
@@ -102,6 +103,7 @@ export const LogsTable = ({
     return (
       <>
         <h1 className="text-2xl font-bold mb-6">Activity Logs</h1>
+        <LogsFilter />
         <div className=" bg-white py-6 rounded-xl border shadow">
           <LogsTableSkeleton rows={limit} />
         </div>
@@ -112,6 +114,7 @@ export const LogsTable = ({
   return (
     <>
       <h1 className="text-2xl font-bold mb-6">Activity Logs</h1>
+      <LogsFilter />
       <div className=" bg-white py-6 rounded-xl border shadow">
         <div className="overflow-auto">
           <table className="w-full">

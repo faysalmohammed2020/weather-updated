@@ -10,10 +10,6 @@ import { LogAction, LogActionType, LogModule } from "@/lib/log";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth"; // <-- তোমার authOptions export থাকতে হবে
 
-async function getSession() {
-  return await getServerSession(authOptions);
-}
-
 // ✅ BetterAuth admin.revokeUserSessions replacement
 async function revokeUserSessions(userId: string) {
   await prisma.sessions.deleteMany({
