@@ -1,585 +1,585 @@
-/**
- * Refactored User Table Component
- * 100% Production-Grade with Full Maintainability
- */
+// /**
+//  * Refactored User Table Component
+//  * 100% Production-Grade with Full Maintainability
+//  */
 
-"use client";
+// "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { toast } from "sonner";
-import { useLocation } from "@/contexts/divisionContext";
-import { useSession } from "@/lib/auth-client";
-import {
-  USER_ROLES,
-  PAGINATION,
-  ERROR_MESSAGES,
-} from "@/lib/constants/user-management";
-import {
-  validateUserForm,
-  formatDate,
-  canDeleteUser,
-  canImpersonate,
-  buildUserUpdatePayload,
-} from "@/lib/utils/user-management";
-import {
-  useUsers,
-  useStations,
-  useUserOperations,
-  usePagination,
-  type User,
-  type Station,
-} from "@/hooks/use-user-management";
-import { CreateEditUserDialog } from "@/components/user-management/CreateEditUserDialog";
-import {
-  DeleteConfirmationDialog,
-  RoleChangeConfirmationDialog,
-} from "@/components/user-management/ConfirmationDialogs";
+// import { useState, useEffect, useCallback, useMemo } from "react";
+// import { Button } from "@/components/ui/button";
+// import {
+//   Table,
+//   TableBody,
+//   TableCell,
+//   TableHead,
+//   TableHeader,
+//   TableRow,
+// } from "@/components/ui/table";
+// import { toast } from "sonner";
+// import { useLocation } from "@/contexts/divisionContext";
+// import { useSession } from "@/lib/auth-client";
+// import {
+//   USER_ROLES,
+//   PAGINATION,
+//   ERROR_MESSAGES,
+// } from "@/lib/constants/user-management";
+// import {
+//   validateUserForm,
+//   formatDate,
+//   canDeleteUser,
+//   canImpersonate,
+//   buildUserUpdatePayload,
+// } from "@/lib/utils/user-management";
+// import {
+//   useUsers,
+//   useStations,
+//   useUserOperations,
+//   usePagination,
+//   type User,
+//   type Station,
+// } from "@/hooks/use-user-management";
+// import { CreateEditUserDialog } from "@/components/user-management/CreateEditUserDialog";
+// import {
+//   DeleteConfirmationDialog,
+//   RoleChangeConfirmationDialog,
+// } from "@/components/user-management/ConfirmationDialogs";
 
-interface UserFormData {
-  name: string;
-  email: string;
-  password: string;
-  role: string | null;
-  division: string;
-  district: string;
-  upazila: string;
-  stationId: string;
-}
+// interface UserFormData {
+//   name: string;
+//   email: string;
+//   password: string;
+//   role: string | null;
+//   division: string;
+//   district: string;
+//   upazila: string;
+//   stationId: string;
+// }
 
-export const UserTable = () => {
-  // ============================================================================
-  // HOOKS & CONTEXT
-  // ============================================================================
-  const { data: session } = useSession();
-  const {
-    divisions,
-    districts,
-    upazilas,
-    selectedDivision,
-    setSelectedDivision,
-    selectedDistrict,
-    setSelectedDistrict,
-    setSelectedUpazila,
-    loading: locationLoading,
-  } = useLocation();
+// export const UserTable = () => {
+//   // ============================================================================
+//   // HOOKS & CONTEXT
+//   // ============================================================================
+//   const { data: session } = useSession();
+//   const {
+//     divisions,
+//     districts,
+//     upazilas,
+//     selectedDivision,
+//     setSelectedDivision,
+//     selectedDistrict,
+//     setSelectedDistrict,
+//     setSelectedUpazila,
+//     loading: locationLoading,
+//   } = useLocation();
 
-  // ============================================================================
-  // PAGINATION & DATA FETCHING
-  // ============================================================================
-  const {
-    pageIndex,
-    pageSize,
-    nextPage,
-    prevPage,
-    reset: resetPagination,
-  } = usePagination(PAGINATION.DEFAULT_PAGE_SIZE);
+//   // ============================================================================
+//   // PAGINATION & DATA FETCHING
+//   // ============================================================================
+//   const {
+//     pageIndex,
+//     pageSize,
+//     nextPage,
+//     prevPage,
+//     reset: resetPagination,
+//   } = usePagination(PAGINATION.DEFAULT_PAGE_SIZE);
 
-  const { users, totalUsers, isLoading, fetchUsers, setUsers } =
-    useUsers(pageSize);
-  const { stations, fetchStations, isLoading: loadingStations } = useStations();
-  const { isOperating, createUser, updateUser, deleteUser, impersonateUser } =
-    useUserOperations();
+//   const { users, totalUsers, isLoading, fetchUsers, setUsers } =
+//     useUsers(pageSize);
+//   const { stations, fetchStations, isLoading: loadingStations } = useStations();
+//   const { isOperating, createUser, updateUser, deleteUser, impersonateUser } =
+//     useUserOperations();
 
-  // ============================================================================
-  // LOCAL STATE - FORM DATA
-  // ============================================================================
-  const [formData, setFormData] = useState<UserFormData>({
-    name: "",
-    email: "",
-    password: "",
-    role: USER_ROLES.OBSERVER,
-    division: "",
-    district: "",
-    upazila: "",
-    stationId: "",
-  });
+//   // ============================================================================
+//   // LOCAL STATE - FORM DATA
+//   // ============================================================================
+//   const [formData, setFormData] = useState<UserFormData>({
+//     name: "",
+//     email: "",
+//     password: "",
+//     role: USER_ROLES.OBSERVER,
+//     division: "",
+//     district: "",
+//     upazila: "",
+//     stationId: "",
+//   });
 
-  // ============================================================================
-  // LOCAL STATE - UI/DIALOG STATES
-  // ============================================================================
-  const [openDialog, setOpenDialog] = useState(false);
-  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const [openRoleUpdateDialog, setOpenRoleUpdateDialog] = useState(false);
-  const [editUser, setEditUser] = useState<User | null>(null);
-  const [userToDelete, setUserToDelete] = useState<string | null>(null);
-  const [roleChangeData, setRoleChangeData] = useState<{
-    originalRole: string | null;
-    newRole: string | null;
-  }>({ originalRole: null, newRole: null });
+//   // ============================================================================
+//   // LOCAL STATE - UI/DIALOG STATES
+//   // ============================================================================
+//   const [openDialog, setOpenDialog] = useState(false);
+//   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+//   const [openRoleUpdateDialog, setOpenRoleUpdateDialog] = useState(false);
+//   const [editUser, setEditUser] = useState<User | null>(null);
+//   const [userToDelete, setUserToDelete] = useState<string | null>(null);
+//   const [roleChangeData, setRoleChangeData] = useState<{
+//     originalRole: string | null;
+//     newRole: string | null;
+//   }>({ originalRole: null, newRole: null });
 
-  // ============================================================================
-  // COMPUTED VALUES
-  // ============================================================================
-  const isUserSuperAdmin = useMemo(
-    () => session?.user?.role === USER_ROLES.SUPER_ADMIN,
-    [session?.user?.role]
-  );
+//   // ============================================================================
+//   // COMPUTED VALUES
+//   // ============================================================================
+//   const isUserSuperAdmin = useMemo(
+//     () => session?.user?.role === USER_ROLES.SUPER_ADMIN,
+//     [session?.user?.role]
+//   );
 
-  const canLoadingLocationData = useMemo(
-    () => ({
-      loadingDivisions: locationLoading,
-      loadingDistricts: locationLoading,
-      loadingUpazilas: locationLoading,
-    }),
-    [locationLoading]
-  );
+//   const canLoadingLocationData = useMemo(
+//     () => ({
+//       loadingDivisions: locationLoading,
+//       loadingDistricts: locationLoading,
+//       loadingUpazilas: locationLoading,
+//     }),
+//     [locationLoading]
+//   );
 
-  // ============================================================================
-  // EFFECTS - INITIAL DATA LOAD
-  // ============================================================================
-  useEffect(() => {
-    fetchStations();
-  }, [fetchStations]);
+//   // ============================================================================
+//   // EFFECTS - INITIAL DATA LOAD
+//   // ============================================================================
+//   useEffect(() => {
+//     fetchStations();
+//   }, [fetchStations]);
 
-  useEffect(() => {
-    fetchUsers(pageIndex);
-  }, [pageIndex, fetchUsers]);
+//   useEffect(() => {
+//     fetchUsers(pageIndex);
+//   }, [pageIndex, fetchUsers]);
 
-  // ============================================================================
-  // FORM MANAGEMENT FUNCTIONS
-  // ============================================================================
-  const resetForm = useCallback(() => {
-    setFormData({
-      name: "",
-      email: "",
-      password: "",
-      role: USER_ROLES.OBSERVER,
-      division: "",
-      district: "",
-      upazila: "",
-      stationId: "",
-    });
-    setEditUser(null);
-  }, []);
+//   // ============================================================================
+//   // FORM MANAGEMENT FUNCTIONS
+//   // ============================================================================
+//   const resetForm = useCallback(() => {
+//     setFormData({
+//       name: "",
+//       email: "",
+//       password: "",
+//       role: USER_ROLES.OBSERVER,
+//       division: "",
+//       district: "",
+//       upazila: "",
+//       stationId: "",
+//     });
+//     setEditUser(null);
+//   }, []);
 
-  const openCreateDialog = useCallback(() => {
-    resetForm();
-    setOpenDialog(true);
-  }, [resetForm]);
+//   const openCreateDialog = useCallback(() => {
+//     resetForm();
+//     setOpenDialog(true);
+//   }, [resetForm]);
 
-  const handleCloseDialog = useCallback(() => {
-    setOpenDialog(false);
-    resetForm();
-  }, [resetForm]);
+//   const handleCloseDialog = useCallback(() => {
+//     setOpenDialog(false);
+//     resetForm();
+//   }, [resetForm]);
 
-  // ============================================================================
-  // USER CREATION
-  // ============================================================================
-  const handleCreateUser = useCallback(async () => {
-    // Validate form
-    const validation = validateUserForm(formData, false);
-    if (!validation.isValid) {
-      toast.error(validation.error);
-      return;
-    }
+//   // ============================================================================
+//   // USER CREATION
+//   // ============================================================================
+//   const handleCreateUser = useCallback(async () => {
+//     // Validate form
+//     const validation = validateUserForm(formData, false);
+//     if (!validation.isValid) {
+//       toast.error(validation.error);
+//       return;
+//     }
 
-    // Create user via API
-    const result = await createUser({
-      name: formData.name,
-      email: formData.email,
-      password: formData.password,
-      role: formData.role,
-      division: formData.division,
-      district: formData.district,
-      upazila: formData.upazila,
-      stationId: formData.stationId,
-    });
+//     // Create user via API
+//     const result = await createUser({
+//       name: formData.name,
+//       email: formData.email,
+//       password: formData.password,
+//       role: formData.role,
+//       division: formData.division,
+//       district: formData.district,
+//       upazila: formData.upazila,
+//       stationId: formData.stationId,
+//     });
 
-    if (result.success) {
-      handleCloseDialog();
-      resetPagination();
-      fetchUsers(0);
-    }
-  }, [formData, createUser, handleCloseDialog, resetPagination, fetchUsers]);
+//     if (result.success) {
+//       handleCloseDialog();
+//       resetPagination();
+//       fetchUsers(0);
+//     }
+//   }, [formData, createUser, handleCloseDialog, resetPagination, fetchUsers]);
 
-  // ============================================================================
-  // USER EDITING
-  // ============================================================================
-  const openEditDialog = useCallback((user: User) => {
-    if (user.role === USER_ROLES.SUPER_ADMIN) {
-      toast.error(ERROR_MESSAGES.CANNOT_MODIFY_SUPER_ADMIN);
-      return;
-    }
+//   // ============================================================================
+//   // USER EDITING
+//   // ============================================================================
+//   const openEditDialog = useCallback((user: User) => {
+//     if (user.role === USER_ROLES.SUPER_ADMIN) {
+//       toast.error(ERROR_MESSAGES.CANNOT_MODIFY_SUPER_ADMIN);
+//       return;
+//     }
 
-    setEditUser(user);
-    setFormData({
-      name: user.name || "",
-      email: user.email || "",
-      password: "",
-      role: user.role as string,
-      division: user.division || "",
-      district: user.district || "",
-      upazila: user.upazila || "",
-      stationId: user.stationId || "",
-    });
-    setOpenDialog(true);
-  }, []);
+//     setEditUser(user);
+//     setFormData({
+//       name: user.name || "",
+//       email: user.email || "",
+//       password: "",
+//       role: user.role as string,
+//       division: user.division || "",
+//       district: user.district || "",
+//       upazila: user.upazila || "",
+//       stationId: user.stationId || "",
+//     });
+//     setOpenDialog(true);
+//   }, []);
 
-  const confirmRoleUpdate = useCallback(() => {
-    if (!editUser) return;
+//   const confirmRoleUpdate = useCallback(() => {
+//     if (!editUser) return;
 
-    // Validate form
-    const validation = validateUserForm(formData, true);
-    if (!validation.isValid) {
-      toast.error(validation.error);
-      return;
-    }
+//     // Validate form
+//     const validation = validateUserForm(formData, true);
+//     if (!validation.isValid) {
+//       toast.error(validation.error);
+//       return;
+//     }
 
-    // Check if role is actually changing
-    if (editUser.role === formData.role) {
-      handleUpdateUser();
-      return;
-    }
+//     // Check if role is actually changing
+//     if (editUser.role === formData.role) {
+//       handleUpdateUser();
+//       return;
+//     }
 
-    // Show role change confirmation
-    setRoleChangeData({
-      originalRole: editUser.role,
-      newRole: formData.role,
-    });
-    setOpenRoleUpdateDialog(true);
-  }, [editUser, formData]);
+//     // Show role change confirmation
+//     setRoleChangeData({
+//       originalRole: editUser.role,
+//       newRole: formData.role,
+//     });
+//     setOpenRoleUpdateDialog(true);
+//   }, [editUser, formData]);
 
-  const handleUpdateUser = useCallback(async () => {
-    if (!editUser) return;
+//   const handleUpdateUser = useCallback(async () => {
+//     if (!editUser) return;
 
-    // Validate form
-    const validation = validateUserForm(formData, true);
-    if (!validation.isValid) {
-      toast.error(validation.error);
-      return;
-    }
+//     // Validate form
+//     const validation = validateUserForm(formData, true);
+//     if (!validation.isValid) {
+//       toast.error(validation.error);
+//       return;
+//     }
 
-    // Close role update dialog if open
-    setOpenRoleUpdateDialog(false);
+//     // Close role update dialog if open
+//     setOpenRoleUpdateDialog(false);
 
-    // Build payload
-    const payload = buildUserUpdatePayload(editUser, formData as any);
+//     // Build payload
+//     const payload = buildUserUpdatePayload(editUser, formData as any);
 
-    // Update user via API
-    const result = await updateUser(payload);
+//     // Update user via API
+//     const result = await updateUser(payload);
 
-    if (result.success) {
-      handleCloseDialog();
-      fetchUsers(pageIndex);
-    }
-  }, [
-    editUser,
-    formData,
-    updateUser,
-    handleCloseDialog,
-    pageIndex,
-    fetchUsers,
-  ]);
+//     if (result.success) {
+//       handleCloseDialog();
+//       fetchUsers(pageIndex);
+//     }
+//   }, [
+//     editUser,
+//     formData,
+//     updateUser,
+//     handleCloseDialog,
+//     pageIndex,
+//     fetchUsers,
+//   ]);
 
-  // ============================================================================
-  // USER DELETION
-  // ============================================================================
-  const openDeleteConfirmation = useCallback(
-    (userId: string, userRole: string | null) => {
-      const check = canDeleteUser(session?.user?.id || "", userId, userRole);
-      if (!check.canDelete) {
-        toast.error(check.error);
-        return;
-      }
+//   // ============================================================================
+//   // USER DELETION
+//   // ============================================================================
+//   const openDeleteConfirmation = useCallback(
+//     (userId: string, userRole: string | null) => {
+//       const check = canDeleteUser(session?.user?.id || "", userId, userRole);
+//       if (!check.canDelete) {
+//         toast.error(check.error);
+//         return;
+//       }
 
-      setUserToDelete(userId);
-      setOpenDeleteDialog(true);
-    },
-    [session?.user?.id]
-  );
+//       setUserToDelete(userId);
+//       setOpenDeleteDialog(true);
+//     },
+//     [session?.user?.id]
+//   );
 
-  const handleDeleteUser = useCallback(async () => {
-    if (!userToDelete) return;
+//   const handleDeleteUser = useCallback(async () => {
+//     if (!userToDelete) return;
 
-    const result = await deleteUser(userToDelete);
+//     const result = await deleteUser(userToDelete);
 
-    if (result.success) {
-      setOpenDeleteDialog(false);
-      setUserToDelete(null);
-      fetchUsers(pageIndex);
-    }
-  }, [userToDelete, deleteUser, pageIndex, fetchUsers]);
+//     if (result.success) {
+//       setOpenDeleteDialog(false);
+//       setUserToDelete(null);
+//       fetchUsers(pageIndex);
+//     }
+//   }, [userToDelete, deleteUser, pageIndex, fetchUsers]);
 
-  // ============================================================================
-  // USER IMPERSONATION
-  // ============================================================================
-  const handleImpersonate = useCallback(
-    async (
-      userId: string,
-      userName: string | null,
-      userRole: string | null
-    ) => {
-      const check = canImpersonate(session?.user?.id || "", userId, userRole);
-      if (!check.canImpersonate) {
-        toast.error(check.error);
-        return;
-      }
+//   // ============================================================================
+//   // USER IMPERSONATION
+//   // ============================================================================
+//   const handleImpersonate = useCallback(
+//     async (
+//       userId: string,
+//       userName: string | null,
+//       userRole: string | null
+//     ) => {
+//       const check = canImpersonate(session?.user?.id || "", userId, userRole);
+//       if (!check.canImpersonate) {
+//         toast.error(check.error);
+//         return;
+//       }
 
-      await impersonateUser(userId, userName, userRole);
-    },
-    [session?.user?.id, impersonateUser]
-  );
+//       await impersonateUser(userId, userName, userRole);
+//     },
+//     [session?.user?.id, impersonateUser]
+//   );
 
-  // ============================================================================
-  // TABLE ROWS RENDERING
-  // ============================================================================
-  const tableRows = useMemo(
-    () =>
-      users.map((user) => {
-        const stationName = stations.find(
-          (station) => station.id === user.stationId
-        )?.name;
+//   // ============================================================================
+//   // TABLE ROWS RENDERING
+//   // ============================================================================
+//   const tableRows = useMemo(
+//     () =>
+//       users.map((user) => {
+//         const stationName = stations.find(
+//           (station) => station.id === user.stationId
+//         )?.name;
 
-        return (
-          <TableRow key={user.id}>
-            <TableCell className="p-3 text-left truncate max-w-[250px] text-base">
-              {user.name || "N/A"}
-            </TableCell>
-            <TableCell className="p-3 text-left truncate max-w-[250px] text-base">
-              {user.email}
-            </TableCell>
-            <TableCell className="p-3 text-left truncate max-w-[250px] text-base">
-              {user.role || "N/A"}
-            </TableCell>
-            <TableCell className="p-3 text-left truncate max-w-[250px] text-base">
-              {stationName || "N/A"}
-            </TableCell>
-            <TableCell className="p-3 text-left truncate max-w-[250px] text-base">
-              {formatDate(user.createdAt)}
-            </TableCell>
-            <TableCell>
-              <UserActionButtons
-                user={user}
-                isSuper={isUserSuperAdmin}
-                currentUserId={session?.user?.id}
-                onEdit={openEditDialog}
-                onDelete={openDeleteConfirmation}
-                onImpersonate={handleImpersonate}
-                isImpersonating={isOperating}
-              />
-            </TableCell>
-          </TableRow>
-        );
-      }),
-    [
-      users,
-      stations,
-      isUserSuperAdmin,
-      session?.user?.id,
-      openEditDialog,
-      openDeleteConfirmation,
-      handleImpersonate,
-      isOperating,
-    ]
-  );
+//         return (
+//           <TableRow key={user.id}>
+//             <TableCell className="p-3 text-left truncate max-w-[250px] text-base">
+//               {user.name || "N/A"}
+//             </TableCell>
+//             <TableCell className="p-3 text-left truncate max-w-[250px] text-base">
+//               {user.email}
+//             </TableCell>
+//             <TableCell className="p-3 text-left truncate max-w-[250px] text-base">
+//               {user.role || "N/A"}
+//             </TableCell>
+//             <TableCell className="p-3 text-left truncate max-w-[250px] text-base">
+//               {stationName || "N/A"}
+//             </TableCell>
+//             <TableCell className="p-3 text-left truncate max-w-[250px] text-base">
+//               {formatDate(user.createdAt)}
+//             </TableCell>
+//             <TableCell>
+//               <UserActionButtons
+//                 user={user}
+//                 isSuper={isUserSuperAdmin}
+//                 currentUserId={session?.user?.id}
+//                 onEdit={openEditDialog}
+//                 onDelete={openDeleteConfirmation}
+//                 onImpersonate={handleImpersonate}
+//                 isImpersonating={isOperating}
+//               />
+//             </TableCell>
+//           </TableRow>
+//         );
+//       }),
+//     [
+//       users,
+//       stations,
+//       isUserSuperAdmin,
+//       session?.user?.id,
+//       openEditDialog,
+//       openDeleteConfirmation,
+//       handleImpersonate,
+//       isOperating,
+//     ]
+//   );
 
-  // ============================================================================
-  // RENDER
-  // ============================================================================
-  return (
-    <div className="mb-8">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">User Management</h1>
-        {isUserSuperAdmin && (
-          <Button
-            className="bg-sky-600 hover:bg-sky-400"
-            onClick={openCreateDialog}
-          >
-            + Create User
-          </Button>
-        )}
-      </div>
+//   // ============================================================================
+//   // RENDER
+//   // ============================================================================
+//   return (
+//     <div className="mb-8">
+//       {/* Header */}
+//       <div className="flex justify-between items-center mb-6">
+//         <h1 className="text-2xl font-bold">User Management</h1>
+//         {isUserSuperAdmin && (
+//           <Button
+//             className="bg-sky-600 hover:bg-sky-400"
+//             onClick={openCreateDialog}
+//           >
+//             + Create User
+//           </Button>
+//         )}
+//       </div>
 
-      {/* User Table */}
-      <div className="bg-white py-6 rounded-xl border shadow">
-        <Table>
-          <TableHeader className="border-b-2 border-slate-300 bg-slate-100">
-            <TableRow>
-              <TableHead className="p-3 text-lg font-medium whitespace-nowrap min-w-max-[250px] text-left">
-                Name
-              </TableHead>
-              <TableHead className="p-3 text-lg font-medium whitespace-nowrap min-w-max-[250px] text-left">
-                Email
-              </TableHead>
-              <TableHead className="p-3 text-lg font-medium whitespace-nowrap min-w-max-[250px] text-left">
-                Role
-              </TableHead>
-              <TableHead className="p-3 text-lg font-medium whitespace-nowrap min-w-max-[250px] text-left">
-                Station
-              </TableHead>
-              <TableHead className="p-3 text-lg font-medium whitespace-nowrap min-w-max-[250px] text-left">
-                Joined
-              </TableHead>
-              <TableHead className="p-3 text-lg font-medium whitespace-nowrap min-w-max-[250px] text-left">
-                Actions
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">
-                  Loading users...
-                </TableCell>
-              </TableRow>
-            ) : users.length > 0 ? (
-              tableRows
-            ) : (
-              <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">
-                  No users found.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+//       {/* User Table */}
+//       <div className="bg-white py-6 rounded-xl border shadow">
+//         <Table>
+//           <TableHeader className="border-b-2 border-slate-300 bg-slate-100">
+//             <TableRow>
+//               <TableHead className="p-3 text-lg font-medium whitespace-nowrap min-w-max-[250px] text-left">
+//                 Name
+//               </TableHead>
+//               <TableHead className="p-3 text-lg font-medium whitespace-nowrap min-w-max-[250px] text-left">
+//                 Email
+//               </TableHead>
+//               <TableHead className="p-3 text-lg font-medium whitespace-nowrap min-w-max-[250px] text-left">
+//                 Role
+//               </TableHead>
+//               <TableHead className="p-3 text-lg font-medium whitespace-nowrap min-w-max-[250px] text-left">
+//                 Station
+//               </TableHead>
+//               <TableHead className="p-3 text-lg font-medium whitespace-nowrap min-w-max-[250px] text-left">
+//                 Joined
+//               </TableHead>
+//               <TableHead className="p-3 text-lg font-medium whitespace-nowrap min-w-max-[250px] text-left">
+//                 Actions
+//               </TableHead>
+//             </TableRow>
+//           </TableHeader>
+//           <TableBody>
+//             {isLoading ? (
+//               <TableRow>
+//                 <TableCell colSpan={6} className="h-24 text-center">
+//                   Loading users...
+//                 </TableCell>
+//               </TableRow>
+//             ) : users.length > 0 ? (
+//               tableRows
+//             ) : (
+//               <TableRow>
+//                 <TableCell colSpan={6} className="h-24 text-center">
+//                   No users found.
+//                 </TableCell>
+//               </TableRow>
+//             )}
+//           </TableBody>
+//         </Table>
 
-        {/* Pagination */}
-        <div className="flex items-center justify-between space-x-2 px-3 border-t pt-5">
-          <div className="flex-1 text-sm text-muted-foreground">
-            {totalUsers > 0 && (
-              <>
-                Showing {pageIndex * pageSize + 1} to{" "}
-                {Math.min((pageIndex + 1) * pageSize, totalUsers)} of{" "}
-                {totalUsers} users
-              </>
-            )}
-          </div>
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => prevPage()}
-              disabled={pageIndex === 0}
-            >
-              Previous
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => nextPage(totalUsers)}
-              disabled={(pageIndex + 1) * pageSize >= totalUsers}
-            >
-              Next
-            </Button>
-          </div>
-        </div>
-      </div>
+//         {/* Pagination */}
+//         <div className="flex items-center justify-between space-x-2 px-3 border-t pt-5">
+//           <div className="flex-1 text-sm text-muted-foreground">
+//             {totalUsers > 0 && (
+//               <>
+//                 Showing {pageIndex * pageSize + 1} to{" "}
+//                 {Math.min((pageIndex + 1) * pageSize, totalUsers)} of{" "}
+//                 {totalUsers} users
+//               </>
+//             )}
+//           </div>
+//           <div className="flex items-center space-x-2">
+//             <Button
+//               variant="outline"
+//               size="sm"
+//               onClick={() => prevPage()}
+//               disabled={pageIndex === 0}
+//             >
+//               Previous
+//             </Button>
+//             <Button
+//               variant="outline"
+//               size="sm"
+//               onClick={() => nextPage(totalUsers)}
+//               disabled={(pageIndex + 1) * pageSize >= totalUsers}
+//             >
+//               Next
+//             </Button>
+//           </div>
+//         </div>
+//       </div>
 
-      {/* Dialogs */}
-      <CreateEditUserDialog
-        open={openDialog}
-        onOpenChange={setOpenDialog}
-        editUser={editUser}
-        formData={formData}
-        onFormDataChange={setFormData}
-        onSubmit={editUser ? confirmRoleUpdate : handleCreateUser}
-        onCancel={handleCloseDialog}
-        isLoading={isOperating}
-        stations={stations}
-        loadingStations={loadingStations}
-        divisions={divisions}
-        districts={districts}
-        upazilas={upazilas}
-        selectedDivision={selectedDivision}
-        onDivisionChange={setSelectedDivision}
-        selectedDistrict={selectedDistrict}
-        onDistrictChange={setSelectedDistrict}
-        onUpazilaChange={setSelectedUpazila}
-        loadingDivisions={canLoadingLocationData.loadingDivisions}
-        loadingDistricts={canLoadingLocationData.loadingDistricts}
-        loadingUpazilas={canLoadingLocationData.loadingUpazilas}
-        canShowRoleSelector={isUserSuperAdmin}
-      />
+//       {/* Dialogs */}
+//       <CreateEditUserDialog
+//         open={openDialog}
+//         onOpenChange={setOpenDialog}
+//         editUser={editUser}
+//         formData={formData}
+//         onFormDataChange={setFormData}
+//         onSubmit={editUser ? confirmRoleUpdate : handleCreateUser}
+//         onCancel={handleCloseDialog}
+//         isLoading={isOperating}
+//         stations={stations}
+//         loadingStations={loadingStations}
+//         divisions={divisions}
+//         districts={districts}
+//         upazilas={upazilas}
+//         selectedDivision={selectedDivision}
+//         onDivisionChange={setSelectedDivision}
+//         selectedDistrict={selectedDistrict}
+//         onDistrictChange={setSelectedDistrict}
+//         onUpazilaChange={setSelectedUpazila}
+//         loadingDivisions={canLoadingLocationData.loadingDivisions}
+//         loadingDistricts={canLoadingLocationData.loadingDistricts}
+//         loadingUpazilas={canLoadingLocationData.loadingUpazilas}
+//         canShowRoleSelector={isUserSuperAdmin}
+//       />
 
-      {isUserSuperAdmin && (
-        <DeleteConfirmationDialog
-          open={openDeleteDialog}
-          onOpenChange={setOpenDeleteDialog}
-          onConfirm={handleDeleteUser}
-          isLoading={isOperating}
-        />
-      )}
+//       {isUserSuperAdmin && (
+//         <DeleteConfirmationDialog
+//           open={openDeleteDialog}
+//           onOpenChange={setOpenDeleteDialog}
+//           onConfirm={handleDeleteUser}
+//           isLoading={isOperating}
+//         />
+//       )}
 
-      <RoleChangeConfirmationDialog
-        open={openRoleUpdateDialog}
-        onOpenChange={setOpenRoleUpdateDialog}
-        originalRole={roleChangeData.originalRole}
-        newRole={roleChangeData.newRole}
-        onConfirm={handleUpdateUser}
-        isLoading={isOperating}
-      />
-    </div>
-  );
-};
+//       <RoleChangeConfirmationDialog
+//         open={openRoleUpdateDialog}
+//         onOpenChange={setOpenRoleUpdateDialog}
+//         originalRole={roleChangeData.originalRole}
+//         newRole={roleChangeData.newRole}
+//         onConfirm={handleUpdateUser}
+//         isLoading={isOperating}
+//       />
+//     </div>
+//   );
+// };
 
-// ============================================================================
-// ACTION BUTTONS SUBCOMPONENT
-// ============================================================================
-interface UserActionButtonsProps {
-  user: User;
-  isSuper: boolean;
-  currentUserId?: string;
-  onEdit: (user: User) => void;
-  onDelete: (userId: string, userRole: string | null) => void;
-  onImpersonate: (
-    userId: string,
-    userName: string | null,
-    userRole: string | null
-  ) => void;
-  isImpersonating: boolean;
-}
+// // ============================================================================
+// // ACTION BUTTONS SUBCOMPONENT
+// // ============================================================================
+// interface UserActionButtonsProps {
+//   user: User;
+//   isSuper: boolean;
+//   currentUserId?: string;
+//   onEdit: (user: User) => void;
+//   onDelete: (userId: string, userRole: string | null) => void;
+//   onImpersonate: (
+//     userId: string,
+//     userName: string | null,
+//     userRole: string | null
+//   ) => void;
+//   isImpersonating: boolean;
+// }
 
-const UserActionButtons = ({
-  user,
-  isSuper,
-  currentUserId,
-  onEdit,
-  onDelete,
-  onImpersonate,
-  isImpersonating,
-}: UserActionButtonsProps) => {
-  const canImpersonateUser = isSuper || user.role === USER_ROLES.OBSERVER;
-  const canDeleteUser = isSuper;
+// const UserActionButtons = ({
+//   user,
+//   isSuper,
+//   currentUserId,
+//   onEdit,
+//   onDelete,
+//   onImpersonate,
+//   isImpersonating,
+// }: UserActionButtonsProps) => {
+//   const canImpersonateUser = isSuper || user.role === USER_ROLES.OBSERVER;
+//   const canDeleteUser = isSuper;
 
-  return (
-    <div className="flex gap-2">
-      <Button variant="outline" size="sm" onClick={() => onEdit(user)}>
-        Edit
-      </Button>
+//   return (
+//     <div className="flex gap-2">
+//       <Button variant="outline" size="sm" onClick={() => onEdit(user)}>
+//         Edit
+//       </Button>
 
-      {canDeleteUser && (
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={() => onDelete(user.id, user.role)}
-        >
-          Delete
-        </Button>
-      )}
+//       {canDeleteUser && (
+//         <Button
+//           variant="destructive"
+//           size="sm"
+//           onClick={() => onDelete(user.id, user.role)}
+//         >
+//           Delete
+//         </Button>
+//       )}
 
-      {canImpersonateUser &&
-        user.role !== USER_ROLES.SUPER_ADMIN &&
-        user.id !== currentUserId && (
-          <Button
-            variant="default"
-            size="sm"
-            onClick={() => onImpersonate(user.id, user.name, user.role)}
-            disabled={isImpersonating}
-          >
-            {isImpersonating ? "..." : "Impersonate"}
-          </Button>
-        )}
-    </div>
-  );
-};
+//       {canImpersonateUser &&
+//         user.role !== USER_ROLES.SUPER_ADMIN &&
+//         user.id !== currentUserId && (
+//           <Button
+//             variant="default"
+//             size="sm"
+//             onClick={() => onImpersonate(user.id, user.name, user.role)}
+//             disabled={isImpersonating}
+//           >
+//             {isImpersonating ? "..." : "Impersonate"}
+//           </Button>
+//         )}
+//     </div>
+//   );
+// };

@@ -18,6 +18,7 @@ async function revokeUserSessions(userId: string) {
 }
 
 /* ----------------------------- GET USERS ----------------------------- */
+/* ----------------------------- GET USERS ----------------------------- */
 export async function GET(request: NextRequest) {
   const session = await getSession();
 
@@ -29,29 +30,41 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const limit = parseInt(searchParams.get("limit") || "10");
     const offset = parseInt(searchParams.get("offset") || "0");
+    const search = (searchParams.get("search") || "").trim(); // ✅ NEW
 
     const isSuper = session.user.role === "super_admin";
 
+    // ✅ base filter (existing logic)
+    const baseWhere = isSuper
+      ? {}
+      : {
+          role: "observer",
+          stationId: session.user.station?.id,
+        };
+
+    // ✅ search filter add (name/email)
+    const where = search
+      ? {
+          AND: [
+            baseWhere,
+            {
+              OR: [
+                { name: { contains: search, mode: "insensitive" } },
+                { email: { contains: search, mode: "insensitive" } },
+              ],
+            },
+          ],
+        }
+      : baseWhere;
+
     const [users, total] = await Promise.all([
       prisma.users.findMany({
-        where: isSuper
-          ? undefined
-          : {
-              role: "observer",
-              stationId: session.user.station?.id,
-            },
+        where,
         skip: offset,
         take: limit,
         orderBy: { createdAt: "desc" },
       }),
-      prisma.users.count({
-        where: isSuper
-          ? undefined
-          : {
-              role: "observer",
-              stationId: session.user.station?.id,
-            },
-      }),
+      prisma.users.count({ where }),
     ]);
 
     return NextResponse.json({ users, total, limit, offset }, { status: 200 });
