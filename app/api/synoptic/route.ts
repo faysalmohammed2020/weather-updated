@@ -173,25 +173,34 @@ export async function GET() {
         const parsedSlots = timeSlots
           .filter((slot) => slot.timeStart && slot.timeEnd)
           .map((slot) => {
-            const baseDate = observationTime.toISOString().split("T")[0];
             const [startHour, startMin] = slot.timeStart.split(":").map(Number);
             const [endHour, endMin] = slot.timeEnd.split(":").map(Number);
+
+            // For 00 UTC observations, rainfall occurred on previous date
+            // For all other hours, rainfall occurred on same date as observation
+            const obsHour = observationTime.getUTCHours();
+            let slotDate = new Date(observationTime);
+
+            if (obsHour === 0) {
+              // At 00 UTC, rainfall slots are from previous day
+              slotDate.setUTCDate(slotDate.getUTCDate() - 1);
+            }
 
             return {
               start: new Date(
                 Date.UTC(
-                  observationTime.getUTCFullYear(),
-                  observationTime.getUTCMonth(),
-                  observationTime.getUTCDate(),
+                  slotDate.getUTCFullYear(),
+                  slotDate.getUTCMonth(),
+                  slotDate.getUTCDate(),
                   startHour,
                   startMin
                 )
               ),
               end: new Date(
                 Date.UTC(
-                  observationTime.getUTCFullYear(),
-                  observationTime.getUTCMonth(),
-                  observationTime.getUTCDate(),
+                  slotDate.getUTCFullYear(),
+                  slotDate.getUTCMonth(),
+                  slotDate.getUTCDate(),
                   endHour,
                   endMin
                 )
