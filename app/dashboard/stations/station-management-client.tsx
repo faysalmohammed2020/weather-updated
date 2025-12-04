@@ -32,7 +32,6 @@ interface StationManagementClientProps {
   initialStations: Station[];
   session: any;
 }
-
 export function StationManagementClient({
   initialStations,
   session,
