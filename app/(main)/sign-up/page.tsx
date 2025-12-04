@@ -27,9 +27,9 @@ import {
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { signUp } from "@/lib/auth-client";
 import { FormError } from "@/components/ui/form-error";
 import { Station } from "@prisma/client";
+import { signIn } from "next-auth/react"; // ✅ NextAuth signIn
 
 export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -64,41 +64,63 @@ export default function SignUpForm() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const formData = new FormData(e.currentTarget);
-    const name = formData.get("name") as string;
-    const role = "super_admin";
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
-    const stationId = formData.get("stationId") as string;
+    const fd = new FormData(e.currentTarget);
+    const name = fd.get("name") as string;
+    const email = fd.get("email") as string;
+    const password = fd.get("password") as string;
+    const stationId = fd.get("stationId") as string;
 
-    await signUp.email(
-      {
-        name,
-        email,
-        role,
-        password,
-        stationId,
-        division: "default-division",
-        district: "default-district",
-        upazila: "default-upazila",
-      },
-      {
-        onRequest: () => {
-          setLoading(true);
-          setFormError("");
-        },
-        onSuccess: () => {
-          toast.success("Registration successful");
-          router.push("/dashboard");
-          router.refresh();
-        },
-        onError: (ctx) => {
-          setFormError(ctx.error.message);
-        },
+    try {
+      setLoading(true);
+      setFormError("");
+
+      // ✅ 1) Register user
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          role: "super_admin",
+          stationId,
+          division: "default-division",
+          district: "default-district",
+          upazila: "default-upazila",
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setFormError(data?.error || "Registration failed");
+        return;
       }
-    );
 
-    setLoading(false);
+      toast.success("Registration successful");
+
+      // ✅ 2) Auto-login after signup (optional)
+      const loginRes = await signIn("credential", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (loginRes?.error) {
+        // signup success but login fail
+        router.push("/sign-in");
+        return;
+      }
+
+      router.push("/dashboard");
+      router.refresh();
+    } catch (err) {
+      console.error(err);
+      setFormError("Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fadeIn = {
