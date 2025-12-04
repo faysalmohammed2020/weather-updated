@@ -5,7 +5,7 @@ interface Remark {
 
 const remarksData: Record<string, Remark> = {
   "00": {
-    symbol: "remarks/1.png",
+    symbol: "/remarks/1.png",
     description:
       "Cloud development not observed or not observable during past hour",
   },
