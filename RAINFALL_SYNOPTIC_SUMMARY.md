@@ -27,6 +27,7 @@
 ```
 
 **সম্পর্কের প্রকৃতি:** Direct Data Pipeline
+
 - Rainfall tab থেকে ইনপুট লেওয়া
 - ডাটাবেসে সংরক্ষণ করা
 - Synoptic code generation এ ব্যবহৃত
@@ -37,12 +38,12 @@
 
 #### **A. Rainfall Tab Logic (Input Phase)**
 
-| উপাদান | কী ঘটে | ফলাফল |
-|--------|--------|--------|
-| **Time Slots** | User দেয় মিনিট-গ্রানুলার সময় (21:00, 22:30) | সংরক্ষিত হয় JSON array হিসেবে |
-| **Auto-Type Detection** | দুই slot এর gap ≥ 30 min? | "intermittent" ✓ বা "continuous" |
-| **Amount** | "during-previous" field থেকে (e.g., 8.3 mm) | পরে synoptic code এ ব্যবহার হয় |
-| **Bangladesh Calendar** | UTC hour = 00? | Previous date select হয় auto |
+| উপাদান                  | কী ঘটে                                        | ফলাফল                            |
+| ----------------------- | --------------------------------------------- | -------------------------------- |
+| **Time Slots**          | User দেয় মিনিট-গ্রানুলার সময় (21:00, 22:30) | সংরক্ষিত হয় JSON array হিসেবে   |
+| **Auto-Type Detection** | দুই slot এর gap ≥ 30 min?                     | "intermittent" ✓ বা "continuous" |
+| **Amount**              | "during-previous" field থেকে (e.g., 8.3 mm)   | পরে synoptic code এ ব্যবহার হয়  |
+| **Bangladesh Calendar** | UTC hour = 00?                                | Previous date select হয় auto    |
 
 #### **B. Database Storage (Persistence Phase)**
 
@@ -73,6 +74,7 @@ WeatherObservation {
 **tr কোড কীভাবে Calculate হয়:**
 
 **Intermittent Rain (একাধিক গ্যাপ সহ):**
+
 ```
 Observation Window: H-6 থেকে H
 
@@ -87,6 +89,7 @@ Observation Window: H-6 থেকে H
 ```
 
 **Continuous Rain (একটি interval):**
+
 ```
 ┌──────────────────┬──────────────────┬──────┐
 │ Duration         │ Hours Since Ends │ tr   │
@@ -329,29 +332,31 @@ H = observation_time
 
 ```typescript
 // Start time > End time? → Next day ধরে নেওয়া হয়
-const end = e >= s ? e : e + 24*60;  // Add 24 hours
+const end = e >= s ? e : e + 24 * 60; // Add 24 hours
 ```
 
 ---
 
 ## ⚠️ বর্তমান Limitations
 
-| সীমাবদ্ধতা | বিবরণ | প্রভাব |
-|-----------|--------|--------|
-| **Fallback Logic Weak** | শুধু `rainfallDuringPrevious` ব্যবহার, fallback নেই | নাল values এ ০ ব্যবহার হয় |
-| **No Manual Override** | rainfallType auto-calculated, manual choice নেই | যদি WMO ভিন্ন চায়, সমস্যা |
-| **No Cross-Date Support** | একই দিনের rainfall শুধু | মাল্টি-ডে rainfall support না |
-| **Limited tr Validation** | tr code validation নেই | Invalid codes pass করতে পারে |
+| সীমাবদ্ধতা                | বিবরণ                                               | প্রভাব                        |
+| ------------------------- | --------------------------------------------------- | ----------------------------- |
+| **Fallback Logic Weak**   | শুধু `rainfallDuringPrevious` ব্যবহার, fallback নেই | নাল values এ ০ ব্যবহার হয়    |
+| **No Manual Override**    | rainfallType auto-calculated, manual choice নেই     | যদি WMO ভিন্ন চায়, সমস্যা    |
+| **No Cross-Date Support** | একই দিনের rainfall শুধু                             | মাল্টি-ডে rainfall support না |
+| **Limited tr Validation** | tr code validation নেই                              | Invalid codes pass করতে পারে  |
 
 ---
 
 ## 💡 সুপারিশ
 
 ### **Short-Term:**
+
 1. `rainfallDuringPrevious` এ fallback add করুন
 2. tr code validation add করুন
 
 ### **Long-Term:**
+
 1. Manual rainfallType override option
 2. Multi-day rainfall support
 3. WMO Compliance checker
@@ -388,4 +393,3 @@ A: Fallback logic দুর্বল, manual override নেই, cross-date ন�
 **Created:** December 4, 2025  
 **Language:** Bengali & English
 **Status:** ✅ Complete
-

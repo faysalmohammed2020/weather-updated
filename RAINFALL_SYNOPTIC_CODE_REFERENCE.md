@@ -15,22 +15,22 @@ const toMinutes = (hhmm: string) => {
   if (!hhmm) return null;
   const [h, m] = hhmm.split(":").map(Number);
   if (Number.isNaN(h) || Number.isNaN(m)) return null;
-  return h * 60 + m;  // Convert to total minutes from midnight
+  return h * 60 + m; // Convert to total minutes from midnight
 };
 
 const diffMinutes = (startHHMM: string, endHHMM: string) => {
   const s = toMinutes(startHHMM);
   const e = toMinutes(endHHMM);
   if (s === null || e === null) return 0;
-  
+
   // CRITICAL: Support cross-midnight
   // If end < start, assume next day
-  const end = e >= s ? e : e + 24 * 60;  // Add 24 hours worth of minutes
+  const end = e >= s ? e : e + 24 * 60; // Add 24 hours worth of minutes
   return end - s;
 };
 
 // Example Usage:
-// diffMinutes("23:00", "01:30") 
+// diffMinutes("23:00", "01:30")
 // = diffMinutes(1380, 90)
 // = (90 + 1440) - 1380 = 150 minutes = 2.5 hours ✓
 ```
@@ -46,7 +46,7 @@ const detectRainfallType = (slots: TimeSlot[]) => {
     setFieldValue("rainfall.rainfallType", "");
     return;
   }
-  
+
   // Sort slots by start time for consistent checking
   const sorted = [...slots].sort((a, b) =>
     (a.timeStart || "").localeCompare(b.timeStart || "")
@@ -58,17 +58,18 @@ const detectRainfallType = (slots: TimeSlot[]) => {
     const curEnd = sorted[i].timeEnd;
     const nextStart = sorted[i + 1].timeStart;
     if (!curEnd || !nextStart) continue;
-    
-    const gap = gapMinutes(curEnd, nextStart);  // Helper function
-    if (gap >= 30) {  // ← THRESHOLD
+
+    const gap = gapMinutes(curEnd, nextStart); // Helper function
+    if (gap >= 30) {
+      // ← THRESHOLD
       intermittent = true;
-      break;  // Found gap, no need to check further
+      break; // Found gap, no need to check further
     }
   }
-  
+
   const type = intermittent ? "intermittent" : "continuous";
   setRainfallType(type);
-  setFieldValue("rainfall.rainfallType", type);  // Sync with Formik
+  setFieldValue("rainfall.rainfallType", type); // Sync with Formik
 };
 
 // Example:
@@ -84,18 +85,17 @@ const detectRainfallType = (slots: TimeSlot[]) => {
 
 const getCurrentUTCInfo = () => {
   const now = new Date();
-  const utcHour = selectedHour
-    ? parseInt(selectedHour, 10)
-    : now.getUTCHours();
-  
+  const utcHour = selectedHour ? parseInt(selectedHour, 10) : now.getUTCHours();
+
   const bdToday = fmtISOInTZ(now, "Asia/Dhaka");
-  
+
   // CRITICAL RULE:
   // - If UTC Hour = 00 → Use PREVIOUS Bangladesh date
   // - Otherwise → Use current Bangladesh date
-  const selectedDate = utcHour === 0 
-    ? shiftISOByDays(bdToday, -1)  // Go back 1 day
-    : bdToday;                      // Use today
+  const selectedDate =
+    utcHour === 0
+      ? shiftISOByDays(bdToday, -1) // Go back 1 day
+      : bdToday; // Use today
 
   const rule =
     utcHour === 0
@@ -154,8 +154,8 @@ if (
 ) {
   const timeSlots = weatherObs.rainfallTimeSlots as Array<{
     id: string;
-    timeStart: string;  // HH:MM format
-    timeEnd: string;    // HH:MM format
+    timeStart: string; // HH:MM format
+    timeEnd: string; // HH:MM format
   }>;
 
   if (timeSlots.length > 0) {
@@ -195,9 +195,7 @@ if (
       rainStart = new Date(
         Math.min(...parsedSlots.map((s) => s.start.getTime()))
       );
-      rainEnd = new Date(
-        Math.max(...parsedSlots.map((s) => s.end.getTime()))
-      );
+      rainEnd = new Date(Math.max(...parsedSlots.map((s) => s.end.getTime())));
     }
   }
 
@@ -217,7 +215,7 @@ else {
   rainEnd = weatherObs.rainfallTimeEnd
     ? new Date(weatherObs.rainfallTimeEnd)
     : null;
-  isIntermittentRain = false;  // Legacy is always continuous
+  isIntermittentRain = false; // Legacy is always continuous
 }
 ```
 
@@ -226,9 +224,9 @@ else {
 ```typescript
 // Line ~222-230 in app/api/synoptic/route.ts
 
-const H = observationTime;           // Current observation time
-const H_3 = new Date(H.getTime() - 3 * 60 * 60 * 1000);  // 3 hours ago
-const H_6 = new Date(H.getTime() - 6 * 60 * 60 * 1000);  // 6 hours ago
+const H = observationTime; // Current observation time
+const H_3 = new Date(H.getTime() - 3 * 60 * 60 * 1000); // 3 hours ago
+const H_6 = new Date(H.getTime() - 6 * 60 * 60 * 1000); // 6 hours ago
 
 // Timeline visualization:
 // ├─────── H-6 ─────────── H-3 ─────────── H ─────►
@@ -245,11 +243,11 @@ const H_6 = new Date(H.getTime() - 6 * 60 * 60 * 1000);  // 6 hours ago
 ```typescript
 // Line ~302-320 in app/api/synoptic/route.ts
 
-let tr = "/";  // Default: invalid/unknown
+let tr = "/"; // Default: invalid/unknown
 
 if (isIntermittentRain) {
   // WMO Chart-Based Intermittent Logic
-  
+
   // Check if rain period started/ended in first half
   const startedInFirstHalf = rainStart >= H_6 && rainStart < H_3;
   const endedInFirstHalf = rainEnd <= H_3;
@@ -259,13 +257,13 @@ if (isIntermittentRain) {
   const endedInSecondHalf = rainEnd <= H;
 
   if (startedInFirstHalf && endedInFirstHalf) {
-    tr = "1";  // Entire rain period in first 3 hours
+    tr = "1"; // Entire rain period in first 3 hours
   } else if (startedInSecondHalf && endedInSecondHalf) {
-    tr = "2";  // Entire rain period in second 3 hours
+    tr = "2"; // Entire rain period in second 3 hours
   } else if (rainStart <= H_6 && rainEnd >= H) {
-    tr = "3";  // Rain spans entire 6-hour period
+    tr = "3"; // Rain spans entire 6-hour period
   } else {
-    tr = "/";  // Invalid range (rain outside window)
+    tr = "/"; // Invalid range (rain outside window)
   }
 }
 ```
@@ -277,7 +275,7 @@ if (isIntermittentRain) {
 
 else {
   // Continuous rain — WMO tr = 4-9
-  
+
   // Quick range validation
   if (rainStart < H_6 || rainEnd > H) {
     tr = "/";  // Rain outside observation window
@@ -411,19 +409,19 @@ model WeatherObservation {
 
 interface SecondCardFormValues {
   rainfall: {
-    "date-start": string;      // ISO date (YYYY-MM-DD)
-    "date-end": string;        // ISO date (YYYY-MM-DD)
+    "date-start": string; // ISO date (YYYY-MM-DD)
+    "date-end": string; // ISO date (YYYY-MM-DD)
     timeSlots: Array<{
-      id: string;              // UUID
-      timeStart: string;        // HH:MM
-      timeEnd: string;          // HH:MM
+      id: string; // UUID
+      timeStart: string; // HH:MM
+      timeEnd: string; // HH:MM
     }>;
-    rainfallType?: string;     // "continuous" | "intermittent"
+    rainfallType?: string; // "continuous" | "intermittent"
     "since-previous"?: string; // mm decimal
-    "during-previous"?: string;// mm decimal
-    "last-24-hours"?: string;  // mm decimal
+    "during-previous"?: string; // mm decimal
+    "last-24-hours"?: string; // mm decimal
   };
-  
+
   // ... other fields (wind, cloud, etc.)
 }
 ```
@@ -555,13 +553,13 @@ const H_6 = new Date(H - 6h);      // 00:00 UTC
 if (isIntermittentRain) {
   const startedInFirstHalf = rainStart >= H_6 && rainStart < H_3;
   const endedInFirstHalf = rainEnd <= H_3;
-  
+
   // Check: 00:15 (rainStart) >= 00:00 (H_6)? YES
   //        00:15 < 03:00 (H_3)? YES
   //        01:45 (rainEnd) <= 03:00 (H_3)? YES
   // → Both conditions true!
   // → tr = "1" (intermittent in first half) ✓
-  
+
   tr = "1";
 }
 
@@ -603,10 +601,10 @@ measurements[7] = `6${rainFallPadded}${tr}`;  // "60081" ✓
 // Input:
 const scenario1 = {
   timeSlots: [
-    { timeStart: "10:00", timeEnd: "11:30" }  // Single slot
+    { timeStart: "10:00", timeEnd: "11:30" }, // Single slot
   ],
   rainfallDuringPrevious: "5.2",
-  observationTime: "12:00 UTC"
+  observationTime: "12:00 UTC",
 };
 
 // Expected Output:
@@ -626,10 +624,10 @@ const scenario1 = {
 const scenario2 = {
   timeSlots: [
     { timeStart: "23:00", timeEnd: "23:45" },
-    { timeStart: "01:30", timeEnd: "02:00" }
+    { timeStart: "01:30", timeEnd: "02:00" },
   ],
   rainfallDuringPrevious: "12.0",
-  observationTime: "06:00 UTC"
+  observationTime: "06:00 UTC",
 };
 
 // Expected Output:
@@ -638,15 +636,15 @@ const scenario2 = {
 // rainStart = 23:00 (previous day)
 // rainEnd = 02:00 (current day)
 // H = 06:00, H_3 = 03:00, H_6 = 00:00
-// 
+//
 // First slot (23:00-23:45):
 //   Started in [00:00, 03:00)? NO (before 00:00)
-// 
+//
 // Second slot (01:30-02:00):
 //   Started in [00:00, 03:00)? YES ✓
 //   Ended in [00:00, 03:00)? YES ✓
 //   → tr = "1" (first half)
-// 
+//
 // 6RRRtR = "61201"
 ```
 
@@ -655,9 +653,9 @@ const scenario2 = {
 ```typescript
 // Input:
 const scenario3 = {
-  timeSlots: [],  // Empty
+  timeSlots: [], // Empty
   rainfallDuringPrevious: "0",
-  observationTime: "06:00 UTC"
+  observationTime: "06:00 UTC",
 };
 
 // Expected Output:
@@ -704,7 +702,7 @@ const start = new Date(Date.UTC(year, month, day, 21, 0));
 ```typescript
 // ❌ WRONG:
 // Only checking endTime - startTime
-const gap = endTime - startTime;  // This is duration, not gap!
+const gap = endTime - startTime; // This is duration, not gap!
 
 // ✅ CORRECT:
 // Gap is between end of one slot and start of next
@@ -714,8 +712,8 @@ const gap = nextSlot.timeStart - currentSlot.timeEnd;
 ---
 
 **Reference Document:**
+
 - Created: December 4, 2025
 - Version: 1.0
 - Code Examples from: weather-updated project
 - Status: ✅ Production-Ready
-

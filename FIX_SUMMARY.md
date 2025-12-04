@@ -12,6 +12,7 @@
 ## 📊 Before & After
 
 ### Before Fix (BROKEN ❌):
+
 ```
 Observing: 2025-12-04 00:00 UTC
 Slot: 21:30 - 22:30
@@ -31,6 +32,7 @@ Result:
 ```
 
 ### After Fix (WORKING ✅):
+
 ```
 Observing: 2025-12-04 00:00 UTC
 Slot: 21:30 - 22:30
@@ -55,9 +57,11 @@ Result:
 ## 🔧 What Changed
 
 ### File Modified:
+
 `app/api/synoptic/route.ts` (lines 160-220)
 
 ### Key Changes:
+
 ```typescript
 // NEW LOGIC
 const obsHour = observationTime.getUTCHours();
@@ -70,13 +74,15 @@ if (obsHour === 0) {
 
 // Use slotDate for all calculations
 return {
-  start: new Date(Date.UTC(
-    slotDate.getUTCFullYear(),    // ← Fixed
-    slotDate.getUTCMonth(),       // ← Fixed
-    slotDate.getUTCDate(),        // ← Fixed
-    startHour,
-    startMin
-  )),
+  start: new Date(
+    Date.UTC(
+      slotDate.getUTCFullYear(), // ← Fixed
+      slotDate.getUTCMonth(), // ← Fixed
+      slotDate.getUTCDate(), // ← Fixed
+      startHour,
+      startMin
+    )
+  ),
   // ... similar for end
 };
 ```
@@ -86,6 +92,7 @@ return {
 ## ✅ Test Results
 
 ### Unit Tests: 18/18 PASSING ✓
+
 ```
 ✓ 00 UTC: Date should be previous day
 ✓ 03 UTC: Date should be current day
@@ -108,6 +115,7 @@ return {
 ```
 
 ### Your Exact Scenario: VERIFIED ✓
+
 ```
 Input:  21:30-22:30 at 00 UTC, 6mm
 Output: 6RRRtR = "60064" (tr=4)
@@ -121,6 +129,7 @@ Status: ✅ CORRECT
 ### Why 00 UTC is Special:
 
 **Regular Hours (03, 06, 12, 18 UTC):**
+
 ```
 Observing Time: Today 03:00 UTC
 Observation Period: Last 6 hours (Yesterday 21:00 to Today 03:00)
@@ -129,6 +138,7 @@ Slot Date: TODAY (same as observation date)
 ```
 
 **00 UTC (Midnight):**
+
 ```
 Observing Time: Tomorrow 00:00 UTC
 Observation Period: Last 6 hours (Yesterday 18:00 to Today 00:00)
@@ -143,6 +153,7 @@ The fix handles this by detecting `obsHour === 0` and subtracting 1 day from the
 ## 🚀 Affected Features
 
 ### Fixed:
+
 1. ✅ tr code calculation at 00 UTC
 2. ✅ 6RRRtR field generation
 3. ✅ Synoptic code validity
@@ -150,6 +161,7 @@ The fix handles this by detecting `obsHour === 0` and subtracting 1 day from the
 5. ✅ WMO window calculation
 
 ### Not Affected (Still Working):
+
 1. ✅ Other UTC hours (03, 06, 12, 18)
 2. ✅ Single slot observations
 3. ✅ Backward compatibility
@@ -169,6 +181,7 @@ The fix handles this by detecting `obsHour === 0` and subtracting 1 day from the
 ## 🧪 How to Verify
 
 ### Quick Test:
+
 ```bash
 # Run unit tests
 node test-00-utc.js
@@ -180,6 +193,7 @@ node test-your-exact-scenario.js
 ```
 
 ### Manual Test (if DB available):
+
 ```bash
 1. Navigate to app at http://localhost:3000
 2. Select hour: 00 UTC
@@ -194,6 +208,7 @@ node test-your-exact-scenario.js
 ## 🎓 Technical Details
 
 ### Time Windows at 00 UTC:
+
 ```
 H    = 00:00 UTC (current day)
 H-3  = 21:00 UTC (previous day)
@@ -203,6 +218,7 @@ Valid rainfall window: [18:00, 00:00] on PREVIOUS day
 ```
 
 ### tr Code Values:
+
 ```
 tr = 0   : No rain period, but precipitation measured
 tr = 1-3 : Intermittent rain in specific period
@@ -242,12 +258,12 @@ Fixes issue with synoptic code generation at midnight UTC.
 
 ## 🎉 Results
 
-| Metric | Before | After |
-|--------|--------|-------|
-| 00 UTC tr code | "/" ❌ | "4" ✓ |
-| Multiple slots | Broken ❌ | Working ✓ |
-| Unit tests | ? | 18/18 ✓ |
-| Scenario test | "/" ❌ | "60064" ✓ |
+| Metric          | Before    | After     |
+| --------------- | --------- | --------- |
+| 00 UTC tr code  | "/" ❌    | "4" ✓     |
+| Multiple slots  | Broken ❌ | Working ✓ |
+| Unit tests      | ?         | 18/18 ✓   |
+| Scenario test   | "/" ❌    | "60064" ✓ |
 | Bangladesh rule | Broken ❌ | Working ✓ |
 
 ---
@@ -255,4 +271,3 @@ Fixes issue with synoptic code generation at midnight UTC.
 **Fix Status: ✅ COMPLETE**
 
 আপনার analysis exactly ছিল correct। তার ফলেই এই fix করা সম্ভব হয়েছে! 🎯
-

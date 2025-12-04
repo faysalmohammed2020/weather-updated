@@ -7,67 +7,72 @@
 ## 📖 Available Documents
 
 ### 1. **RAINFALL_SYNOPTIC_SUMMARY.md** ⭐ START HERE
-   - **Purpose:** Quick overview & executive summary
-   - **Read Time:** 10 minutes
-   - **Contains:** 
-     - সংক্ষিপ্ত উত্তর (Quick answers)
-     - সম্পর্ক ব্যাখ্যা (Relationship explanation)
-     - Step-by-step workflow
-     - Critical points
-   - **Best For:** Quick understanding without getting lost in details
+
+- **Purpose:** Quick overview & executive summary
+- **Read Time:** 10 minutes
+- **Contains:**
+  - সংক্ষিপ্ত উত্তর (Quick answers)
+  - সম্পর্ক ব্যাখ্যা (Relationship explanation)
+  - Step-by-step workflow
+  - Critical points
+- **Best For:** Quick understanding without getting lost in details
 
 ---
 
 ### 2. **RAINFALL_SYNOPTIC_QUICK_REF.md** ⚡ FOR QUICK LOOKUP
-   - **Purpose:** One-page cheat sheet
-   - **Read Time:** 3-5 minutes
-   - **Contains:**
-     - Formula reference (6RRRtR)
-     - Decision trees
-     - Code snippets
-     - Common issues & fixes
-     - Function location map
-   - **Best For:** Quick reference during development/debugging
+
+- **Purpose:** One-page cheat sheet
+- **Read Time:** 3-5 minutes
+- **Contains:**
+  - Formula reference (6RRRtR)
+  - Decision trees
+  - Code snippets
+  - Common issues & fixes
+  - Function location map
+- **Best For:** Quick reference during development/debugging
 
 ---
 
 ### 3. **RAINFALL_SYNOPTIC_ANALYSIS.md** 📊 TECHNICAL DEEP DIVE
-   - **Purpose:** Complete technical documentation
-   - **Read Time:** 30+ minutes
-   - **Contains:**
-     - Complete data flow architecture
-     - Database schema details
-     - WMO code generation logic
-     - Real-world examples
-     - Limitations & recommendations
-   - **Best For:** Understanding all aspects thoroughly, future improvements
+
+- **Purpose:** Complete technical documentation
+- **Read Time:** 30+ minutes
+- **Contains:**
+  - Complete data flow architecture
+  - Database schema details
+  - WMO code generation logic
+  - Real-world examples
+  - Limitations & recommendations
+- **Best For:** Understanding all aspects thoroughly, future improvements
 
 ---
 
 ### 4. **RAINFALL_SYNOPTIC_DIAGRAMS.md** 🎨 VISUAL REFERENCE
-   - **Purpose:** Visual explanations & ASCII diagrams
-   - **Read Time:** 20 minutes
-   - **Contains:**
-     - Data flow visualization
-     - Decision trees
-     - Real-time walkthrough examples
-     - Performance considerations
-     - Troubleshooting guide with diagrams
-   - **Best For:** Visual learners, understanding complex logic flows
+
+- **Purpose:** Visual explanations & ASCII diagrams
+- **Read Time:** 20 minutes
+- **Contains:**
+  - Data flow visualization
+  - Decision trees
+  - Real-time walkthrough examples
+  - Performance considerations
+  - Troubleshooting guide with diagrams
+- **Best For:** Visual learners, understanding complex logic flows
 
 ---
 
 ### 5. **RAINFALL_SYNOPTIC_CODE_REFERENCE.md** 💻 CODE EXAMPLES
-   - **Purpose:** Actual code snippets & implementations
-   - **Read Time:** 25 minutes
-   - **Contains:**
-     - Component code (rainfall-tab.tsx)
-     - API code (synoptic/route.ts)
-     - Database schema
-     - Formik structure
-     - Complete end-to-end example
-     - Testing scenarios
-   - **Best For:** Developers implementing changes, debugging issues
+
+- **Purpose:** Actual code snippets & implementations
+- **Read Time:** 25 minutes
+- **Contains:**
+  - Component code (rainfall-tab.tsx)
+  - API code (synoptic/route.ts)
+  - Database schema
+  - Formik structure
+  - Complete end-to-end example
+  - Testing scenarios
+- **Best For:** Developers implementing changes, debugging issues
 
 ---
 
@@ -96,24 +101,31 @@ RAINFALL_SYNOPTIC_DOCUMENTATION/
 ## 📋 How to Use This Documentation
 
 ### **Scenario 1: "I need to understand the relationship quickly"**
+
 → Read: `RAINFALL_SYNOPTIC_SUMMARY.md` (10 min)
 
 ### **Scenario 2: "I need to fix a bug quickly"**
+
 → Check: `RAINFALL_SYNOPTIC_QUICK_REF.md` → Look for issue
 
 ### **Scenario 3: "I need to implement a feature"**
-→ Study: 
+
+→ Study:
+
 1. `RAINFALL_SYNOPTIC_SUMMARY.md` (understand overview)
 2. `RAINFALL_SYNOPTIC_ANALYSIS.md` (technical details)
 3. `RAINFALL_SYNOPTIC_CODE_REFERENCE.md` (actual code)
 
 ### **Scenario 4: "I need to understand how data flows"**
+
 → Read: `RAINFALL_SYNOPTIC_DIAGRAMS.md` (visual walkthrough)
 
 ### **Scenario 5: "I need to debug a complex issue"**
+
 → Use: `RAINFALL_SYNOPTIC_DIAGRAMS.md` (troubleshooting section)
 
 ### **Scenario 6: "I'm writing documentation/tests"**
+
 → Reference: All documents for completeness
 
 ---
@@ -121,27 +133,32 @@ RAINFALL_SYNOPTIC_DOCUMENTATION/
 ## 🎯 Quick Navigation by Topic
 
 ### **Topic: Data Flow**
+
 - Primary: `RAINFALL_SYNOPTIC_SUMMARY.md` → "Step-by-Step Workflow"
 - Detailed: `RAINFALL_SYNOPTIC_ANALYSIS.md` → "ডেটা ফ্লো আর্কিটেকচার"
 - Visual: `RAINFALL_SYNOPTIC_DIAGRAMS.md` → "Complete Data Flow"
 - Code: `RAINFALL_SYNOPTIC_CODE_REFERENCE.md` → "End-to-End Flow"
 
 ### **Topic: tr Code Calculation**
+
 - Quick: `RAINFALL_SYNOPTIC_QUICK_REF.md` → "tr Code Decision"
 - Detailed: `RAINFALL_SYNOPTIC_ANALYSIS.md` → "Synoptic Code জেনারেশন"
 - Visual: `RAINFALL_SYNOPTIC_DIAGRAMS.md` → "tr Decision Tree"
 - Code: `RAINFALL_SYNOPTIC_CODE_REFERENCE.md` → "WMO Logic"
 
 ### **Topic: Intermittent vs Continuous**
+
 - Summary: `RAINFALL_SYNOPTIC_SUMMARY.md` → "Key Logic Points"
 - Analysis: `RAINFALL_SYNOPTIC_ANALYSIS.md` → "Automatic Rainfall Type Detection"
 - Code: `RAINFALL_SYNOPTIC_CODE_REFERENCE.md` → "detectRainfallType()"
 
 ### **Topic: Database Storage**
+
 - Structure: `RAINFALL_SYNOPTIC_ANALYSIS.md` → "ডেটাবেস স্টোরেজ"
 - Schema: `RAINFALL_SYNOPTIC_CODE_REFERENCE.md` → "Prisma Schema"
 
 ### **Topic: Debugging Issues**
+
 - Common Problems: `RAINFALL_SYNOPTIC_QUICK_REF.md` → "Common Issues"
 - Detailed Guide: `RAINFALL_SYNOPTIC_DIAGRAMS.md` → "Troubleshooting"
 
@@ -151,17 +168,17 @@ RAINFALL_SYNOPTIC_DOCUMENTATION/
 
 ### **If you're looking for:**
 
-| What | Where | Document |
-|-----|-------|----------|
-| Quick summary | Top section | SUMMARY |
-| Single formula | 📊 Formula area | QUICK_REF |
-| Complete logic | Technical section | ANALYSIS |
-| Visual flow | Diagram area | DIAGRAMS |
-| Code example | Code section | CODE_REF |
-| Bug fix | Issue area | QUICK_REF or DIAGRAMS |
-| Implementation | Implementation section | CODE_REF |
-| Performance | Scalability section | DIAGRAMS |
-| WMO standards | Detailed logic | ANALYSIS |
+| What           | Where                  | Document              |
+| -------------- | ---------------------- | --------------------- |
+| Quick summary  | Top section            | SUMMARY               |
+| Single formula | 📊 Formula area        | QUICK_REF             |
+| Complete logic | Technical section      | ANALYSIS              |
+| Visual flow    | Diagram area           | DIAGRAMS              |
+| Code example   | Code section           | CODE_REF              |
+| Bug fix        | Issue area             | QUICK_REF or DIAGRAMS |
+| Implementation | Implementation section | CODE_REF              |
+| Performance    | Scalability section    | DIAGRAMS              |
+| WMO standards  | Detailed logic         | ANALYSIS              |
 
 ---
 
@@ -195,6 +212,7 @@ weather-updated/
 ## 📚 Reading Paths
 
 ### **Path A: Complete Understanding (60 min)**
+
 1. SUMMARY (10 min) - Get overview
 2. QUICK_REF (5 min) - Learn the formula
 3. DIAGRAMS (20 min) - Visual walkthrough
@@ -206,6 +224,7 @@ weather-updated/
 ---
 
 ### **Path B: Quick Fix (15 min)**
+
 1. QUICK_REF (5 min) - Find the issue
 2. DIAGRAMS → Troubleshooting (10 min) - Solve it
 
@@ -214,6 +233,7 @@ weather-updated/
 ---
 
 ### **Path C: Implementation Guide (45 min)**
+
 1. SUMMARY (10 min) - Understand what you're building
 2. ANALYSIS (20 min) - Technical requirements
 3. CODE_REF (15 min) - Code structure
@@ -223,6 +243,7 @@ weather-updated/
 ---
 
 ### **Path D: Debugging Complex Issue (30 min)**
+
 1. DIAGRAMS → Data Flow (10 min) - Understand flow
 2. DIAGRAMS → Walkthrough (10 min) - Trace exact scenario
 3. QUICK_REF → Issues (5 min) - Find similar problem
@@ -235,30 +256,35 @@ weather-updated/
 ## 🎓 Key Concepts Defined
 
 ### **6RRRtR Field**
+
 - What: WMO Synoptic format for precipitation
 - Where: Position 47-51 in SYNOP message
 - Format: `[6][RRR][tR]`
 - Reference: All documents, especially QUICK_REF
 
 ### **tr Code**
+
 - What: Time-based rainfall type indicator
 - Values: 0, 1-3 (intermittent), 4-9 (continuous), / (invalid)
 - Calculated by: WMO logic based on timing & duration
 - Reference: QUICK_REF, ANALYSIS, CODE_REF
 
 ### **Intermittent Rain**
+
 - What: Rainfall with gaps ≥ 30 minutes between intervals
 - Detection: Auto in rainfall-tab.tsx
 - tr codes: 1, 2, 3
 - Reference: SUMMARY, DIAGRAMS
 
 ### **Continuous Rain**
+
 - What: Rainfall as single unbroken interval
 - Detection: Gap < 30 minutes (or single slot)
 - tr codes: 4, 5, 6, 7, 8, 9
 - Reference: SUMMARY, DIAGRAMS
 
 ### **WMO 6-Hour Window**
+
 - What: Observation window from H-6 to H (current time)
 - Split: 2 halves × 3 hours each
 - Used for: Determining intermittent rain positioning
@@ -269,6 +295,7 @@ weather-updated/
 ## ✅ Quality Checklist
 
 All documents have been verified for:
+
 - ✅ Accuracy of code references
 - ✅ Correctness of WMO logic
 - ✅ Clarity of explanations
@@ -283,26 +310,31 @@ All documents have been verified for:
 ## 🔗 Cross-Document References
 
 ### **From SUMMARY:**
+
 - Links to QUICK_REF for formula
 - Links to ANALYSIS for deep dive
 - Links to DIAGRAMS for visualization
 
 ### **From QUICK_REF:**
+
 - Links to ANALYSIS for detailed logic
 - Links to DIAGRAMS for visual explanation
 - Links to CODE_REF for implementation
 
 ### **From ANALYSIS:**
+
 - Links to CODE_REF for code snippets
 - Links to DIAGRAMS for illustrations
 - Cross-references to related sections
 
 ### **From DIAGRAMS:**
+
 - Links to CODE_REF for actual code
 - Links to QUICK_REF for formulas
 - Links to ANALYSIS for theory
 
 ### **From CODE_REF:**
+
 - Links to ANALYSIS for logic explanation
 - Links to DIAGRAMS for flow visualization
 - Links to QUICK_REF for formula reference
@@ -330,16 +362,19 @@ Last Updated: December 4, 2025
 ## 🎯 Next Steps After Reading
 
 1. **For Developers:**
+
    - Set these docs as project reference
    - Link to CODE_REF when reviewing rainfall code
    - Use QUICK_REF for debugging
 
 2. **For New Team Members:**
+
    - Start with SUMMARY
    - Work through reading paths above
    - Reference CODE_REF when implementing
 
 3. **For Documentation:**
+
    - Use ANALYSIS for wiki/knowledge base
    - Use DIAGRAMS for visual documentation
    - Maintain links between docs
@@ -364,6 +399,7 @@ Last Updated: December 4, 2025
 ## 📞 Documentation Support
 
 If you find:
+
 - ❌ Outdated information
 - ❌ Incorrect code examples
 - ❌ Missing sections
@@ -380,4 +416,3 @@ If you find:
 **Date:** December 4, 2025  
 **Status:** Ready for Use  
 **Maintenance:** Review quarterly or when logic changes
-

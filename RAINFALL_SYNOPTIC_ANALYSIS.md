@@ -4,11 +4,12 @@
 
 ## 📋 সারসংক্ষেপ (Executive Summary)
 
-রেইনফল সেকশন এবং Synoptic Code এর মধ্যে সরাসরি ডেটা-প্রবাহ সম্পর্ক আছে। 
+রেইনফল সেকশন এবং Synoptic Code এর মধ্যে সরাসরি ডেটা-প্রবাহ সম্পর্ক আছে।
 
 **মূল কানেকশন:**
+
 ```
-Rainfall Tab (Second Card) 
+Rainfall Tab (Second Card)
     ↓ (Form Data)
     ↓
 Weather Observation Model (Prisma)
@@ -28,21 +29,22 @@ SYNOP Message (WMO Standard)
 
 **ব্যবহারকারী ইনপুট সেকশন:**
 
-| ফিল্ড | প্রকার | উদ্দেশ্য |
-|------|--------|----------|
-| **Date Start** | ISO String (YYYY-MM-DD) | বৃষ্টির শুরু তারিখ |
-| **Date End** | ISO String (YYYY-MM-DD) | বৃষ্টির শেষ তারিখ |
-| **Time Slots** | JSON Array | একাধিক সময়ের ব্যবধান (Minute-granular) |
-| **Since Previous** | Number (mm) | আগের অবজারভেশন থেকে বৃষ্টি |
-| **During Previous** | Number (mm) | আগের ৬ ঘণ্টায় বৃষ্টি (00, 06, 12, 18 UTC) |
-| **Last 24 Hours** | Number (mm) | গত ২৪ ঘণ্টার বৃষ্টি |
+| ফিল্ড               | প্রকার                  | উদ্দেশ্য                                   |
+| ------------------- | ----------------------- | ------------------------------------------ |
+| **Date Start**      | ISO String (YYYY-MM-DD) | বৃষ্টির শুরু তারিখ                         |
+| **Date End**        | ISO String (YYYY-MM-DD) | বৃষ্টির শেষ তারিখ                          |
+| **Time Slots**      | JSON Array              | একাধিক সময়ের ব্যবধান (Minute-granular)    |
+| **Since Previous**  | Number (mm)             | আগের অবজারভেশন থেকে বৃষ্টি                 |
+| **During Previous** | Number (mm)             | আগের ৬ ঘণ্টায় বৃষ্টি (00, 06, 12, 18 UTC) |
+| **Last 24 Hours**   | Number (mm)             | গত ২৪ ঘণ্টার বৃষ্টি                        |
 
 **Time Slots স্ট্রাকচার:**
+
 ```typescript
 interface TimeSlot {
-  id: string;           // UUID
-  timeStart: string;    // HH:MM (e.g., "21:00", "22:50")
-  timeEnd: string;      // HH:MM (e.g., "23:45", "00:30")
+  id: string; // UUID
+  timeStart: string; // HH:MM (e.g., "21:00", "22:50")
+  timeEnd: string; // HH:MM (e.g., "23:45", "00:30")
 }
 
 // Cross-midnight সাপোর্ট:
@@ -57,14 +59,14 @@ interface TimeSlot {
 
 detectRainfallType(timeSlots) {
   if (timeSlots.length === 0) return ""; // কোন স্লট নেই
-  
+
   // Gap Detection:
   for (i = 0; i < slots.length - 1; i++) {
     gap = slots[i].end থেকে slots[i+1].start এর ব্যবধান
-    
+
     if (gap >= 30 minutes) → "intermittent" ✓
   }
-  
+
   return "continuous" or "intermittent"
 }
 
@@ -72,6 +74,7 @@ detectRainfallType(timeSlots) {
 ```
 
 **রেইনফল টাইপ সংজ্ঞা:**
+
 - **Continuous (ধারাবাহিক)**: সব স্লট ৩০ মিনিটের মধ্যে সংযুক্ত
 - **Intermittent (অনিয়মিত)**: যেকোনো দুটি স্লটের মধ্যে ≥ ৩০ মিনিট গ্যাপ
 
@@ -91,25 +94,26 @@ model WeatherObservation {
   rainfallTimeEnd        DateTime?    // পুরানো ফরম্যাট (backward compat)
   rainfallTimeSlots      Json?        // নতুন ফরম্যাট (TimeSlot[] array)
   rainfallSincePrevious  String?      // "since-previous" (mm)
-  rainfallDuringPrevious String?      // "during-previous" (mm) 
+  rainfallDuringPrevious String?      // "during-previous" (mm)
   rainfallLast24Hours    String?      // "last-24-hours" (mm)
   isIntermittentRain     Boolean?     // ডেপ্রিকেটেড (rainfallType ব্যবহার করুন)
   rainfallType           String?      // "continuous" or "intermittent"
-  
+
   ObservingTime ObservingTime @relation(...)
 }
 ```
 
 **ডাটা সংরক্ষণের ক্রমাগত বিবর্তন:**
+
 ```
 Phase 1 (পুরানো):
   rainfallTimeStart (single timestamp)
   rainfallTimeEnd (single timestamp)
-  
+
 Phase 2 (বর্তমান):
   rainfallTimeSlots (JSON array with multiple intervals)
   rainfallType (explicit type indicator)
-  
+
 Backward Compatibility: উভয় ফরম্যাট সাপোর্ট করা হয়
 ```
 
@@ -139,6 +143,7 @@ Example: 6015004 = 6 + 015mm + 4 (ended <2h before obs)
 ### ২. **RRR - বৃষ্টির পরিমাণ (Precipitation Amount)**
 
 **সোর্স:**
+
 ```typescript
 // From: app/api/synoptic/route.ts (line ~285)
 const rainFall = Number(weatherObs.rainfallDuringPrevious) || 0;
@@ -148,6 +153,7 @@ measurements[7] = `6${rainFallPadded}${tr}`;
 ```
 
 **নিয়ম:**
+
 - ০ = no rainfall / অজ্ঞাত পরিমাণ
 - ১-৯৯৯ = মিমিতে পরিমাণ
 - শেষ ৩ ডিজিট শুধুমাত্র (যেমন ১০২৫ মিমি → ০২৫ স্টোর করা হয়)
@@ -182,11 +188,12 @@ Observation Time: H
 ```
 
 **কোড উদাহরণ** (`app/api/synoptic/route.ts`, lines 302-320):
+
 ```typescript
 if (isIntermittentRain) {
   const startedInFirstHalf = rainStart >= H_6 && rainStart < H_3;
   const endedInFirstHalf = rainEnd <= H_3;
-  
+
   if (startedInFirstHalf && endedInFirstHalf) {
     tr = "1"; // পুরোটাই H-6 থেকে H-3 মধ্যে
   } else if (/* H-3 থেকে H */) {
@@ -224,6 +231,7 @@ WMO Code (tr = 4-9):
 ```
 
 **কোড উদাহরণ** (`app/api/synoptic/route.ts`, lines 322-345):
+
 ```typescript
 const durationHours = (rainEnd - rainStart) / (1000 * 60 * 60);
 const hoursSinceEnd = (H - rainEnd) / (1000 * 60 * 60);
@@ -305,10 +313,10 @@ H-6:                        06:00 UTC
 ─────────────
 - Slot 1: 07:00-08:30 → এর মধ্যে H-3 (09:00)? NO
   → Not in first half
-  
+
 - Slot 1 শেষ হয় 08:30 < 09:00 (H-3)? YES
   → ended in first half? Actually NO because 08:30 < 09:00
-  
+
 Wait, recalculate:
 - H = 12:00, H-3 = 09:00, H-6 = 06:00
 - Slot 1: 07:00 - 08:30
@@ -334,7 +342,7 @@ H-3:                       03:00 UTC
 
 ক্যালকুলেশন:
 ─────────────
-- rainStart (23:30) <= H-6 (00:00)? 
+- rainStart (23:30) <= H-6 (00:00)?
   🔴 যদি আগের দিন হয় → technically NOT
   🟢 লক্ষ্য করুন: এ ক্ষেত্রে কোড ক্রস-মিডনাইট হ্যান্ডল করে
 
@@ -409,15 +417,19 @@ const rainFall = Number(weatherObs.rainfallDuringPrevious) || 0;
 ```
 
 **সমস্যা:**
+
 - শুধুমাত্র "during previous" (আগের ৬ ঘণ্টা) ব্যবহার করা হয়
 - `rainfallLast24Hours` বা `rainfallSincePrevious` ব্যবহার করা হয় না
 - যখন specific value উপলব্ধ না থাকে, fallback logic নেই
 
 **উন্নতির পরামর্শ:**
+
 ```typescript
 // Better logic:
-const rainFall = Number(weatherObs.rainfallDuringPrevious) || 
-                 Number(weatherObs.rainfallLast24Hours) || 0;
+const rainFall =
+  Number(weatherObs.rainfallDuringPrevious) ||
+  Number(weatherObs.rainfallLast24Hours) ||
+  0;
 ```
 
 ### **সমস্যা ২: Cross-Midnight Handling**
@@ -430,11 +442,13 @@ const [startHour, startMin] = slot.timeStart.split(":").map(Number);
 ```
 
 **সমস্যা:**
+
 - ক্রস-মিডনাইট রেইনফল সঠিকভাবে হ্যান্ডেল করা হয়
 - কিন্তু `end < start` এর ক্ষেত্রে পরের দিন ধরে নেওয়া হয়
 - ডেটাবেসে ISO string হিসেবে স্টোর করা হয় (UTC timestamps নয়)
 
 **সীমাবদ্ধতা:**
+
 - ২-দিনের বৃষ্টি সাপোর্ট করে না (বিরল কিন্তু সম্ভব)
 
 ### **সমস্যা ৩: rainfallType Auto-Detection vs Manual Entry**
@@ -449,6 +463,7 @@ const detectRainfallType = (slots: TimeSlot[]) => {
 ```
 
 **সমস্যা:**
+
 - ব্যবহারকারী রোধ করতে পারে না (শুধু auto-detect)
 - WMO কখনো আলাদা মান প্রয়োজন হলে?
 - যদি অবজারভেশন প্রক্রিয়ায় ম্যানুয়াল রিপোর্টিং হয়?
@@ -459,12 +474,10 @@ const detectRainfallType = (slots: TimeSlot[]) => {
 
 ### **স্বল্পমেয়াদী (Quick Wins):**
 
-1. **Rainfall Amount Fallback Logic** 
+1. **Rainfall Amount Fallback Logic**
    - সিনোপ্টিক জেনারেশনে multiple sources চেক করুন
-   
 2. **Manual Override Option**
    - `rainfallType` এর জন্য ম্যানুয়াল সিলেক্টর যোগ করুন
-   
 3. **Better Validation**
    - tr কোড generation এ error handling
 
@@ -472,10 +485,8 @@ const detectRainfallType = (slots: TimeSlot[]) => {
 
 1. **Unified Rainfall Schema**
    - সব rainfall fields একটি nested object হিসেবে অর্গানাইজ করুন
-   
 2. **Time Zone Awareness**
    - Bangladesh calendar rule consistent করুন সর্বত্র
-   
 3. **WMO Compliance Checker**
    - Synoptic code validation module তৈরি করুন
 
@@ -484,10 +495,12 @@ const detectRainfallType = (slots: TimeSlot[]) => {
 ## 📚 রেফারেন্স
 
 - **WMO Manual on Codes:**
+
   - Section 3.1.1.2 - Precipitation (6RRRtR)
   - Group 4 - Time-based codes
 
 - **Bangladesh Meteorological Department:**
+
   - Observation Standards
   - Synoptic Reporting Guidelines
 
@@ -505,12 +518,14 @@ A: UTC hour অনুযায়ী Bangladesh calendar rule ফলো কর�
 
 **Q: Synoptic code এ rainfall data কোথায় ব্যবহৃত হয়?**
 A: Position 47-51 এ `6RRRtR` ফিল্ড হিসেবে:
+
 - `6` = ফিল্ড identifier
 - `RRR` = পরিমাণ (rainfallDuringPrevious থেকে)
 - `tR` = ধরন+সময় কোড (time slot logic থেকে)
 
 **Q: Continuous vs Intermittent এর পার্থক্য কী?**
-A: 
+A:
+
 - **Continuous**: সব intervals consecutive (30 min গ্যাপ ছাড়াই)
 - **Intermittent**: কমপক্ষে একটি 30+ মিনিট গ্যাপ থাকে
 

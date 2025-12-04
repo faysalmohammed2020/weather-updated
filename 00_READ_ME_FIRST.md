@@ -9,6 +9,7 @@
 ## 📚 তৈরি ডকুমেন্টগুলি
 
 ### 1️⃣ **RAINFALL_SYNOPTIC_SUMMARY.md** ⭐ (শুরু এখানে)
+
 - **আপনার প্রশ্নের সরাসরি উত্তর**
 - সম্পর্ক কী: ডেটা pipeline হিসেবে rainfall tab → database → synoptic
 - বর্তমান logic: Step-by-step explanation with diagrams
@@ -19,6 +20,7 @@
 ---
 
 ### 2️⃣ **RAINFALL_SYNOPTIC_ANALYSIS.md** 📊 (বৈজ্ঞানিক বিশ্লেষণ)
+
 - **সম্পূর্ণ প্রযুক্তিগত বিবরণ**
 - ডেটা ফ্লো আর্কিটেকচার (detailed)
 - ডাটাবেস স্কিমা বিশ্লেষণ
@@ -31,6 +33,7 @@
 ---
 
 ### 3️⃣ **RAINFALL_SYNOPTIC_DIAGRAMS.md** 🎨 (ভিজ্যুয়াল গাইড)
+
 - **ASCII ডায়াগ্রাম এবং flowcharts**
 - ৭ টি বড় ভিজ্যুয়াল ডায়াগ্রাম
 - সম্পূর্ণ ডেটা লাইফসাইকেল visualization
@@ -43,6 +46,7 @@
 ---
 
 ### 4️⃣ **RAINFALL_SYNOPTIC_CODE_REFERENCE.md** 💻 (কোড উদাহরণ)
+
 - **প্রকৃত কোড স্নিপেট**
 - rainfall-tab.tsx থেকে ফাংশন
 - /api/synoptic logic
@@ -57,6 +61,7 @@
 ---
 
 ### 5️⃣ **RAINFALL_SYNOPTIC_QUICK_REF.md** ⚡ (চিট শীট)
+
 - **এক পৃষ্ঠার দ্রুত রেফারেন্স**
 - 6RRRtR formula
 - tr code quick table
@@ -69,6 +74,7 @@
 ---
 
 ### 6️⃣ **RAINFALL_SYNOPTIC_DOCUMENTATION_INDEX.md** 📖 (নেভিগেশন গাইড)
+
 - **সব ডকুমেন্টের সূচী**
 - কীভাবে ব্যবহার করতে হবে
 - বিভিন্ন scenarios এর জন্য reading paths
@@ -110,6 +116,7 @@ SYNOP Message (Position 47-51: 6RRRtR)
 **Step-by-Step:**
 
 **Step 1: Rainfall Type Auto-Detection**
+
 ```
 User enters time slots: [21:00-22:30, 00:15-01:45]
 Gap = 1h 45m > 30m?
@@ -117,6 +124,7 @@ YES → rainfallType = "intermittent" ✓
 ```
 
 **Step 2: Data Storage**
+
 ```
 Save to Database:
 - rainfallTimeSlots (JSON array)
@@ -125,6 +133,7 @@ Save to Database:
 ```
 
 **Step 3: Synoptic Code Generation**
+
 ```
 When /api/synoptic is called:
 - Extract rainfallDuringPrevious → RRR = "008"
@@ -142,20 +151,23 @@ When /api/synoptic is called:
 **Key Points:**
 
 1. **তিনটি পর্যায়ে ডেটা প্রবাহ:**
+
    - Input Phase (rainfall-tab.tsx)
    - Persistence Phase (Prisma Database)
    - Output Phase (/api/synoptic)
 
 2. **tr Code Calculate করার Logic:**
+
    - Intermittent: WMO 6-hour window এ rain কোথায় পড়ে তার উপর ভিত্তি করে (1, 2, 3)
    - Continuous: Duration এবং "কত আগে শেষ হয়েছে" এর উপর ভিত্তি করে (4-9)
 
 3. **WMO 6-hour Window:**
+
    ```
    H = observation time (e.g., 06:00 UTC)
    H-3 = 3 hours ago (e.g., 03:00 UTC)
    H-6 = 6 hours ago (e.g., 00:00 UTC)
-   
+
    প্রথম অর্ধ: H-6 থেকে H-3
    দ্বিতীয় অর্ধ: H-3 থেকে H
    ```
@@ -168,14 +180,14 @@ When /api/synoptic is called:
 
 ## 📊 ডকুমেন্টের কন্টেন্ট সারসংক্ষেপ
 
-| ডকুমেন্ট | পৃষ্ঠা | সেকশন | সংখ্যা |
-|----------|--------|--------|--------|
-| SUMMARY | 20 | Main sections | 7 |
-| ANALYSIS | 40+ | Detailed analysis | 8 |
-| DIAGRAMS | 25 | Visual diagrams | 7 |
-| CODE_REF | 30 | Code snippets | 30+ |
-| QUICK_REF | 5 | Quick tables | 8 |
-| INDEX | 15 | Navigation guides | - |
+| ডকুমেন্ট  | পৃষ্ঠা | সেকশন             | সংখ্যা |
+| --------- | ------ | ----------------- | ------ |
+| SUMMARY   | 20     | Main sections     | 7      |
+| ANALYSIS  | 40+    | Detailed analysis | 8      |
+| DIAGRAMS  | 25     | Visual diagrams   | 7      |
+| CODE_REF  | 30     | Code snippets     | 30+    |
+| QUICK_REF | 5      | Quick tables      | 8      |
+| INDEX     | 15     | Navigation guides | -      |
 
 **মোট:** ৬ ডকুমেন্ট, ১৩০+ পৃষ্ঠা, ৫০+ ডায়াগ্রাম, ৩০+ কোড উদাহরণ
 
@@ -184,12 +196,14 @@ When /api/synoptic is called:
 ## 🚀 কীভাবে ব্যবহার করবেন
 
 ### **সিনারিও ১: দ্রুত বোঝা (১৫ মিনিট)**
+
 ```
 1. RAINFALL_SYNOPTIC_SUMMARY.md পড়ুন (সম্পূর্ণ)
 2. কাজ শুরু করুন
 ```
 
 ### **সিনারিও ২: বাগ ফিক্স (২০ মিনিট)**
+
 ```
 1. RAINFALL_SYNOPTIC_QUICK_REF.md এ issue খুঁজুন
 2. RAINFALL_SYNOPTIC_DIAGRAMS.md → Troubleshooting পড়ুন
@@ -197,6 +211,7 @@ When /api/synoptic is called:
 ```
 
 ### **সিনারিও ৩: নতুন ফিচার (৬০ মিনিট)**
+
 ```
 1. SUMMARY পড়ুন
 2. ANALYSIS পড়ুন
@@ -205,6 +220,7 @@ When /api/synoptic is called:
 ```
 
 ### **সিনারিও ৪: টিম অনবোর্ডিং**
+
 ```
 1. সবাইকে SUMMARY দিন
 2. প্রয়োজন অনুযায়ী ANALYSIS দিন
@@ -249,8 +265,8 @@ weather-updated/
 
 1. **RAINFALL_SYNOPTIC_SUMMARY.md খুলুন**
    - এটি আপনার প্রশ্নের সরাসরি উত্তর
-   
 2. **প্রয়োজন অনুযায়ী আরও পড়ুন**
+
    - বাগ? → QUICK_REF + DIAGRAMS
    - গভীর বোঝা? → ANALYSIS
    - কোড প্রয়োজন? → CODE_REF
@@ -280,6 +296,7 @@ weather-updated/
 **আপনার প্রশ্ন:** Second card rainfall section এবং synoptic code এর মধ্যে সম্পর্ক, বর্তমান logic, এবং গভীর বিশ্লেষণ
 
 **আমাদের উত্তর:** ৬টি সম্পূর্ণ ডকুমেন্ট (১৩০+ পৃষ্ঠা) যাতে:
+
 - সরাসরি উত্তর
 - বিস্তারিত ব্যাখ্যা
 - বাস্তব উদাহরণ
@@ -299,4 +316,3 @@ weather-updated/
 **Ready to Use:** ✅ YES
 
 **Start Reading:** RAINFALL_SYNOPTIC_SUMMARY.md
-

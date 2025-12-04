@@ -12,6 +12,7 @@
 ## 🔍 Why tr = "/" Happened (Deep Dive)
 
 ### Your Data in Database:
+
 ```json
 {
   "observingTime": "2025-12-04T00:00:00.000Z",
@@ -27,23 +28,28 @@
 ```
 
 ### The Bug (Before Fix):
+
 ```typescript
 // OLD CODE - INCORRECT
 const parsedSlots = timeSlots.map((slot) => {
   // ❌ WRONG: Uses observationTime date (2025-12-04)
   return {
-    start: new Date(Date.UTC(
-      observationTime.getUTCFullYear(),        // 2025
-      observationTime.getUTCMonth(),           // 12
-      observationTime.getUTCDate(),            // 04 ❌ WRONG!
-      startHour, startMin
-    )),
+    start: new Date(
+      Date.UTC(
+        observationTime.getUTCFullYear(), // 2025
+        observationTime.getUTCMonth(), // 12
+        observationTime.getUTCDate(), // 04 ❌ WRONG!
+        startHour,
+        startMin
+      )
+    ),
     // Result: 2025-12-04T21:30:00.000Z (TODAY'S 21:30)
   };
 });
 ```
 
 ### The Calculation With Bug:
+
 ```
 Observing Time: 2025-12-04T00:00:00Z (00 UTC)
 WMO Window:
@@ -58,15 +64,16 @@ Check if within window:
   rainStart >= H-6?
     2025-12-04T21:30 >= 2025-12-03T18:00?
     YES (next day! ✓)
-  
+
   rainEnd <= H?
     2025-12-04T22:30 <= 2025-12-04T00:00?
     NO ✗ (END is AFTER observation time!)
-    
+
 → Outside valid window → tr = "/"
 ```
 
 ### The Problem Visually:
+
 ```
 WRONG PARSING:
 Previous day    |    Today (04)
@@ -77,7 +84,7 @@ Previous day    |    Today (04)
 CORRECT (After Fix):
 Previous day    |    Today (04)
    18:00──────00:00
-   ←H-6 ──── H    
+   ←H-6 ──── H
    ↑
    21:30──────22:30 (actual slot ✓)
    (fits in window!)
@@ -88,10 +95,12 @@ Previous day    |    Today (04)
 ## ✅ The Fix (Applied)
 
 ### Location:
+
 File: `app/api/synoptic/route.ts`  
 Lines: 169-180 (slot parsing logic)
 
 ### What Changed:
+
 ```typescript
 // NEW CODE - CORRECT
 const parsedSlots = timeSlots.map((slot) => {
@@ -100,29 +109,37 @@ const parsedSlots = timeSlots.map((slot) => {
 
   // ✅ For 00 UTC observations, use PREVIOUS date
   let slotDate = new Date(observationTime);
-  
-  if (obsHour === 0) {  // ← NEW: Check if 00 UTC
-    slotDate.setUTCDate(slotDate.getUTCDate() - 1);  // ← Go back 1 day
+
+  if (obsHour === 0) {
+    // ← NEW: Check if 00 UTC
+    slotDate.setUTCDate(slotDate.getUTCDate() - 1); // ← Go back 1 day
   }
 
   return {
-    start: new Date(Date.UTC(
-      slotDate.getUTCFullYear(),
-      slotDate.getUTCMonth(),
-      slotDate.getUTCDate(),    // ✅ Uses correct date
-      startHour, startMin
-    )),
-    end: new Date(Date.UTC(
-      slotDate.getUTCFullYear(),
-      slotDate.getUTCMonth(),
-      slotDate.getUTCDate(),    // ✅ Uses correct date
-      endHour, endMin
-    )),
+    start: new Date(
+      Date.UTC(
+        slotDate.getUTCFullYear(),
+        slotDate.getUTCMonth(),
+        slotDate.getUTCDate(), // ✅ Uses correct date
+        startHour,
+        startMin
+      )
+    ),
+    end: new Date(
+      Date.UTC(
+        slotDate.getUTCFullYear(),
+        slotDate.getUTCMonth(),
+        slotDate.getUTCDate(), // ✅ Uses correct date
+        endHour,
+        endMin
+      )
+    ),
   };
 });
 ```
 
 ### Why This Works:
+
 ```
 CORRECT PARSING (After Fix):
 For 00 UTC:
@@ -137,10 +154,10 @@ Parse slots using slotDate:
 Check if within window:
   rainStart >= H-6?
     2025-12-03T21:30 >= 2025-12-03T18:00? YES ✓
-  
+
   rainEnd <= H?
     2025-12-03T22:30 <= 2025-12-04T00:00? YES ✓
-    
+
 → Inside valid window → Calculate tr properly
 → Duration = 1h, Hours since end = 1.5h
 → tr = "4" ✓
@@ -151,6 +168,7 @@ Check if within window:
 ## 🧪 Test Results
 
 ### Test 1: Unit Tests (All 18 passing)
+
 ```bash
 ✓ 00 UTC: Date should be previous day
 ✓ 03 UTC: Date should be current day
@@ -167,6 +185,7 @@ Test Results: Passed: 18, Failed: 0 ✅
 ```
 
 ### Test 2: Your Exact Scenario
+
 ```bash
 Input:
   Observing Time: 2025-12-04T00:00:00.000Z (00 UTC)
@@ -178,7 +197,7 @@ Output:
   Duration: 1 hour
   Hours Since End: 1.50 hours
   tr Code: 4 ✓
-  
+
 Final: 6RRRtR = 60064 ✅
 ```
 
@@ -187,12 +206,14 @@ Final: 6RRRtR = 60064 ✅
 ## 🎯 Why This Matters
 
 ### For 00 UTC (Unique Case):
+
 - Observations at 00:00 UTC report rainfall from the **previous 6 hours**
 - That rainfall occurred on the **previous date**
 - But the observationTime record is created with **today's date**
 - **The fix:** When parsing rainfall slots at 00 UTC, subtract 1 day ✓
 
 ### For Other Hours (03, 06, 12, 18 UTC):
+
 - Observations at 03:00 UTC report rainfall from previous 6 hours
 - That rainfall occurred **same day** (03 UTC = 9 AM Bangladesh time)
 - No date adjustment needed
@@ -202,31 +223,34 @@ Final: 6RRRtR = 60064 ✅
 
 ## 📊 Bangladesh Calendar Special Rules
 
-| UTC Hour | Occurrence | Date Used | Rainfall Period | Fix Applied |
-|----------|-----------|-----------|-----------------|------------|
-| **00** | Midnight | Previous day ✓ | Previous 6h on prev day | YES (this fix) |
-| 03 | 9 AM | Current day | Previous 6h, same day | NO |
-| 06 | 12 PM | Current day | Previous 6h, same day | NO |
-| 12 | 6 PM | Current day | Previous 6h, same day | NO |
-| 18 | 12 AM | Current day | Previous 6h, same day | NO |
+| UTC Hour | Occurrence | Date Used      | Rainfall Period         | Fix Applied    |
+| -------- | ---------- | -------------- | ----------------------- | -------------- |
+| **00**   | Midnight   | Previous day ✓ | Previous 6h on prev day | YES (this fix) |
+| 03       | 9 AM       | Current day    | Previous 6h, same day   | NO             |
+| 06       | 12 PM      | Current day    | Previous 6h, same day   | NO             |
+| 12       | 6 PM       | Current day    | Previous 6h, same day   | NO             |
+| 18       | 12 AM      | Current day    | Previous 6h, same day   | NO             |
 
 ---
 
 ## 🔍 Impact Analysis
 
 ### What Was Broken:
+
 - ❌ tr code always "/" at 00 UTC with multiple slots
 - ❌ 6RRRtR field showed "6RRRt/" instead of "6RRRt4-9"
 - ❌ Synoptic code incomplete for midnight observations
 - ❌ Data loss in synoptic message generation
 
 ### What's Fixed:
+
 - ✅ tr code correctly calculated at 00 UTC
 - ✅ Multiple slots properly parsed with correct date
 - ✅ WMO windows correctly aligned
 - ✅ 6RRRtR field shows valid tr values (0, 1, 2, 3, 4-9)
 
 ### Affected Users:
+
 - **Primary:** All observers at 00 UTC (daily users)
 - **Impact:** Complete synoptic code generation
 - **Severity:** CRITICAL (affects WMO message validity)
@@ -255,7 +279,7 @@ Final: 6RRRtR = 60064 ✅
 -     const baseDate = observationTime.toISOString().split("T")[0];
 -     const [startHour, startMin] = slot.timeStart.split(":").map(Number);
 -     const [endHour, endMin] = slot.timeEnd.split(":").map(Number);
-      
+
       return {
         start: new Date(Date.UTC(
 -         observationTime.getUTCFullYear(),
@@ -312,16 +336,18 @@ Before committing, verify:
 ## 📚 Reference
 
 **Files Modified:**
+
 - `app/api/synoptic/route.ts` (lines 160-220)
 
 **Test Files:**
+
 - `test-00-utc.js` (18 unit tests)
 - `test-your-exact-scenario.js` (scenario validation)
 
 **Documentation:**
+
 - This file (FIX_TR_CODE_00_UTC.md)
 
 ---
 
 **Status:** ✅ FIX COMPLETE AND VERIFIED
-

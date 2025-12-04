@@ -1,6 +1,6 @@
 /**
  * Test Your Exact Scenario: 00 UTC with slots 21:30-22:30
- * 
+ *
  * This test verifies the fix for tr code calculation at 00 UTC
  * when rainfall ends at 22:30 (should now show tr=2, not tr=/)
  */
@@ -8,7 +8,7 @@
 // Simulate the synoptic route logic with your exact data
 function testYourScenario() {
   console.log("🔬 Testing Your Exact Scenario\n");
-  console.log("=" . repeat(60));
+  console.log("=".repeat(60));
 
   // Your exact data from the screenshot
   const observingTimeISO = "2025-12-04T00:00:00.000Z"; // 00 UTC
@@ -20,8 +20,8 @@ function testYourScenario() {
     {
       id: "slot-1",
       timeStart: "21:30",
-      timeEnd: "22:30"
-    }
+      timeEnd: "22:30",
+    },
   ];
 
   console.log("\n📋 Input Data:");
@@ -55,7 +55,9 @@ function testYourScenario() {
   if (obsHour === 0) {
     slotDate.setUTCDate(slotDate.getUTCDate() - 1);
     console.log(`\n✨ FIX APPLIED: For 00 UTC, using previous date`);
-    console.log(`  Slot Date: ${slotDate.toISOString().split("T")[0]} (adjusted from ${observationTime.toISOString().split("T")[0]})`);
+    console.log(
+      `  Slot Date: ${slotDate.toISOString().split("T")[0]} (adjusted from ${observationTime.toISOString().split("T")[0]})`
+    );
   }
 
   const slot = rainfallTimeSlots[0];
@@ -98,8 +100,12 @@ function testYourScenario() {
   // Check if within valid window
   const withinWindow = rainStart >= H_6 && rainEnd <= H;
   console.log(`\n🎯 Window Check:`);
-  console.log(`  rainStart >= H-6? ${rainStart.getTime()} >= ${H_6.getTime()} = ${rainStart >= H_6 ? "✓ YES" : "✗ NO"}`);
-  console.log(`  rainEnd <= H? ${rainEnd.getTime()} <= ${H.getTime()} = ${rainEnd <= H ? "✓ YES" : "✗ NO"}`);
+  console.log(
+    `  rainStart >= H-6? ${rainStart.getTime()} >= ${H_6.getTime()} = ${rainStart >= H_6 ? "✓ YES" : "✗ NO"}`
+  );
+  console.log(
+    `  rainEnd <= H? ${rainEnd.getTime()} <= ${H.getTime()} = ${rainEnd <= H ? "✓ YES" : "✗ NO"}`
+  );
   console.log(`  Within Valid Window? ${withinWindow ? "✓ YES" : "✗ NO"}`);
 
   // Calculate tr code (continuous rain)
@@ -133,7 +139,7 @@ function testYourScenario() {
   console.log(`  tr  = ${tr}`);
   console.log(`  6RRRtR = 6${rainFallPadded}${tr}`);
 
-  console.log(`\n${"=" . repeat(60)}`);
+  console.log(`\n${"=".repeat(60)}`);
 
   // Verify expected result
   const expected = "6006" + tr;

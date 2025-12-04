@@ -70,7 +70,7 @@ TEST:
 ```
 GIVEN:
   • Observation Time: 2025-12-04 00:00 UTC (midnight)
-  
+
 WHEN:
   • Rainfall Time Slot: 22:00 - 00:00 (ends at observation)
   • Date: 2025-12-03 (previous day)
@@ -81,12 +81,12 @@ CALCULATION:
   H = 00:00 UTC
   H_3 = Previous day 21:00 UTC (= 2025-12-03 21:00)
   H_6 = Previous day 18:00 UTC (= 2025-12-03 18:00)
-  
+
   rainStart = 22:00 (2025-12-03) ✓ within [18:00, 21:00)?
     22:00 >= 18:00? YES ✓
     22:00 < 21:00? NO ✗
     → NOT in first half
-  
+
   rainEnd = 00:00 (= 2025-12-04 00:00) ✓ exactly at H
     00:00 <= 00:00? YES ✓
     → In valid range
@@ -140,19 +140,19 @@ WMO CALCULATION:
   H = 00:30 UTC (2025-12-04)
   H_3 = 2025-12-03 21:30 UTC
   H_6 = 2025-12-03 18:30 UTC
-  
+
   rainStart = 21:00 (2025-12-03)
   rainEnd = 23:45 (2025-12-03)
-  
+
   Slot 1 check: [21:00 - 22:00]
     Started in first half? 21:00 >= 18:30 && 21:00 < 21:30 = YES
     Ended in first half? 22:00 <= 21:30 = NO
     → Spans both halves of first 3-hour period
-  
+
   Slot 2 check: [23:00 - 23:45]
     Started in first half? 23:00 >= 18:30 && 23:00 < 21:30 = NO
     → Outside first half
-  
+
   Overall:
     rainStart = 21:00 >= 18:30? YES
     rainStart < 21:30? YES
@@ -184,7 +184,7 @@ TEST ASSERTIONS:
 GIVEN:
   • Observation: 2025-12-04 00:00 UTC
   • Previous Bangladesh date: 2025-12-03
-  
+
 WINDOW CALCULATION:
   H = 00:00 UTC
   H_3 = 2025-12-03 21:00 UTC ← First half ends
@@ -200,15 +200,15 @@ CALCULATION:
     >= 18:00? YES
     < 21:00? YES
     → In first half ✓
-  
+
   rainEnd = 20:30
     <= 21:00? YES
     → Ended in first half ✓
-  
+
   Not intermittent (single slot):
     isIntermittentRain = false
     → Use continuous logic
-  
+
   durationHours = 2 hours (≤ 2) ✓
   hoursSinceEnd = 0 hours ✓
   → tr = "4" (short rain, recently ended)
@@ -231,7 +231,7 @@ TEST:
 ```
 GIVEN:
   • Observation: 2025-12-04 00:30 UTC
-  
+
 WINDOW:
   H = 00:30 UTC
   H_3 = 2025-12-03 21:30 UTC ← Second half starts
@@ -247,11 +247,11 @@ CALCULATION:
     >= 21:30? YES
     < 00:30? YES (tomorrow)
     → In second half ✓
-  
+
   rainEnd = 23:45
     <= 00:30? YES
     → In valid range ✓
-  
+
   durationHours = 2 hours
   hoursSinceEnd = 45 minutes < 1 hour
   → tr = "4" (short, recently ended)
@@ -260,9 +260,9 @@ EXPECTED:
   • tr = "4" (continuous code)
   • NOT tr = "2" (intermittent in second half)
     Because it's NOT intermittent (single slot)
-  
+
   Wait - recheck logic:
-  
+
   Actually, if single slot → force continuous
   So isIntermittentRain = false
   Then use continuous logic, not intermittent
@@ -333,7 +333,7 @@ PROBLEM:
 HOW SYSTEM HANDLES:
   Start: 23:30 on date-start (2025-12-03)
   End: 00:30 on date-end (could be 2025-12-04?)
-  
+
   Current code converts to UTC using DATE field
   So: 23:30 on 2025-12-03 = 2025-12-03 23:30 UTC
       00:30 on 2025-12-04 = 2025-12-04 00:30 UTC
@@ -369,7 +369,7 @@ STEP 3: INPUT RAINFALL
   • Amount: 10.5 mm
 
 STEP 4: SUBMIT
-  • API receives: 
+  • API receives:
     rainfallTimeSlots: [...]
     rainfallType: "intermittent"
     "date-start": "2025-12-03"
@@ -432,17 +432,17 @@ SYNOPTIC CALCULATION TRACE:
 3. Parse slots:
    Slot 1 start: 21:00, end: 22:00
    Slot 2 start: 23:00, end: 23:30
-   
+
    rainStart = 21:00 (earliest)
    rainEnd = 23:30 (latest)
 
 4. Determine tr (intermittent):
    startedInFirstHalf = 21:00 >= 18:30 && 21:00 < 21:30 = YES
    endedInFirstHalf = 23:30 <= 21:30 = NO
-   
+
    startedInSecondHalf = 21:00 >= 21:30 && 21:00 < 00:30 = NO
    endedInSecondHalf = 23:30 <= 00:30 = YES
-   
+
    Neither first+first nor second+second
    Check if spans both: rainStart <= H_6 && rainEnd >= H?
      21:00 <= 18:30? NO
@@ -526,12 +526,12 @@ TEST:
 GIVEN:
   • UTC Hour: 00
   • Rainfall times: "25:00" (invalid hour)
-  
+
 EXPECTED:
   • Form validation rejects
   • Database rejects
   • Error message shown
-  
+
 TEST:
   ✓ Validation catches error at UI
   ✓ If bypassed, DB rejects
@@ -589,14 +589,14 @@ INTEGRATION:
 curl -X GET "http://localhost:3000/api/synoptic?hour=00"
 
 # Check database for 00 UTC observations
-SELECT * FROM "WeatherObservation" 
+SELECT * FROM "WeatherObservation"
 WHERE "ObservingTime"."utcTime" LIKE '2025-12-04 00:%'
 
 # Test export with 00 UTC data
 curl -X POST "http://localhost:3000/api/export/csv?hour=00"
 
 # Verify dates match
-SELECT 
+SELECT
   "date-start" as form_date,
   "rainfallTimeSlots"->0->>'timeStart' as slot_time,
   "createdAt" as stored_date

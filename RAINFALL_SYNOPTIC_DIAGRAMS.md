@@ -347,10 +347,10 @@ Date End:          2025-12-04
 Time Slots:
   Slot 1: 09:45 - 10:15  (Duration: 30 min)
   Slot 2: 10:45 - 12:00  (Duration: 1h 15m)
-  
+
   Gap between Slot 1 and 2: 30 minutes
   ⚠️ EDGE CASE: Exactly 30 min! (≥ 30 threshold)
-  
+
 Rainfall Amount: 12.7 mm (during previous 6 hours)
 Detected Type: ?
 
@@ -403,7 +403,7 @@ Intermittent logic:
     ⟹ tr = "2" (Intermittent rain in second half) ✓
 
 Alternative timeline if slots were different:
-  
+
   IF Slot 1: 06:30 - 07:00 (purely first half)
   IF Slot 2: 10:00 - 11:00 (purely second half)
   ⟹ tr = "3" (Spans both halves) ✓
@@ -456,17 +456,17 @@ Debug Steps:
   1. Check time slots:
      • Are they in local time or UTC?
      • Do they cross midnight?
-  
+
   2. Verify observation time:
      • H = 06:00 UTC
      • H-3 = 03:00 UTC
      • H-6 = 00:00 UTC
-  
+
   3. Validate slot positions:
      • startedInFirstHalf?
      • endedInFirstHalf?
      • Span both?
-  
+
   4. If still "/" → Slots genuinely outside window
      • May need to adjust observation time
      • Or verify slot data is correct
@@ -504,11 +504,11 @@ Cause:
 
 Debug:
   1. Check WeatherObservation record:
-     SELECT rainfallTimeSlots, rainfallType FROM "WeatherObservation" 
+     SELECT rainfallTimeSlots, rainfallType FROM "WeatherObservation"
      WHERE id = '...';
-  
+
   2. Verify rainfallType column is not NULL
-  
+
   3. If NULL or "continuous":
      • rainfallTimeSlots might be using old format
      • Re-submit form to recalculate
@@ -522,16 +522,16 @@ Symptom:
 
 Cause:
   const end = e >= s ? e : e + 24*60;
-  
+
   toMinutes("23:00") = 1380
   toMinutes("01:30") = 90
-  
+
   90 >= 1380? NO
   end = 90 + 1440 = 1530
   duration = 1530 - 1380 = 150 minutes = 2.5 hours ✓
-  
+
   (This actually works correctly!)
-  
+
 If showing wrong:
   • Check HH:MM format (must be 24-hour)
   • Verify time picker output
@@ -547,13 +547,13 @@ Symptom:
 
 Cause:
   Backward compatibility logic prefers new format:
-  
+
     if (Array.isArray(weatherObs.rainfallTimeSlots)) {
       // Uses new format (rainfallTimeSlots) ✓
     } else {
       // Falls back to old format
     }
-  
+
   If both exist → new format takes precedence
 
 Verify:
@@ -637,16 +637,16 @@ Edge Cases:
 1. Entire 24-hour rainfall
    • System assumes same day
    • Cross-date rainfall not supported
-   
+
 2. Very long gaps (6+ hours)
    • Still marked as "intermittent"
    • tr codes might be "/" (invalid range)
-   
+
 3. Overlapping slots
    • Current UI doesn't prevent
    • Could cause duration miscalculation
    • Flag in UI: "⚠️ Overlap detected"
-   
+
 4. Midnight boundary
    • Handled via end-time < start-time check
    • Adds 24*60 minutes to end for calculation

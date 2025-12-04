@@ -165,9 +165,9 @@ const parsedSlots = timeSlots
     return {
       start: new Date(
         Date.UTC(
-          observationTime.getUTCFullYear(),    // ❌ Today's year
-          observationTime.getUTCMonth(),       // ❌ Today's month
-          observationTime.getUTCDate(),        // ❌ Today's date!
+          observationTime.getUTCFullYear(), // ❌ Today's year
+          observationTime.getUTCMonth(), // ❌ Today's month
+          observationTime.getUTCDate(), // ❌ Today's date!
           startHour,
           startMin
         )
@@ -175,7 +175,6 @@ const parsedSlots = timeSlots
       // ... end similar
     };
   });
-
 
 // AFTER (✅ FIXED):
 const parsedSlots = timeSlots
@@ -196,9 +195,9 @@ const parsedSlots = timeSlots
     return {
       start: new Date(
         Date.UTC(
-          slotDate.getUTCFullYear(),    // ✅ Correct date
-          slotDate.getUTCMonth(),       // ✅ Correct date
-          slotDate.getUTCDate(),        // ✅ Adjusted for 00 UTC!
+          slotDate.getUTCFullYear(), // ✅ Correct date
+          slotDate.getUTCMonth(), // ✅ Correct date
+          slotDate.getUTCDate(), // ✅ Adjusted for 00 UTC!
           startHour,
           startMin
         )
@@ -213,6 +212,7 @@ const parsedSlots = timeSlots
 ## 🎯 Key Insight
 
 ### The Root Problem:
+
 ```
 UI sends: "21:30" (just time, no date)
 Code assumed: "Today's 21:30"
@@ -221,6 +221,7 @@ Result: Data mismatch!
 ```
 
 ### The Solution:
+
 ```
 At 00 UTC: "Yesterday's 21:30" ✓
 At 03 UTC: "Today's 21:30" ✓
@@ -229,6 +230,7 @@ At 06 UTC: "Today's 21:30" ✓
 ```
 
 ### Why Only 00 UTC?
+
 ```
 Because 00 UTC = midnight
 All observations before midnight = previous calendar day
@@ -274,6 +276,7 @@ All other UTC hours = same calendar day
 ## ✅ Verification
 
 ### Before Fix:
+
 ```
 Input:  00 UTC, slot 21:30-22:30, 6mm
 Output: 6RRRtR = "6006/" ❌ WRONG
@@ -281,6 +284,7 @@ Reason: Slot outside valid window
 ```
 
 ### After Fix:
+
 ```
 Input:  00 UTC, slot 21:30-22:30, 6mm
 Output: 6RRRtR = "60064" ✓ CORRECT
@@ -293,17 +297,20 @@ Reason: Slot within valid window, tr=4
 
 **For Developers:**
 When parsing time values without dates, always consider the context:
+
 - What time zone is this in?
 - When was this data recorded?
 - Is there a special case at specific hours?
 
 **For This Project:**
 00 UTC is the only hour with special behavior because:
+
 1. It represents midnight
 2. All previous 6 hours are on previous calendar day
 3. Date selection must reflect this
 
 The fix ensures data consistency across all layers:
+
 - Database: Stores correct date ✓
 - API: Parses with correct date ✓
 - Synoptic: Calculates with correct date ✓
@@ -311,4 +318,3 @@ The fix ensures data consistency across all layers:
 ---
 
 **Status: ✅ FIXED AND EXPLAINED**
-

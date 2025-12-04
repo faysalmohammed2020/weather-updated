@@ -6,11 +6,11 @@
 
 ## 📍 Location in Codebase
 
-| Component | Path | Purpose |
-|-----------|------|---------|
-| **UI Form** | `components/weather-form/rainfall-tab.tsx` | User input, auto-detection |
-| **DB Schema** | `prisma/schema.prisma` | WeatherObservation model |
-| **API Logic** | `app/api/synoptic/route.ts` | tr code calculation |
+| Component     | Path                                       | Purpose                    |
+| ------------- | ------------------------------------------ | -------------------------- |
+| **UI Form**   | `components/weather-form/rainfall-tab.tsx` | User input, auto-detection |
+| **DB Schema** | `prisma/schema.prisma`                     | WeatherObservation model   |
+| **API Logic** | `app/api/synoptic/route.ts`                | tr code calculation        |
 
 ---
 
@@ -96,7 +96,7 @@ WeatherObservation {
   // LEGACY (v1)
   rainfallTimeStart: DateTime,    // OLD
   rainfallTimeEnd: DateTime,      // OLD
-  
+
   // UNUSED
   rainfallSincePrevious: "5.2",   // Not used
   rainfallLast24Hours: "15.8"     // Not used
@@ -120,7 +120,7 @@ if (gap >= 30 minutes) {
 
 ```typescript
 const H = observationTime;     // e.g., 06:00 UTC
-const H_3 = H - 3 hours;       // e.g., 03:00 UTC  
+const H_3 = H - 3 hours;       // e.g., 03:00 UTC
 const H_6 = H - 6 hours;       // e.g., 00:00 UTC
 ```
 
@@ -128,13 +128,13 @@ const H_6 = H - 6 hours;       // e.g., 00:00 UTC
 
 ```typescript
 if (rainStart >= H_6 && rainStart < H_3 && rainEnd <= H_3) {
-  tr = "1";  // First half only
+  tr = "1"; // First half only
 } else if (rainStart >= H_3 && rainStart < H && rainEnd <= H) {
-  tr = "2";  // Second half only
+  tr = "2"; // Second half only
 } else if (rainStart <= H_6 && rainEnd >= H) {
-  tr = "3";  // Both halves
+  tr = "3"; // Both halves
 } else {
-  tr = "/";  // Invalid
+  tr = "/"; // Invalid
 }
 ```
 
@@ -151,7 +151,7 @@ Input:
 
 Calculation:
   • H = 06:00 UTC, H_3 = 03:00, H_6 = 00:00
-  • Slot 2: [00:15, 01:45] 
+  • Slot 2: [00:15, 01:45]
   • 00:15 >= 00:00? YES
   • 00:15 < 03:00? YES
   • 01:45 <= 03:00? YES
@@ -175,6 +175,7 @@ If (UTC Hour == 0) {
 ```
 
 Example:
+
 - 00:15 UTC → Select previous Bangladesh date
 - 06:00 UTC → Select today's Bangladesh date
 
@@ -182,12 +183,12 @@ Example:
 
 ## 🚨 Common Issues & Fixes
 
-| Issue | Cause | Fix |
-|-------|-------|-----|
-| tr = "/" | Rain outside 6h window | Check slot times vs observation time |
-| RRR = "000" | rainfallDuringPrevious is null | Add fallback: `|| 0` |
-| Wrong type | Gap not detected | Check if gap ≥ exactly 30min threshold |
-| Cross-midnight broken | Time not adjusted | End < Start? Add 24h to end |
+| Issue                 | Cause                          | Fix                                    |
+| --------------------- | ------------------------------ | -------------------------------------- | --- | --- |
+| tr = "/"              | Rain outside 6h window         | Check slot times vs observation time   |
+| RRR = "000"           | rainfallDuringPrevious is null | Add fallback: `                        |     | 0`  |
+| Wrong type            | Gap not detected               | Check if gap ≥ exactly 30min threshold |
+| Cross-midnight broken | Time not adjusted              | End < Start? Add 24h to end            |
 
 ---
 
@@ -197,11 +198,11 @@ Example:
 1. rainfall-tab.tsx
    └─ Find: detectRainfallType()
    └─ Find: gapMinutes()
-   
+
 2. route.ts (/api/synoptic)
    └─ Find: rainFall = Number(...)
    └─ Find: if (isIntermittentRain)
-   
+
 3. schema.prisma
    └─ Find: model WeatherObservation
    └─ Look for: rainfall* fields
@@ -212,21 +213,25 @@ Example:
 ## 🎓 How to Debug
 
 1. **Log the timeSlots after parsing**
+
    ```typescript
    console.log("Slots:", timeSlots);
    ```
 
 2. **Check calculated gap**
+
    ```typescript
    console.log("Gap:", gap, "minutes");
    ```
 
 3. **Verify WMO windows**
+
    ```typescript
    console.log("H:", H, "H_3:", H_3, "H_6:", H_6);
    ```
 
 4. **Log final tr code**
+
    ```typescript
    console.log("tr =", tr);
    ```
@@ -267,12 +272,12 @@ Use tr = /: No rainfall or invalid range
 
 ## 🌐 Related Functions
 
-| Function | File | Purpose |
-|----------|------|---------|
-| `detectRainfallType()` | rainfall-tab.tsx | Auto-detect intermittent |
-| `gapMinutes()` | rainfall-tab.tsx | Calculate gap between slots |
-| `diffMinutes()` | rainfall-tab.tsx | Calculate duration |
-| `getCurrentUTCInfo()` | rainfall-tab.tsx | Bangladesh calendar rule |
+| Function               | File             | Purpose                     |
+| ---------------------- | ---------------- | --------------------------- |
+| `detectRainfallType()` | rainfall-tab.tsx | Auto-detect intermittent    |
+| `gapMinutes()`         | rainfall-tab.tsx | Calculate gap between slots |
+| `diffMinutes()`        | rainfall-tab.tsx | Calculate duration          |
+| `getCurrentUTCInfo()`  | rainfall-tab.tsx | Bangladesh calendar rule    |
 
 ---
 
