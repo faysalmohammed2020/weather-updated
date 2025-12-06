@@ -17,17 +17,17 @@ export async function getUsersForSession(params: {
   // তাহলে এখানে empty return করতে পারেন।
   if (!session?.user) {
     const [users, total] = await Promise.all([
-      prisma.user.findMany({
+      prisma.users.findMany({
         skip: params.offset,
         take: params.limit,
         orderBy: { createdAt: "desc" },
         include: {
-          station: {
+          Station: {
             select: { id: true, name: true, securityCode: true },
           },
         },
       }),
-      prisma.user.count(),
+      prisma.users.count(),
     ]);
     return { users, total };
   }
@@ -37,32 +37,32 @@ export async function getUsersForSession(params: {
     // non-super admin দের জন্য আপনি যা চান সেটা দিন:
     // এখানে আমি নিরাপদভাবে নিজের user-ই দিচ্ছি।
     const [users, total] = await Promise.all([
-      prisma.user.findMany({
+      prisma.users.findMany({
         where: { id: session.user.id },
         include: {
-          station: {
+          Station: {
             select: { id: true, name: true, securityCode: true },
           },
         },
       }),
-      prisma.user.count({ where: { id: session.user.id } }),
+      prisma.users.count({ where: { id: session.user.id } }),
     ]);
     return { users, total };
   }
 
   // super_admin → all users
   const [users, total] = await Promise.all([
-    prisma.user.findMany({
+    prisma.users.findMany({
       skip: params.offset,
       take: params.limit,
       orderBy: { createdAt: "desc" },
       include: {
-        station: {
+        Station: {
           select: { id: true, name: true, securityCode: true },
         },
       },
     }),
-    prisma.user.count(),
+    prisma.users.count(),
   ]);
 
   return { users, total };

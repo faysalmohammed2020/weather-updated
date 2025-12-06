@@ -152,6 +152,19 @@ export const UserTableClient = ({
   }>({ originalRole: null, newRole: null });
 
   // ============================================================================
+  // SEARCH STATE (SERVER-SIDE)
+  // ============================================================================
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setDebouncedSearch(searchTerm.trim());
+    }, 400);
+    return () => clearTimeout(t);
+  }, [searchTerm]);
+
+  // ============================================================================
   // COMPUTED VALUES
   // ============================================================================
   const isUserSuperAdmin = useMemo(
@@ -175,45 +188,6 @@ export const UserTableClient = ({
   }, [stations]);
 
   // ============================================================================
-  // DATA REFRESH FUNCTION
-  // ============================================================================
-  const refreshUsers = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch(
-        `${API_ENDPOINTS.USERS}?limit=${pageSize}&offset=${
-          pageIndex * pageSize
-        }`,
-        {
-          cache: "no-store",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-        }
-      );
-
-      if (!response.ok) {
-        const text = await response.text();
-        console.error("Refresh failed:", response.status, text);
-        throw new Error("Failed to refresh users");
-      }
-
-      const data = await response.json();
-      setUsers(data.users ?? []);
-      setTotalUsers(data.total ?? 0);
-    } catch (error) {
-      console.error("Error refreshing users:", error);
-      toast.error("Failed to refresh users");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [pageIndex, pageSize]);
-
-  // ✅ IMPORTANT: pageIndex change hole auto refresh
-  useEffect(() => {
-    refreshUsers();
-  }, [pageIndex, refreshUsers]);
-
-  // ============================================================================
   // PAGINATION FUNCTIONS
   // ============================================================================
   const updatePageInUrl = useCallback(
@@ -224,9 +198,17 @@ export const UserTableClient = ({
       } else {
         params.set("page", newPage.toString());
       }
+
+      // search query maintain korbo
+      if (debouncedSearch) {
+        params.set("search", debouncedSearch);
+      } else {
+        params.delete("search");
+      }
+
       router.push(`/dashboard/user?${params.toString()}`, { scroll: false });
     },
-    [router, searchParams]
+    [router, searchParams, debouncedSearch]
   );
 
   const nextPage = useCallback(() => {
@@ -249,6 +231,60 @@ export const UserTableClient = ({
     setPageIndex(0);
     updatePageInUrl(0);
   }, [updatePageInUrl]);
+
+  // search change hole first page e niye jabe
+  useEffect(() => {
+    if (pageIndex !== 0) {
+      setPageIndex(0);
+      updatePageInUrl(0);
+    } else {
+      updatePageInUrl(0);
+    }
+  }, [debouncedSearch]);
+
+  // ============================================================================
+  // DATA REFRESH FUNCTION (SERVER-SIDE SEARCH INCLUDED)
+  // ============================================================================
+  const refreshUsers = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const params = new URLSearchParams();
+      params.set("limit", pageSize.toString());
+      params.set("offset", (pageIndex * pageSize).toString());
+
+      if (debouncedSearch) {
+        params.set("search", debouncedSearch); // backend e "search" support korte hobe
+      }
+
+      const response = await fetch(
+        `${API_ENDPOINTS.USERS}?${params.toString()}`,
+        {
+          cache: "no-store",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) {
+        const text = await response.text();
+        console.error("Refresh failed:", response.status, text);
+        throw new Error("Failed to refresh users");
+      }
+
+      const data = await response.json();
+      setUsers(data.users ?? []);
+      setTotalUsers(data.total ?? 0);
+    } catch (error) {
+      console.error("Error refreshing users:", error);
+      toast.error("Failed to refresh users");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [pageIndex, pageSize, debouncedSearch]);
+
+  useEffect(() => {
+    refreshUsers();
+  }, [pageIndex, debouncedSearch, refreshUsers]);
 
   // ============================================================================
   // FORM MANAGEMENT FUNCTIONS
@@ -419,72 +455,6 @@ export const UserTableClient = ({
   );
 
   // ============================================================================
-  // TABLE ROWS RENDERING
-  // ============================================================================
-  const tableRows = useMemo(
-    () =>
-      users.map((user) => {
-        const stationName = stationNameById.get(user.stationId);
-
-        return (
-          <TableRow key={user.id}>
-            <TableCell className="p-3 text-left truncate max-w-[250px] text-base">
-              {user.name || "N/A"}
-            </TableCell>
-            <TableCell className="p-3 text-left truncate max-w-[250px] text-base">
-              {user.email}
-            </TableCell>
-            <TableCell className="p-3 text-left truncate max-w-[250px] text-base">
-              {user.role || "N/A"}
-            </TableCell>
-            <TableCell className="p-3 text-left truncate max-w-[250px] text-base">
-              {stationName || "N/A"}
-            </TableCell>
-            <TableCell className="p-3 text-left truncate max-w-[250px] text-base">
-              {formatDate(user.createdAt)}
-            </TableCell>
-            <TableCell>
-              <UserActionButtons
-                user={user}
-                isSuper={isUserSuperAdmin}
-                currentUserId={session?.user?.id}
-                onEdit={openEditDialog}
-                onDelete={openDeleteConfirmation}
-                onImpersonate={handleImpersonate}
-                isImpersonating={isOperating}
-              />
-            </TableCell>
-          </TableRow>
-        );
-      }),
-    [
-      users,
-      stationNameById,
-      isUserSuperAdmin,
-      session?.user?.id,
-      openEditDialog,
-      openDeleteConfirmation,
-      handleImpersonate,
-      isOperating,
-    ]
-  );
-
-  // ============================================================================
-  // SEARCH STATE
-  // ============================================================================
-  const [searchTerm, setSearchTerm] = useState('');
-
-  // Filter users based on search term (name or email)
-  const filteredUsers = useMemo(() => {
-    if (!searchTerm.trim()) return users;
-    const term = searchTerm.toLowerCase();
-    return users.filter(user => 
-      user.name?.toLowerCase().includes(term) || 
-      user.email?.toLowerCase().includes(term)
-    );
-  }, [users, searchTerm]);
-
-  // ============================================================================
   // RENDER
   // ============================================================================
   return (
@@ -506,8 +476,16 @@ export const UserTableClient = ({
       <div className="mb-6">
         <div className="relative max-w-md">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+            <svg
+              className="h-5 w-5 text-gray-400"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fillRule="evenodd"
+                d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                clipRule="evenodd"
+              />
             </svg>
           </div>
           <input
@@ -549,8 +527,8 @@ export const UserTableClient = ({
           <TableBody>
             {isLoading ? (
               <UserTableSkeletonRows rows={pageSize} />
-            ) : filteredUsers.length > 0 ? (
-              filteredUsers.map((user) => {
+            ) : users.length > 0 ? (
+              users.map((user) => {
                 const stationName = stationNameById.get(user.stationId);
                 return (
                   <TableRow key={user.id}>

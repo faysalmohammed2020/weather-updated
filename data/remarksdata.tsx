@@ -430,7 +430,7 @@ const remarksData: Record<string, Remark> = {
     description: "Thunderstorm with rain and strong wind at time of obs",
   },
   "99": {
-    symbol: "/remarks/99.png",
+    symbol: "/remarks/100.png",
     description: "Heavy thunderstorm with hail, not at time of obs",
   },
 };
