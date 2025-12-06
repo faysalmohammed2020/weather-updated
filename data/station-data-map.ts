@@ -155,6 +155,18 @@ import NarsingdiSea from "./station_pressure_level/Narsingdi-sea_level"
 import MonpuraStation from "./station_pressure_level/Monpura-station_level";
 import MonpuraSea from "./station_pressure_level/Monpura-sea_level"
 
+import AshuganjStation from "./station_pressure_level/Ashuganj-station_level";
+import AshuganjSea from "./station_pressure_level/Ashuganj-sea_level";
+
+import BaghabariStation from "./station_pressure_level/Baghabari-station_level";
+import BaghabariSea from "./station_pressure_level/Baghabari-sea_level";
+
+import DighinalaStation from "./station_pressure_level/Dighinala-station_level";
+import DighinalaSea from "./station_pressure_level/Dighinala-sea_level";
+
+import SaintMartinStation from "./station_pressure_level/SaintMartin-station_level";
+import SaintMartinSea from "./station_pressure_level/SaintMartin-sea_level";
+
 export const stationDataMap = {
   [dhakaStation.station.station_no]: { station: dhakaStation, sea: dhakaSea },
   [cxbStation.station.station_no]: { station: cxbStation, sea: cxbSea },
@@ -162,9 +174,22 @@ export const stationDataMap = {
     station: ambaganStation,
     sea: ambaganSea,
   },
+  [AshuganjStation.station.station_no]: {
+    station: AshuganjStation,
+    sea: AshuganjSea,
+  },
   [badalgachhiStation.station.station_no]: {
     station: badalgachhiStation,
     sea: badalgachhiSea,
+  },
+  [bandarbanStation.station.station_no]: {
+    station: bandarbanStation,
+    sea: bandarbanSea,
+  },
+ 
+  [BaghabariStation.station.station_no]: {
+    station: BaghabariStation,
+    sea: BaghabariSea,
   },
   [bandarbanStation.station.station_no]: {
     station: bandarbanStation,
@@ -185,6 +210,10 @@ export const stationDataMap = {
   [dinajpurStation.station.station_no]: {
     station: dinajpurStation,
     sea: dinajpurSea,
+  },
+  [DighinalaStation.station.station_no]: {
+    station: DighinalaStation,
+    sea: DighinalaSea,
   },
   [feniStation.station.station_no]: { station: feniStation, sea: feniSea },
   [faridpurStation.station.station_no]: {
@@ -228,6 +257,10 @@ export const stationDataMap = {
   [srimangalStation.station.station_no]: {
     station: srimangalStation,
     sea: srimangalSea,
+  },
+  [SaintMartinStation.station.station_no]: {
+    station: SaintMartinStation,
+    sea: SaintMartinSea,
   },
   [tarashStation.station.station_no]: {
     station: tarashStation,
