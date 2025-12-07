@@ -187,35 +187,35 @@ export default function AllViewAndManagePage() {
       {/* Tabs Section - Responsive */}
       <Tabs defaultValue="full-table" onValueChange={(value) => setActiveTab(value)} className="w-full">
         {/* Tab Navigation - Responsive with Horizontal Scroll */}
-        <div className="w-full md:w-[200px]">
-          <TabsList className="bg-gradient-to-r from-blue-400 to-blue-500 shadow rounded-lg p-1 flex justify-start gap-1 sm:gap-2 min-w-max w-full h-12 sm:w-auto">
-          <TabsTrigger 
-              value="full-table" 
-              className="whitespace-nowrap text-xs md:text-md sm:text-sm px-2 sm:px-3 py-4 sm:py-6 data-[state=active]:text-blue-500 data-[state=inactive]:text-white"
+        <div className="w-full overflow-x-auto">
+          <TabsList className="min-w-max w-full sm:w-auto">
+            <TabsTrigger
+              value="full-table"
+              className="whitespace-nowrap text-sm"
             >
               Full Table
             </TabsTrigger>
-            <TabsTrigger 
-              value="first-card" 
-              className="whitespace-nowrap text-xs md:text-md sm:text-sm px-2 sm:px-3 py-4 sm:py-6 data-[state=active]:text-blue-500 data-[state=inactive]:text-white"
+            <TabsTrigger
+              value="first-card"
+              className="whitespace-nowrap text-sm"
             >
               First Card
             </TabsTrigger>
-            <TabsTrigger 
+            <TabsTrigger
               value="second-card"
-              className="whitespace-nowrap text-xs md:text-md sm:text-sm px-2 sm:px-3 py-4 sm:py-6 data-[state=active]:text-blue-500 data-[state=inactive]:text-white"
+              className="whitespace-nowrap text-sm"
             >
               Second Card
             </TabsTrigger>
-            <TabsTrigger 
+            <TabsTrigger
               value="synoptic-code"
-              className="whitespace-nowrap text-xs md:text-md sm:text-sm px-2 sm:px-3 py-4 sm:py-6 data-[state=active]:text-blue-500 data-[state=inactive]:text-white"
+              className="whitespace-nowrap text-sm"
             >
               Synoptic Code
             </TabsTrigger>
-            <TabsTrigger 
+            <TabsTrigger
               value="daily-summery"
-              className="whitespace-nowrap text-xs md:text-md sm:text-sm px-2 sm:px-3 py-4 sm:py-6 data-[state=active]:text-blue-500 data-[state=inactive]:text-white"
+              className="whitespace-nowrap text-sm"
             >
               Daily Summary
             </TabsTrigger>

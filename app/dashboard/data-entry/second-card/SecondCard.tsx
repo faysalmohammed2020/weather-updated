@@ -958,8 +958,8 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                 >
                   {/* Responsive tabs list */}
                   <div className="relative">
-                    <div className="relative p-1 bg-white/80 backdrop-blur-sm rounded-full shadow-lg border border-gray-200/50 max-w-max mx-auto">
-                      <div className="relative flex flex-wrap justify-center items-center gap-1 p-1.5 rounded-full bg-gray-100/50">
+                    <div className="relative p-1 bg-slate-50/80 backdrop-blur-sm rounded-full border border-slate-200 shadow-sm max-w-max mx-auto">
+                      <div className="relative flex flex-wrap justify-center items-center gap-2 p-1 rounded-full">
                         {Object.entries(tabStyles).map(
                           ([key, style], index) => {
                             const isActive = activeTab === key;
@@ -984,20 +984,20 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                                   handleTabChange(key);
                                 }}
                                 className={cn(
-                                  "relative flex items-center justify-center px-6 py-2 rounded-full transition-all duration-300 transform",
-                                  "focus:outline-none min-w-[80px]",
+                                  "relative flex items-center justify-center h-11 px-4 rounded-full border border-transparent text-slate-600 font-semibold transition-all duration-200 shadow-none",
+                                  "hover:bg-white/70 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-200 focus-visible:ring-offset-0 min-w-[90px]",
                                   isActive
-                                    ? "bg-white shadow shadow-blue-300 text-gray-900 font-semibold"
-                                    : "text-gray-600 hover:text-gray-800 hover:bg-white/50",
+                                    ? "bg-white text-slate-900 border border-blue-200 shadow-[0_10px_30px_rgba(37,99,235,0.12)] shadow-blue-200/70"
+                                    : "bg-transparent",
                                   !isTabValid(key) &&
                                     formik.submitCount > 0 &&
-                                    "!border-2 !border-red-400 !bg-red-50"
+                                    "!border-2 !border-red-400 !bg-red-50 !text-red-700"
                                 )}
                                 initial={{ opacity: 0, x: -10 }}
                                 animate={{
                                   opacity: 1,
                                   x: 0,
-                                  scale: isActive ? 1.05 : 1,
+                                  scale: isActive ? 1.0 : 1,
                                 }}
                                 transition={{
                                   type: "spring",
@@ -1009,22 +1009,21 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                                 <div className="relative z-10 flex items-center gap-1">
                                   <div
                                     className={cn(
-                                      "p-1.5 rounded-full transition-all duration-200",
+                                      "p-1.5 rounded-full transition-colors duration-200",
                                       {
-                                        "scale-110": isActive,
-                                        [iconColor]: !isActive,
-                                        "bg-white/20": isActive,
+                                        "bg-blue-50 text-blue-600": isActive,
+                                        "bg-transparent text-slate-500": !isActive,
                                       }
                                     )}
                                   >
                                     {React.cloneElement(style.icon, {
                                       className: cn("w-4 h-4", {
-                                        "text-blue-500": isActive,
+                                        "text-blue-600": isActive,
                                         [iconColor]: !isActive,
                                       }),
                                     })}
                                   </div>
-                                  <span className="text-base capitalize font-medium">
+                                  <span className="text-sm capitalize font-medium">
                                     {key === "n"
                                       ? "Total Cloud"
                                       : key === "V.V"
@@ -1032,18 +1031,6 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                                         : key}
                                   </span>
                                 </div>
-
-                                {isActive && (
-                                  <motion.div
-                                    className="absolute inset-0 bg-white rounded-full border border-gray-200 z-0"
-                                    layoutId="activePill"
-                                    transition={{
-                                      type: "spring",
-                                      bounce: 0.2,
-                                      duration: 0.6,
-                                    }}
-                                  />
-                                )}
                               </motion.button>
                             );
                           }

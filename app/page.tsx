@@ -59,7 +59,7 @@ export default function LandingPage() {
           </Link>
 
           {/* Desktop Navigation */}
-          {/* <nav className="hidden md:flex items-center gap-6">
+          <nav className="hidden md:flex items-center gap-6">
             <Link
               href="/"
               className={`text-sm font-medium transition-colors hover:text-cyan-600 dark:hover:text-cyan-400 ${
@@ -110,7 +110,7 @@ export default function LandingPage() {
             >
               Contact
             </Link>
-          </nav> */}
+          </nav>
 
           <div className="flex items-center gap-4">
             <Link href="/sign-in" className="hidden md:block">
