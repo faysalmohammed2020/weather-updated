@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSession } from "@/lib/auth-client";
 import {
   Thermometer,
@@ -31,47 +31,44 @@ interface WeatherCardProps {
   value: string;
   status: string;
   description: string;
-  color: string;
-  textColor: string;
-  subtext?: string;
+  accent: string;
+  badge?: string;
+  subtle?: string;
 }
 
-function WeatherCard({
-  icon,
-  title,
-  value,
-  status,
-  description,
-  color,
-  textColor,
-  subtext,
-}: WeatherCardProps) {
+function WeatherCard({ icon, title, value, status, description, accent, badge, subtle }: WeatherCardProps) {
   return (
-    <div
-      className={`rounded-xl shadow-md p-5 space-y-3 transition-all duration-300 hover:shadow-lg ${color}`}
-    >
-      <div className="flex justify-between items-center">
-        <h3 className="text-md font-semibold text-gray-800">{title}</h3>
-        <div className="p-2 bg-white rounded-full shadow-sm">{icon}</div>
+    <div className="rounded-2xl bg-white/90 border border-slate-100 shadow-sm hover:shadow-md transition-all duration-200">
+      <div className="flex items-start justify-between gap-3 p-5 pb-3">
+        <div>
+          <p className="text-xs uppercase tracking-wide text-slate-500">{title}</p>
+          <div className="flex items-baseline gap-2 mt-1">
+            <span className="text-3xl font-semibold text-slate-900 leading-tight">{value}</span>
+            {badge ? (
+              <span className="text-xs font-medium text-slate-500 bg-slate-100 rounded-full px-2 py-0.5">
+                {badge}
+              </span>
+            ) : null}
+          </div>
+          <p className="mt-1 text-sm font-medium text-slate-700">{status}</p>
+        </div>
+        <div
+          className="h-10 w-10 rounded-xl flex items-center justify-center shadow-inner"
+          style={{ backgroundColor: subtle || "rgba(47,128,237,0.08)", color: accent }}
+        >
+          {icon}
+        </div>
       </div>
-      <div className="text-3xl font-bold text-gray-800">{value}</div>
-      {subtext && <div className="text-sm text-gray-600">{subtext}</div>}
-      <div className={`font-medium ${textColor} pb-1 border-b border-gray-200`}>
-        {status}
+      <div className="px-5 pb-5">
+        <div className="h-px bg-slate-100 mb-3" />
+        <p className="text-sm text-slate-600 leading-snug">{description}</p>
       </div>
-      <p className="text-sm text-gray-600 leading-snug">{description}</p>
     </div>
   );
 }
 
-export default function WeatherDashboard({
-  selectedStation,
-}: {
-  selectedStation: any | null;
-}) {
+export default function WeatherDashboard({ selectedStation }: { selectedStation: any | null }) {
   const { data: session } = useSession();
-  const role = session?.user.role;
-
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -102,7 +99,6 @@ export default function WeatherDashboard({
 
         setStationName(nameToDisplay);
 
-        // Get today's date range in UTC
         const today = new Date();
         const startToday = new Date(today);
         startToday.setUTCHours(0, 0, 0, 0);
@@ -126,7 +122,6 @@ export default function WeatherDashboard({
           return;
         }
 
-        // Take the first entry (most recent)
         const latestEntry = data[0];
         setWeatherData(latestEntry);
       } catch (err) {
@@ -139,8 +134,6 @@ export default function WeatherDashboard({
 
     fetchWeatherData();
   }, [selectedStation, session]);
-
-
 
   if (loading) {
     return (
@@ -164,28 +157,20 @@ export default function WeatherDashboard({
 
   const data = weatherData
     ? {
-      maxTemperature:
-        weatherData.maxTemperature || defaultValues.maxTemperature,
-      minTemperature:
-        weatherData.minTemperature || defaultValues.minTemperature,
-      totalPrecipitation:
-        weatherData.totalPrecipitation || defaultValues.totalPrecipitation,
-      windSpeed: weatherData.windSpeed || defaultValues.windSpeed,
-      avTotalCloud: weatherData.avTotalCloud || defaultValues.avTotalCloud,
-      avRelativeHumidity:
-        weatherData.avRelativeHumidity || defaultValues.avRelativeHumidity,
-      lowestVisibility:
-        weatherData.lowestVisibility || defaultValues.lowestVisibility,
-      totalRainDuration:
-        weatherData.totalRainDuration || defaultValues.totalRainDuration,
-    }
+        maxTemperature: weatherData.maxTemperature || defaultValues.maxTemperature,
+        minTemperature: weatherData.minTemperature || defaultValues.minTemperature,
+        totalPrecipitation: weatherData.totalPrecipitation || defaultValues.totalPrecipitation,
+        windSpeed: weatherData.windSpeed || defaultValues.windSpeed,
+        avTotalCloud: weatherData.avTotalCloud || defaultValues.avTotalCloud,
+        avRelativeHumidity: weatherData.avRelativeHumidity || defaultValues.avRelativeHumidity,
+        lowestVisibility: weatherData.lowestVisibility || defaultValues.lowestVisibility,
+        totalRainDuration: weatherData.totalRainDuration || defaultValues.totalRainDuration,
+      }
     : defaultValues;
 
   const tempDiff =
     data.maxTemperature !== "N/A" && data.minTemperature !== "N/A"
-      ? `${(
-        parseFloat(data.maxTemperature) - parseFloat(data.minTemperature)
-      ).toFixed(1)}°`
+      ? `${(parseFloat(data.maxTemperature) - parseFloat(data.minTemperature)).toFixed(1)}°C`
       : "N/A";
 
   const todayFormatted = new Date().toLocaleDateString("en-US", {
@@ -199,9 +184,7 @@ export default function WeatherDashboard({
     <div className="w-full mb-8 md:p-6 bg-gray-50">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">
-            Weather Dashboard
-          </h2>
+          <h2 className="text-2xl font-bold text-gray-800">Weather Dashboard</h2>
           <p className="text-gray-600">{todayFormatted}</p>
         </div>
         <div className="flex items-center gap-2 mt-2 md:mt-0">
@@ -222,105 +205,108 @@ export default function WeatherDashboard({
       <div className="mb-8">
         <DailySummaryChart selectedStation={selectedStation} />
       </div>
-    
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <WeatherCard
-              icon={<Thermometer className="text-red-500" size={24} />}
-              title="Temperature"
-              value={
-                data.maxTemperature !== "N/A" ? `${data.maxTemperature}°` : "N/A"
-              }
-              status={`High: ${data.maxTemperature} | Low: ${data.minTemperature}`}
-              description={`Daily range: ${tempDiff}`}
-              color="bg-gradient-to-br from-orange-50 to-yellow-100"
-              textColor="text-orange-700"
-            />
 
-            <WeatherCard
-              icon={<Cloud className="text-gray-600" size={24} />}
-              title="Cloud Cover"
-              value={data.avTotalCloud !== "N/A" ? `${data.avTotalCloud}%` : "N/A"}
-              status={
-                data.avTotalCloud !== "N/A"
-                  ? parseInt(data.avTotalCloud) > 50
-                    ? "Mostly Cloudy"
-                    : "Partly Cloudy"
-                  : "No Data Recorded"
-              }
-              description="Average cloud cover today"
-              color="bg-gradient-to-br from-gray-50 to-gray-100"
-              textColor="text-gray-700"
-            />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <WeatherCard
+          icon={<Thermometer size={22} />}
+          title="Temperature"
+          value={data.maxTemperature !== "N/A" ? `${data.maxTemperature}°C` : "N/A"}
+          status={`High ${data.maxTemperature ?? "–"} / Low ${data.minTemperature ?? "–"}`}
+          description={`Daily range: ${tempDiff}`}
+          accent="#EB5757"
+          subtle="rgba(235,87,87,0.08)"
+          badge="°C"
+        />
 
-            <WeatherCard
-              icon={<CloudRain className="text-blue-600" size={24} />}
-              title="Precipitation"
-              value={
-                data.totalPrecipitation !== "N/A"
-                  ? `${data.totalPrecipitation} mm`
-                  : "N/A"
-              }
-              status={
-                data.totalPrecipitation !== "N/A" &&
-                  parseFloat(data.totalPrecipitation) > 0
-                  ? "Rain recorded"
-                  : "No precipitation"
-              }
-              description="Total precipitation in last 24 hours"
-              color="bg-gradient-to-br from-blue-50 to-indigo-100"
-              textColor="text-blue-700"
-            />
+        <WeatherCard
+          icon={<Cloud size={22} />}
+          title="Cloud Cover"
+          value={data.avTotalCloud !== "N/A" ? `${data.avTotalCloud}%` : "N/A"}
+          status={
+            data.avTotalCloud !== "N/A"
+              ? parseInt(data.avTotalCloud) > 50
+                ? "Mostly Cloudy"
+                : "Partly Cloudy"
+              : "No data"
+          }
+          description="Average cloud cover today"
+          accent="#2F80ED"
+          subtle="rgba(47,128,237,0.08)"
+          badge="%"
+        />
 
-            <WeatherCard
-              icon={<Wind className="text-teal-600" size={24} />}
-              title="Wind Speed"
-              value={data.windSpeed !== "N/A" ? `${data.windSpeed} NM` : "N/A"}
-              status="Current wind conditions"
-              description="Average wind speed"
-              color="bg-gradient-to-br from-teal-50 to-green-100"
-              textColor="text-teal-700"
-            />
+        <WeatherCard
+          icon={<CloudRain size={22} />}
+          title="Precipitation"
+          value={
+            data.totalPrecipitation !== "N/A"
+              ? `${data.totalPrecipitation} mm`
+              : "N/A"
+          }
+          status={
+            data.totalPrecipitation !== "N/A" && parseFloat(data.totalPrecipitation) > 0
+              ? "Rain recorded"
+              : "No precipitation"
+          }
+          description="Total precipitation in last 24 hours"
+          accent="#2D9CDB"
+          subtle="rgba(45,156,219,0.08)"
+          badge="mm"
+        />
 
-            <WeatherCard
-              icon={<Droplets className="text-cyan-600" size={24} />}
-              title="Humidity"
-              value={
-                data.avRelativeHumidity !== "N/A"
-                  ? `${data.avRelativeHumidity}%`
-                  : "N/A"
-              }
-              status={
-                data.avRelativeHumidity !== "N/A"
-                  ? parseInt(data.avRelativeHumidity) > 70
-                    ? "Very Humid"
-                    : "Moderate"
-                  : "No Data"
-              }
-              description="Relative humidity in the air"
-              color="bg-gradient-to-br from-cyan-50 to-blue-100"
-              textColor="text-cyan-700"
-            />
+        <WeatherCard
+          icon={<Wind size={22} />}
+          title="Wind Speed"
+          value={data.windSpeed !== "N/A" ? `${data.windSpeed} kt` : "N/A"}
+          status="Current wind conditions"
+          description="Average wind speed"
+          accent="#27AE60"
+          subtle="rgba(39,174,96,0.08)"
+          badge="kt"
+        />
 
-            <WeatherCard
-              icon={<Eye className="text-purple-600" size={24} />}
-              title="Visibility"
-              value={
-                data.lowestVisibility !== "N/A"
-                  ? `${(parseFloat(data.lowestVisibility) / 10).toFixed(1)} km`
-                  : "N/A"
-              }
-              status={
-                data.lowestVisibility !== "N/A"
-                  ? parseFloat(data.lowestVisibility) / 10 > 10
-                    ? "Excellent"
-                    : "Good"
-                  : "No Data"
-              }
-              description="Current visibility level"
-              color="bg-gradient-to-br from-purple-50 to-pink-100"
-              textColor="text-purple-700"
-            />
-          </div>
-        </div>
-        );
+        <WeatherCard
+          icon={<Droplets size={22} />}
+          title="Humidity"
+          value={
+            data.avRelativeHumidity !== "N/A"
+              ? `${data.avRelativeHumidity}%`
+              : "N/A"
+          }
+          status={
+            data.avRelativeHumidity !== "N/A"
+              ? parseInt(data.avRelativeHumidity) > 70
+                ? "Very Humid"
+                : "Moderate"
+              : "No data"
+          }
+          description="Relative humidity in the air"
+          accent="#00B5D8"
+          subtle="rgba(0,181,216,0.08)"
+          badge="%"
+        />
+
+        <WeatherCard
+          icon={<Eye size={22} />}
+          title="Visibility"
+          value={
+            data.lowestVisibility !== "N/A"
+              ? `${(parseFloat(data.lowestVisibility) / 10).toFixed(1)} km`
+              : "N/A"
+          }
+          status={
+            data.lowestVisibility !== "N/A"
+              ? parseFloat(data.lowestVisibility) / 10 > 10
+                ? "Excellent"
+                : "Good"
+              : "No data"
+          }
+          description="Current visibility level"
+          accent="#9B51E0"
+          subtle="rgba(155,81,224,0.08)"
+          badge="km"
+        />
+      </div>
+    </div>
+  );
 }
