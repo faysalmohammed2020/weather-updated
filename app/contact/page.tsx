@@ -1,7 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Mail, MapPin, MessageSquare, Phone } from "lucide-react";
+import {
+  ArrowRight,
+  Cloud,
+  Mail,
+  MapPin,
+  MessageSquare,
+  Phone,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,209 +21,252 @@ export default function ContactPage() {
     <div className="flex min-h-screen flex-col">
       <Header />
       <main className="flex-1">
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-b from-blue-50 to-white dark:from-blue-950 dark:to-background">
-          <div className="container px-4 md:px-6">
+        <section className="w-full py-12 md:py-24 lg:py-32 relative overflow-hidden">
+          {/* Background gradient matching hero section */}
+          <div className="absolute inset-0 bg-gradient-to-b from-cyan-100 via-white to-blue-100 dark:from-gray-900 dark:via-gray-900 dark:to-blue-950 -z-10"></div>
+
+          {/* Animated background elements matching hero section */}
+          <div className="absolute inset-0 overflow-hidden -z-10">
+            <motion.div
+              className="absolute top-10 left-10 w-48 h-48 rounded-full bg-cyan-300/20 dark:bg-cyan-700/15 blur-3xl"
+              animate={{
+                scale: [1, 1.1, 1],
+                opacity: [0.2, 0.3, 0.2],
+              }}
+              transition={{
+                duration: 8,
+                repeat: Number.POSITIVE_INFINITY,
+                repeatType: "reverse",
+              }}
+            />
+            <motion.div
+              className="absolute bottom-10 right-10 w-56 h-56 rounded-full bg-blue-400/20 dark:bg-blue-600/15 blur-3xl"
+              animate={{
+                scale: [1, 1.05, 1],
+                opacity: [0.15, 0.25, 0.15],
+              }}
+              transition={{
+                duration: 10,
+                repeat: Number.POSITIVE_INFINITY,
+                repeatType: "reverse",
+              }}
+            />
+          </div>
+
+          <div className="container px-4 md:px-6 relative z-10">
             <motion.div
               className="flex flex-col items-center text-center space-y-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <div className="inline-block rounded-lg bg-primary px-3 py-1 text-sm text-primary-foreground">
-                Contact Us
+              <div className="inline-flex items-center gap-2 dark:border-cyan-700 dark:bg-gray-900/60 px-3 py-1 text-sm backdrop-blur-sm rounded-lg bg-white/90 border border-cyan-200">
+                <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+                <span className="text-xs font-medium">Contact Us</span>
               </div>
-              <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl">
+              <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400">
                 Get in Touch
               </h1>
-              <p className="max-w-[700px] text-muted-foreground md:text-xl">
-                Have questions about our weather dashboard? We&apos;re here to help.
+              <p className="max-w-[700px] text-gray-700 dark:text-gray-300 md:text-xl">
+                Have questions about our weather dashboard? We&apos;re here to
+                help.
               </p>
             </motion.div>
           </div>
         </section>
 
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-white dark:bg-background">
-          <div className="container px-4 md:px-6">
-            <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
-              <motion.div
-                className="space-y-6"
-                initial={{ opacity: 0, x: -30 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <div className="space-y-2">
-                  <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
-                    Contact Information
-                  </h2>
-                  <p className="text-muted-foreground md:text-lg">
-                    Reach out to us through any of the following channels:
-                  </p>
-                </div>
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-white dark:bg-gray-900 relative overflow-hidden">
+          {/* Subtle background elements */}
+          <div className="absolute inset-0 overflow-hidden -z-10">
+            <motion.div
+              className="absolute top-20 right-20 w-32 h-32 rounded-full bg-cyan-300/10 dark:bg-cyan-700/10 blur-3xl"
+              animate={{
+                scale: [1, 1.2, 1],
+                opacity: [0.1, 0.2, 0.1],
+              }}
+              transition={{
+                duration: 12,
+                repeat: Number.POSITIVE_INFINITY,
+                repeatType: "reverse",
+              }}
+            />
+          </div>
 
-                <div className="grid gap-6">
-                  <div className="flex items-start space-x-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                      <Mail className="h-6 w-6 text-primary" />
+          <div className="container px-4 md:px-6 relative z-10">
+            <motion.div
+              className="space-y-6"
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="space-y-2">
+                <h2 className="text-3xl font-bold tracking-tighter md:text-4xl bg-clip-text text-transparent bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400">
+                  Contact Information
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400 md:text-lg">
+                  Reach out to us through any of the following channels:
+                </p>
+              </div>
+
+              <div className="grid gap-6">
+                <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                  {/* Email */}
+                  <motion.div
+                    className="flex items-start space-x-4"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1, duration: 0.5 }}
+                    viewport={{ once: true }}
+                  >
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 shadow-lg">
+                      <Mail className="h-6 w-6 text-white" />
                     </div>
                     <div className="space-y-1">
-                      <h3 className="text-xl font-bold">Email</h3>
-                      <p className="text-muted-foreground">
+                      <h3 className="text-xl font-bold text-cyan-700 dark:text-cyan-400">
+                        Email
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-400">
                         info@bdweather.org
                       </p>
-                      <p className="text-muted-foreground">
+                      <p className="text-gray-600 dark:text-gray-400">
                         support@bdweather.org
                       </p>
                     </div>
-                  </div>
+                  </motion.div>
 
-                  <div className="flex items-start space-x-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                      <Phone className="h-6 w-6 text-primary" />
+                  {/* Phone */}
+                  <motion.div
+                    className="flex items-start space-x-4"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2, duration: 0.5 }}
+                    viewport={{ once: true }}
+                  >
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 shadow-lg">
+                      <Phone className="h-6 w-6 text-white" />
                     </div>
                     <div className="space-y-1">
-                      <h3 className="text-xl font-bold">Phone</h3>
-                      <p className="text-muted-foreground">+880 2 123 4567</p>
-                      <p className="text-muted-foreground">+880 1 987 6543</p>
+                      <h3 className="text-xl font-bold text-cyan-700 dark:text-cyan-400">
+                        Phone
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-400">
+                        +880 2 123 4567
+                      </p>
+                      <p className="text-gray-600 dark:text-gray-400">
+                        +880 1 987 6543
+                      </p>
                     </div>
-                  </div>
+                  </motion.div>
 
-                  <div className="flex items-start space-x-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                      <MapPin className="h-6 w-6 text-primary" />
+                  {/* Office Location */}
+                  <motion.div
+                    className="flex items-start space-x-4"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3, duration: 0.5 }}
+                    viewport={{ once: true }}
+                  >
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-cyan-600 to-blue-700 shadow-lg">
+                      <MapPin className="h-6 w-6 text-white" />
                     </div>
                     <div className="space-y-1">
-                      <h3 className="text-xl font-bold">Office Location</h3>
-                      <p className="text-muted-foreground">123 Weather Tower</p>
-                      <p className="text-muted-foreground">Dhaka, Bangladesh</p>
+                      <h3 className="text-xl font-bold text-cyan-700 dark:text-cyan-400">
+                        Office Location
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-400">
+                        123 Weather Tower
+                      </p>
+                      <p className="text-gray-600 dark:text-gray-400">
+                        Dhaka, Bangladesh
+                      </p>
                     </div>
-                  </div>
+                  </motion.div>
+                </div>
 
-                  <div className="flex items-start space-x-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                      <MessageSquare className="h-6 w-6 text-primary" />
+                <div className="w-full grid grid-cols-1 md:grid-cols-3">
+                  {/* Support Hours */}
+                  <motion.div
+                    className="flex items-start space-x-4"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4, duration: 0.5 }}
+                    viewport={{ once: true }}
+                  >
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 shadow-lg">
+                      <MessageSquare className="h-6 w-6 text-white" />
                     </div>
                     <div className="space-y-1">
-                      <h3 className="text-xl font-bold">Support Hours</h3>
-                      <p className="text-muted-foreground">
+                      <h3 className="text-xl font-bold text-cyan-700 dark:text-cyan-400">
+                        Support Hours
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-400">
                         Monday - Friday: 9:00 AM - 6:00 PM
                       </p>
-                      <p className="text-muted-foreground">
+                      <p className="text-gray-600 dark:text-gray-400">
                         Saturday: 10:00 AM - 2:00 PM
                       </p>
                     </div>
-                  </div>
-                </div>
-              </motion.div>
+                  </motion.div>
 
-              <motion.div
-                className="rounded-lg border bg-background p-6 shadow-sm"
-                initial={{ opacity: 0, x: 30 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <div className="space-y-2 mb-6">
-                  <h2 className="text-2xl font-bold">Send Us a Message</h2>
-                  <p className="text-muted-foreground">
-                    Fill out the form below and we'll get back to you as soon as
-                    possible.
-                  </p>
-                </div>
-
-                <form className="space-y-4">
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <label
-                        htmlFor="first-name"
-                        className="text-sm font-medium leading-none"
-                      >
-                        First name
-                      </label>
-                      <Input
-                        id="first-name"
-                        placeholder="Enter your first name"
-                      />
+                  {/* 🌤️ NEW — Bangladesh Meteorological Department (BMD) */}
+                  <motion.div
+                    className="flex items-start space-x-4"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5, duration: 0.5 }}
+                    viewport={{ once: true }}
+                  >
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-blue-600 shadow-lg">
+                      <Cloud className="h-6 w-6 text-white" />
                     </div>
-                    <div className="space-y-2">
-                      <label
-                        htmlFor="last-name"
-                        className="text-sm font-medium leading-none"
-                      >
-                        Last name
-                      </label>
-                      <Input
-                        id="last-name"
-                        placeholder="Enter your last name"
-                      />
+                    <div className="space-y-1">
+                      <h3 className="text-xl font-bold text-indigo-700 dark:text-indigo-400">
+                        Bangladesh Meteorological Department (BMD)
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-400">
+                        The national meteorological authority providing weather
+                        forecasting, climate monitoring, storm warnings, and
+                        environmental data services.
+                      </p>
+                      <p className="text-gray-600 dark:text-gray-400">
+                        Headquarters: Agargaon, Dhaka, Bangladesh
+                      </p>
+                      <p className="text-gray-600 dark:text-gray-400">
+                        Official Website:{" "}
+                        <a
+                          href="https://bmd.gov.bd"
+                          target="_blank"
+                          className="text-blue-600 dark:text-blue-400 underline font-medium"
+                        >
+                          www.bmd.gov.bd
+                        </a>
+                      </p>
                     </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label
-                      htmlFor="email"
-                      className="text-sm font-medium leading-none"
-                    >
-                      Email
-                    </label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="Enter your email"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label
-                      htmlFor="phone"
-                      className="text-sm font-medium leading-none"
-                    >
-                      Phone (optional)
-                    </label>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      placeholder="Enter your phone number"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label
-                      htmlFor="subject"
-                      className="text-sm font-medium leading-none"
-                    >
-                      Subject
-                    </label>
-                    <Input
-                      id="subject"
-                      placeholder="What is your message about?"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label
-                      htmlFor="message"
-                      className="text-sm font-medium leading-none"
-                    >
-                      Message
-                    </label>
-                    <Textarea
-                      id="message"
-                      placeholder="Enter your message"
-                      className="min-h-[120px]"
-                    />
-                  </div>
-
-                  <Button type="submit" className="w-full">
-                    Send Message
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </form>
-              </motion.div>
-            </div>
+                  </motion.div>
+                </div>
+              </div>
+            </motion.div>
           </div>
         </section>
 
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-slate-50 dark:bg-slate-950">
-          <div className="container px-4 md:px-6">
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-b from-cyan-50 to-white dark:from-gray-900 dark:to-gray-900 relative overflow-hidden">
+          {/* Subtle background elements */}
+          <div className="absolute inset-0 overflow-hidden -z-10">
+            <motion.div
+              className="absolute bottom-10 left-10 w-40 h-40 rounded-full bg-blue-300/15 dark:bg-blue-700/15 blur-3xl"
+              animate={{
+                scale: [1, 1.15, 1],
+                opacity: [0.1, 0.2, 0.1],
+              }}
+              transition={{
+                duration: 10,
+                repeat: Number.POSITIVE_INFINITY,
+                repeatType: "reverse",
+              }}
+            />
+          </div>
+
+          <div className="container px-4 md:px-6 relative z-10">
             <motion.div
               className="mx-auto max-w-3xl text-center space-y-4"
               initial={{ opacity: 0, y: 20 }}
@@ -224,26 +274,26 @@ export default function ContactPage() {
               transition={{ duration: 0.5 }}
               viewport={{ once: true }}
             >
-              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
+              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl bg-clip-text text-transparent bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400">
                 Frequently Asked Questions
               </h2>
-              <p className="text-muted-foreground md:text-lg">
+              <p className="text-gray-700 dark:text-gray-300 md:text-lg">
                 Find answers to common questions about our weather dashboard.
               </p>
             </motion.div>
 
             <div className="mx-auto max-w-3xl mt-12 grid gap-6">
               <motion.div
-                className="rounded-lg border bg-background p-6 shadow-sm"
+                className="rounded-lg border bg-white/90 dark:bg-gray-800/90 p-6 shadow-sm backdrop-blur-sm border-cyan-200 dark:border-cyan-800/50 hover:shadow-lg hover:border-cyan-300 dark:hover:border-cyan-700 transition-all duration-300"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1, duration: 0.5 }}
                 viewport={{ once: true }}
               >
-                <h3 className="text-xl font-bold mb-2">
+                <h3 className="text-xl font-bold mb-2 text-cyan-700 dark:text-cyan-400">
                   How accurate is your weather data?
                 </h3>
-                <p className="text-muted-foreground">
+                <p className="text-gray-600 dark:text-gray-400">
                   Our weather data is sourced from multiple reliable sources
                   including the Bangladesh Meteorological Department and
                   international weather networks. We maintain rigorous quality
@@ -253,16 +303,16 @@ export default function ContactPage() {
               </motion.div>
 
               <motion.div
-                className="rounded-lg border bg-background p-6 shadow-sm"
+                className="rounded-lg border bg-white/90 dark:bg-gray-800/90 p-6 shadow-sm backdrop-blur-sm border-cyan-200 dark:border-cyan-800/50 hover:shadow-lg hover:border-cyan-300 dark:hover:border-cyan-700 transition-all duration-300"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2, duration: 0.5 }}
                 viewport={{ once: true }}
               >
-                <h3 className="text-xl font-bold mb-2">
+                <h3 className="text-xl font-bold mb-2 text-cyan-700 dark:text-cyan-400">
                   How often is the weather data updated?
                 </h3>
-                <p className="text-muted-foreground">
+                <p className="text-gray-600 dark:text-gray-400">
                   Our weather data is updated hourly for current conditions and
                   multiple times per day for forecasts. Severe weather alerts
                   are issued in real-time as they become available.
@@ -270,16 +320,16 @@ export default function ContactPage() {
               </motion.div>
 
               <motion.div
-                className="rounded-lg border bg-background p-6 shadow-sm"
+                className="rounded-lg border bg-white/90 dark:bg-gray-800/90 p-6 shadow-sm backdrop-blur-sm border-cyan-200 dark:border-cyan-800/50 hover:shadow-lg hover:border-cyan-300 dark:hover:border-cyan-700 transition-all duration-300"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.5 }}
                 viewport={{ once: true }}
               >
-                <h3 className="text-xl font-bold mb-2">
+                <h3 className="text-xl font-bold mb-2 text-cyan-700 dark:text-cyan-400">
                   Can I access historical weather data?
                 </h3>
-                <p className="text-muted-foreground">
+                <p className="text-gray-600 dark:text-gray-400">
                   Yes, our dashboard provides access to historical weather data
                   for all regions of Bangladesh. You can view and analyze data
                   from the past decades to identify trends and patterns.
@@ -287,16 +337,16 @@ export default function ContactPage() {
               </motion.div>
 
               <motion.div
-                className="rounded-lg border bg-background p-6 shadow-sm"
+                className="rounded-lg border bg-white/90 dark:bg-gray-800/90 p-6 shadow-sm backdrop-blur-sm border-cyan-200 dark:border-cyan-800/50 hover:shadow-lg hover:border-cyan-300 dark:hover:border-cyan-700 transition-all duration-300"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4, duration: 0.5 }}
                 viewport={{ once: true }}
               >
-                <h3 className="text-xl font-bold mb-2">
+                <h3 className="text-xl font-bold mb-2 text-cyan-700 dark:text-cyan-400">
                   Is there an API available for developers?
                 </h3>
-                <p className="text-muted-foreground">
+                <p className="text-gray-600 dark:text-gray-400">
                   Yes, we offer an API for developers who want to integrate our
                   weather data into their applications. Please contact our
                   support team for API documentation and access credentials.
@@ -306,8 +356,36 @@ export default function ContactPage() {
           </div>
         </section>
 
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-primary text-primary-foreground">
-          <div className="container px-4 md:px-6">
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-r from-cyan-700 to-blue-700 text-white relative overflow-hidden">
+          {/* Animated background elements */}
+          <div className="absolute inset-0 overflow-hidden -z-10">
+            <motion.div
+              className="absolute top-10 left-10 w-32 h-32 rounded-full bg-white/10 blur-3xl"
+              animate={{
+                scale: [1, 1.2, 1],
+                opacity: [0.1, 0.2, 0.1],
+              }}
+              transition={{
+                duration: 8,
+                repeat: Number.POSITIVE_INFINITY,
+                repeatType: "reverse",
+              }}
+            />
+            <motion.div
+              className="absolute bottom-10 right-10 w-40 h-40 rounded-full bg-white/15 blur-3xl"
+              animate={{
+                scale: [1, 1.1, 1],
+                opacity: [0.1, 0.2, 0.1],
+              }}
+              transition={{
+                duration: 10,
+                repeat: Number.POSITIVE_INFINITY,
+                repeatType: "reverse",
+              }}
+            />
+          </div>
+
+          <div className="container px-4 md:px-6 relative z-10">
             <motion.div
               className="mx-auto max-w-3xl text-center space-y-4"
               initial={{ opacity: 0, y: 20 }}
@@ -315,10 +393,10 @@ export default function ContactPage() {
               transition={{ duration: 0.5 }}
               viewport={{ once: true }}
             >
-              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
+              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl text-white">
                 Ready to Experience Our Weather Dashboard?
               </h2>
-              <p className="text-primary-foreground/80 md:text-xl">
+              <p className="text-white/80 md:text-xl">
                 Access comprehensive weather data for Bangladesh today.
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4">
@@ -326,7 +404,7 @@ export default function ContactPage() {
                   <Button
                     size="lg"
                     variant="secondary"
-                    className="w-full sm:w-auto"
+                    className="w-full sm:w-auto bg-white text-cyan-700 hover:bg-gray-100 shadow-lg"
                   >
                     Launch Dashboard
                     <ArrowRight className="ml-2 h-4 w-4" />
