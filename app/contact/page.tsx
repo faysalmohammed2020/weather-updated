@@ -34,7 +34,7 @@ export default function ContactPage() {
                 opacity: [0.2, 0.3, 0.2],
               }}
               transition={{
-                duration: 8,
+                duration: 4,
                 repeat: Number.POSITIVE_INFINITY,
                 repeatType: "reverse",
               }}
@@ -46,7 +46,7 @@ export default function ContactPage() {
                 opacity: [0.15, 0.25, 0.15],
               }}
               transition={{
-                duration: 10,
+                duration: 5,
                 repeat: Number.POSITIVE_INFINITY,
                 repeatType: "reverse",
               }}
@@ -85,7 +85,7 @@ export default function ContactPage() {
                 opacity: [0.1, 0.2, 0.1],
               }}
               transition={{
-                duration: 12,
+                duration: 4,
                 repeat: Number.POSITIVE_INFINITY,
                 repeatType: "reverse",
               }}
@@ -216,8 +216,8 @@ export default function ContactPage() {
                     transition={{ delay: 0.5, duration: 0.5 }}
                     viewport={{ once: true }}
                   >
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-blue-600 shadow-lg">
-                      <Cloud className="h-6 w-6 text-white" />
+                    <div className="flex p-3 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 shadow-lg">
+                      <Cloud className="h-6 w-6 text-white"/>
                     </div>
                     <div className="space-y-1">
                       <h3 className="text-xl font-bold text-indigo-700 dark:text-indigo-400">
@@ -259,7 +259,7 @@ export default function ContactPage() {
                 opacity: [0.1, 0.2, 0.1],
               }}
               transition={{
-                duration: 10,
+                duration: 5,
                 repeat: Number.POSITIVE_INFINITY,
                 repeatType: "reverse",
               }}
@@ -366,7 +366,7 @@ export default function ContactPage() {
                 opacity: [0.1, 0.2, 0.1],
               }}
               transition={{
-                duration: 8,
+                duration: 4,
                 repeat: Number.POSITIVE_INFINITY,
                 repeatType: "reverse",
               }}
@@ -378,7 +378,7 @@ export default function ContactPage() {
                 opacity: [0.1, 0.2, 0.1],
               }}
               transition={{
-                duration: 10,
+                duration: 5,
                 repeat: Number.POSITIVE_INFINITY,
                 repeatType: "reverse",
               }}

@@ -112,7 +112,10 @@ export default function LandingPageDailySummaryChart() {
         setStations(data);
 
         if (data.length > 0) {
-          setStationSelection(data[0]);
+          const dhakaStation = data.find((station: Station) => 
+            station.name.toLowerCase().includes('dhaka')
+          );
+          setStationSelection(dhakaStation || data[0]);
         }
       } catch (err) {
         console.error(err);
