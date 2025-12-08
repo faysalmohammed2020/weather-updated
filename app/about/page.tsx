@@ -109,7 +109,7 @@ export default function AboutPage() {
                 viewport={{ once: true }}
               >
                 <Image
-                  src="/placeholder.svg?height=600&width=800"
+                  src="/weather_monitoring_station.jpg"
                   alt="Weather monitoring station"
                   width={800}
                   height={600}
@@ -307,7 +307,7 @@ export default function AboutPage() {
                 viewport={{ once: true }}
               >
                 <Image
-                  src="/placeholder.svg?height=600&width=800"
+                  src="/team_of_meteorologists.jpg"
                   alt="Team of meteorologists"
                   width={800}
                   height={600}

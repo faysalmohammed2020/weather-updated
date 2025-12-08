@@ -287,15 +287,10 @@ export default function LandingPageDailySummaryChart() {
         <div className="flex flex-col lg:flex-row justify-between gap-4">
           <div>
             <CardTitle className="text-xl font-semibold">
-              Daily Summary Chart
+              Weather Data
             </CardTitle>
             <CardDescription>
-              {stationSelection?.name || "No Station Selected"}
-              {weatherData.length > 0 && (
-                <span className="ml-2 text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-full">
-                  {weatherData.length} records
-                </span>
-              )}
+              {stationSelection?.name || "No Station Selected"} Station
             </CardDescription>
           </div>
 

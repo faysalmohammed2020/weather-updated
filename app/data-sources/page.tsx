@@ -320,7 +320,7 @@ export default function DataSourcesPage() {
                 viewport={{ once: true }}
               >
                 <Image
-                  src="/placeholder.svg?height=600&width=800"
+                  src="/data-processing-visualization.png"
                   alt="Data processing visualization"
                   width={800}
                   height={600}
