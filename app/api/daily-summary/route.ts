@@ -166,14 +166,16 @@ export async function GET(req: Request) {
   const endDate = searchParams.get("endDate");
   const stationIdParam = searchParams.get("stationId");
 
-  if (!stationIdParam) {
+  // If stationId is not provided explicitly, try to infer it from the current session
+  const session = await getSession();
+  const resolvedStationId = stationIdParam || session?.user?.station?.id || null;
+
+  if (!resolvedStationId) {
     return NextResponse.json(
       { success: false, error: "stationId is required" },
       { status: 400 }
     );
   }
-
-  // Anyone can access → no session required
 
   const startTime = startDate
     ? new Date(startDate)
@@ -191,7 +193,7 @@ export async function GET(req: Request) {
             gte: startTime,
             lte: endTime,
           },
-          stationId: stationIdParam,
+          stationId: resolvedStationId,
         },
       },
       orderBy: {

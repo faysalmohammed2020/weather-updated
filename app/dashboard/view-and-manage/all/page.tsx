@@ -13,6 +13,9 @@ import { useSession } from "next-auth/react"
 import dynamic from "next/dynamic"
 import DailySummaryTable from "../daily-summery"
 import MargeTable from "@/components/margeTable"
+import type { DailySummaryRecord } from "@/lib/types/dailySummary"
+import type { WeatherObservationRecord } from "@/types/weather-observation"
+import type { SynopticRecord } from "@/lib/types/synoptic"
 
 // ✅ CHANGED: keep only one dynamic import (no redeclare inside component)
 const CompactPDFExportButton = dynamic(() => import("../PdfExportComponent"), {
@@ -57,21 +60,21 @@ export default function AllViewAndManagePage() {
       'c2Indicator'
     ];
 
-    const cleanFirst = firstCardData.map(item => {
+    const cleanFirst = firstCardData.map((item: WeatherObservationRecord) => {
       const cleaned: any = {};
-      Object.keys(item).forEach(key => {
+      Object.keys(item).forEach((key: string) => {
         if (!excludedKeys.includes(key)) {
-          cleaned[key] = item[key];
+          cleaned[key] = (item as any)[key];
         }
       });
       return cleaned;
     });
 
-    const cleanSecond = secondCardData.map(item => {
+    const cleanSecond = secondCardData.map((item: WeatherObservationRecord) => {
       const cleaned: any = {};
-      Object.keys(item).forEach(key => {
+      Object.keys(item).forEach((key: string) => {
         if (!excludedKeys.includes(key)) {
-          cleaned[key] = item[key];
+          cleaned[key] = (item as any)[key];
         }
       });
       return cleaned;
@@ -112,11 +115,11 @@ export default function AllViewAndManagePage() {
     XLSX.utils.book_append_sheet(wb, mergedSheet, "First+Second Card");
 
     // Synoptic
-    const cleanSynoptic = synopticData.map(item => {
+    const cleanSynoptic = synopticData.map((item: SynopticRecord) => {
       const cleaned: any = {};
-      Object.keys(item).forEach(key => {
+      Object.keys(item).forEach((key: string) => {
         if (!excludedKeys.includes(key)) {
-          cleaned[key] = item[key];
+          cleaned[key] = (item as any)[key];
         }
       });
       return cleaned;
@@ -125,11 +128,11 @@ export default function AllViewAndManagePage() {
     XLSX.utils.book_append_sheet(wb, synopticSheet, "Synoptic");
 
     // Daily Summary
-    const cleanSummary = dailySummaryData.map(item => {
+    const cleanSummary = dailySummaryData.map((item: DailySummaryRecord) => {
       const cleaned: any = {};
-      Object.keys(item).forEach(key => {
+      Object.keys(item).forEach((key: string) => {
         if (!excludedKeys.includes(key)) {
-          cleaned[key] = item[key];
+          cleaned[key] = item[key as keyof DailySummaryRecord];
         }
       });
       return cleaned;
