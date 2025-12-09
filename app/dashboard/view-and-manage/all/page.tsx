@@ -152,8 +152,18 @@ export default function AllViewAndManagePage() {
       });
     }
 
-    // Export
-    await wb.xlsx.writeFile("Weather_Data_All_Tabs.xlsx");
+    const buffer = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "Weather_Data_All_Tabs.xlsx";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   const MargeTableRef = useRef<any>(null);
