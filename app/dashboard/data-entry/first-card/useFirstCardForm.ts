@@ -610,10 +610,8 @@ export const useFirstCardForm = () => {
   const isFirstTab = tabOrder.indexOf(activeTab as any) === 0;
 
     const getFieldError = (fieldName: string) => {
-    const touched =
-      formik.touched[fieldName as keyof typeof formik.touched];
-    const error =
-      formik.errors[fieldName as keyof typeof formik.errors];
+    const touched = formik.touched[fieldName as string];
+    const error = formik.errors[fieldName as string];
 
     if (touched && error) {
       return error as string;
