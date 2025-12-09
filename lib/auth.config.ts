@@ -1,10 +1,10 @@
 //lib/auth.config.ts
-import type { NextAuthConfig } from "next-auth";
+import type { AuthOptions } from "next-auth";
 import NextAuth from "next-auth";
 
 // ✅ NO Prisma imports here
-export const authConfig: NextAuthConfig = {
-  trustHost: true,
+export const authConfig: AuthOptions = {
+  providers: [],
 
   session: {
     strategy: "jwt",

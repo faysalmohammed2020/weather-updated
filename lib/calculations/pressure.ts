@@ -45,7 +45,7 @@ export const calculatePressureValues = (
     );
 
     const heightCorrection =
-      correctionEntry.cistern_level_pressure[closestPressure.toString()];
+      (correctionEntry.cistern_level_pressure as Record<string, number>)[closestPressure.toString()];
     const stationLevelPressure = barAsReadValue + heightCorrection;
 
     return {

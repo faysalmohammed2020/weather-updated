@@ -314,7 +314,8 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
       setIsEditDialogOpen(false);
     } catch (error) {
       console.error("Error updating record:", error);
-      toast.error(`Failed to update record: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      toast.error(`Failed to update record: ${errorMessage}`);
     } finally {
       setIsSaving(false);
     }

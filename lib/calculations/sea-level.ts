@@ -45,7 +45,7 @@ export const calculateSeaLevelPressure = (
     );
 
     const seaLevelReduction =
-      correctionEntry.station_level_pressure[closestPressure.toString()];
+      (correctionEntry.station_level_pressure as Record<string, number>)[closestPressure.toString()];
     const seaLevelPressure = stationPressureValue + seaLevelReduction;
 
     return {

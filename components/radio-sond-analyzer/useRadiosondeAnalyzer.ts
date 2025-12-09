@@ -155,8 +155,8 @@ export function useRadiosondeAnalyzer() {
         surfaceWindSpeed: ttaaDecoded.surfaceWindSpeed || 0,
         mandatoryLevels: ttaaDecoded.mandatoryLevels || [],
         significantLevels: ttbbDecoded.significantLevels,
-        tropopause: ttaaDecoded.tropopause,
-        maxWind: ttaaDecoded.maxWind,
+        tropopause: ttaaDecoded.tropopause ?? null,
+        maxWind: ttaaDecoded.maxWind ?? null,
       }
 
       setDecodedData(combined)

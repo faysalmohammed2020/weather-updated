@@ -3,6 +3,7 @@
 
 import React, { useState } from "react";
 import dynamic from "next/dynamic";
+// @ts-ignore - papaparse types not available
 import Papa from "papaparse";
 
 const Plot = dynamic(() => import("react-plotly.js"), { ssr: false });
@@ -32,12 +33,12 @@ export default function NetCDFCsvHeatmap() {
         complete: (results: any) => {
           const data = results.data.filter((d: any) => d.lat && d.lon);
 
-          const lats = Array.from(new Set(data.map((d: any) => d.lat))).sort(
-            (a, b) => a - b
-          );
-          const lons = Array.from(new Set(data.map((d: any) => d.lon))).sort(
-            (a, b) => a - b
-          );
+          const lats = Array.from(new Set(data.map((d: any) => d.lat)))
+            .filter((lat): lat is number => typeof lat === 'number' && !isNaN(lat))
+            .sort((a: number, b: number) => a - b);
+          const lons = Array.from(new Set(data.map((d: any) => d.lon)))
+            .filter((lon): lon is number => typeof lon === 'number' && !isNaN(lon))
+            .sort((a: number, b: number) => a - b);
 
           const latLen = lats.length;
           const lonLen = lons.length;
@@ -113,8 +114,8 @@ export default function NetCDFCsvHeatmap() {
               id: `${file.name}-${Date.now()}-${index}`,
               filename: file.name,
               plotType: variable,
-              lats,
-              lons,
+              lats: lats as number[],
+              lons: lons as number[],
               z: zSpeed,
               windOverlay: arrows,
             };
@@ -150,8 +151,8 @@ export default function NetCDFCsvHeatmap() {
               id: `${file.name}-${Date.now()}-${index}`,
               filename: file.name,
               plotType: variable,
-              lats,
-              lons,
+              lats: lats as number[],
+              lons: lons as number[],
               z,
               windOverlay: [],
               contourData,
@@ -325,7 +326,7 @@ export default function NetCDFCsvHeatmap() {
     return [...baseData, ...mapData.windOverlay];
   };
 
-  const getLayoutConfig = (mapData: MapData) => {
+  const getLayoutConfig = (mapData: MapData): any => {
     const baseLayout = {
       title: {
         text: `${titleMap[mapData.plotType]} - ${mapData.filename}`,
@@ -346,6 +347,7 @@ export default function NetCDFCsvHeatmap() {
       margin: { l: 60, r: 60, t: 60, b: 60 },
       paper_bgcolor: "#f8f9fa",
       plot_bgcolor: "#ffffff",
+      annotations: [] as any[],
     };
 
     // Add specific annotations for different data types
@@ -486,7 +488,7 @@ export default function NetCDFCsvHeatmap() {
               <div className="p-2">
                 <Plot
                   data={getPlotData(mapData)}
-                  layout={getLayoutConfig(mapData)}
+                  layout={getLayoutConfig(mapData) as any}
                   config={{
                     responsive: true,
                     displayModeBar: true,

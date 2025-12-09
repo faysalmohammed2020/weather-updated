@@ -9,7 +9,6 @@ import {
   View,
   StyleSheet,
 } from "@react-pdf/renderer";
-import * as d3 from "d3";
 
 import { useState, useCallback } from "react";
 import {
@@ -64,24 +63,6 @@ import {
   Clock,
 } from "lucide-react";
 
-// Enhanced data parsing utilities with proper calculations
-const parseMeteorologicalData = (rawData: string, format: string) => {
-  try {
-    if (format === "pilot") {
-      return parsePilotData(rawData);
-    } else if (format === "dems") {
-      return parseDemsData(rawData);
-    } else if (format === "csv") {
-      return parseCsvData(rawData);
-    } else {
-      return autoDetectAndParse(rawData);
-    }
-  } catch (error) {
-    throw new Error(`Failed to parse data: ${error.message}`);
-  }
-};
-
-// Add these styles for the PDF
 const styles = StyleSheet.create({
   page: {
     padding: 30,
@@ -124,7 +105,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const MeteoPDF = ({ data }) => (
+const MeteoPDF = ({ data }: { data: any }) => (
   <Document>
     <Page style={styles.page}>
       <Text style={styles.title}>Meteorological Analysis Report</Text>
@@ -166,7 +147,7 @@ const MeteoPDF = ({ data }) => (
           <Text style={styles.tableCol}>Humidity (%)</Text>
           <Text style={styles.tableCol}>Wind (m/s)</Text>
         </View>
-        {data.atmosphericProfile.slice(0, 10).map((row, i) => (
+        {data.atmosphericProfile.slice(0, 10).map((row: any, i: number) => (
           <View key={i} style={[styles.table, styles.tableRow]}>
             <Text style={styles.tableCol}>{row.altitude}</Text>
             <Text style={styles.tableCol}>
@@ -188,10 +169,25 @@ const MeteoPDF = ({ data }) => (
   </Document>
 );
 
-const parsePilotData = (data: string) => {
+const parseMeteorologicalData = (rawData: string, format: string): any => {
+  try {
+    if (format === "pilot") {
+      return parsePilotData(rawData);
+    } else if (format === "dems") {
+      return parseDemsData(rawData);
+    } else if (format === "csv") {
+      return parseCsvData(rawData);
+    } else {
+      return autoDetectAndParse(rawData);
+    }
+  } catch (error: any) {
+    throw new Error(`Failed to parse data: ${error?.message || "Unknown"}`);
+  }
+};
+
+const parsePilotData = (data: string): any => {
   const lines = data.split("\n").filter((line) => line.trim());
 
-  // Extract station information with proper parsing
   const stationInfo = {
     name: extractValue(lines, "Station") || "DHAKA",
     country: extractValue(lines, "Nation") || "BANGLADESH",
@@ -224,10 +220,8 @@ const parsePilotData = (data: string) => {
     maxAltitude: Number.parseFloat(extractValue(lines, "AltMax") || "12197"),
   };
 
-  // Extract atmospheric profile data with proper validation
-  const atmosphericData = extractAtmosphericProfile(lines);
+  const atmosphericData: any[] = extractAtmosphericProfile(lines);
 
-  // Calculate proper ground conditions from first measurement or metadata
   const groundConditions = {
     pressure:
       stationInfo.groundPressure || atmosphericData[0]?.pressure || 1010.6,
@@ -235,7 +229,7 @@ const parsePilotData = (data: string) => {
       stationInfo.groundTemperature || atmosphericData[0]?.temperature || 20.0,
     maxAltitude:
       stationInfo.maxAltitude ||
-      Math.max(...atmosphericData.map((d) => d.altitude)) ||
+      Math.max(...atmosphericData.map((d: any) => d.altitude)) ||
       12197,
   };
 
@@ -248,16 +242,15 @@ const parsePilotData = (data: string) => {
   };
 };
 
-const parseDemsData = (data: string) => {
+const parseDemsData = (data: string): any => {
   const lines = data.split("\n").filter((line) => line.trim());
   const demsMessages = lines.filter(
     (line) => line.includes("DEMS") || line.includes("TTAA")
   );
 
-  const atmosphericData = [];
-  const messageTypes = new Map();
+  const atmosphericData: any[] = [];
+  const messageTypes = new Map<string, number>();
 
-  // Parse TTAA codes properly according to WMO standards
   demsMessages.forEach((line) => {
     if (line.includes("TTAA")) {
       const measurements = extractTTAAMeasurements(line);
@@ -270,14 +263,18 @@ const parseDemsData = (data: string) => {
     }
   });
 
-  // Calculate ground conditions from lowest altitude measurement
-  const sortedData = atmosphericData.sort((a, b) => a.altitude - b.altitude);
+  const sortedData = atmosphericData.sort(
+    (a: any, b: any) => a.altitude - b.altitude
+  );
   const groundMeasurement = sortedData[0] || {};
 
   const groundConditions = {
-    pressure: groundMeasurement.pressure || 1013.25, // Standard sea level pressure
-    temperature: groundMeasurement.temperature || 15.0, // Standard temperature
-    maxAltitude: Math.max(...atmosphericData.map((d) => d.altitude)) || 0,
+    pressure: groundMeasurement.pressure || 1013.25,
+    temperature: groundMeasurement.temperature || 15.0,
+    maxAltitude:
+      atmosphericData.length > 0
+        ? Math.max(...atmosphericData.map((d: any) => d.altitude))
+        : 0,
   };
 
   return {
@@ -292,29 +289,31 @@ const parseDemsData = (data: string) => {
     },
     atmosphericProfile: atmosphericData,
     dataQuality: calculateDataQuality(atmosphericData),
-    messageTypes: Array.from(messageTypes.entries()).map(([type, count]) => ({
-      type,
-      count,
-      percentage: (count / demsMessages.length) * 100,
-    })),
+    messageTypes: Array.from(messageTypes.entries()).map(
+      ([type, count]: [string, number]) => ({
+        type,
+        count,
+        percentage: (count / demsMessages.length) * 100,
+      })
+    ),
     groundConditions,
   };
 };
 
-const parseCsvData = (data: string) => {
+const parseCsvData = (data: string): any => {
   const lines = data.split("\n").filter((line) => line.trim());
   const headers = lines[0].split(",").map((h) => h.trim().toLowerCase());
 
-  const atmosphericData = lines
+  const atmosphericData: any[] = lines
     .slice(1)
     .map((line) => {
       const values = line.split(",");
-      const entry = {};
+      const entry: any = {};
 
       headers.forEach((header, index) => {
-        const value = Number.parseFloat(values[index]);
+        const raw = values[index];
+        const value = Number.parseFloat(raw);
         if (!isNaN(value)) {
-          // Map common CSV headers to standard names
           if (header.includes("alt") || header.includes("height"))
             entry.altitude = value;
           else if (header.includes("press") || header.includes("hpa"))
@@ -334,14 +333,13 @@ const parseCsvData = (data: string) => {
       return entry;
     })
     .filter((entry) => Object.keys(entry).length > 0)
-    .sort((a, b) => (a.altitude || 0) - (b.altitude || 0)); // Sort by altitude
+    .sort((a: any, b: any) => (a.altitude || 0) - (b.altitude || 0));
 
-  // Calculate ground conditions from lowest altitude
   const groundMeasurement = atmosphericData[0] || {};
   const groundConditions = {
     pressure: groundMeasurement.pressure || 1013.25,
     temperature: groundMeasurement.temperature || 15.0,
-    maxAltitude: Math.max(...atmosphericData.map((d) => d.altitude || 0)),
+    maxAltitude: Math.max(...atmosphericData.map((d: any) => d.altitude || 0)),
   };
 
   return {
@@ -363,17 +361,14 @@ const parseCsvData = (data: string) => {
   };
 };
 
-// Helper function to extract values from text lines
 const extractValue = (lines: string[], key: string): string | null => {
   for (const line of lines) {
     if (line.includes(key)) {
-      // Handle different formats: "Key: Value", "Key Value", "Key(unit) Value"
       const match = line.match(
-        new RegExp(`${key}[:\\s\$$][^\$$]*\\)?[:\\s]+([\\d\\.\\-]+)`, "i")
+        new RegExp(`${key}[:\\s$][^$]*\\)?[:\\s]+([\\d\\.\\-]+)`, "i")
       );
       if (match) return match[1];
 
-      // Try splitting by colon or space
       const parts = line.split(/[:\s]+/);
       const keyIndex = parts.findIndex((part) =>
         part.toLowerCase().includes(key.toLowerCase())
@@ -386,17 +381,15 @@ const extractValue = (lines: string[], key: string): string | null => {
   return null;
 };
 
-// Enhanced atmospheric profile extraction
-const extractAtmosphericProfile = (lines: string[]) => {
+const extractAtmosphericProfile = (lines: string[]): any[] => {
   const dataLines = lines.filter((line) => {
-    // Look for lines with multiple numeric values (atmospheric measurements)
     const nums = line
       .split(/\s+/)
       .filter(
         (part) =>
           !isNaN(Number.parseFloat(part)) && isFinite(Number.parseFloat(part))
       );
-    return nums.length >= 3; // At least altitude, pressure, temperature
+    return nums.length >= 3;
   });
 
   return dataLines
@@ -406,7 +399,6 @@ const extractAtmosphericProfile = (lines: string[]) => {
         .map((v) => Number.parseFloat(v))
         .filter((v) => !isNaN(v) && isFinite(v));
 
-      // Standard order: altitude, pressure, temperature, humidity, windSpeed, windDirection
       return {
         altitude: values[0] || 0,
         pressure: values[1] || null,
@@ -417,20 +409,17 @@ const extractAtmosphericProfile = (lines: string[]) => {
       };
     })
     .filter((entry) => entry.altitude !== null && entry.pressure !== null)
-    .sort((a, b) => a.altitude - b.altitude); // Sort by altitude ascending
+    .sort((a, b) => a.altitude - b.altitude);
 };
 
-// Enhanced TTAA measurement extraction following WMO FM 35 TEMP code
-const extractTTAAMeasurements = (line: string) => {
+const extractTTAAMeasurements = (line: string): any[] => {
   const numbers = line
     .split(/\s+/)
     .map((n) => Number.parseFloat(n))
     .filter((n) => !isNaN(n) && isFinite(n));
 
-  const measurements = [];
+  const measurements: any[] = [];
 
-  // TTAA format: Station_ID Date/Time followed by groups of measurements
-  // Each group typically: pressure_level temperature dewpoint_depression wind_direction wind_speed
   for (let i = 2; i < numbers.length - 4; i += 5) {
     const pressure = numbers[i];
     const temperature = numbers[i + 1];
@@ -439,14 +428,16 @@ const extractTTAAMeasurements = (line: string) => {
     const windSpeed = numbers[i + 4];
 
     if (pressure && temperature !== undefined) {
-      // Convert pressure level to altitude (approximate using barometric formula)
       const altitude = pressureToAltitude(pressure);
 
+      const t = temperature / 10;
+      const dp = dewpoint / 10;
+
       measurements.push({
-        altitude: altitude,
-        pressure: pressure,
-        temperature: temperature / 10, // TTAA temperatures are in tenths of degrees
-        humidity: dewpointToHumidity(temperature / 10, dewpoint / 10),
+        altitude,
+        pressure,
+        temperature: t,
+        humidity: dewpointToHumidity(t, dp),
         windSpeed: windSpeed || null,
         windDir: windDir || null,
       });
@@ -456,27 +447,19 @@ const extractTTAAMeasurements = (line: string) => {
   return measurements.sort((a, b) => a.altitude - b.altitude);
 };
 
-// Convert pressure to altitude using international standard atmosphere
 const pressureToAltitude = (pressure: number): number => {
-  // Standard atmosphere formula: h = 44330 * (1 - (P/P0)^(1/5.255))
-  const P0 = 1013.25; // Standard sea level pressure in hPa
+  const P0 = 1013.25;
   return Math.round(44330 * (1 - Math.pow(pressure / P0, 1 / 5.255)));
 };
 
-// Convert dewpoint depression to relative humidity
-const dewpointToHumidity = (
-  temperature: number,
-  dewpointDep: number
-): number => {
-  const dewpoint = temperature - dewpointDep;
-  // Magnus formula approximation
+const dewpointToHumidity = (temperature: number, dewpoint: number): number => {
   const humidity =
     (100 * Math.exp((17.625 * dewpoint) / (243.04 + dewpoint))) /
     Math.exp((17.625 * temperature) / (243.04 + temperature));
   return Math.max(0, Math.min(100, Math.round(humidity)));
 };
 
-const autoDetectAndParse = (data: string) => {
+const autoDetectAndParse = (data: string): any => {
   if (
     data.includes("PILOT") ||
     data.includes("DHAKA") ||
@@ -494,13 +477,12 @@ const autoDetectAndParse = (data: string) => {
   }
 };
 
-const extractMessageType = (line: string) => {
+const extractMessageType = (line: string): string | null => {
   const match = line.match(/RR[MLKBA]/);
   return match ? match[0] : null;
 };
 
-// Enhanced data quality calculation
-const calculateDataQuality = (data: any[]) => {
+const calculateDataQuality = (data: any[]): number => {
   if (!data || data.length === 0) return 0;
 
   let totalFields = 0;
@@ -509,7 +491,6 @@ const calculateDataQuality = (data: any[]) => {
   let validCriticalFields = 0;
 
   data.forEach((item) => {
-    // Critical fields: altitude, pressure, temperature
     const critical = ["altitude", "pressure", "temperature"];
     const optional = ["humidity", "windSpeed", "windDir"];
 
@@ -536,7 +517,6 @@ const calculateDataQuality = (data: any[]) => {
     });
   });
 
-  // Weight critical fields more heavily
   const criticalQuality = (validCriticalFields / criticalFields) * 100;
   const optionalQuality =
     totalFields > 0 ? (validFields / totalFields) * 100 : 100;
@@ -544,8 +524,8 @@ const calculateDataQuality = (data: any[]) => {
   return Math.round(criticalQuality * 0.7 + optionalQuality * 0.3);
 };
 
-const analyzeMessageTypes = (lines: string[]) => {
-  const types = new Map();
+const analyzeMessageTypes = (lines: string[]): any[] => {
+  const types = new Map<string, number>();
   lines.forEach((line) => {
     if (line.includes("PILOT"))
       types.set("PILOT", (types.get("PILOT") || 0) + 1);
@@ -561,11 +541,17 @@ const analyzeMessageTypes = (lines: string[]) => {
   }));
 };
 
-// Enhanced statistics calculation with proper handling of missing values
 const calculateStatistics = (data: any[], field: string) => {
   const values = data
     .map((d) => d[field])
-    .filter((v) => v !== null && v !== undefined && !isNaN(v) && isFinite(v));
+    .filter(
+      (v) =>
+        v !== null &&
+        v !== undefined &&
+        !isNaN(Number(v)) &&
+        isFinite(Number(v))
+    )
+    .map((v) => Number(v));
 
   if (values.length === 0) return { min: 0, max: 0, avg: 0, std: 0, count: 0 };
 
@@ -585,11 +571,15 @@ const calculateStatistics = (data: any[], field: string) => {
   };
 };
 
-// Format numbers according to international standards
-const formatValue = (value: number, unit: string, decimals = 1): string => {
-  if (value === null || value === undefined || isNaN(value)) return "N/A";
+const formatValue = (
+  value: number | null | undefined,
+  unit: string,
+  decimals = 1
+): string => {
+  if (value === null || value === undefined || isNaN(Number(value)))
+    return "N/A";
 
-  const formatted = value.toFixed(decimals);
+  const formatted = Number(value).toFixed(decimals);
   return `${formatted} ${unit}`;
 };
 
@@ -598,7 +588,7 @@ const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
 export default function MeteorologicalAnalysis() {
   const [rawData, setRawData] = useState("");
   const [dataFormat, setDataFormat] = useState("auto");
-  const [parsedData, setParsedData] = useState(null);
+  const [parsedData, setParsedData] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("input");
@@ -632,15 +622,14 @@ export default function MeteorologicalAnalysis() {
       const result = parseMeteorologicalData(rawData, dataFormat);
       setParsedData(result);
       setActiveTab("profiles");
-    } catch (err) {
-      setError(err.message);
+    } catch (err: any) {
+      setError(err?.message || "Failed to parse data");
     } finally {
       setIsLoading(false);
     }
   }, [rawData, dataFormat]);
 
   const loadSampleData = useCallback(() => {
-    // Accurate sample data based on the Dhaka sounding
     const sampleData = `DHAKA 11/21/2024 11:31
 PILOT messages
 
@@ -673,7 +662,6 @@ Ascent(m/s): 3.8
     setDataFormat("pilot");
   }, []);
 
-  // Calculate statistics if data is available
   const statistics = parsedData
     ? {
         temperature: calculateStatistics(
@@ -695,7 +683,6 @@ Ascent(m/s): 3.8
       }
     : null;
 
-  // Add this function to your component (inside the MeteorologicalAnalysis component but outside the return statement)
   const handleExport = useCallback(
     (format: string) => {
       if (!parsedData) return;
@@ -705,8 +692,7 @@ Ascent(m/s): 3.8
       let fileName = `meteo_analysis_${parsedData.stationInfo.name}_${parsedData.stationInfo.date}`;
 
       switch (format) {
-        case "csv":
-          // CSV export remains the same
+        case "csv": {
           const headers = [
             "Altitude (m)",
             "Pressure (hPa)",
@@ -715,15 +701,20 @@ Ascent(m/s): 3.8
             "Wind Speed (m/s)",
             "Wind Direction (°)",
           ];
-          const rows = parsedData.atmosphericProfile.map(
-            (d) =>
-              `${d.altitude},${d.pressure || ""},${d.temperature || ""},${d.humidity || ""},${d.windSpeed || ""},${d.windDir || ""}`
+          const rows = parsedData.atmosphericProfile.map((d: any) =>
+            [
+              d.altitude,
+              d.pressure ?? "",
+              d.temperature ?? "",
+              d.humidity ?? "",
+              d.windSpeed ?? "",
+              d.windDir ?? "",
+            ].join(",")
           );
           content = [headers.join(","), ...rows].join("\n");
           mimeType = "text/csv";
           fileName += ".csv";
 
-          // Create download link
           const blob = new Blob([content], { type: mimeType });
           const url = URL.createObjectURL(blob);
           const a = document.createElement("a");
@@ -734,9 +725,9 @@ Ascent(m/s): 3.8
           document.body.removeChild(a);
           URL.revokeObjectURL(url);
           break;
+        }
 
-        case "json":
-          // JSON export remains the same
+        case "json": {
           const jsonData = {
             station: parsedData.stationInfo,
             atmosphericProfile: parsedData.atmosphericProfile,
@@ -748,7 +739,6 @@ Ascent(m/s): 3.8
           mimeType = "application/json";
           fileName += ".json";
 
-          // Create download link
           const jsonBlob = new Blob([content], { type: mimeType });
           const jsonUrl = URL.createObjectURL(jsonBlob);
           const jsonA = document.createElement("a");
@@ -759,16 +749,16 @@ Ascent(m/s): 3.8
           document.body.removeChild(jsonA);
           URL.revokeObjectURL(jsonUrl);
           break;
+        }
 
         case "pdf":
-          // PDF is handled by the PDFDownloadLink component in the JSX
-          // We don't need to do anything here
           break;
 
-        case "netcdf":
-          // Basic NetCDF-like export (simplified)
-          // Note: This is a simplified version. Full NetCDF support would require a proper library
-          const ncHeader = `netcdf meteo_${parsedData.stationInfo.name.replace(/\s+/g, "_")} {
+        case "netcdf": {
+          const ncHeader = `netcdf meteo_${parsedData.stationInfo.name.replace(
+            /\s+/g,
+            "_"
+          )} {
 dimensions:
   level = ${parsedData.atmosphericProfile.length} ;
 variables:
@@ -798,15 +788,14 @@ variables:
 data:
 `;
 
-          // Add the data section
           let ncData = "";
-          parsedData.atmosphericProfile.forEach((d) => {
+          parsedData.atmosphericProfile.forEach((d: any) => {
             ncData += `  altitude = ${d.altitude} ;
-  pressure = ${d.pressure || "NaN"} ;
-  temperature = ${d.temperature || "NaN"} ;
-  humidity = ${d.humidity || "NaN"} ;
-  wind_speed = ${d.windSpeed || "NaN"} ;
-  wind_direction = ${d.windDir || "NaN"} ;
+  pressure = ${d.pressure ?? "NaN"} ;
+  temperature = ${d.temperature ?? "NaN"} ;
+  humidity = ${d.humidity ?? "NaN"} ;
+  wind_speed = ${d.windSpeed ?? "NaN"} ;
+  wind_direction = ${d.windDir ?? "NaN"} ;
 `;
           });
 
@@ -814,7 +803,6 @@ data:
           mimeType = "text/plain";
           fileName += ".nc";
 
-          // Create download link
           const ncBlob = new Blob([content], { type: mimeType });
           const ncUrl = URL.createObjectURL(ncBlob);
           const ncA = document.createElement("a");
@@ -825,6 +813,7 @@ data:
           document.body.removeChild(ncA);
           URL.revokeObjectURL(ncUrl);
           break;
+        }
 
         default:
           return;
@@ -836,7 +825,6 @@ data:
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
         <div className="text-center space-y-4">
           <h1 className="text-4xl font-bold text-gray-900 flex items-center justify-center gap-3">
             <Activity className="h-10 w-10 text-blue-600" />
@@ -888,10 +876,8 @@ data:
             </TabsTrigger>
           </TabsList>
 
-          {/* Data Input Tab */}
           <TabsContent value="input" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* File Upload */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -940,7 +926,6 @@ data:
                 </CardContent>
               </Card>
 
-              {/* Text Input */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -992,7 +977,6 @@ data:
               </Card>
             </div>
 
-            {/* Error Display */}
             {error && (
               <Alert variant="destructive">
                 <AlertTriangle className="h-4 w-4" />
@@ -1000,7 +984,6 @@ data:
               </Alert>
             )}
 
-            {/* Data Preview */}
             {parsedData && (
               <Card>
                 <CardHeader>
@@ -1052,7 +1035,6 @@ data:
               </Card>
             )}
 
-            {/* Supported Formats */}
             <Card>
               <CardHeader>
                 <CardTitle>Supported International Data Formats</CardTitle>
@@ -1090,12 +1072,9 @@ data:
             </Card>
           </TabsContent>
 
-          {/* All other tabs with corrected calculations */}
           {parsedData && (
             <>
-              {/* Atmospheric Profiles with Corrected Values */}
               <TabsContent value="profiles" className="space-y-6">
-                {/* Corrected Key Metrics */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                   <Card>
                     <CardContent className="p-6">
@@ -1109,7 +1088,7 @@ data:
                               parsedData.stationInfo.maxAltitude ||
                                 Math.max(
                                   ...parsedData.atmosphericProfile.map(
-                                    (d) => d.altitude
+                                    (d: any) => d.altitude
                                   )
                                 ),
                               "m",
@@ -1118,7 +1097,12 @@ data:
                           </p>
                           <p className="text-xs text-gray-500">
                             {(
-                              parsedData.stationInfo.maxAltitude / 1000
+                              (parsedData.stationInfo.maxAltitude ||
+                                Math.max(
+                                  ...parsedData.atmosphericProfile.map(
+                                    (d: any) => d.altitude
+                                  )
+                                )) / 1000
                             ).toFixed(1)}{" "}
                             km AGL
                           </p>
@@ -1137,20 +1121,22 @@ data:
                           </p>
                           <p className="text-2xl font-bold text-red-600">
                             {formatValue(
-                              parsedData.stationInfo.groundTemperature ||
-                                parsedData.atmosphericProfile[0]?.temperature,
+                              parsedData.stationInfo.groundTemperature ??
+                                parsedData.atmosphericProfile[0]?.temperature ??
+                                null,
                               "°C"
                             )}
                           </p>
                           <p className="text-xs text-gray-500">
-                            {formatValue(
-                              ((parsedData.stationInfo.groundTemperature ||
-                                parsedData.atmosphericProfile[0]?.temperature) *
-                                9) /
-                                5 +
-                                32,
-                              "°F"
-                            )}
+                            {(() => {
+                              const t =
+                                parsedData.stationInfo.groundTemperature ??
+                                parsedData.atmosphericProfile[0]?.temperature ??
+                                null;
+                              if (t === null || t === undefined) return "N/A";
+                              const f = (Number(t) * 9) / 5 + 32;
+                              return formatValue(f, "°F");
+                            })()}
                           </p>
                         </div>
                         <Thermometer className="h-8 w-8 text-red-600" />
@@ -1167,19 +1153,22 @@ data:
                           </p>
                           <p className="text-2xl font-bold text-green-600">
                             {formatValue(
-                              parsedData.stationInfo.groundPressure ||
-                                parsedData.atmosphericProfile[0]?.pressure,
+                              parsedData.stationInfo.groundPressure ??
+                                parsedData.atmosphericProfile[0]?.pressure ??
+                                null,
                               "hPa"
                             )}
                           </p>
                           <p className="text-xs text-gray-500">
-                            {formatValue(
-                              (parsedData.stationInfo.groundPressure ||
-                                parsedData.atmosphericProfile[0]?.pressure) *
-                                0.02953,
-                              "inHg",
-                              2
-                            )}
+                            {(() => {
+                              const p =
+                                parsedData.stationInfo.groundPressure ??
+                                parsedData.atmosphericProfile[0]?.pressure ??
+                                null;
+                              if (p === null || p === undefined) return "N/A";
+                              const ihg = Number(p) * 0.02953;
+                              return formatValue(ihg, "inHg", 2);
+                            })()}
                           </p>
                         </div>
                         <Gauge className="h-8 w-8 text-green-600" />
@@ -1213,7 +1202,6 @@ data:
                   </Card>
                 </div>
 
-                {/* Station Information Card */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
@@ -1293,7 +1281,6 @@ data:
                 </Card>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Temperature Profile */}
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
@@ -1326,12 +1313,19 @@ data:
                             }}
                           />
                           <Tooltip
-                            formatter={(value, name) => [
-                              name === "temperature"
-                                ? `${value}°C (${((value * 9) / 5 + 32).toFixed(1)}°F)`
-                                : value,
-                              name === "temperature" ? "Temperature" : name,
-                            ]}
+                            formatter={(value: any, name: any) => {
+                              const num = Number(value);
+                              return [
+                                name === "temperature"
+                                  ? `${num}°C (${((num * 9) / 5 + 32).toFixed(
+                                      1
+                                    )}°F)`
+                                  : num,
+                                name === "temperature"
+                                  ? "Temperature"
+                                  : String(name),
+                              ];
+                            }}
                           />
                           <Line
                             type="monotone"
@@ -1345,7 +1339,6 @@ data:
                     </CardContent>
                   </Card>
 
-                  {/* Pressure Profile */}
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
@@ -1376,12 +1369,17 @@ data:
                             }}
                           />
                           <Tooltip
-                            formatter={(value, name) => [
-                              name === "pressure"
-                                ? `${value} hPa (${(value * 0.02953).toFixed(2)} inHg)`
-                                : value,
-                              name === "pressure" ? "Pressure" : name,
-                            ]}
+                            formatter={(value: any, name: any) => {
+                              const num = Number(value);
+                              return [
+                                name === "pressure"
+                                  ? `${num} hPa (${(num * 0.02953).toFixed(
+                                      2
+                                    )} inHg)`
+                                  : num,
+                                name === "pressure" ? "Pressure" : String(name),
+                              ];
+                            }}
                           />
                           <Area
                             type="monotone"
@@ -1396,7 +1394,6 @@ data:
                     </CardContent>
                   </Card>
 
-                  {/* Humidity Profile */}
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
@@ -1411,7 +1408,7 @@ data:
                       <ResponsiveContainer width="100%" height={400}>
                         <BarChart
                           data={parsedData.atmosphericProfile
-                            .filter((d) => d.humidity !== null)
+                            .filter((d: any) => d.humidity !== null)
                             .slice(0, 12)}
                         >
                           <CartesianGrid strokeDasharray="3 3" />
@@ -1432,7 +1429,7 @@ data:
                             domain={[0, 100]}
                           />
                           <Tooltip
-                            formatter={(value) => [
+                            formatter={(value: any) => [
                               `${value}%`,
                               "Relative Humidity",
                             ]}
@@ -1443,7 +1440,6 @@ data:
                     </CardContent>
                   </Card>
 
-                  {/* Combined Profile */}
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
@@ -1485,7 +1481,7 @@ data:
                             }}
                           />
                           <Tooltip
-                            formatter={(value, name) => [
+                            formatter={(value: any, name: any) => [
                               name === "temperature"
                                 ? `${value}°C`
                                 : `${value} hPa`,
@@ -1518,12 +1514,10 @@ data:
                 </div>
               </TabsContent>
 
-              {/* Statistical Analysis with Corrected Calculations */}
               <TabsContent value="analysis" className="space-y-6">
                 {statistics && (
                   <>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      {/* Statistical Summary */}
                       <Card>
                         <CardHeader>
                           <CardTitle>
@@ -1597,7 +1591,6 @@ data:
                         </CardContent>
                       </Card>
 
-                      {/* Correlation Analysis */}
                       <Card>
                         <CardHeader>
                           <CardTitle>
@@ -1612,7 +1605,7 @@ data:
                           <ResponsiveContainer width="100%" height={400}>
                             <ScatterChart
                               data={parsedData.atmosphericProfile.filter(
-                                (d) =>
+                                (d: any) =>
                                   d.temperature !== null && d.pressure !== null
                               )}
                             >
@@ -1635,7 +1628,7 @@ data:
                               />
                               <Tooltip
                                 cursor={{ strokeDasharray: "3 3" }}
-                                formatter={(value, name) => [
+                                formatter={(value: any, name: any) => [
                                   name === "temperature"
                                     ? `${value}°C`
                                     : `${value} hPa`,
@@ -1651,7 +1644,6 @@ data:
                       </Card>
                     </div>
 
-                    {/* Atmospheric Layers Analysis */}
                     <Card>
                       <CardHeader>
                         <CardTitle>
@@ -1740,11 +1732,8 @@ data:
                 )}
               </TabsContent>
 
-              {/* Continue with other tabs... */}
-              {/* DEMS Data Analysis */}
               <TabsContent value="dems" className="space-y-6">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Message Type Distribution */}
                   <Card>
                     <CardHeader>
                       <CardTitle>
@@ -1763,19 +1752,21 @@ data:
                             cx="50%"
                             cy="50%"
                             labelLine={false}
-                            label={({ type, percentage }) =>
+                            label={({ type, percentage }: any) =>
                               `${type} (${percentage.toFixed(1)}%)`
                             }
                             outerRadius={80}
                             fill="#8884d8"
                             dataKey="count"
                           >
-                            {parsedData.messageTypes.map((entry, index) => (
-                              <Cell
-                                key={`cell-${index}`}
-                                fill={COLORS[index % COLORS.length]}
-                              />
-                            ))}
+                            {parsedData.messageTypes.map(
+                              (entry: any, index: number) => (
+                                <Cell
+                                  key={`cell-${index}`}
+                                  fill={COLORS[index % COLORS.length]}
+                                />
+                              )
+                            )}
                           </Pie>
                           <Tooltip />
                         </PieChart>
@@ -1783,7 +1774,6 @@ data:
                     </CardContent>
                   </Card>
 
-                  {/* Data Quality Metrics */}
                   <Card>
                     <CardHeader>
                       <CardTitle>
@@ -1843,7 +1833,6 @@ data:
                 </div>
               </TabsContent>
 
-              {/* Data Quality */}
               <TabsContent value="quality" className="space-y-6">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   <Card>
@@ -1889,13 +1878,13 @@ data:
                           <span className="font-medium">
                             {Math.min(
                               ...parsedData.atmosphericProfile.map(
-                                (d) => d.altitude
+                                (d: any) => d.altitude
                               )
                             )}{" "}
                             -{" "}
                             {Math.max(
                               ...parsedData.atmosphericProfile.map(
-                                (d) => d.altitude
+                                (d: any) => d.altitude
                               )
                             )}{" "}
                             m AMSL
@@ -1906,13 +1895,13 @@ data:
                           <span className="font-medium">
                             {Math.min(
                               ...parsedData.atmosphericProfile.map(
-                                (d) => d.pressure
+                                (d: any) => d.pressure
                               )
                             ).toFixed(1)}{" "}
                             -{" "}
                             {Math.max(
                               ...parsedData.atmosphericProfile.map(
-                                (d) => d.pressure
+                                (d: any) => d.pressure
                               )
                             ).toFixed(1)}{" "}
                             hPa
@@ -1923,13 +1912,13 @@ data:
                           <span className="font-medium">
                             {Math.min(
                               ...parsedData.atmosphericProfile.map(
-                                (d) => d.temperature
+                                (d: any) => d.temperature
                               )
                             ).toFixed(1)}{" "}
                             -{" "}
                             {Math.max(
                               ...parsedData.atmosphericProfile.map(
-                                (d) => d.temperature
+                                (d: any) => d.temperature
                               )
                             ).toFixed(1)}{" "}
                             °C
@@ -1955,19 +1944,19 @@ data:
                     <CardContent>
                       <div className="space-y-2">
                         <div className="flex items-center gap-2 text-sm">
-                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <div className="w-2 h-2 bg-green-500 rounded-full" />
                           <span>Data format validated</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm">
-                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <div className="w-2 h-2 bg-green-500 rounded-full" />
                           <span>Units converted to SI/International</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm">
-                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <div className="w-2 h-2 bg-green-500 rounded-full" />
                           <span>Quality control applied</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm">
-                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                          <div className="w-2 h-2 bg-blue-500 rounded-full" />
                           <span>Ready for meteorological analysis</span>
                         </div>
                       </div>
@@ -1976,10 +1965,8 @@ data:
                 </div>
               </TabsContent>
 
-              {/* Wind Analysis */}
               <TabsContent value="wind" className="space-y-6">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Wind Speed Profile */}
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
@@ -1995,7 +1982,7 @@ data:
                       <ResponsiveContainer width="100%" height={400}>
                         <LineChart
                           data={parsedData.atmosphericProfile.filter(
-                            (d) => d.windSpeed !== null
+                            (d: any) => d.windSpeed !== null
                           )}
                         >
                           <CartesianGrid strokeDasharray="3 3" />
@@ -2015,10 +2002,15 @@ data:
                             }}
                           />
                           <Tooltip
-                            formatter={(value) => [
-                              `${value} m/s (${(value * 1.944).toFixed(1)} kt, ${(value * 3.6).toFixed(1)} km/h)`,
-                              "Wind Speed",
-                            ]}
+                            formatter={(value: any) => {
+                              const num = Number(value);
+                              return [
+                                `${num} m/s (${(num * 1.944).toFixed(
+                                  1
+                                )} kt, ${(num * 3.6).toFixed(1)} km/h)`,
+                                "Wind Speed",
+                              ];
+                            }}
                           />
                           <Line
                             type="monotone"
@@ -2032,7 +2024,6 @@ data:
                     </CardContent>
                   </Card>
 
-                  {/* Wind Direction */}
                   <Card>
                     <CardHeader>
                       <CardTitle>Wind Direction Profile</CardTitle>
@@ -2045,7 +2036,7 @@ data:
                       <ResponsiveContainer width="100%" height={400}>
                         <LineChart
                           data={parsedData.atmosphericProfile.filter(
-                            (d) => d.windDir !== null
+                            (d: any) => d.windDir !== null
                           )}
                         >
                           <CartesianGrid strokeDasharray="3 3" />
@@ -2066,8 +2057,10 @@ data:
                             domain={[0, 360]}
                           />
                           <Tooltip
-                            formatter={(value) => [
-                              `${value}° (${getWindDirectionName(value)})`,
+                            formatter={(value: any) => [
+                              `${value}° (${getWindDirectionName(
+                                Number(value)
+                              )})`,
                               "Wind Direction",
                             ]}
                           />
@@ -2084,7 +2077,6 @@ data:
                   </Card>
                 </div>
 
-                {/* Wind Statistics */}
                 {statistics && (
                   <Card>
                     <CardHeader>
@@ -2151,9 +2143,7 @@ data:
           )}
         </Tabs>
 
-        {/* Export Options */}
         {parsedData && (
-          // Update the export buttons section to use this handler:
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -2184,12 +2174,15 @@ data:
                   <span className="text-xs">JSON (WMO)</span>
                 </Button>
 
-                {/* PDF Export Button */}
                 <div className="h-16">
                   <PDFDownloadLink
                     document={<MeteoPDF data={parsedData} />}
                     fileName={`meteo_analysis_${parsedData.stationInfo.name}_${parsedData.stationInfo.date}.pdf`}
-                    style={{ textDecoration: "none" }}
+                    style={{
+                      textDecoration: "none",
+                      width: "100%",
+                      height: "100%",
+                    }}
                   >
                     {({ loading }) => (
                       <Button
@@ -2230,7 +2223,6 @@ data:
   );
 }
 
-// Helper function to convert wind direction to compass names
 const getWindDirectionName = (degrees: number): string => {
   const directions = [
     "N",

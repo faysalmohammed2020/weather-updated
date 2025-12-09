@@ -1,6 +1,6 @@
 "use client";
 
-import type React from "react";
+import React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -21,10 +21,13 @@ type ValuesState = {
 };
 
 // ✅ stable refs creator (no re-create per render)
-const makeRefs = (len: number) =>
-  Array.from({ length: len }, () => ({ current: null })) as React.RefObject<HTMLInputElement>[];
+const makeRefs = (len: number): React.RefObject<HTMLInputElement | null>[] =>
+  Array.from({ length: len }, () => React.createRef<HTMLInputElement>());
 
-export default function BasicInfoTab({ onFieldChange, isLoading }: BasicInfoTabProps) {
+export default function BasicInfoTab({
+  onFieldChange,
+  isLoading,
+}: BasicInfoTabProps) {
   const { data: session } = useSession();
 
   const dataTypeRefs = useMemo(() => makeRefs(2), []);
@@ -81,12 +84,17 @@ export default function BasicInfoTab({ onFieldChange, isLoading }: BasicInfoTabP
       name: keyof ValuesState,
       value: string,
       index?: number,
-      refs?: React.RefObject<HTMLInputElement>[]
+      refs?: React.RefObject<HTMLInputElement | null>[]
     ) => {
       setValues((prev) => ({ ...prev, [name]: value }));
       pushUpdates({ [name]: value });
 
-      if (index !== undefined && refs && index < refs.length - 1 && value.length === 1) {
+      if (
+        index !== undefined &&
+        refs &&
+        index < refs.length - 1 &&
+        value.length === 1
+      ) {
         refs[index + 1]?.current?.focus();
       }
     },
@@ -97,7 +105,7 @@ export default function BasicInfoTab({ onFieldChange, isLoading }: BasicInfoTabP
     (
       e: React.ChangeEvent<HTMLInputElement>,
       index: number,
-      refs: React.RefObject<HTMLInputElement>[],
+      refs: React.RefObject<HTMLInputElement | null>[],
       fieldName: keyof ValuesState
     ) => {
       const val = e.target.value.slice(0, 1);
@@ -260,9 +268,7 @@ export default function BasicInfoTab({ onFieldChange, isLoading }: BasicInfoTabP
                     ref={ref}
                     className="w-12 bg-white text-center"
                     value={values.day?.[i] || ""}
-                    onChange={(e) =>
-                      handleSegmentedInput(e, i, dayRefs, "day")
-                    }
+                    onChange={(e) => handleSegmentedInput(e, i, dayRefs, "day")}
                   />
                 ))}
               </div>

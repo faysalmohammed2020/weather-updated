@@ -2,6 +2,7 @@
 
 import { signIn as naSignIn, signOut as naSignOut, useSession as naUseSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import type { UserRole } from "@/lib/constants/user-management";
 
 // ---- main hooks ----
 export function useSession() {
@@ -44,7 +45,7 @@ export async function signUp(data: {
   district: string;
   upazila?: string | null;
   stationId: string;
-  role?: "super_admin" | "station_admin" | "observer";
+  role?: UserRole;
 }) {
   const res = await fetch("/api/auth/signup", {
     method: "POST",
@@ -62,7 +63,7 @@ export async function signUp(data: {
 
 // ---- admin helper ----
 // BetterAuth adminClient() এর কাজ সাধারণত role check / admin actions।
-export function useAdminGuard(allowedRoles: Array<"super_admin" | "station_admin"> = ["super_admin"]) {
+export function useAdminGuard(allowedRoles: UserRole[] = ["super_admin"]) {
   const { data, status } = naUseSession();
   const router = useRouter();
 

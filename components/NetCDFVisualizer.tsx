@@ -183,8 +183,8 @@ function App() {
       const variables: Record<string, NCVariable> = {};
       for (const variable of reader.variables) {
         variables[variable.name] = {
-          dimensions: variable.dimensions,
-          attributes: variable.attributes.map((attr) => ({
+          dimensions: variable.dimensions.map(dim => String(dim)),
+          attributes: variable.attributes.map((attr: any) => ({
             name: attr.name,
             value: attr.value,
           })),
@@ -193,7 +193,7 @@ function App() {
       }
 
       const processedData = {
-        metadata: { dimensions, globalAttributes, version: reader.version },
+        metadata: { dimensions, globalAttributes, version: reader.version === "classic format" ? 1 : reader.version === "64-bit offset format" ? 2 : undefined },
         variables,
       };
 
@@ -371,7 +371,7 @@ function App() {
             name: selectedVariable,
             marker: { color: "#3b82f6", opacity: 0.8 },
             nbinsx: 30,
-          } as PlotData,
+          } as unknown as PlotData,
         ];
 
       case "heatmap":
@@ -1074,7 +1074,7 @@ function App() {
                                     </div>
                                     <div className="p-3 bg-white border-t">
                                       <a
-                                        href={`https://django-netcdf-visualizer.onrender.com${serverCsvData.csvs[key]}`}
+                                        href={`https://django-netcdf-visualizer.onrender.com${serverCsvData.csvs?.[key] || ''}`}
                                         download
                                         className="flex items-center justify-center gap-2 text-blue-600 hover:text-blue-800 transition-colors w-full"
                                       >

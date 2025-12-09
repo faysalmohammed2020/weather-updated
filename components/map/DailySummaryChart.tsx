@@ -500,9 +500,8 @@ export default function DailySummaryChart({
                       labelFormatter={(value) => {
                         return format(new Date(value), "EEEE, MMMM d, yyyy");
                       }}
-                      indicator="circle"
+                      indicator="dot"
                       labelClassName="font-medium text-gray-900"
-                      valueClassName="font-semibold"
                       className="bg-white shadow-lg rounded-lg border border-gray-200 p-3"
                     />
                   }
@@ -528,9 +527,6 @@ export default function DailySummaryChart({
                   content={
                     <ChartLegendContent
                       className="mt-4 flex flex-wrap justify-center gap-4"
-                      itemClassName="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-full"
-                      iconClassName="w-3 h-3 rounded-full"
-                      labelClassName="text-sm font-medium text-gray-700"
                     />
                   }
                 />

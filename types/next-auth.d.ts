@@ -1,14 +1,16 @@
 import type { DefaultSession } from "next-auth";
+import type { UserRole } from "@/lib/constants/user-management";
 
 declare module "next-auth" {
   interface Session {
     user: {
       id?: string;
-      role?: string;
+      role?: UserRole;
       stationId?: string;
       division?: string;
       district?: string;
       upazila?: string;
+      twoFactorEnabled?: boolean;
       station?: {
         id?: string;
         stationId?: string;
@@ -27,11 +29,12 @@ declare module "next-auth" {
 
   interface JWT {
     id?: string;
-    role?: string;
+    role?: UserRole;
     stationId?: string;
     division?: string;
     district?: string;
     upazila?: string;
+    twoFactorEnabled?: boolean;
     station?: {
       id?: string;
       stationId?: string;

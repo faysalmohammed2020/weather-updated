@@ -232,7 +232,6 @@ export const authOptions: NextAuthOptions = {
                 name: user.Station.name,
                 latitude: user.Station.latitude,
                 longitude: user.Station.longitude,
-                elevation: user.Station.elevation,
               }
             : null;
 
