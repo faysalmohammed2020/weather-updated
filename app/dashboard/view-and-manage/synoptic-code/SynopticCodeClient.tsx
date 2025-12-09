@@ -1,12 +1,14 @@
 "use client";
 
-import { useRef } from "react";
+import { forwardRef } from "react";
 import SynopticCodeView, {
   type SynopticCodeViewHandle,
 } from "./SynopticCodeView";
 
-export default function SynopticCodeClient() {
-  const ref = useRef<SynopticCodeViewHandle>(null);
-
+const SynopticCodeClient = forwardRef<SynopticCodeViewHandle, {}>((props: {}, ref: React.Ref<SynopticCodeViewHandle>) => {
   return <SynopticCodeView ref={ref} />;
-}
+});
+
+SynopticCodeClient.displayName = "SynopticCodeClient";
+
+export default SynopticCodeClient;

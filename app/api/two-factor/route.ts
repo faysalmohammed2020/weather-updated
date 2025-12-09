@@ -120,11 +120,20 @@ export async function POST(req: NextRequest) {
     const totpURI = authenticator.keyuri(email, "Weather Forecast BD", secret);
     const backupCodes = generateBackupCodes();
 
-    await prisma.twoFactor.upsert({
+    const existingTwoFactor = await prisma.twoFactor.findFirst({
       where: { userId },
-      update: { secret, backupCodes: JSON.stringify(backupCodes) },
-      create: { userId, secret, backupCodes: JSON.stringify(backupCodes) },
     });
+
+    if (existingTwoFactor) {
+      await prisma.twoFactor.update({
+        where: { id: existingTwoFactor.id },
+        data: { secret, backupCodes: JSON.stringify(backupCodes) },
+      });
+    } else {
+      await prisma.twoFactor.create({
+        data: { userId, secret, backupCodes: JSON.stringify(backupCodes) },
+      });
+    }
 
     // Mark as pending until verification succeeds
     await prisma.users.update({
@@ -141,7 +150,7 @@ export async function POST(req: NextRequest) {
       return jsonError("Verification code is required");
     }
 
-    const record = await prisma.twoFactor.findUnique({
+    const record = await prisma.twoFactor.findFirst({
       where: { userId },
       select: { secret: true },
     });
@@ -170,7 +179,7 @@ export async function POST(req: NextRequest) {
       return jsonError("Backup code is required");
     }
 
-    const record = await prisma.twoFactor.findUnique({
+    const record = await prisma.twoFactor.findFirst({
       where: { userId },
       select: { backupCodes: true },
     });
@@ -186,11 +195,20 @@ export async function POST(req: NextRequest) {
 
     codes.splice(index, 1);
 
-    await prisma.twoFactor.upsert({
+    const existingTwoFactor = await prisma.twoFactor.findFirst({
       where: { userId },
-      update: { backupCodes: JSON.stringify(codes) },
-      create: { userId, backupCodes: JSON.stringify(codes) },
     });
+
+    if (existingTwoFactor) {
+      await prisma.twoFactor.update({
+        where: { id: existingTwoFactor.id },
+        data: { backupCodes: JSON.stringify(codes) },
+      });
+    } else {
+      await prisma.twoFactor.create({
+        data: { userId, backupCodes: JSON.stringify(codes) },
+      });
+    }
 
     await prisma.users.update({
       where: { id: userId },

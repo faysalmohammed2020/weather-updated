@@ -1,12 +1,14 @@
 "use client";
 
-import { useRef } from "react";
+import { forwardRef } from "react";
 import FirstCardTable, {
   type FirstCardTableHandle,
 } from "@/components/first-card-table/FirstCardTable";
 
-export default function FirstCardClient() {
-  const ref = useRef<FirstCardTableHandle>(null);
-
+const FirstCardClient = forwardRef<FirstCardTableHandle, {}>((props: {}, ref: React.Ref<FirstCardTableHandle>) => {
   return <FirstCardTable ref={ref} />;
-}
+});
+
+FirstCardClient.displayName = "FirstCardClient";
+
+export default FirstCardClient;

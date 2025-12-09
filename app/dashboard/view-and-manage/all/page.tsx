@@ -2,9 +2,9 @@
 
 import { useRef, useState } from "react"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import FirstCardTable from "../first-card-view/page"
-import SecondCardTable from "../second-card-view/page"
-import SynopticCodeTable from "../synoptic-code/page"
+import FirstCardTable from "../first-card-view/FirstCardTable"
+import SecondCardTable from "../second-card-view/SecondCardTable"
+import SynopticCodeTable from "../synoptic-code/SynopticCodeTable"
 import * as XLSX from "xlsx"
 import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
