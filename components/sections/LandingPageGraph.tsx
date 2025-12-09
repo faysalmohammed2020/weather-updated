@@ -112,8 +112,8 @@ export default function LandingPageDailySummaryChart() {
         setStations(data);
 
         if (data.length > 0) {
-          const dhakaStation = data.find((station: Station) =>
-            station.name.toLowerCase().includes("dhaka")
+          const dhakaStation = data.find((station: Station) => 
+            station.name.toLowerCase().includes('dhaka')
           );
           setStationSelection(dhakaStation || data[0]);
         }
@@ -266,19 +266,13 @@ export default function LandingPageDailySummaryChart() {
   };
 
   if (loading || stationsLoading) {
-    return (
-      <div className="p-6 sm:p-8 md:p-10 text-center text-sm sm:text-base">
-        Loading...
-      </div>
-    );
+    return <div className="p-6 sm:p-8 md:p-10 text-center text-sm sm:text-base">Loading...</div>;
   }
 
   if (error) {
     return (
       <div className="p-6 sm:p-8 md:p-10 text-red-600 text-center">
-        <h2 className="text-lg sm:text-xl font-semibold mb-2">
-          Error loading data
-        </h2>
+        <h2 className="text-lg sm:text-xl font-semibold mb-2">Error loading data</h2>
         <p className="text-sm sm:text-base">{error}</p>
       </div>
     );
@@ -288,14 +282,14 @@ export default function LandingPageDailySummaryChart() {
     dataTypeOptions.find((x) => x.value === dataType)?.metrics || [];
 
   return (
-    <Card className="border-0 shadow-none rounded-none">
-      <CardHeader className="border-b">
+    <Card className="border-0 shadow-none rounded-none bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm">
+      <CardHeader className="border-b border-cyan-200/50 dark:border-cyan-800/50 bg-gradient-to-r from-cyan-50/50 to-blue-50/50 dark:from-gray-800/50 dark:to-blue-950/50">
         <div className="flex flex-col gap-4">
           <div>
-            <CardTitle className="text-lg sm:text-xl font-semibold">
-              Weather Data
+            <CardTitle className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400 bg-clip-text text-transparent">
+              Weather Data Analytics
             </CardTitle>
-            <CardDescription className="text-sm sm:text-base">
+            <CardDescription className="text-sm sm:text-base text-gray-700 dark:text-gray-300 mt-1">
               {stationSelection?.name || "No Station Selected"} Station
             </CardDescription>
           </div>
@@ -308,7 +302,7 @@ export default function LandingPageDailySummaryChart() {
                 setStationSelection(st || null);
               }}
             >
-              <SelectTrigger className="w-full sm:w-[180px] md:w-[200px] rounded-lg border-gray-300 text-sm">
+              <SelectTrigger className="w-full sm:w-[180px] md:w-[200px] rounded-lg border-cyan-200 dark:border-cyan-800/50 bg-white/90 dark:bg-gray-800/90 text-sm backdrop-blur-sm hover:border-cyan-300 dark:hover:border-cyan-700 transition-colors">
                 <SelectValue placeholder="Select Station" />
               </SelectTrigger>
               <SelectContent className="rounded-lg">
@@ -325,7 +319,7 @@ export default function LandingPageDailySummaryChart() {
             </Select>
 
             <Select value={dataType} onValueChange={setDataType}>
-              <SelectTrigger className="w-full sm:w-[140px] md:w-[160px] rounded-lg border-gray-300 text-sm">
+              <SelectTrigger className="w-full sm:w-[140px] md:w-[160px] rounded-lg border-cyan-200 dark:border-cyan-800/50 bg-white/90 dark:bg-gray-800/90 text-sm backdrop-blur-sm hover:border-cyan-300 dark:hover:border-cyan-700 transition-colors">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="rounded-lg">
@@ -344,7 +338,7 @@ export default function LandingPageDailySummaryChart() {
             </Select>
 
             <Select value={timeRange} onValueChange={setTimeRange}>
-              <SelectTrigger className="w-full sm:w-[120px] md:w-[140px] rounded-lg border-gray-300 text-sm">
+              <SelectTrigger className="w-full sm:w-[120px] md:w-[140px] rounded-lg border-cyan-200 dark:border-cyan-800/50 bg-white/90 dark:bg-gray-800/90 text-sm backdrop-blur-sm hover:border-cyan-300 dark:hover:border-cyan-700 transition-colors">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="rounded-lg">
@@ -570,11 +564,7 @@ export default function LandingPageDailySummaryChart() {
                       value: getYAxisLabel(),
                       angle: -90,
                       position: "insideLeft",
-                      style: {
-                        textAnchor: "middle",
-                        fill: "#6b7280",
-                        fontSize: 10,
-                      },
+                      style: { textAnchor: "middle", fill: "#6b7280", fontSize: 10 },
                       offset: -8,
                     }}
                   />

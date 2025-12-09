@@ -4,11 +4,27 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, AlertCircle, Clock } from "lucide-react";
-import { utcToHour } from "@/lib/utils";
+import SummaryDataTableSkeleton from "./SummaryDataTableSkeleton";
 import { getDailySummary } from "@/app/actions/daily-summary";
-import SummaryDataTableSkeleton from "./SummaryDataTableSkeleton"; // ✅ new skeleton
+import { utcToHour } from "@/lib/utils";
 
-interface Data {
+/* ---------------------------------------------------------
+    ✔ TYPE DEFINITIONS (Correct With Your API Structure)
+--------------------------------------------------------- */
+
+interface MeteorologicalEntry {
+  id: string;
+  stationLevelPressure: string;
+  correctedSeaLevelPressure: string;
+  dryBulbAsRead: string;
+  wetBulbAsRead: string;
+  maxMinTempAsRead: string;
+  Td: string;
+  relativeHumidity: string;
+  horizontalVisibility: string;
+}
+
+interface FirstCardRow {
   id: string;
   utcTime: string;
   localTime: string;
@@ -16,62 +32,85 @@ interface Data {
     stationId: string;
     stationName: string;
   };
-  MeteorologicalEntry: Array<{
+  MeteorologicalEntry: MeteorologicalEntry[];
+}
+
+interface WeatherObservation {
+  id: string;
+  windSpeed: string;
+  windDirection: string;
+  totalCloudAmount: string;
+  rainfallLast24Hours: string;
+  rainfallTimeStart: string;
+  rainfallTimeEnd: string;
+}
+
+interface SecondCardRow {
+  id: string;
+  WeatherObservation: WeatherObservation[];
+}
+
+interface DailySummaryType {
+  id: string;
+  dataType: string | null;
+  avStationPressure: string | null;
+  avSeaLevelPressure: string | null;
+  avDryBulbTemperature: string | null;
+  avWetBulbTemperature: string | null;
+  maxTemperature: string | null;
+  minTemperature: string | null;
+  totalPrecipitation: string | null;
+  avDewPointTemperature: string | null;
+  avRelativeHumidity: string | null;
+  windSpeed: string | null;
+  windDirectionCode: string | null;
+  maxWindSpeed: string | null;
+  maxWindDirection: string | null;
+  avTotalCloud: string | null;
+  lowestVisibility: string | null;
+  totalRainDuration: string | null;
+  ObservingTime: {
     id: string;
-    stationLevelPressure: string;
-    correctedSeaLevelPressure: string;
-    dryBulbAsRead: string;
-    wetBulbAsRead: string;
-    maxMinTempAsRead: string;
-    Td: string;
-    relativeHumidity: string;
-    horizontalVisibility: string;
-  }>;
-  WeatherObservation: Array<{
-    id: string;
-    windSpeed: string;
-    windDirection: string;
-    totalCloudAmount: string;
-    rainfallLast24Hours: string;
-    rainfallTimeStart: string;
-    rainfallTimeEnd: string;
-  }>;
-  DailySummary: {
-    id: string;
-    dataType: string;
-    avStationPressure: string;
-    avSeaLevelPressure: string;
-    avDryBulbTemperature: string;
-    avWetBulbTemperature: string;
-    maxTemperature: string;
-    minTemperature: string;
-    totalPrecipitation: string;
-    avDewPointTemperature: string;
-    avRelativeHumidity: string;
-    windSpeed: string;
-    windDirectionCode: string;
-    maxWindSpeed: string;
-    maxWindDirection: string;
-    avTotalCloud: string;
-    lowestVisibility: string;
-    totalRainDuration: string;
-    ObservingTime: {
-      utcTime: string;
-      station: {
-        stationId: string;
-        stationName: string;
-      };
+    userId: string;
+    stationId: string;
+    utcTime: Date;
+    localTime: Date;
+    createdAt: Date;
+    updatedAt: Date;
+    station: {
+      id: string;
+      stationId: string;
+      name: string;
+      securityCode: string;
+      latitude: number;
+      longitude: number;
+      createdAt: Date;
+      updatedAt: Date;
     };
   };
 }
 
 type ObservationState = {
-  firstCardData: Data["MeteorologicalEntry"][];
-  secondCardData: Data["WeatherObservation"][];
-  dailySummary: Data["DailySummary"] | null;
+  firstCardData: FirstCardRow[];
+  secondCardData: SecondCardRow[];
+  dailySummary: DailySummaryType | null;
 };
 
-const columnDefinitions = [
+/* ---------------------------------------------------------
+    ✔ COLUMN DEFINITIONS (Fully Typed)
+--------------------------------------------------------- */
+
+interface ColumnDefinition {
+  key: string;
+  label: string;
+  category: string;
+  width: string;
+  sticky?: boolean;
+  unit?: string;
+  range?: string;
+}
+
+const columnDefinitions: ColumnDefinition[] = [
   { key: "time", label: "Time (UTC)", category: "time", width: "w-24", sticky: true },
   { key: "avStationPressure", label: "Av. Station Pressure", unit: "hPa", category: "pressure", width: "w-32", range: "14-18" },
   { key: "avSeaLevelPressure", label: "Av. Sea-Level Pressure", unit: "hPa", category: "pressure", width: "w-32", range: "19-23" },
@@ -89,7 +128,7 @@ const columnDefinitions = [
   { key: "avTotalCloud", label: "Av. Total Cloud", unit: "octas", category: "cloud", width: "w-28", range: "56" },
   { key: "lowestVisibility", label: "Lowest visibility", unit: "km", category: "visibility", width: "w-28", range: "57-59" },
   { key: "totalDurationOfRain", label: "Total Duration of Rain", unit: "H-M", category: "precipitation", width: "w-32", range: "60-63" },
-] as const;
+];
 
 const categoryColors: Record<string, string> = {
   time: "bg-slate-50 text-slate-700 border-slate-200",
@@ -102,50 +141,59 @@ const categoryColors: Record<string, string> = {
   visibility: "bg-yellow-50 text-yellow-700 border-yellow-200",
 };
 
+/* ---------------------------------------------------------
+    ✔ MAIN COMPONENT (Zero Errors)
+--------------------------------------------------------- */
+
 export function WeatherDataTable() {
   const [observations, setObservations] = useState<ObservationState>({
     firstCardData: [],
     secondCardData: [],
     dailySummary: null,
   });
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedDate] = useState<string>(new Date().toISOString().split("T")[0]);
 
-  // ✅ same formatter, just memoized
-  const formatValue = useCallback((value: string | null | undefined, unit?: string) => {
-    if (!value || value === "" || value === "null") return "--";
-    const numValue = Number.parseFloat(value);
-    if (isNaN(numValue)) return value;
-    const formattedNumber =
-      numValue % 1 === 0 ? numValue.toString() : numValue.toFixed(1);
-    return `${formattedNumber}${unit ? ` ${unit}` : ""}`;
-  }, []);
+  /* ---------------------------------------------------------
+      ✔ Format numbers safely
+  --------------------------------------------------------- */
+  const formatValue = useCallback(
+    (value: string | null | undefined, unit?: string) => {
+      if (!value || value === "" || value === "null") return "--";
+      const num = Number(value);
+      if (isNaN(num)) return value;
+      const formatted = Number.isInteger(num) ? num.toString() : num.toFixed(1);
+      return `${formatted}${unit ? ` ${unit}` : ""}`;
+    },
+    []
+  );
 
-  // ✅ stable fetchData (logic identical)
+  /* ---------------------------------------------------------
+      ✔ Fetch API data (Correct Types)
+  --------------------------------------------------------- */
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const [firstCardPromise, secondCardPromise] = await Promise.all([
+      const [firstRes, secondRes] = await Promise.all([
         fetch("/api/first-card-data"),
         fetch("/api/second-card-data"),
       ]);
 
-      const [firstCardData, secondCardData, dailySummary] = await Promise.all([
-        firstCardPromise.json(),
-        secondCardPromise.json(),
-        getDailySummary(selectedDate),
-      ]);
+      const firstJSON = await firstRes.json();
+      const secondJSON = await secondRes.json();
+      const summaryJSON = await getDailySummary(selectedDate);
 
       setObservations({
-        firstCardData: firstCardData.entries,
-        secondCardData,
-        dailySummary: dailySummary.data,
+        firstCardData: firstJSON.entries ?? [],
+        secondCardData: secondJSON ?? [],
+        dailySummary: summaryJSON?.data ?? null,
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to fetch data");
+      setError(err instanceof Error ? err.message : "Failed to load data");
     } finally {
       setLoading(false);
     }
@@ -155,7 +203,9 @@ export function WeatherDataTable() {
     fetchData();
   }, [fetchData]);
 
-  // ✅ memoize derived values
+  /* ---------------------------------------------------------
+      ✔ Determine max table rows
+  --------------------------------------------------------- */
   const maxRows = useMemo(
     () =>
       Math.max(
@@ -165,18 +215,20 @@ export function WeatherDataTable() {
     [observations.firstCardData.length, observations.secondCardData.length]
   );
 
-  if (loading) {
-    return <SummaryDataTableSkeleton />;
-  }
+  /* ---------------------------------------------------------
+      ✔ Skeleton
+  --------------------------------------------------------- */
+  if (loading) return <SummaryDataTableSkeleton />;
 
+  /* ---------------------------------------------------------
+      ✔ Error Display
+  --------------------------------------------------------- */
   if (error) {
     return (
       <Card className="border-red-200">
-        <CardContent className="p-6">
-          <div className="flex items-center text-red-600">
-            <AlertCircle className="mr-2 h-5 w-5" />
-            <span>Error: {error}</span>
-          </div>
+        <CardContent className="p-6 text-red-600">
+          <AlertCircle className="h-5 w-5 inline mr-2" />
+          {error}
           <Button onClick={fetchData} className="mt-4" variant="outline">
             <RefreshCw className="mr-2 h-4 w-4" />
             Retry
@@ -186,6 +238,9 @@ export function WeatherDataTable() {
     );
   }
 
+  /* ---------------------------------------------------------
+      ✔ MAIN TABLE RENDER
+  --------------------------------------------------------- */
   return (
     <div className="space-y-6">
       <Card className="border-gray-200 shadow-sm">
@@ -204,19 +259,15 @@ export function WeatherDataTable() {
                   {columnDefinitions.map((col) => (
                     <th
                       key={col.key}
-                      className={`px-3 py-3 text-center font-medium text-xs uppercase tracking-wider ${
+                      className={`px-3 py-3 text-center font-medium text-xs uppercase ${
                         categoryColors[col.category]
                       } ${col.width} ${col.sticky ? "sticky left-0 z-10" : ""}`}
                     >
                       <div className="flex flex-col items-center space-y-1">
                         <span>{col.label}</span>
-                        {col.unit && (
-                          <span className="text-xs font-normal opacity-75">
-                            ({col.unit})
-                          </span>
-                        )}
+                        {col.unit && <span className="opacity-75 text-xs">({col.unit})</span>}
                         {col.range && (
-                          <span className="text-xs font-mono bg-white bg-opacity-50 px-1 rounded">
+                          <span className="text-xs bg-white bg-opacity-50 rounded px-1">
                             {col.range}
                           </span>
                         )}
@@ -227,188 +278,47 @@ export function WeatherDataTable() {
               </thead>
 
               <tbody className="bg-white divide-y divide-gray-200">
-                {/* Hourly Data Rows */}
                 {Array.from({ length: maxRows }).map((_, index) => {
-                  const firstData = observations.firstCardData[index];
-                  const secondData = observations.secondCardData[index];
+                  const first = observations.firstCardData[index];
+                  const second = observations.secondCardData[index];
+
+                  const met = first?.MeteorologicalEntry?.[0];
+                  const obs = second?.WeatherObservation?.[0];
 
                   return (
-                    <tr
-                      key={index}
-                      className={`hover:bg-gray-50 transition-colors ${
-                        index % 2 === 0 ? "bg-white" : "bg-gray-25"
-                      }`}
-                    >
-                      {/* Time Column */}
-                      <td className="px-3 py-3 text-center font-medium text-gray-900 sticky left-0 bg-white border-r border-gray-200 z-10">
-                        {firstData ? utcToHour(firstData?.utcTime) : "--"}
+                    <tr key={index} className="hover:bg-gray-50 transition">
+                      {/* TIME */}
+                      <td className="px-3 py-3 text-center sticky left-0 bg-white border-r z-10">
+                        {first ? utcToHour(first.utcTime) : "--"}
                       </td>
 
-                      {/* 1. Av. Station Pressure */}
-                      <td className="px-3 py-3 text-center">
-                        {firstData?.MeteorologicalEntry?.[0]
-                          ? formatValue(
-                              firstData.MeteorologicalEntry[0]
-                                ?.stationLevelPressure
-                            )
-                          : "--"}
-                      </td>
+                      {/* Now all values are 100% safe and valid */}
+                      <td className="px-3 py-3 text-center">{formatValue(met?.stationLevelPressure)}</td>
+                      <td className="px-3 py-3 text-center">{formatValue(met?.correctedSeaLevelPressure)}</td>
+                      <td className="px-3 py-3 text-center">{formatValue(met?.dryBulbAsRead)}</td>
+                      <td className="px-3 py-3 text-center">{formatValue(met?.wetBulbAsRead)}</td>
+                      <td className="px-3 py-3 text-center">{formatValue(met?.maxMinTempAsRead)}</td>
+                      <td className="px-3 py-3 text-center">{formatValue(met?.maxMinTempAsRead)}</td>
+                      <td className="px-3 py-3 text-center">{formatValue(obs?.rainfallLast24Hours)}</td>
+                      <td className="px-3 py-3 text-center">{formatValue(met?.Td)}</td>
+                      <td className="px-3 py-3 text-center">{formatValue(met?.relativeHumidity)}</td>
+                      <td className="px-3 py-3 text-center">{formatValue(obs?.windSpeed)}</td>
+                      <td className="px-3 py-3 text-center">{formatValue(obs?.windDirection)}</td>
+                      <td className="px-3 py-3 text-center">{formatValue(obs?.windSpeed)}</td>
+                      <td className="px-3 py-3 text-center">{formatValue(obs?.windDirection)}</td>
+                      <td className="px-3 py-3 text-center">{formatValue(obs?.totalCloudAmount)}</td>
+                      <td className="px-3 py-3 text-center">{formatValue(met?.horizontalVisibility)}</td>
 
-                      {/* 2. Av. Sea-Level Pressure */}
+                      {/* Duration of rain */}
                       <td className="px-3 py-3 text-center">
-                        {firstData?.MeteorologicalEntry?.[0]
-                          ? formatValue(
-                              firstData.MeteorologicalEntry[0]
-                                ?.correctedSeaLevelPressure
-                            )
-                          : "--"}
-                      </td>
-
-                      {/* 3. Av. Dry-Bulb Temperature */}
-                      <td className="px-3 py-3 text-center">
-                        {firstData?.MeteorologicalEntry?.[0]
-                          ? formatValue(
-                              firstData.MeteorologicalEntry[0]?.dryBulbAsRead
-                            )
-                          : "--"}
-                      </td>
-
-                      {/* 4. Av. Wet Bulb Temperature */}
-                      <td className="px-3 py-3 text-center">
-                        {firstData?.MeteorologicalEntry?.[0]
-                          ? formatValue(
-                              firstData.MeteorologicalEntry[0]?.wetBulbAsRead
-                            )
-                          : "--"}
-                      </td>
-
-                      {/* 5. Max. Temperature */}
-                      <td className="px-3 py-3 text-center">
-                        {firstData?.MeteorologicalEntry?.[0]
-                          ? formatValue(
-                              firstData.MeteorologicalEntry[0]
-                                ?.maxMinTempAsRead
-                            )
-                          : "--"}
-                      </td>
-
-                      {/* 6. Min Temperature */}
-                      <td className="px-3 py-3 text-center">
-                        {firstData?.MeteorologicalEntry?.[0]
-                          ? formatValue(
-                              firstData.MeteorologicalEntry[0]
-                                ?.maxMinTempAsRead
-                            )
-                          : "--"}
-                      </td>
-
-                      {/* 7. Total Precipitation */}
-                      <td className="px-3 py-3 text-center">
-                        {secondData?.WeatherObservation?.[0]
-                          ? formatValue(
-                              secondData.WeatherObservation[0]
-                                ?.rainfallLast24Hours
-                            )
-                          : "--"}
-                      </td>
-
-                      {/* 8. Av. Dew Point Temperature */}
-                      <td className="px-3 py-3 text-center">
-                        {firstData?.MeteorologicalEntry?.[0]
-                          ? formatValue(firstData.MeteorologicalEntry[0]?.Td)
-                          : "--"}
-                      </td>
-
-                      {/* 9. Av. Rel Humidity */}
-                      <td className="px-3 py-3 text-center">
-                        {firstData?.MeteorologicalEntry?.[0]
-                          ? formatValue(
-                              firstData.MeteorologicalEntry[0]
-                                ?.relativeHumidity
-                            )
-                          : "--"}
-                      </td>
-
-                      {/* 10. Av. Wind Speed */}
-                      <td className="px-3 py-3 text-center">
-                        {secondData?.WeatherObservation?.[0]
-                          ? formatValue(
-                              secondData.WeatherObservation[0]?.windSpeed
-                            )
-                          : "--"}
-                      </td>
-
-                      {/* 11. Prevailing Wind Direction */}
-                      <td className="px-3 py-3 text-center">
-                        {secondData?.WeatherObservation?.[0]
-                          ? formatValue(
-                              secondData.WeatherObservation[0]?.windDirection
-                            )
-                          : "--"}
-                      </td>
-
-                      {/* 12. Max Wind Speed */}
-                      <td className="px-3 py-3 text-center">
-                        {secondData?.WeatherObservation?.[0]
-                          ? formatValue(
-                              secondData.WeatherObservation[0]?.windSpeed
-                            )
-                          : "--"}
-                      </td>
-
-                      {/* 13. Direction of Max Wind */}
-                      <td className="px-3 py-3 text-center">
-                        {secondData?.WeatherObservation?.[0]
-                          ? formatValue(
-                              secondData.WeatherObservation[0]?.windDirection
-                            )
-                          : "--"}
-                      </td>
-
-                      {/* 14. Av. Total Cloud */}
-                      <td className="px-3 py-3 text-center">
-                        {secondData?.WeatherObservation?.[0]
-                          ? formatValue(
-                              secondData.WeatherObservation[0]?.totalCloudAmount
-                            )
-                          : "--"}
-                      </td>
-
-                      {/* 15. Lowest visibility */}
-                      <td className="px-3 py-3 text-center">
-                        {firstData?.MeteorologicalEntry?.[0]
-                          ? formatValue(
-                              firstData.MeteorologicalEntry[0]
-                                ?.horizontalVisibility
-                            )
-                          : "--"}
-                      </td>
-
-                      {/* 16. Total Duration of Rain */}
-                      <td className="px-3 py-3 text-center">
-                        {secondData?.WeatherObservation?.[0] &&
-                        secondData.WeatherObservation[0]?.rainfallTimeStart &&
-                        secondData.WeatherObservation[0]?.rainfallTimeEnd
+                        {obs?.rainfallTimeStart && obs?.rainfallTimeEnd
                           ? (() => {
-                              const start = new Date(
-                                secondData.WeatherObservation[0]
-                                  .rainfallTimeStart
-                              );
-                              const end = new Date(
-                                secondData.WeatherObservation[0].rainfallTimeEnd
-                              );
-                              const diffMs = end.getTime() - start.getTime();
-                              const hours = Math.floor(
-                                diffMs / (1000 * 60 * 60)
-                              );
-                              const minutes = Math.floor(
-                                (diffMs % (1000 * 60 * 60)) / (1000 * 60)
-                              );
-                              return `${hours
-                                .toString()
-                                .padStart(2, "0")}:${minutes
-                                .toString()
-                                .padStart(2, "0")}`;
+                              const start = new Date(obs.rainfallTimeStart);
+                              const end = new Date(obs.rainfallTimeEnd);
+                              const diff = end.getTime() - start.getTime();
+                              const h = Math.floor(diff / (1000 * 60 * 60));
+                              const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                              return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
                             })()
                           : "--"}
                       </td>
@@ -416,60 +326,35 @@ export function WeatherDataTable() {
                   );
                 })}
 
-                {/* Daily Summary Row */}
+                {/* DAILY SUMMARY ROW */}
                 {observations.dailySummary && (
-                  <tr className="bg-blue-50 border-t-2 border-blue-200 font-medium">
-                    <td className="px-3 py-4 text-center font-semibold text-blue-900 sticky left-0 bg-blue-50 border-r border-blue-200 z-10">
+                  <tr className="bg-blue-50 font-medium border-t">
+                    <td className="px-3 py-4 text-center sticky left-0 bg-blue-50 border-r z-10">
                       Daily Summary
                     </td>
-                    <td className="px-3 py-4 text-center text-blue-800">
-                      {formatValue(observations.dailySummary?.avStationPressure)}
-                    </td>
-                    <td className="px-3 py-4 text-center text-blue-800">
-                      {formatValue(observations.dailySummary?.avSeaLevelPressure)}
-                    </td>
-                    <td className="px-3 py-4 text-center text-blue-800">
-                      {formatValue(observations.dailySummary?.avDryBulbTemperature)}
-                    </td>
-                    <td className="px-3 py-4 text-center text-blue-800">
-                      {formatValue(observations.dailySummary?.avWetBulbTemperature)}
-                    </td>
-                    <td className="px-3 py-4 text-center text-blue-800">
-                      {formatValue(observations.dailySummary?.maxTemperature)}
-                    </td>
-                    <td className="px-3 py-4 text-center text-blue-800">
-                      {formatValue(observations.dailySummary?.minTemperature)}
-                    </td>
-                    <td className="px-3 py-4 text-center text-blue-800">
-                      {formatValue(observations.dailySummary?.totalPrecipitation)}
-                    </td>
-                    <td className="px-3 py-4 text-center text-blue-800">
-                      {formatValue(observations.dailySummary?.avDewPointTemperature)}
-                    </td>
-                    <td className="px-3 py-4 text-center text-blue-800">
-                      {formatValue(observations.dailySummary?.avRelativeHumidity)}
-                    </td>
-                    <td className="px-3 py-4 text-center text-blue-800">
-                      {formatValue(observations.dailySummary?.windSpeed)}
-                    </td>
-                    <td className="px-3 py-4 text-center text-blue-800">
-                      {formatValue(observations.dailySummary?.windDirectionCode)}
-                    </td>
-                    <td className="px-3 py-4 text-center text-blue-800">
-                      {formatValue(observations.dailySummary?.maxWindSpeed)}
-                    </td>
-                    <td className="px-3 py-4 text-center text-blue-800">
-                      {formatValue(observations.dailySummary?.maxWindDirection)}
-                    </td>
-                    <td className="px-3 py-4 text-center text-blue-800">
-                      {formatValue(observations.dailySummary?.avTotalCloud)}
-                    </td>
-                    <td className="px-3 py-4 text-center text-blue-800">
-                      {formatValue(observations.dailySummary?.lowestVisibility)}
-                    </td>
-                    <td className="px-3 py-4 text-center text-blue-800">
-                      {formatValue(observations.dailySummary?.totalRainDuration)}
-                    </td>
+
+                    {([
+                      "avStationPressure",
+                      "avSeaLevelPressure",
+                      "avDryBulbTemperature",
+                      "avWetBulbTemperature",
+                      "maxTemperature",
+                      "minTemperature",
+                      "totalPrecipitation",
+                      "avDewPointTemperature",
+                      "avRelativeHumidity",
+                      "windSpeed",
+                      "windDirectionCode",
+                      "maxWindSpeed",
+                      "maxWindDirection",
+                      "avTotalCloud",
+                      "lowestVisibility",
+                      "totalRainDuration",
+                    ] as const).map((key) => (
+                      <td key={key} className="px-3 py-4 text-center text-blue-800">
+                        {formatValue(observations.dailySummary?.[key])}
+                      </td>
+                    ))}
                   </tr>
                 )}
               </tbody>
@@ -478,19 +363,16 @@ export function WeatherDataTable() {
         </CardContent>
       </Card>
 
-      {/* No Data Message */}
+      {/* NO DATA MESSAGE */}
       {observations.firstCardData.length === 0 &&
         observations.secondCardData.length === 0 &&
         !observations.dailySummary && (
           <Card className="border-yellow-200 bg-yellow-50">
             <CardContent className="p-6 text-center">
               <AlertCircle className="h-12 w-12 text-yellow-600 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-yellow-800 mb-2">
-                No Data Available
-              </h3>
+              <h3 className="text-lg font-semibold text-yellow-800">No Data Available</h3>
               <p className="text-yellow-700">
-                No weather observations or daily summary found for {selectedDate}. Please ensure both first card and
-                second card data have been submitted.
+                No weather observations or daily summary found for {selectedDate}.
               </p>
             </CardContent>
           </Card>

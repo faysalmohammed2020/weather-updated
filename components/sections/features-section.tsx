@@ -128,7 +128,7 @@ export default function FeaturesSection() {
   const features: FeatureCard[] = [
     {
       icon: (
-        <Thermometer className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+        <Thermometer className="h-6 w-6 text-cyan-600 dark:text-cyan-400" />
       ),
       title: "Temperature Analytics",
       description: `Latest observation from ${stationLabel}. Max ${formatValue(
@@ -149,7 +149,7 @@ export default function FeaturesSection() {
     },
     {
       icon: (
-        <CloudRain className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+        <CloudRain className="h-6 w-6 text-cyan-600 dark:text-cyan-400" />
       ),
       title: "Rainfall Patterns",
       description: `Last reading: ${formatValue(totalRain, " mm")} recorded.`,
@@ -179,7 +179,7 @@ export default function FeaturesSection() {
       ),
     },
     {
-      icon: <Wind className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />,
+      icon: <Wind className="h-6 w-6 text-cyan-600 dark:text-cyan-400" />,
       title: "Wind Conditions",
       description: `Current wind: ${formatValue(windSpeed, " kt")} average.`,
       chart: (
@@ -193,7 +193,7 @@ export default function FeaturesSection() {
       ),
     },
     {
-      icon: <Map className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />,
+      icon: <Map className="h-6 w-6 text-cyan-600 dark:text-cyan-400" />,
       title: "Humidity Snapshot",
       description: `Relative humidity at ${formatValue(humidity, "%")}.`,
       chart: (
@@ -216,13 +216,39 @@ export default function FeaturesSection() {
   ];
 
   return (
-    <section className="relative w-full py-16 bg-slate-50 dark:bg-gray-900 overflow-hidden">
-      {/* Subtle background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-indigo-50/20 to-transparent dark:from-indigo-900/10"></div>
+    <section className="relative w-full py-16 md:py-24 overflow-hidden">
+      {/* Background gradient matching hero section */}
+      <div className="absolute inset-0 bg-gradient-to-b from-cyan-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-900 dark:to-blue-950 -z-10"></div>
+
+      {/* Animated background elements matching hero section */}
+      <div className="absolute inset-0 overflow-hidden -z-10">
+        <motion.div
+          className="absolute top-10 left-10 w-64 h-64 rounded-full bg-cyan-300/20 dark:bg-cyan-700/10 blur-3xl"
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.2, 0.4, 0.2],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Number.POSITIVE_INFINITY,
+            repeatType: "reverse",
+          }}
+        />
+        <motion.div
+          className="absolute bottom-10 right-10 w-80 h-80 rounded-full bg-blue-400/20 dark:bg-blue-600/10 blur-3xl"
+          animate={{
+            scale: [1, 1.1, 1],
+            opacity: [0.1, 0.3, 0.1],
+          }}
+          transition={{
+            duration: 10,
+            repeat: Number.POSITIVE_INFINITY,
+            repeatType: "reverse",
+          }}
+        />
       </div>
 
-      <div className=" px-4 md:px-6  relative z-10">
+      <div className="container px-4 md:px-6 relative z-10">
         <motion.div
           className="flex flex-col items-center justify-center space-y-4 text-center mb-12"
           initial={{ opacity: 0, y: 30 }}
@@ -235,16 +261,19 @@ export default function FeaturesSection() {
             whileInView={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.5 }}
             viewport={{ once: true }}
-            className="inline-block px-3 py-1 text-xs font-medium rounded-full bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300"
+            className="inline-flex items-center gap-2 dark:border-cyan-700 dark:bg-gray-900/60 px-3 py-1 text-sm backdrop-blur-sm border border-cyan-200 bg-white/90 rounded-full"
           >
-            Weather Intelligence
+            <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+            <span className="text-xs font-medium text-cyan-700 dark:text-cyan-300">
+              Weather Intelligence
+            </span>
           </motion.span>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.5 }}
             viewport={{ once: true }}
-            className="text-3xl font-bold tracking-tight md:text-4xl text-gray-900 dark:text-white"
+            className="text-4xl font-bold tracking-tighter sm:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400"
           >
             Advanced Meteorological Data
           </motion.h2>
@@ -253,12 +282,12 @@ export default function FeaturesSection() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.5 }}
             viewport={{ once: true }}
-            className="max-w-2xl text-gray-600 dark:text-gray-300"
+            className="max-w-2xl text-gray-700 dark:text-gray-300 md:text-xl"
           >
             {status === "error"
               ? "Live feature data unavailable right now."
               : "Precise weather analytics and forecasting tools for informed decision making across Bangladesh."}
-            <span className="block text-sm text-indigo-600 dark:text-indigo-300 mt-2">
+            <span className="block text-sm text-cyan-600 dark:text-cyan-400 mt-2">
               {status === "ready"
                 ? `Updated - ${observedLabel}`
                 : "Loading latest data..."}
@@ -267,7 +296,7 @@ export default function FeaturesSection() {
         </motion.div>
 
         <motion.div
-          className="mx-auto grid max-w-5xl items-center gap-6 md:grid-cols-2 lg:grid-cols-4"
+          className="mx-auto grid max-w-6xl items-stretch gap-8 md:grid-cols-2 lg:grid-cols-4"
           variants={container}
           initial="hidden"
           whileInView="visible"
@@ -276,29 +305,30 @@ export default function FeaturesSection() {
           {features.map((feature) => (
             <motion.div
               key={feature.title}
-              className="flex flex-col rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 p-6 shadow-sm hover:shadow-md transition-all duration-300"
+              className="flex flex-col rounded-2xl border border-cyan-200 dark:border-cyan-800/50 bg-white/90 dark:bg-gray-800/90 p-6 shadow-lg backdrop-blur-sm hover:shadow-2xl transition-all duration-300"
               variants={item}
               whileHover={{
-                y: -5,
-                boxShadow: "0 10px 20px -5px rgba(79, 70, 229, 0.1)",
-                transition: { duration: 0.2, ease: "easeOut" },
+                y: -8,
+                scale: 1.02,
+                boxShadow: "0 25px 50px -12px rgba(6, 182, 212, 0.25)",
+                transition: { duration: 0.3, ease: "easeOut" },
               }}
             >
               <div className="flex items-center gap-3 mb-4">
-                <div className="flex items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-900/30 p-2">
+                <div className="flex items-center justify-center rounded-xl bg-gradient-to-br from-cyan-100 to-blue-100 dark:from-cyan-900/30 dark:to-blue-900/30 p-3 shadow-sm">
                   {feature.icon}
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">
                   {feature.title}
                 </h3>
               </div>
-              <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
+              <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm leading-relaxed">
                 {feature.description}
               </p>
               {feature.chart}
               <Link
                 href="/features"
-                className="mt-4 inline-flex items-center text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors group"
+                className="mt-auto inline-flex items-center text-sm font-medium text-cyan-600 dark:text-cyan-400 hover:text-cyan-800 dark:hover:text-cyan-300 transition-colors group"
               >
                 Explore data
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
@@ -318,7 +348,7 @@ export default function FeaturesSection() {
             <Button
               variant="default"
               size="lg"
-              className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors shadow-sm hover:shadow-md"
+              className="px-8 bg-gradient-to-r from-cyan-700 to-blue-700 hover:from-cyan-600 hover:to-blue-600 shadow-lg hover:shadow-blue-500/25 transition-all duration-300"
             >
               <span className="flex items-center">
                 View Full Dashboard
