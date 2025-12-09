@@ -52,8 +52,7 @@ export async function POST(request: NextRequest) {
       prisma.sessions.findFirst({
         where: { userId: user.id },
         orderBy: {
-          // schema-তে expires থাকলে এটা কাজ করবে
-          expires: "desc" as any,
+          expiresAt: "desc" as any,
         },
       })
     );

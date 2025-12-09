@@ -8,7 +8,7 @@ export async function POST(req: Request) {
     const session = await getSession();
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const userId = session.user.id;
+    const userId = session.user.id!;
     const stationId = bodyStationId ?? session.user.station?.id;
 
     // Validate date
