@@ -1,17 +1,21 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
+type Ctx = { params: Promise<{ id: string }> };
+
 // PUT update station
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: Ctx
 ) {
   try {
+    const { id } = await params; // ✅ await params
+
     const { name, stationId, securityCode, latitude, longitude } =
       await request.json();
 
     const updatedStation = await prisma.station.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         name,
         stationId,
@@ -38,11 +42,13 @@ export async function PUT(
 // DELETE station
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: Ctx
 ) {
   try {
+    const { id } = await params; // ✅ await params
+
     await prisma.station.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ success: true });

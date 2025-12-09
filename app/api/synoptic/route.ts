@@ -179,7 +179,7 @@ export async function GET() {
             // For 00 UTC observations, rainfall occurred on previous date
             // For all other hours, rainfall occurred on same date as observation
             const obsHour = observationTime.getUTCHours();
-            let slotDate = new Date(observationTime);
+            const slotDate = new Date(observationTime);
 
             if (obsHour === 0) {
               // At 00 UTC, rainfall slots are from previous day
