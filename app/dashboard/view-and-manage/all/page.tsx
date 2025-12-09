@@ -5,7 +5,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import FirstCardTable from "../first-card-view/FirstCardTable"
 import SecondCardTable from "../second-card-view/SecondCardTable"
 import SynopticCodeTable from "../synoptic-code/SynopticCodeTable"
-import * as XLSX from "xlsx"
+import ExcelJS from "exceljs"
 import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
 // ✅ CHANGED: useSession now from next-auth
@@ -37,8 +37,8 @@ export default function AllViewAndManagePage() {
   const synopticRef = useRef<any>(null)
   const dailySummeryRef = useRef<any>(null)
 
-  const exportToExcel = () => {
-    const wb = XLSX.utils.book_new();
+  const exportToExcel = async () => {
+    const wb = new ExcelJS.Workbook();
 
     const firstCardData = firstCardRef.current?.getData?.() || [];
     const secondCardData = secondCardRef.current?.getData?.() || [];
@@ -102,17 +102,17 @@ export default function AllViewAndManagePage() {
       ]);
     }
 
-    const finalData = [fullHeaderRow, subHeaderRow, ...mergedRows];
-    const mergedSheet = XLSX.utils.aoa_to_sheet(finalData);
+    // Create First+Second Card sheet
+    const mergedSheet = wb.addWorksheet("First+Second Card");
+    mergedSheet.addRow(fullHeaderRow);
+    mergedSheet.addRow(subHeaderRow);
+    mergedRows.forEach(row => mergedSheet.addRow(row));
 
-    // Merge headers
-    mergedSheet["!merges"] = [
-      { s: { r: 0, c: 0 }, e: { r: 0, c: firstKeys.length - 1 } },
-      { s: { r: 0, c: firstKeys.length }, e: { r: 0, c: firstKeys.length + secondKeys.length - 1 } }
-    ];
-
-    // Add merged sheet
-    XLSX.utils.book_append_sheet(wb, mergedSheet, "First+Second Card");
+    // Merge header cells
+    const firstColEnd = firstKeys.length;
+    const secondColEnd = firstKeys.length + secondKeys.length;
+    mergedSheet.mergeCells(1, 1, 1, firstColEnd);
+    mergedSheet.mergeCells(1, firstColEnd + 1, 1, secondColEnd);
 
     // Synoptic
     const cleanSynoptic = synopticData.map((item: SynopticRecord) => {
@@ -124,8 +124,14 @@ export default function AllViewAndManagePage() {
       });
       return cleaned;
     });
-    const synopticSheet = XLSX.utils.json_to_sheet(cleanSynoptic);
-    XLSX.utils.book_append_sheet(wb, synopticSheet, "Synoptic");
+    const synopticSheet = wb.addWorksheet("Synoptic");
+    if (cleanSynoptic.length > 0) {
+      const synopticKeys = Object.keys(cleanSynoptic[0]);
+      synopticSheet.addRow(synopticKeys);
+      cleanSynoptic.forEach((item: any) => {
+        synopticSheet.addRow(synopticKeys.map(k => item[k]));
+      });
+    }
 
     // Daily Summary
     const cleanSummary = dailySummaryData.map((item: DailySummaryRecord) => {
@@ -137,11 +143,17 @@ export default function AllViewAndManagePage() {
       });
       return cleaned;
     });
-    const summarySheet = XLSX.utils.json_to_sheet(cleanSummary);
-    XLSX.utils.book_append_sheet(wb, summarySheet, "Daily Summary");
+    const summarySheet = wb.addWorksheet("Daily Summary");
+    if (cleanSummary.length > 0) {
+      const summaryKeys = Object.keys(cleanSummary[0]);
+      summarySheet.addRow(summaryKeys);
+      cleanSummary.forEach((item: any) => {
+        summarySheet.addRow(summaryKeys.map(k => item[k]));
+      });
+    }
 
     // Export
-    XLSX.writeFile(wb, "Weather_Data_All_Tabs.xlsx");
+    await wb.xlsx.writeFile("Weather_Data_All_Tabs.xlsx");
   };
 
   const MargeTableRef = useRef<any>(null);
@@ -166,7 +178,7 @@ export default function AllViewAndManagePage() {
           <div className="flex items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
             {/* Excel Export Button */}
             <Button 
-              onClick={exportToExcel} 
+              onClick={() => exportToExcel()} 
               className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 w-1/2 sm:w-auto text-sm sm:text-base px-3 py-2"
             >
               <Download className="h-4 w-4 flex-shrink-0" />
