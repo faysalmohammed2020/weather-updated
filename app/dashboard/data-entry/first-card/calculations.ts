@@ -14,7 +14,10 @@ export type HygrometricData = {
 };
 
 // ✅ BMD Temperature Validation Helper (pure)
-export const validateTemperatureInputs = (dryBulb?: string, wetBulb?: string) => {
+export const validateTemperatureInputs = (
+  dryBulb?: string,
+  wetBulb?: string
+) => {
   if (!dryBulb || !wetBulb) return { isValid: true };
 
   const dryBulbValue = Number.parseFloat(
@@ -114,7 +117,7 @@ export const createDewPointAndHumidityCalculator = (
     const { DpT, RH } = dbtEntry.values[diffIndex];
 
     const formattedDpT = (DpT * 10).toFixed(0);
-    const formattedRH = RH === 100 ? "100" : RH.toString().padStart(3, "0");
+    const formattedRH = RH === 100 ? "100" : (RH ?? 0).toString().padStart(3, "0");
 
     setHygrometricData({
       dryBulb: dryBulbValue.toFixed(1),
@@ -161,9 +164,7 @@ export const calculatePressureValues = (
     return;
   }
 
-  const availablePressures = Object.keys(
-    correctionEntry.cistern_level_pressure
-  )
+  const availablePressures = Object.keys(correctionEntry.cistern_level_pressure)
     .map(Number)
     .sort((a, b) => a - b);
 
@@ -174,21 +175,24 @@ export const calculatePressureValues = (
   );
 
   const heightCorrection =
-    correctionEntry.cistern_level_pressure[closestPressure.toString()];
-  const stationLevelPressure = barAsReadValue + heightCorrection;
+    correctionEntry.cistern_level_pressure[
+      closestPressure.toString() as keyof typeof correctionEntry.cistern_level_pressure
+    ];
 
-  const seaLevelCorrection =
-    correctionEntry.sea_level_pressure?.[closestPressure.toString()];
+  if (heightCorrection === undefined) {
+    toast.error(
+      `Pressure correction not found for pressure ${closestPressure} hPa`
+    );
+    return;
+  }
+
+  const stationLevelPressure = barAsReadValue + heightCorrection;
 
   return {
     stationLevelPressure: Math.round(stationLevelPressure * 10)
       .toString()
       .padStart(5, "0"),
     heightDifference: `+${Math.round(heightCorrection * 100)}`,
-    seaLevelReduction:
-      seaLevelCorrection !== undefined
-        ? `+${Math.round(seaLevelCorrection * 100)}`
-        : undefined,
   };
 };
 
@@ -222,9 +226,7 @@ export const calculateSeaLevelPressure = (
     return;
   }
 
-  const availablePressures = Object.keys(
-    correctionEntry.station_level_pressure
-  )
+  const availablePressures = Object.keys(correctionEntry.station_level_pressure)
     .map(Number)
     .sort((a, b) => a - b);
 
@@ -236,7 +238,17 @@ export const calculateSeaLevelPressure = (
   );
 
   const seaLevelReduction =
-    correctionEntry.station_level_pressure[closestPressure.toString()];
+    correctionEntry.station_level_pressure[
+      closestPressure.toString() as keyof typeof correctionEntry.station_level_pressure
+    ];
+
+  if (seaLevelReduction === undefined) {
+    toast.error(
+      `Pressure ${closestPressure} not found in correction table for dry bulb temperature ${roundedDryBulb}°C`
+    );
+    return;
+  }
+
   const seaLevelPressure = stationPressureValue + seaLevelReduction;
 
   return {

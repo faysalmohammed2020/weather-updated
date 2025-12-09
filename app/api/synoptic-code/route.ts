@@ -142,7 +142,7 @@ export async function POST(req: Request) {
       actionText: "Synoptic Code Created",
       role: session.user.role!,
       actorId: session.user.id,
-      actorEmail: session.user.email,
+      actorEmail: session.user.email ?? undefined,
       module: LogModule.SYNOPTIC_CODE,
     });
 
@@ -299,7 +299,7 @@ export async function PUT(req: Request) {
       actionText: "Synoptic Code Updated",
       role: session.user.role!,
       actorId: session.user.id,
-      actorEmail: session.user.email,
+      actorEmail: session.user.email ?? undefined,
       module: LogModule.SYNOPTIC_CODE,
       details: diffData,
     });

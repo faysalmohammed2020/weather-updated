@@ -17,7 +17,7 @@ import FeaturesSection from "@/components/sections/features-section";
 import TestimonialsSection from "@/components/sections/testimonials-section";
 import CtaSection from "@/components/sections/cta-section";
 import Footer from "@/components/footer";
-import LandingPageDailySummaryChart from "@/components/map/LandingPageGraph";
+import LandingPageDailySummaryChart from "@/components/sections/LandingPageGraph";
 
 export default function LandingPage() {
   // Header state

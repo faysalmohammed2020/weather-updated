@@ -54,55 +54,7 @@ interface Station {
   updatedAt: string;
 }
 
-interface MeteorologicalEntry {
-  id: string;
-  observingTimeId: string;
-  dataType: string;
-  subIndicator: string;
-  alteredThermometer: string;
-  barAsRead: string;
-  correctedForIndex: string;
-  heightDifference: string;
-  correctionForTemp: string;
-  stationLevelPressure: string;
-  seaLevelReduction: string;
-  correctedSeaLevelPressure: string;
-  afternoonReading: string;
-  pressureChange24h: string;
-  dryBulbAsRead: string;
-  wetBulbAsRead: string;
-  maxMinTempAsRead: string;
-  dryBulbCorrected: string;
-  wetBulbCorrected: string;
-  maxMinTempCorrected: string;
-  Td: string;
-  relativeHumidity: string;
-  squallConfirmed: string;
-  squallForce: string;
-  squallDirection: string;
-  squallTime: string;
-  horizontalVisibility: string;
-  miscMeteors: string;
-  pastWeatherW1: string;
-  pastWeatherW2: string;
-  presentWeatherWW: string;
-  c2Indicator: string;
-  submittedAt?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface ObservingTimeEntry {
-  id: string;
-  userId: string;
-  stationId: string;
-  utcTime: string;
-  localTime: string;
-  createdAt: string;
-  updatedAt: string;
-  station: Station;
-  MeteorologicalEntry: MeteorologicalEntry[];
-}
+import type { MeteorologicalEntry, ObservingTimeEntry } from "@/types/meteorological";
 
 interface FirstCardTableProps {
   refreshTrigger?: number;
@@ -384,7 +336,8 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
       setIsEditDialogOpen(false);
     } catch (error) {
       console.error("Error updating record:", error);
-      toast.error(`Failed to update record: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      toast.error(`Failed to update record: ${errorMessage}`);
     } finally {
       setIsSaving(false);
     }
@@ -1147,8 +1100,10 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                     <Input
                       id={field.id}
                       value={
-                        editFormData[field.id as keyof typeof editFormData] ||
-                        ""
+                        typeof editFormData[field.id as keyof typeof editFormData] === 'string' &&
+                        editFormData[field.id as keyof typeof editFormData] !== undefined
+                          ? (editFormData[field.id as keyof typeof editFormData] as string) || ""
+                          : ""
                       }
                       onChange={handleEditInputChange}
                       readOnly={field.readOnly}

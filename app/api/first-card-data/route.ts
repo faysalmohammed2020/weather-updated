@@ -163,8 +163,8 @@ export async function POST(req: Request) {
       action: LogActionType.CREATE,
       actionText: "Meteorological Data Created",
       role: session.user.role!,
-      actorId: session.user.id,
-      actorEmail: session.user.email,
+      actorId: session.user.id!,
+      actorEmail: session.user.email ?? undefined,
       module: LogModule.METEOROLOGICAL_ENTRY,
     });
 
@@ -356,8 +356,8 @@ export async function PUT(req: Request) {
       action: LogActionType.UPDATE,
       actionText: "Meteorological Data Updated",
       role: session.user.role!,
-      actorId: session.user.id,
-      actorEmail: session.user.email,
+      actorId: session.user.id!,
+      actorEmail: session.user.email ?? undefined,
       module: LogModule.METEOROLOGICAL_ENTRY,
       details: diffData,
     });

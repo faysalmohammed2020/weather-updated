@@ -272,10 +272,10 @@ export function DailySummaryForm() {
               ms: knotsToMs(x.windSpeed),
               dirIdx: degTo16PtIndex(x.windDirection),
             }))
-            .filter((w) => !isNaN(w.ms));
+            .filter((w: { ms: number; dirIdx: number | null }) => !isNaN(w.ms));
           if (windPairs.length) {
             const maxW = windPairs.reduce(
-              (m, x) => (x.ms > m.ms ? x : m),
+              (m: { ms: number; dirIdx: number | null }, x: { ms: number; dirIdx: number | null }) => (x.ms > m.ms ? x : m),
               windPairs[0]
             );
             calculatedMeasurements[11] = String(round1(maxW.ms));

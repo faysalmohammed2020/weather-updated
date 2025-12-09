@@ -3,8 +3,22 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
+interface NetCDFVariable {
+  dimensions: string[];
+  data: number[];
+}
+
+interface NetCDFMetadata {
+  dimensions: Record<string, number>;
+}
+
+interface NetCDFData {
+  variables: Record<string, NetCDFVariable>;
+  metadata: NetCDFMetadata;
+}
+
 interface DebugPanelProps {
-  ncData: any;
+  ncData: NetCDFData;
   selectedVariable: string;
 }
 

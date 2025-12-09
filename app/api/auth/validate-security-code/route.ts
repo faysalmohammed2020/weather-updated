@@ -13,13 +13,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if the security code exists in the database
-    const user = await prisma.users.findFirst({
+    const station = await prisma.station.findFirst({
       where: {
         securityCode,
       },
     });
 
-    if (user) {
+    if (station) {
       return NextResponse.json({ valid: true });
     } else {
       return NextResponse.json(

@@ -1,7 +1,7 @@
 // lib/server/user-management-data.ts
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/getSession";
-import type { User, Station } from "@prisma/client";
+import type { users, Station } from "@prisma/client";
 
 /**
  * Users fetch (server-only, build-safe)

@@ -116,7 +116,7 @@ export default function UploadAndVisualizeCsv() {
                 </div>
                 <div className="p-4 bg-gray-50">
                   <a
-                    href={`https://django-netcdf-visualizer.onrender.com${fileData.csvs[key]}`}
+                    href={`https://django-netcdf-visualizer.onrender.com${fileData.csvs?.[key]}`}
                     download
                     className="flex items-center justify-center text-blue-600 hover:text-blue-800 transition-colors"
                   >

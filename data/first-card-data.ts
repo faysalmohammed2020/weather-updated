@@ -407,6 +407,7 @@ export const firstCardData: FirstCardData[] = [
       "1": "1",
       "2": "1",
       "3": "1",
+      "4": "1",
     },
     stationName: "Dhaka",
     year: {

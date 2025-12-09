@@ -17,12 +17,18 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import LogsTableSkeleton from "./LogsTableSkeleton"; // ✅ skeleton
 import { LogsFilter } from "./logs-filter";
 
+type LogWithUsers = logs & {
+  actor?: { name?: string | null } | null;
+  targetUser?: { name?: string | null } | null;
+  details?: any;
+};
+
 export const LogsTable = ({
   logs: rawLogs,
   total: rawTotal,
   limit = 10,
 }: {
-  logs: logs[];
+  logs: LogWithUsers[];
   total?: number;
   limit?: number;
 }) => {
@@ -75,7 +81,7 @@ export const LogsTable = ({
     [router, pathname, searchParams]
   );
 
-  const handleViewDetails = useCallback((details: JSON) => {
+  const handleViewDetails = useCallback((details: any) => {
     setSelectedDetails(details);
     setIsDialogOpen(true);
   }, []);

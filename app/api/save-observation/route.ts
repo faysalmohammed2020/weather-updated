@@ -243,7 +243,7 @@ export async function POST(request: Request) {
       actionText: "Weather Observation Created",
       role: session.user.role!,
       actorId: session.user.id,
-      actorEmail: session.user.email,
+      actorEmail: session.user.email ?? undefined,
       module: LogModule.WEATHER_OBSERVATION,
     });
 
@@ -317,7 +317,7 @@ export async function POST(request: Request) {
       actionText: "Daily Summary Created",
       role: session.user.role!,
       actorId: session.user.id,
-      actorEmail: session.user.email,
+      actorEmail: session.user.email ?? undefined,
       module: LogModule.DAILY_SUMMARY,
     });
 
@@ -549,7 +549,7 @@ export async function PUT(request: Request) {
         actionText: "Weather Observation Updated",
         role: session.user.role!,
         actorId: session.user.id,
-        actorEmail: session.user.email,
+        actorEmail: session.user.email ?? undefined,
         module: LogModule.WEATHER_OBSERVATION,
         details: diffData,
       });

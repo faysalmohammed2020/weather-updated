@@ -42,6 +42,10 @@ export const calculateDewPointAndHumidity = (
 
     const { DpT, RH } = dbtEntry.values[diffIndex];
 
+    if (DpT === null || RH === null) {
+      return null;
+    }
+
     return {
       Td: DpT.toString(),
       relativeHumidity: RH.toString(),

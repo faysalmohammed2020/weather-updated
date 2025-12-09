@@ -80,7 +80,9 @@ const CloudRow = ({ observation }: CloudRowProps) => {
             key={`${field}-${index}`}
             className={significantClass(observation?.[field] as string | null)}
           >
-            {observation?.[field] || "--"}
+            {Array.isArray(observation?.[field]) 
+              ? JSON.stringify(observation?.[field]) 
+              : observation?.[field] || "--"}
           </td>
         ))
       )}

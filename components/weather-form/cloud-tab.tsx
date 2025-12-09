@@ -57,11 +57,11 @@ export default function CloudTab() {
   // Initialize cloud object if it doesn't exist
   const cloud = values.cloud || {}
 
-  const handleCloudChange = (section, field, value) => {
+  const handleCloudChange = (section: string, field: string, value: string) => {
     setFieldValue(`cloud.${section}.${field}`, value)
   }
 
-  const handleSignificantCloudChange = (layer, field, value) => {
+  const handleSignificantCloudChange = (layer: string, field: string, value: string) => {
     setFieldValue(`cloud.significantCloud.${layer}.${field}`, value)
   }
 

@@ -215,9 +215,9 @@ export async function POST(request: NextRequest) {
       action: LogActionType.CREATE,
       actionText: "User Impersonation Started",
       role: session.user.role!,
-      actorId: session.user.id,
+      actorId: session.user.id!,
       targetId: targetUserId,
-      actorEmail: session.user.email,
+      actorEmail: session.user.email!,
       targetEmail: targetUser.email,
       module: LogModule.USER,
       details: {
