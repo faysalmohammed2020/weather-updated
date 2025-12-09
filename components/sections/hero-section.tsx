@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import {
@@ -25,6 +26,20 @@ import {
   Legend,
 } from "recharts";
 
+type LiveWeatherData = {
+  station: {
+    id: string;
+    stationId: string;
+    name: string;
+  } | null;
+  observedAt: string | null;
+  maxTemperature: number | null;
+  minTemperature: number | null;
+  totalPrecipitation: number | null;
+  windSpeed: number | null;
+  avRelativeHumidity: number | null;
+};
+
 export default function HeroSection() {
   // Animation variants
   const fadeIn = {
@@ -40,6 +55,89 @@ export default function HeroSection() {
         staggerChildren: 0.1,
       },
     },
+  };
+
+  const [liveWeather, setLiveWeather] = useState<LiveWeatherData | null>(null);
+  const [liveStatus, setLiveStatus] = useState<"loading" | "ready" | "error">(
+    "loading"
+  );
+
+  useEffect(() => {
+    let active = true;
+
+    const fetchLiveWeather = async () => {
+      try {
+        setLiveStatus("loading");
+        const res = await fetch("/api/home-weather", { cache: "no-store" });
+        const payload = await res.json();
+
+        if (!res.ok || !payload?.data) {
+          throw new Error(payload?.message || "Failed to load weather data");
+        }
+
+        if (!active) return;
+        setLiveWeather(payload.data);
+        setLiveStatus("ready");
+      } catch (error) {
+        console.error("Hero live weather fetch failed:", error);
+        if (active) setLiveStatus("error");
+      }
+    };
+
+    fetchLiveWeather();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const formatMetric = (
+    value: number | null | undefined,
+    unit = "",
+    fallback = "N/A"
+  ) => {
+    if (value === null || value === undefined) return fallback;
+    return `${value}${unit}`;
+  };
+
+  const observedLabel = useMemo(() => {
+    if (!liveWeather?.observedAt) return "Awaiting latest reading";
+    return new Date(liveWeather.observedAt).toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+  }, [liveWeather?.observedAt]);
+
+  const stationLabel = liveWeather?.station?.name || "Bangladesh Network";
+
+  const heroStats = useMemo(
+    () => [
+      {
+        label: "Max Temp",
+        value: formatMetric(liveWeather?.maxTemperature, "°C"),
+        hint: "Today's high",
+      },
+      {
+        label: "Min Temp",
+        value: formatMetric(liveWeather?.minTemperature, "°C"),
+        hint: "Today's low",
+      },
+      {
+        label: "Wind Speed",
+        value: formatMetric(liveWeather?.windSpeed, " kt"),
+        hint: "Average wind",
+      },
+    ],
+    [liveWeather]
+  );
+
+  const floatingMetrics = {
+    temperature: formatMetric(liveWeather?.maxTemperature, "°C"),
+    precipitation: formatMetric(liveWeather?.totalPrecipitation, " mm"),
+    wind: formatMetric(liveWeather?.windSpeed, " kt"),
+    humidity: formatMetric(liveWeather?.avRelativeHumidity, "%"),
   };
 
   // Sample weather data for charts
@@ -205,7 +303,13 @@ export default function HeroSection() {
               variants={fadeIn}
             >
               <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
-              <span className="text-xs font-medium">Live Weather Updates</span>
+              <span className="text-xs font-medium">
+                {liveStatus === "loading"
+                  ? "Fetching live weather..."
+                  : liveStatus === "error"
+                  ? "Live weather unavailable"
+                  : `Latest update • ${observedLabel}`}
+              </span>
             </motion.div>
 
             <div className="space-y-2">
@@ -221,7 +325,7 @@ export default function HeroSection() {
               >
                 Professional weather monitoring and forecasting for Bangladesh.
                 Access real-time data, forecasts, and historical trends with our
-                interactive dashboard.
+                interactive dashboard. Latest data from {stationLabel}.
               </motion.p>
             </div>
 
@@ -254,54 +358,28 @@ export default function HeroSection() {
               className="grid grid-cols-3 gap-4 mt-8 max-w-md"
               variants={fadeIn}
             >
-              <motion.div
-                className="flex flex-col items-center justify-center rounded-lg bg-white/90 dark:bg-gray-800/90 p-3 backdrop-blur-sm shadow-sm border border-cyan-200 dark:border-cyan-800/50"
-                whileHover={{
-                  y: -8,
-                  boxShadow:
-                    "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-                  transition: { duration: 0.2 },
-                }}
-              >
-                <span className="text-2xl font-bold text-cyan-700 dark:text-cyan-400">
-                  64
-                </span>
-                <span className="text-xs text-gray-600 dark:text-gray-400">
-                  Districts
-                </span>
-              </motion.div>
-              <motion.div
-                className="flex flex-col items-center justify-center rounded-lg bg-white/90 dark:bg-gray-800/90 p-3 backdrop-blur-sm shadow-sm border border-cyan-200 dark:border-cyan-800/50"
-                whileHover={{
-                  y: -8,
-                  boxShadow:
-                    "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-                  transition: { duration: 0.2 },
-                }}
-              >
-                <span className="text-2xl font-bold text-cyan-700 dark:text-cyan-400">
-                  24/7
-                </span>
-                <span className="text-xs text-gray-600 dark:text-gray-400">
-                  Monitoring
-                </span>
-              </motion.div>
-              <motion.div
-                className="flex flex-col items-center justify-center rounded-lg bg-white/90 dark:bg-gray-800/90 p-3 backdrop-blur-sm shadow-sm border border-cyan-200 dark:border-cyan-800/50"
-                whileHover={{
-                  y: -8,
-                  boxShadow:
-                    "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-                  transition: { duration: 0.2 },
-                }}
-              >
-                <span className="text-2xl font-bold text-cyan-700 dark:text-cyan-400">
-                  95%
-                </span>
-                <span className="text-xs text-gray-600 dark:text-gray-400">
-                  Accuracy
-                </span>
-              </motion.div>
+              {heroStats.map((stat) => (
+                <motion.div
+                  key={stat.label}
+                  className="flex flex-col items-center justify-center rounded-lg bg-white/90 dark:bg-gray-800/90 p-3 backdrop-blur-sm shadow-sm border border-cyan-200 dark:border-cyan-800/50"
+                  whileHover={{
+                    y: -8,
+                    boxShadow:
+                      "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+                    transition: { duration: 0.2 },
+                  }}
+                >
+                  <span className="text-2xl font-bold text-cyan-700 dark:text-cyan-400">
+                    {stat.value}
+                  </span>
+                  <span className="text-xs text-gray-600 dark:text-gray-400">
+                    {stat.label}
+                  </span>
+                  <span className="text-[10px] text-gray-500 mt-1">
+                    {stat.hint}
+                  </span>
+                </motion.div>
+              ))}
             </motion.div>
           </motion.div>
 
@@ -476,9 +554,11 @@ export default function HeroSection() {
                 }}
               >
                 <Thermometer className="h-5 w-5 text-red-500" />
-                <span className="font-bold">28°C</span>
+                <span className="font-bold">
+                  {floatingMetrics.temperature}
+                </span>
                 <span className="text-sm text-gray-600 dark:text-gray-400">
-                  Dhaka
+                  {stationLabel}
                 </span>
               </motion.div>
 
@@ -496,7 +576,9 @@ export default function HeroSection() {
                 }}
               >
                 <CloudRain className="h-5 w-5 text-blue-500" />
-                <span className="font-bold">15mm</span>
+                <span className="font-bold">
+                  {floatingMetrics.precipitation}
+                </span>
                 <span className="text-sm text-gray-600 dark:text-gray-400">
                   Rainfall
                 </span>
@@ -516,7 +598,7 @@ export default function HeroSection() {
                 }}
               >
                 <Wind className="h-5 w-5 text-green-500" />
-                <span className="font-bold">12NM</span>
+                <span className="font-bold">{floatingMetrics.wind}</span>
                 <span className="text-sm text-gray-600 dark:text-gray-400">
                   Wind
                 </span>
@@ -536,7 +618,7 @@ export default function HeroSection() {
                 }}
               >
                 <Droplets className="h-5 w-5 text-cyan-500" />
-                <span className="font-bold">65%</span>
+                <span className="font-bold">{floatingMetrics.humidity}</span>
                 <span className="text-sm text-gray-600 dark:text-gray-400">
                   Humidity
                 </span>

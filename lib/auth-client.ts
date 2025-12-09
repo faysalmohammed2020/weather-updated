@@ -4,7 +4,16 @@ import { signIn as naSignIn, signOut as naSignOut, useSession as naUseSession } 
 import { useRouter } from "next/navigation";
 
 // ---- main hooks ----
-export const useSession = naUseSession;
+export function useSession() {
+  const session = naUseSession();
+
+  // Normalize shape so existing UI can read user/isPending
+  return {
+    ...session,
+    user: session.data?.user ?? null,
+    isPending: session.status === "loading",
+  };
+}
 
 // ---- sign in ----
 // BetterAuth signIn(...) -> NextAuth signIn("credentials", ...)
@@ -83,3 +92,47 @@ export function useTwoFactorRedirect() {
 
   return { onOtpRequired };
 }
+
+// ---- two factor client ----
+type TwoFactorResult<T = undefined> = Promise<{
+  data?: T;
+  error: { message: string } | null;
+}>;
+
+async function callTwoFactor<T>(
+  action: "enable" | "verifyTotp" | "verifyBackupCode" | "disable",
+  payload: Record<string, unknown>
+): TwoFactorResult<T> {
+  try {
+    const res = await fetch("/api/two-factor", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ action, ...payload }),
+    });
+
+    const body = await res.json().catch(() => ({}));
+    const error = body?.error || (!res.ok ? { message: "Unable to process request" } : null);
+
+    if (error) {
+      return { error };
+    }
+
+    return { data: body?.data as T, error: null };
+  } catch (err) {
+    return {
+      error: {
+        message: err instanceof Error ? err.message : "Unexpected error",
+      },
+    };
+  }
+}
+
+export const twoFactor = {
+  enable: (params: { password: string }) =>
+    callTwoFactor<{ totpURI: string; backupCodes: string[] }>("enable", params),
+  verifyTotp: (params: { code: string }) =>
+    callTwoFactor("verifyTotp", params),
+  verifyBackupCode: (params: { code: string }) =>
+    callTwoFactor("verifyBackupCode", params),
+  disable: (params: { password: string }) => callTwoFactor("disable", params),
+};

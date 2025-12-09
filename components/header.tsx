@@ -32,57 +32,104 @@ export default function Header() {
     >
       <div className="container flex h-16 items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
-          <Cloud className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold">BD Weather</span>
+          <Cloud className="h-6 w-6 text-cyan-600 dark:text-cyan-400" />
+          <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400">BD Weather</span>
         </Link>
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-6">
           <Link
             href="/"
-            className={`text-sm font-medium transition-colors hover:text-primary ${
-              isActive("/") ? "text-primary" : "text-foreground"
+            className={`text-sm font-medium transition-all duration-300 relative py-1 px-2 rounded-md ${
+              isActive("/") 
+                ? "text-cyan-700 dark:text-cyan-400 bg-cyan-100 dark:bg-cyan-900/30 shadow-sm" 
+                : "text-gray-700 dark:text-gray-300 hover:text-cyan-700 dark:hover:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-900/20"
             }`}
           >
-            Home
+            {isActive("/") && (
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-md"
+                layoutId="activeTab"
+                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+              />
+            )}
+            <span className="relative z-10">Home</span>
           </Link>
           <Link
             href="/features"
-            className={`text-sm font-medium transition-colors hover:text-primary ${
-              isActive("/features") ? "text-primary" : "text-foreground"
+            className={`text-sm font-medium transition-all duration-300 relative py-1 px-2 rounded-md ${
+              isActive("/features") 
+                ? "text-cyan-700 dark:text-cyan-400 bg-cyan-100 dark:bg-cyan-900/30 shadow-sm" 
+                : "text-gray-700 dark:text-gray-300 hover:text-cyan-700 dark:hover:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-900/20"
             }`}
           >
-            Features
+            {isActive("/features") && (
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-md"
+                layoutId="activeTab"
+                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+              />
+            )}
+            <span className="relative z-10">Features</span>
           </Link>
           <Link
             href="/about"
-            className={`text-sm font-medium transition-colors hover:text-primary ${
-              isActive("/about") ? "text-primary" : "text-foreground"
+            className={`text-sm font-medium transition-all duration-300 relative py-1 px-2 rounded-md ${
+              isActive("/about") 
+                ? "text-cyan-700 dark:text-cyan-400 bg-cyan-100 dark:bg-cyan-900/30 shadow-sm" 
+                : "text-gray-700 dark:text-gray-300 hover:text-cyan-700 dark:hover:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-900/20"
             }`}
           >
-            About
+            {isActive("/about") && (
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-md"
+                layoutId="activeTab"
+                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+              />
+            )}
+            <span className="relative z-10">About</span>
           </Link>
           <Link
             href="/data-sources"
-            className={`text-sm font-medium transition-colors hover:text-primary ${
-              isActive("/data-sources") ? "text-primary" : "text-foreground"
+            className={`text-sm font-medium transition-all duration-300 relative py-1 px-2 rounded-md ${
+              isActive("/data-sources") 
+                ? "text-cyan-700 dark:text-cyan-400 bg-cyan-100 dark:bg-cyan-900/30 shadow-sm" 
+                : "text-gray-700 dark:text-gray-300 hover:text-cyan-700 dark:hover:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-900/20"
             }`}
           >
-            Data Sources
+            {isActive("/data-sources") && (
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-md"
+                layoutId="activeTab"
+                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+              />
+            )}
+            <span className="relative z-10">Data Sources</span>
           </Link>
           <Link
             href="/contact"
-            className={`text-sm font-medium transition-colors hover:text-primary ${
-              isActive("/contact") ? "text-primary" : "text-foreground"
+            className={`text-sm font-medium transition-all duration-300 relative py-1 px-2 rounded-md ${
+              isActive("/contact") 
+                ? "text-cyan-700 dark:text-cyan-400 bg-cyan-100 dark:bg-cyan-900/30 shadow-sm" 
+                : "text-gray-700 dark:text-gray-300 hover:text-cyan-700 dark:hover:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-900/20"
             }`}
           >
-            Contact
+            {isActive("/contact") && (
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-md"
+                layoutId="activeTab"
+                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+              />
+            )}
+            <span className="relative z-10">Contact</span>
           </Link>
         </nav>
 
         <div className="flex items-center gap-4">
           <Link href="/dashboard" className="hidden md:block">
-            <Button>Access Dashboard</Button>
+            <Button className="bg-gradient-to-r from-cyan-700 to-blue-700 hover:from-cyan-600 hover:to-blue-600 shadow-lg hover:shadow-blue-500/25 transition-all duration-300">
+              Access Dashboard
+            </Button>
           </Link>
 
           {/* Mobile Menu Button */}
@@ -111,69 +158,94 @@ export default function Header() {
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <div className="border-b bg-background">
+            <div className="border-b border-cyan-200 dark:border-cyan-800 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm">
               <nav className="container flex flex-col py-4 gap-2">
                 <Link
                   href="/"
-                  className={`px-4 py-2 text-sm font-medium rounded-md ${
+                  className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-300 ${
                     isActive("/")
-                      ? "bg-primary/10 text-primary"
-                      : "hover:bg-muted"
+                      ? "text-cyan-700 dark:text-cyan-400 bg-gradient-to-r from-cyan-100 to-blue-100 dark:from-cyan-900/30 dark:to-blue-900/30 shadow-sm border border-cyan-300 dark:border-cyan-700"
+                      : "text-gray-700 dark:text-gray-300 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 hover:text-cyan-700 dark:hover:text-cyan-400"
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Home
+                  <span className="flex items-center gap-2">
+                    {isActive("/") && (
+                      <div className="w-2 h-2 rounded-full bg-cyan-600 dark:bg-cyan-400 animate-pulse"></div>
+                    )}
+                    Home
+                  </span>
                 </Link>
                 <Link
                   href="/features"
-                  className={`px-4 py-2 text-sm font-medium rounded-md ${
+                  className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-300 ${
                     isActive("/features")
-                      ? "bg-primary/10 text-primary"
-                      : "hover:bg-muted"
+                      ? "text-cyan-700 dark:text-cyan-400 bg-gradient-to-r from-cyan-100 to-blue-100 dark:from-cyan-900/30 dark:to-blue-900/30 shadow-sm border border-cyan-300 dark:border-cyan-700"
+                      : "text-gray-700 dark:text-gray-300 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 hover:text-cyan-700 dark:hover:text-cyan-400"
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Features
+                  <span className="flex items-center gap-2">
+                    {isActive("/features") && (
+                      <div className="w-2 h-2 rounded-full bg-cyan-600 dark:bg-cyan-400 animate-pulse"></div>
+                    )}
+                    Features
+                  </span>
                 </Link>
                 <Link
                   href="/about"
-                  className={`px-4 py-2 text-sm font-medium rounded-md ${
+                  className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-300 ${
                     isActive("/about")
-                      ? "bg-primary/10 text-primary"
-                      : "hover:bg-muted"
+                      ? "text-cyan-700 dark:text-cyan-400 bg-gradient-to-r from-cyan-100 to-blue-100 dark:from-cyan-900/30 dark:to-blue-900/30 shadow-sm border border-cyan-300 dark:border-cyan-700"
+                      : "text-gray-700 dark:text-gray-300 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 hover:text-cyan-700 dark:hover:text-cyan-400"
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  About
+                  <span className="flex items-center gap-2">
+                    {isActive("/about") && (
+                      <div className="w-2 h-2 rounded-full bg-cyan-600 dark:bg-cyan-400 animate-pulse"></div>
+                    )}
+                    About
+                  </span>
                 </Link>
                 <Link
                   href="/data-sources"
-                  className={`px-4 py-2 text-sm font-medium rounded-md ${
+                  className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-300 ${
                     isActive("/data-sources")
-                      ? "bg-primary/10 text-primary"
-                      : "hover:bg-muted"
+                      ? "text-cyan-700 dark:text-cyan-400 bg-gradient-to-r from-cyan-100 to-blue-100 dark:from-cyan-900/30 dark:to-blue-900/30 shadow-sm border border-cyan-300 dark:border-cyan-700"
+                      : "text-gray-700 dark:text-gray-300 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 hover:text-cyan-700 dark:hover:text-cyan-400"
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Data Sources
+                  <span className="flex items-center gap-2">
+                    {isActive("/data-sources") && (
+                      <div className="w-2 h-2 rounded-full bg-cyan-600 dark:bg-cyan-400 animate-pulse"></div>
+                    )}
+                    Data Sources
+                  </span>
                 </Link>
                 <Link
                   href="/contact"
-                  className={`px-4 py-2 text-sm font-medium rounded-md ${
+                  className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-300 ${
                     isActive("/contact")
-                      ? "bg-primary/10 text-primary"
-                      : "hover:bg-muted"
+                      ? "text-cyan-700 dark:text-cyan-400 bg-gradient-to-r from-cyan-100 to-blue-100 dark:from-cyan-900/30 dark:to-blue-900/30 shadow-sm border border-cyan-300 dark:border-cyan-700"
+                      : "text-gray-700 dark:text-gray-300 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 hover:text-cyan-700 dark:hover:text-cyan-400"
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Contact
+                  <span className="flex items-center gap-2">
+                    {isActive("/contact") && (
+                      <div className="w-2 h-2 rounded-full bg-cyan-600 dark:bg-cyan-400 animate-pulse"></div>
+                    )}
+                    Contact
+                  </span>
                 </Link>
                 <Link
                   href="/dashboard"
                   className="mt-2"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  <Button className="w-full">Access Dashboard</Button>
+                  <Button className="w-full bg-gradient-to-r from-cyan-700 to-blue-700 hover:from-cyan-600 hover:to-blue-600 shadow-lg hover:shadow-blue-500/25 transition-all duration-300">Access Dashboard</Button>
                 </Link>
               </nav>
             </div>

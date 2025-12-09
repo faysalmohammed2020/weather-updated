@@ -383,15 +383,15 @@ ${"=".repeat(60)}
 
   // Add data records
   mergedData.forEach((record, index) => {
-    const metEntry = record.meteorologicalEntry || {};
-    const weatherObs = record.weatherObservation || {};
+    const metEntry = record.meteorologicalEntry || {} as MeteorologicalEntry;
+    const weatherObs = record.weatherObservation || {} as WeatherObservation;
     
     txtContent += `\nRecord ${index + 1}:\n`;
     txtContent += `${"-".repeat(30)}\n`;
     
     // Basic Information
     txtContent += `Time (GMT)${" ".repeat(10)} ---> ${utcToHour(record.utcTime) || "--"}\n`;
-    txtContent += `Indicator${" ".repeat(12)} ---> ${metEntry.subIndicator || "--"}\n`;
+    txtContent += `Indicator${" ".repeat(12)} ---> ${metEntry?.subIndicator || "--"}\n`;
     txtContent += `Date${" ".repeat(16)} ---> ${record.utcTime ? format(new Date(record.utcTime), "yyyy-MM-dd") : "--"}\n`;
     txtContent += `Station Name & ID${" ".repeat(4)} ---> ${record.station?.name + " " + record.station?.stationId || "--"}\n`;
     txtContent += `Station Name${" ".repeat(9)} ---> ${record.station?.name || "--"}\n`;
@@ -399,69 +399,69 @@ ${"=".repeat(60)}
     // Meteorological Data
     txtContent += `\nMETEOROLOGICAL DATA:\n`;
     txtContent += `${"-".repeat(30)}\n`;
-    txtContent += `Attached Thermometer (°C) ---> ${metEntry.alteredThermometer || "--"}\n`;
-    txtContent += `Bar As Read (hPa)${" ".repeat(6)} ---> ${metEntry.barAsRead || "--"}\n`;
-    txtContent += `Corrected for Index${" ".repeat(4)} ---> ${metEntry.correctedForIndex || "--"}\n`;
-    txtContent += `Height Difference (hPa)${" ".repeat(1)} ---> ${metEntry.heightDifference || "--"}\n`;
-    txtContent += `Station Level Pressure ---> ${metEntry.stationLevelPressure || "--"}\n`;
-    txtContent += `Sea Level Reduction${" ".repeat(3)} ---> ${metEntry.seaLevelReduction || "--"}\n`;
-    txtContent += `Sea Level Pressure${" ".repeat(4)} ---> ${metEntry.correctedSeaLevelPressure || "--"}\n`;
-    txtContent += `Afternoon Reading${" ".repeat(4)} ---> ${metEntry.afternoonReading || "--"}\n`;
-    txtContent += `24-Hour Pressure Change --> ${metEntry.pressureChange24h || "--"}\n`;
-    txtContent += `Dry Bulb As Read (°C)${" ".repeat(2)} ---> ${metEntry.dryBulbAsRead || "--"}\n`;
-    txtContent += `Wet Bulb As Read (°C)${" ".repeat(2)} ---> ${metEntry.wetBulbAsRead || "--"}\n`;
-    txtContent += `MAX/MIN Temp As Read${" ".repeat(2)} ---> ${metEntry.maxMinTempAsRead || "--"}\n`;
-    txtContent += `Dry Bulb Corrected (°C) --> ${metEntry.dryBulbCorrected || "--"}\n`;
-    txtContent += `Wet Bulb Corrected (°C) --> ${metEntry.wetBulbCorrected || "--"}\n`;
-    txtContent += `MAX/MIN Temp Corrected --> ${metEntry.maxMinTempCorrected || "--"}\n`;
-    txtContent += `Dew Point Temperature${" ".repeat(2)} ---> ${metEntry.Td || "--"}\n`;
-    txtContent += `Relative Humidity (%)${" ".repeat(2)} ---> ${metEntry.relativeHumidity || "--"}\n`;
-    txtContent += `Squall Force (KTS)${" ".repeat(4)} ---> ${metEntry.squallForce || "--"}\n`;
-    txtContent += `Squall Direction (°)${" ".repeat(3)} ---> ${metEntry.squallDirection || "--"}\n`;
-    txtContent += `Squall Time${" ".repeat(10)} ---> ${metEntry.squallTime || "--"}\n`;
-    txtContent += `Horizontal Visibility${" ".repeat(2)} ---> ${metEntry.horizontalVisibility || "--"}\n`;
-    txtContent += `Misc Meteors (Code)${" ".repeat(3)} ---> ${metEntry.miscMeteors || "--"}\n`;
-    txtContent += `Past Weather (W₁)${" ".repeat(5)} ---> ${metEntry.pastWeatherW1 || "--"}\n`;
-    txtContent += `Past Weather (W₂)${" ".repeat(5)} ---> ${metEntry.pastWeatherW2 || "--"}\n`;
-    txtContent += `Present Weather (ww)${" ".repeat(3)} ---> ${metEntry.presentWeatherWW || "--"}\n`;
+    txtContent += `Attached Thermometer (°C) ---> ${metEntry?.alteredThermometer || "--"}\n`;
+    txtContent += `Bar As Read (hPa)${" ".repeat(6)} ---> ${metEntry?.barAsRead || "--"}\n`;
+    txtContent += `Corrected for Index${" ".repeat(4)} ---> ${metEntry?.correctedForIndex || "--"}\n`;
+    txtContent += `Height Difference (hPa)${" ".repeat(1)} ---> ${metEntry?.heightDifference || "--"}\n`;
+    txtContent += `Station Level Pressure ---> ${metEntry?.stationLevelPressure || "--"}\n`;
+    txtContent += `Sea Level Reduction${" ".repeat(3)} ---> ${metEntry?.seaLevelReduction || "--"}\n`;
+    txtContent += `Sea Level Pressure${" ".repeat(4)} ---> ${metEntry?.correctedSeaLevelPressure || "--"}\n`;
+    txtContent += `Afternoon Reading${" ".repeat(4)} ---> ${metEntry?.afternoonReading || "--"}\n`;
+    txtContent += `24-Hour Pressure Change --> ${metEntry?.pressureChange24h || "--"}\n`;
+    txtContent += `Dry Bulb As Read (°C)${" ".repeat(2)} ---> ${metEntry?.dryBulbAsRead || "--"}\n`;
+    txtContent += `Wet Bulb As Read (°C)${" ".repeat(2)} ---> ${metEntry?.wetBulbAsRead || "--"}\n`;
+    txtContent += `MAX/MIN Temp As Read${" ".repeat(2)} ---> ${metEntry?.maxMinTempAsRead || "--"}\n`;
+    txtContent += `Dry Bulb Corrected (°C) --> ${metEntry?.dryBulbCorrected || "--"}\n`;
+    txtContent += `Wet Bulb Corrected (°C) --> ${metEntry?.wetBulbCorrected || "--"}\n`;
+    txtContent += `MAX/MIN Temp Corrected --> ${metEntry?.maxMinTempCorrected || "--"}\n`;
+    txtContent += `Dew Point Temperature${" ".repeat(2)} ---> ${metEntry?.Td || "--"}\n`;
+    txtContent += `Relative Humidity (%)${" ".repeat(2)} ---> ${metEntry?.relativeHumidity || "--"}\n`;
+    txtContent += `Squall Force (KTS)${" ".repeat(4)} ---> ${metEntry?.squallForce || "--"}\n`;
+    txtContent += `Squall Direction (°)${" ".repeat(3)} ---> ${metEntry?.squallDirection || "--"}\n`;
+    txtContent += `Squall Time${" ".repeat(10)} ---> ${metEntry?.squallTime || "--"}\n`;
+    txtContent += `Horizontal Visibility${" ".repeat(2)} ---> ${metEntry?.horizontalVisibility || "--"}\n`;
+    txtContent += `Misc Meteors (Code)${" ".repeat(3)} ---> ${metEntry?.miscMeteors || "--"}\n`;
+    txtContent += `Past Weather (W₁)${" ".repeat(5)} ---> ${metEntry?.pastWeatherW1 || "--"}\n`;
+    txtContent += `Past Weather (W₂)${" ".repeat(5)} ---> ${metEntry?.pastWeatherW2 || "--"}\n`;
+    txtContent += `Present Weather (ww)${" ".repeat(3)} ---> ${metEntry?.presentWeatherWW || "--"}\n`;
 
     // Weather Observation Data
     txtContent += `\nWEATHER OBSERVATION DATA:\n`;
     txtContent += `${"-".repeat(30)}\n`;
-    txtContent += `Low Cloud Form${" ".repeat(7)} ---> ${weatherObs.lowCloudForm || "--"}\n`;
-    txtContent += `Low Cloud Amount${" ".repeat(5)} ---> ${weatherObs.lowCloudAmount || "--"}\n`;
-    txtContent += `Low Cloud Direction${" ".repeat(3)} ---> ${weatherObs.lowCloudDirection || "--"}\n`;
-    txtContent += `Low Cloud Height${" ".repeat(5)} ---> ${weatherObs.lowCloudHeight || "--"}\n`;
-    txtContent += `Medium Cloud Form${" ".repeat(4)} ---> ${weatherObs.mediumCloudForm || "--"}\n`;
-    txtContent += `Medium Cloud Amount${" ".repeat(2)} ---> ${weatherObs.mediumCloudAmount || "--"}\n`;
-    txtContent += `Medium Cloud Direction --> ${weatherObs.mediumCloudDirection || "--"}\n`;
-    txtContent += `Medium Cloud Height${" ".repeat(2)} ---> ${weatherObs.mediumCloudHeight || "--"}\n`;
-    txtContent += `High Cloud Form${" ".repeat(6)} ---> ${weatherObs.highCloudForm || "--"}\n`;
-    txtContent += `High Cloud Amount${" ".repeat(4)} ---> ${weatherObs.highCloudAmount || "--"}\n`;
-    txtContent += `High Cloud Direction${" ".repeat(3)} ---> ${weatherObs.highCloudDirection || "--"}\n`;
-    txtContent += `Total Cloud Amount${" ".repeat(3)} ---> ${weatherObs.totalCloudAmount || "--"}\n`;
-    txtContent += `Layer1 Form${" ".repeat(9)} ---> ${weatherObs.layer1Form || "--"}\n`;
-    txtContent += `Layer1 Amount${" ".repeat(7)} ---> ${weatherObs.layer1Amount || "--"}\n`;
-    txtContent += `Layer1 Height${" ".repeat(7)} ---> ${weatherObs.layer1Height || "--"}\n`;
-    txtContent += `Layer2 Form${" ".repeat(9)} ---> ${weatherObs.layer2Form || "--"}\n`;
-    txtContent += `Layer2 Amount${" ".repeat(7)} ---> ${weatherObs.layer2Amount || "--"}\n`;
-    txtContent += `Layer2 Height${" ".repeat(7)} ---> ${weatherObs.layer2Height || "--"}\n`;
-    txtContent += `Layer3 Form${" ".repeat(9)} ---> ${weatherObs.layer3Form || "--"}\n`;
-    txtContent += `Layer3 Amount${" ".repeat(7)} ---> ${weatherObs.layer3Amount || "--"}\n`;
-    txtContent += `Layer3 Height${" ".repeat(7)} ---> ${weatherObs.layer3Height || "--"}\n`;
-    txtContent += `Layer4 Form${" ".repeat(9)} ---> ${weatherObs.layer4Form || "--"}\n`;
-    txtContent += `Layer4 Amount${" ".repeat(7)} ---> ${weatherObs.layer4Amount || "--"}\n`;
-    txtContent += `Layer4 Height${" ".repeat(7)} ---> ${weatherObs.layer4Height || "--"}\n`;
-    txtContent += `Rainfall Time Start${" ".repeat(2)} ---> ${weatherObs.rainfallTimeStart ? moment(weatherObs.rainfallTimeStart).format("MMMM Do YYYY, h:mm") : "--"}\n`;
-    txtContent += `Rainfall Time End${" ".repeat(4)} ---> ${weatherObs.rainfallTimeEnd ? moment(weatherObs.rainfallTimeEnd).format("MMMM Do YYYY, h:mm") : "--"}\n`;
-    txtContent += `Rainfall Since Prev${" ".repeat(3)} ---> ${weatherObs.rainfallSincePrevious || "--"}\n`;
-    txtContent += `Rainfall During Prev${" ".repeat(2)} ---> ${weatherObs.rainfallDuringPrevious || "--"}\n`;
-    txtContent += `Rainfall Last 24h${" ".repeat(5)} ---> ${weatherObs.rainfallLast24Hours || "--"}\n`;
-    txtContent += `Wind First Anemometer${" ".repeat(1)} ---> ${weatherObs.windFirstAnemometer || "--"}\n`;
-    txtContent += `Wind Second Anemometer --> ${weatherObs.windSecondAnemometer || "--"}\n`;
-    txtContent += `Wind Speed${" ".repeat(10)} ---> ${weatherObs.windSpeed || "--"}\n`;
-    txtContent += `Wind Direction${" ".repeat(7)} ---> ${weatherObs.windDirection || "--"}\n`;
-    txtContent += `Observer Initial${" ".repeat(6)} ---> ${weatherObs.observerInitial || "--"}\n`;
+    txtContent += `Low Cloud Form${" ".repeat(7)} ---> ${weatherObs?.lowCloudForm || "--"}\n`;
+    txtContent += `Low Cloud Amount${" ".repeat(5)} ---> ${weatherObs?.lowCloudAmount || "--"}\n`;
+    txtContent += `Low Cloud Direction${" ".repeat(3)} ---> ${weatherObs?.lowCloudDirection || "--"}\n`;
+    txtContent += `Low Cloud Height${" ".repeat(5)} ---> ${weatherObs?.lowCloudHeight || "--"}\n`;
+    txtContent += `Medium Cloud Form${" ".repeat(4)} ---> ${weatherObs?.mediumCloudForm || "--"}\n`;
+    txtContent += `Medium Cloud Amount${" ".repeat(2)} ---> ${weatherObs?.mediumCloudAmount || "--"}\n`;
+    txtContent += `Medium Cloud Direction --> ${weatherObs?.mediumCloudDirection || "--"}\n`;
+    txtContent += `Medium Cloud Height${" ".repeat(2)} ---> ${weatherObs?.mediumCloudHeight || "--"}\n`;
+    txtContent += `High Cloud Form${" ".repeat(6)} ---> ${weatherObs?.highCloudForm || "--"}\n`;
+    txtContent += `High Cloud Amount${" ".repeat(4)} ---> ${weatherObs?.highCloudAmount || "--"}\n`;
+    txtContent += `High Cloud Direction${" ".repeat(3)} ---> ${weatherObs?.highCloudDirection || "--"}\n`;
+    txtContent += `Total Cloud Amount${" ".repeat(3)} ---> ${weatherObs?.totalCloudAmount || "--"}\n`;
+    txtContent += `Layer1 Form${" ".repeat(9)} ---> ${weatherObs?.layer1Form || "--"}\n`;
+    txtContent += `Layer1 Amount${" ".repeat(7)} ---> ${weatherObs?.layer1Amount || "--"}\n`;
+    txtContent += `Layer1 Height${" ".repeat(7)} ---> ${weatherObs?.layer1Height || "--"}\n`;
+    txtContent += `Layer2 Form${" ".repeat(9)} ---> ${weatherObs?.layer2Form || "--"}\n`;
+    txtContent += `Layer2 Amount${" ".repeat(7)} ---> ${weatherObs?.layer2Amount || "--"}\n`;
+    txtContent += `Layer2 Height${" ".repeat(7)} ---> ${weatherObs?.layer2Height || "--"}\n`;
+    txtContent += `Layer3 Form${" ".repeat(9)} ---> ${weatherObs?.layer3Form || "--"}\n`;
+    txtContent += `Layer3 Amount${" ".repeat(7)} ---> ${weatherObs?.layer3Amount || "--"}\n`;
+    txtContent += `Layer3 Height${" ".repeat(7)} ---> ${weatherObs?.layer3Height || "--"}\n`;
+    txtContent += `Layer4 Form${" ".repeat(9)} ---> ${weatherObs?.layer4Form || "--"}\n`;
+    txtContent += `Layer4 Amount${" ".repeat(7)} ---> ${weatherObs?.layer4Amount || "--"}\n`;
+    txtContent += `Layer4 Height${" ".repeat(7)} ---> ${weatherObs?.layer4Height || "--"}\n`;
+    txtContent += `Rainfall Time Start${" ".repeat(2)} ---> ${weatherObs?.rainfallTimeStart ? moment(weatherObs.rainfallTimeStart).format("MMMM Do YYYY, h:mm") : "--"}\n`;
+    txtContent += `Rainfall Time End${" ".repeat(4)} ---> ${weatherObs?.rainfallTimeEnd ? moment(weatherObs.rainfallTimeEnd).format("MMMM Do YYYY, h:mm") : "--"}\n`;
+    txtContent += `Rainfall Since Prev${" ".repeat(3)} ---> ${weatherObs?.rainfallSincePrevious || "--"}\n`;
+    txtContent += `Rainfall During Prev${" ".repeat(2)} ---> ${weatherObs?.rainfallDuringPrevious || "--"}\n`;
+    txtContent += `Rainfall Last 24h${" ".repeat(5)} ---> ${weatherObs?.rainfallLast24Hours || "--"}\n`;
+    txtContent += `Wind First Anemometer${" ".repeat(1)} ---> ${weatherObs?.windFirstAnemometer || "--"}\n`;
+    txtContent += `Wind Second Anemometer --> ${weatherObs?.windSecondAnemometer || "--"}\n`;
+    txtContent += `Wind Speed${" ".repeat(10)} ---> ${weatherObs?.windSpeed || "--"}\n`;
+    txtContent += `Wind Direction${" ".repeat(7)} ---> ${weatherObs?.windDirection || "--"}\n`;
+    txtContent += `Observer Initial${" ".repeat(6)} ---> ${weatherObs?.observerInitial || "--"}\n`;
   });
 
   // Add footer
@@ -482,17 +482,6 @@ ${"=".repeat(60)}`;
 
   toast.success("Merged meteorological data exported to TXT successfully");
 };
-  // Add this button next to your CSV export button in the JSX
-  <Button
-    variant="outline"
-    size="sm"
-    onClick={exportToTXT}
-    className="flex items-center gap-2 hover:bg-blue-50 border-blue-200 text-blue-700 w-full sm:w-auto justify-center sm:justify-start"
-    disabled={mergedData.length === 0}
-  >
-    <Download className="h-4 w-4 flex-shrink-0" />
-    <span className="whitespace-nowrap">Export TXT</span>
-  </Button>
 
   // Fetch data function for first card
   const firstCardFetchData = async () => {
@@ -575,7 +564,7 @@ ${"=".repeat(60)}`;
             observingTimeId: obsData.id,
             utcTime: obsData.utcTime,
             localTime: obsData.localTime,
-            station: obsData.station,
+            station: obsData.station as Station,
             meteorologicalEntry: undefined,
             weatherObservation: weatherObs,
           })
@@ -1292,7 +1281,7 @@ ${"=".repeat(60)}`;
                       const metEntry = record.meteorologicalEntry
                       const weatherObs = record.weatherObservation
                       const humidityClass = getWeatherStatusColor(metEntry?.relativeHumidity || "")
-                      const cloudClass = getCloudStatusColor(weatherObs?.totalCloudAmount)
+                      const cloudClass = getCloudStatusColor(weatherObs?.totalCloudAmount || null)
                       const rowClass = index % 2 === 0 ? "bg-white" : "bg-slate-50"
 
                       return (

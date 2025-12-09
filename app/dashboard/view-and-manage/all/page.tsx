@@ -13,6 +13,9 @@ import { useSession } from "next-auth/react"
 import dynamic from "next/dynamic"
 import DailySummaryTable from "../daily-summery"
 import MargeTable from "@/components/margeTable"
+import type { DailySummaryRecord } from "@/lib/types/dailySummary"
+import type { WeatherObservationRecord } from "@/types/weather-observation"
+import type { SynopticRecord } from "@/lib/types/synoptic"
 
 // ✅ CHANGED: keep only one dynamic import (no redeclare inside component)
 const CompactPDFExportButton = dynamic(() => import("../PdfExportComponent"), {
@@ -57,21 +60,21 @@ export default function AllViewAndManagePage() {
       'c2Indicator'
     ];
 
-    const cleanFirst = firstCardData.map(item => {
+    const cleanFirst = firstCardData.map((item: WeatherObservationRecord) => {
       const cleaned: any = {};
-      Object.keys(item).forEach(key => {
+      Object.keys(item).forEach((key: string) => {
         if (!excludedKeys.includes(key)) {
-          cleaned[key] = item[key];
+          cleaned[key] = (item as any)[key];
         }
       });
       return cleaned;
     });
 
-    const cleanSecond = secondCardData.map(item => {
+    const cleanSecond = secondCardData.map((item: WeatherObservationRecord) => {
       const cleaned: any = {};
-      Object.keys(item).forEach(key => {
+      Object.keys(item).forEach((key: string) => {
         if (!excludedKeys.includes(key)) {
-          cleaned[key] = item[key];
+          cleaned[key] = (item as any)[key];
         }
       });
       return cleaned;
@@ -112,11 +115,11 @@ export default function AllViewAndManagePage() {
     XLSX.utils.book_append_sheet(wb, mergedSheet, "First+Second Card");
 
     // Synoptic
-    const cleanSynoptic = synopticData.map(item => {
+    const cleanSynoptic = synopticData.map((item: SynopticRecord) => {
       const cleaned: any = {};
-      Object.keys(item).forEach(key => {
+      Object.keys(item).forEach((key: string) => {
         if (!excludedKeys.includes(key)) {
-          cleaned[key] = item[key];
+          cleaned[key] = (item as any)[key];
         }
       });
       return cleaned;
@@ -125,11 +128,11 @@ export default function AllViewAndManagePage() {
     XLSX.utils.book_append_sheet(wb, synopticSheet, "Synoptic");
 
     // Daily Summary
-    const cleanSummary = dailySummaryData.map(item => {
+    const cleanSummary = dailySummaryData.map((item: DailySummaryRecord) => {
       const cleaned: any = {};
-      Object.keys(item).forEach(key => {
+      Object.keys(item).forEach((key: string) => {
         if (!excludedKeys.includes(key)) {
-          cleaned[key] = item[key];
+          cleaned[key] = item[key as keyof DailySummaryRecord];
         }
       });
       return cleaned;
@@ -187,35 +190,35 @@ export default function AllViewAndManagePage() {
       {/* Tabs Section - Responsive */}
       <Tabs defaultValue="full-table" onValueChange={(value) => setActiveTab(value)} className="w-full">
         {/* Tab Navigation - Responsive with Horizontal Scroll */}
-        <div className="w-full md:w-[200px]">
-          <TabsList className="bg-gradient-to-r from-blue-400 to-blue-500 shadow rounded-lg p-1 flex justify-start gap-1 sm:gap-2 min-w-max w-full h-12 sm:w-auto">
-          <TabsTrigger 
-              value="full-table" 
-              className="whitespace-nowrap text-xs md:text-md sm:text-sm px-2 sm:px-3 py-4 sm:py-6 data-[state=active]:text-blue-500 data-[state=inactive]:text-white"
+        <div className="w-full overflow-x-auto">
+          <TabsList className="min-w-max w-full sm:w-auto">
+            <TabsTrigger
+              value="full-table"
+              className="whitespace-nowrap text-sm"
             >
               Full Table
             </TabsTrigger>
-            <TabsTrigger 
-              value="first-card" 
-              className="whitespace-nowrap text-xs md:text-md sm:text-sm px-2 sm:px-3 py-4 sm:py-6 data-[state=active]:text-blue-500 data-[state=inactive]:text-white"
+            <TabsTrigger
+              value="first-card"
+              className="whitespace-nowrap text-sm"
             >
               First Card
             </TabsTrigger>
-            <TabsTrigger 
+            <TabsTrigger
               value="second-card"
-              className="whitespace-nowrap text-xs md:text-md sm:text-sm px-2 sm:px-3 py-4 sm:py-6 data-[state=active]:text-blue-500 data-[state=inactive]:text-white"
+              className="whitespace-nowrap text-sm"
             >
               Second Card
             </TabsTrigger>
-            <TabsTrigger 
+            <TabsTrigger
               value="synoptic-code"
-              className="whitespace-nowrap text-xs md:text-md sm:text-sm px-2 sm:px-3 py-4 sm:py-6 data-[state=active]:text-blue-500 data-[state=inactive]:text-white"
+              className="whitespace-nowrap text-sm"
             >
               Synoptic Code
             </TabsTrigger>
-            <TabsTrigger 
+            <TabsTrigger
               value="daily-summery"
-              className="whitespace-nowrap text-xs md:text-md sm:text-sm px-2 sm:px-3 py-4 sm:py-6 data-[state=active]:text-blue-500 data-[state=inactive]:text-white"
+              className="whitespace-nowrap text-sm"
             >
               Daily Summary
             </TabsTrigger>

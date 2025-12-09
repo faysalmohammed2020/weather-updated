@@ -550,7 +550,7 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
 
               {dailySummeryData.slice(0, 8).map((record, index) => (
                 <View key={index} style={styles.tableRow}>
-                  <Text style={[styles.tableCellSynoptic, { width: "5.5%" }]}>{formatTime(record.date)}</Text>
+                  <Text style={[styles.tableCellSynoptic, { width: "5.5%" }]}>{record.date ? moment(record.date).format("HH:mm") : "--"}</Text>
                   <Text style={[styles.tableCellSynoptic, { width: "5.5%" }]}>{moment(record.date).format("ll")}</Text>
                   <Text style={[styles.tableCellSynoptic, { width: "6%" }]}>{formatValue(record.avStationPressure)}</Text>
                   <Text style={[styles.tableCellSynoptic, { width: "6%" }]}>{formatValue(record.avSeaLevelPressure)}</Text>

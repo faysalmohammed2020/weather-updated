@@ -13,11 +13,11 @@ import Link from "next/link";
 import HeroSection from "@/components/sections/hero-section";
 import TrustedBySection from "@/components/sections/trusted-by-section";
 import FeaturesSection from "@/components/sections/features-section";
-import HowItWorksSection from "@/components/sections/how-it-works-section";
-import WeatherAlertsSection from "@/components/sections/weather-alerts-section";
+// import HowItWorksSection from "@/components/sections/how-it-works-section";
 import TestimonialsSection from "@/components/sections/testimonials-section";
 import CtaSection from "@/components/sections/cta-section";
 import Footer from "@/components/footer";
+import LandingPageDailySummaryChart from "@/components/map/LandingPageGraph";
 
 export default function LandingPage() {
   // Header state
@@ -59,7 +59,7 @@ export default function LandingPage() {
           </Link>
 
           {/* Desktop Navigation */}
-          {/* <nav className="hidden md:flex items-center gap-6">
+          <nav className="hidden md:flex items-center gap-6">
             <Link
               href="/"
               className={`text-sm font-medium transition-colors hover:text-cyan-600 dark:hover:text-cyan-400 ${
@@ -110,7 +110,7 @@ export default function LandingPage() {
             >
               Contact
             </Link>
-          </nav> */}
+          </nav>
 
           <div className="flex items-center gap-4">
             <Link href="/sign-in" className="hidden md:block">
@@ -223,9 +223,8 @@ export default function LandingPage() {
         {/* All sections as components */}
         <HeroSection />
         <TrustedBySection />
+        <LandingPageDailySummaryChart />
         <FeaturesSection />
-        <HowItWorksSection />
-        <WeatherAlertsSection />
         <TestimonialsSection />
         <CtaSection />
       </main>

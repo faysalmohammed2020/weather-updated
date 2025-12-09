@@ -139,7 +139,7 @@ export async function POST(req: Request) {
       actionText: "Daily Summary Created",
       role: session.user.role!,
       actorId: session.user.id,
-      actorEmail: session.user.email,
+      actorEmail: session.user.email ?? undefined,
       module: LogModule.DAILY_SUMMARY,
     });
 
@@ -160,19 +160,22 @@ export async function POST(req: Request) {
 }
 
 export async function GET(req: Request) {
-  const session = await getSession();
-
-  if (!session || !session.user?.id) {
-    return NextResponse.json(
-      { success: false, error: "Unauthorized" },
-      { status: 401 }
-    );
-  }
-
   const { searchParams } = new URL(req.url);
+
   const startDate = searchParams.get("startDate");
   const endDate = searchParams.get("endDate");
-  const stationIdParam = searchParams.get("stationId"); // optional
+  const stationIdParam = searchParams.get("stationId");
+
+  // If stationId is not provided explicitly, try to infer it from the current session
+  const session = await getSession();
+  const resolvedStationId = stationIdParam || session?.user?.station?.id || null;
+
+  if (!resolvedStationId) {
+    return NextResponse.json(
+      { success: false, error: "stationId is required" },
+      { status: 400 }
+    );
+  }
 
   const startTime = startDate
     ? new Date(startDate)
@@ -182,31 +185,19 @@ export async function GET(req: Request) {
   const endTime = endDate ? new Date(endDate) : new Date();
   endTime.setHours(23, 59, 59, 999);
 
-  const superFilter = session.user.role === "super_admin";
-
   try {
     const rawSummaries = await prisma.dailySummary.findMany({
       where: {
-        AND: [
-          {
-            ObservingTime: {
-              utcTime: {
-                gte: startTime,
-                lte: endTime,
-              },
-            },
+        ObservingTime: {
+          utcTime: {
+            gte: startTime,
+            lte: endTime,
           },
-          ...(superFilter
-            ? stationIdParam
-              ? [{ ObservingTime: { stationId: stationIdParam } }]
-              : []
-            : [{ ObservingTime: { stationId: session.user.station?.id } }]),
-        ],
+          stationId: resolvedStationId,
+        },
       },
       orderBy: {
-        ObservingTime: {
-          utcTime: "desc",
-        },
+        ObservingTime: { utcTime: "desc" },
       },
       select: {
         id: true,
@@ -250,62 +241,47 @@ export async function GET(req: Request) {
 
     for (const entry of rawSummaries) {
       const stationId = entry.ObservingTime.stationId;
-      const dateKey = new Date(entry.ObservingTime.utcTime)
-        .toISOString()
-        .split("T")[0]; // "YYYY-MM-DD"
+      const dateKey = entry.ObservingTime.utcTime.toISOString().split("T")[0];
       const key = `${stationId}_${dateKey}`;
 
       if (!grouped[key]) grouped[key] = [];
       grouped[key].push(entry);
     }
 
-    const averagedSummaries = Object.values(grouped).map((entries) => {
+    const averaged = Object.values(grouped).map((entries) => {
       const first = entries[0];
 
-      const averageField = (field: keyof typeof first, factor = 1) => {
-        const values = entries
+      const avg = (field: keyof typeof first, factor = 1) => {
+        const arr = entries
           .map((e) => parseFloat(e[field] as any))
           .filter((v) => !isNaN(v));
-        if (values.length === 0) return null;
-        const avg = values.reduce((a, b) => a + b, 0) / values.length;
-        return (avg / factor).toFixed(1);
+        if (arr.length === 0) return null;
+        return (arr.reduce((a, b) => a + b, 0) / arr.length / factor).toFixed(1);
       };
 
       return {
         ...first,
-        maxTemperature: averageField("maxTemperature", 10),
-        minTemperature: averageField("minTemperature", 10),
-        totalPrecipitation: averageField("totalPrecipitation"),
-        windSpeed: averageField("windSpeed"),
-        avTotalCloud: averageField("avTotalCloud"),
-        totalRainDuration: averageField("totalRainDuration"),
-        avRelativeHumidity: averageField("avRelativeHumidity"),
-        lowestVisibility: averageField("lowestVisibility"),
+        maxTemperature: avg("maxTemperature", 10),
+        minTemperature: avg("minTemperature", 10),
+        totalPrecipitation: avg("totalPrecipitation"),
+        windSpeed: avg("windSpeed"),
+        avTotalCloud: avg("avTotalCloud"),
+        totalRainDuration: avg("totalRainDuration"),
+        avRelativeHumidity: avg("avRelativeHumidity"),
+        lowestVisibility: avg("lowestVisibility"),
       };
     });
 
-    // Convert Date objects to ISO strings for consistent serialization
-    const serializedSummaries = averagedSummaries.map(summary => ({
-      ...summary,
-      createdAt: summary.createdAt ? summary.createdAt.toISOString() : null,
-      ObservingTime: summary.ObservingTime ? {
-        ...summary.ObservingTime,
-        utcTime: summary.ObservingTime.utcTime.toISOString(),
-      } : null,
-    }));
-
-    return NextResponse.json(serializedSummaries);
+    return NextResponse.json(averaged);
   } catch (error) {
-    console.error("Error fetching daily summary data:", error);
+    console.error("Daily Summary Error:", error);
     return NextResponse.json(
-      {
-        message: "Internal server error",
-        error: error instanceof Error ? error.message : "Unknown error",
-      },
+      { message: "Server error", error: error instanceof Error ? error.message : "" },
       { status: 500 }
     );
   }
 }
+
 
 export async function PUT(req: Request) {
   try {
@@ -358,7 +334,7 @@ export async function PUT(req: Request) {
       actionText: "Daily Summary Updated",
       role: session.user.role!,
       actorId: session.user.id,
-      actorEmail: session.user.email,
+      actorEmail: session.user.email ?? undefined,
       module: LogModule.DAILY_SUMMARY,
       details: diffData,
     });
