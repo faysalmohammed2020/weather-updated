@@ -1,9 +1,9 @@
 // components/SecondCard/Wind.tsx
-//Estiak
+// Estiak
 
 "use client";
 
-import React, { memo } from "react";
+import React, { memo, useEffect } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Wind, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -29,9 +29,38 @@ const WindTab = memo(function WindTab({
   handlePrevious,
   isFirstTab,
 }: WindProps) {
+
+  // ✅ Auto-calculate wind speed
+  useEffect(() => {
+    const first = Number(values.wind?.["first-anemometer"]);
+    const second = Number(values.wind?.["second-anemometer"]);
+
+    if (!isNaN(first) && !isNaN(second)) {
+      const speed = ((second - first) * 60) / 10;
+      const roundedSpeed = Math.round(speed);
+      
+      // Add leading zeros: 00 for 1-digit, 0 for 2-digit values
+      let formattedSpeed = roundedSpeed.toString();
+      if (roundedSpeed < 10) {
+        formattedSpeed = "00" + formattedSpeed;
+      } else if (roundedSpeed < 100) {
+        formattedSpeed = "0" + formattedSpeed;
+      }
+
+      handleInputChange({
+        target: {
+          name: "speed",
+          value: formattedSpeed,
+        },
+      } as React.ChangeEvent<HTMLInputElement>);
+    }
+  }, [
+    values.wind?.["first-anemometer"],
+    values.wind?.["second-anemometer"],
+  ]);
+
   return (
     <Card className={cn("overflow-hidden", tabStyle)}>
-      
       {/* Header */}
       <div className="p-4 bg-gradient-to-r from-green-200 to-green-300 text-green-800">
         <h3 className="text-lg font-semibold flex items-center">
@@ -42,26 +71,27 @@ const WindTab = memo(function WindTab({
       {/* Content */}
       <CardContent className="pt-6">
         <div className="grid gap-6 md:grid-cols-2">
-          
           <InputField
             id="first-anemometer"
             name="first-anemometer"
-            label="First Anenometer"
+            label="First Anemometer"
             accent="green"
             value={values.wind?.["first-anemometer"] || ""}
             onChange={handleInputChange}
             required
+            numeric
             error={renderErrorMessage("wind.first-anemometer")}
           />
 
           <InputField
             id="second-anemometer"
             name="second-anemometer"
-            label="Second Anenometer"
+            label="Second Anemometer"
             accent="green"
             value={values.wind?.["second-anemometer"] || ""}
             onChange={handleInputChange}
             required
+            numeric
             error={renderErrorMessage("wind.second-anemometer")}
           />
 
@@ -74,6 +104,7 @@ const WindTab = memo(function WindTab({
             onChange={handleInputChange}
             required
             numeric
+            disabled
             error={renderErrorMessage("wind.speed")}
           />
 
@@ -88,7 +119,6 @@ const WindTab = memo(function WindTab({
             numeric
             error={renderErrorMessage("wind.wind-direction")}
           />
-
         </div>
       </CardContent>
 

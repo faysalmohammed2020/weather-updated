@@ -88,12 +88,15 @@ const squallSchema = Yup.object({
 });
 
 const visibilitySchema = Yup.object({
-  horizontalVisibility: Yup.string()
-    .required("Horizontal Visibility অবশ্যই পূরণ করতে হবে")
-    .matches(/^\d{3}$/, "Must be exactly 3 digits (e.g., 050, 999)")
-    .test("is-numeric", "Only numeric values allowed", (value) =>
-      /^\d+$/.test(value || "")
-    ),
+  horizontalVisibilityCode: Yup.number()
+    .typeError("VV Code must be a number")
+    .integer("VV Code must be an integer")
+    .min(0, "Min 0")
+    .max(80, "Max 80")
+    .test("not-used", "51-55 codes are not used", (v: number | undefined | null) =>
+      v === undefined || v === null ? true : !(v >= 51 && v <= 55)
+    )
+    .required("VV Code is required"),
 });
 
 const weatherSchema = Yup.object({

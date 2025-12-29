@@ -32,6 +32,7 @@ interface SecondCardSummaryProps {
   handlePrevious: () => void;
   handleReset: () => void;
   isSubmitting: boolean;
+  selectedHour?: string;
 }
 
 const SecondCardSummary = memo(function SecondCardSummary({
@@ -43,7 +44,16 @@ const SecondCardSummary = memo(function SecondCardSummary({
   handlePrevious,
   handleReset,
   isSubmitting,
+  selectedHour,
 }: SecondCardSummaryProps) {
+  // Check if current hour is 00, 06, 12, or 18 UTC
+  const isSixHourReport = useMemo(() => {
+    if (!selectedHour) return false;
+    const hour = Number.parseInt(selectedHour, 10);
+    if (Number.isNaN(hour)) return false;
+    return [0, 6, 12, 18].includes(hour);
+  }, [selectedHour]);
+
   // Memoized Cloud Amount Options (shared with parent)
   const cloudAmountOptions = useMemo(
     () => [
@@ -224,7 +234,7 @@ const SecondCardSummary = memo(function SecondCardSummary({
         </div>
 
         {/* Numeric Fields */}
-        <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
+        <div className="grid gap-4 sm:gap-6 md:grid-cols-3">
           <InputField
             id="summary-since-previous"
             name="since-previous"
@@ -237,18 +247,21 @@ const SecondCardSummary = memo(function SecondCardSummary({
             numeric
           />
 
-          <InputField
-            id="summary-during-previous"
-            name="during-previous"
-            label="During Previous 6 Hours Rainfall (At 00, 06, 12, 18 UTC)"
-            accent="cyan"
-            value={formik.values.rainfall["during-previous"] || ""}
-            onChange={handleInputChange}
-            error={renderErrorMessage("rainfall.during-previous")}
-            required
-          />
+          {/* During Previous 6 Hours - Only visible at 00, 06, 12, 18 UTC */}
+          {isSixHourReport && (
+            <InputField
+              id="summary-during-previous"
+              name="during-previous"
+              label="During Previous 6 Hours Rainfall (At 00, 06, 12, 18 UTC)"
+              accent="cyan"
+              value={formik.values.rainfall["during-previous"] || ""}
+              onChange={handleInputChange}
+              error={renderErrorMessage("rainfall.during-previous")}
+              required
+            />
+          )}
 
-          <div className="md:col-span-2">
+          <div>
             <InputField
               id="summary-last-24-hours"
               name="last-24-hours"
