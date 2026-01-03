@@ -47,6 +47,14 @@ export default function RainfallTab() {
   const rainfall = values.rainfall || {};
   const timeSlots = rainfall.timeSlots || [];
 
+  // Check if current hour is 00, 06, 12, or 18 UTC
+  const isSixHourReport = useMemo(() => {
+    if (!selectedHour) return false;
+    const hour = Number.parseInt(selectedHour, 10);
+    if (Number.isNaN(hour)) return false;
+    return [0, 6, 12, 18].includes(hour);
+  }, [selectedHour]);
+
   const [rainfallType, setRainfallType] = useState<
     "continuous" | "intermittent" | ""
   >(rainfall.rainfallType || "");
@@ -237,6 +245,9 @@ export default function RainfallTab() {
     if (m === 0) return `${h}h`;
     return `${h}h ${m}m`;
   };
+
+  const normalizeFourDigitRain = (value: string) =>
+    value.replace(/\D/g, "").slice(0, 4);
 
   return (
     <div className="space-y-6">
@@ -551,7 +562,7 @@ export default function RainfallTab() {
               </Label>
               <Input
                 id="since-previous"
-                type="number"
+                type="text"
                 step="0.1"
                 value={rainfall["since-previous"] || ""}
                 onChange={(e) =>
@@ -560,28 +571,42 @@ export default function RainfallTab() {
                 className="border-violet-200 focus:border-violet-500"
               />
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="during-previous">
-                During Previous 6 Hours (At 00, 06, 12, 18 UTC) - mm
-              </Label>
-              <Input
-                id="during-previous"
-                type="number"
-                step="0.1"
-                value={rainfall["during-previous"] || ""}
-                onChange={(e) =>
-                  setFieldValue("rainfall.during-previous", e.target.value)
-                }
-                className="border-violet-200 focus:border-violet-500"
-              />
-            </div>
+            
+            {/* During Previous 6 Hours - Only visible at 00, 06, 12, 18 UTC */}
+            {isSixHourReport && (
+              <div className="grid gap-2">
+                <Label htmlFor="during-previous">
+                  During Previous 6 Hours (At 00, 06, 12, 18 UTC) - mm (4-digit)
+                </Label>
+                <Input
+                  id="during-previous"
+                  type="text"
+                  step="0.1"
+                  value={rainfall["during-previous"] || ""}
+                  onChange={(e) =>
+                    setFieldValue(
+                      "rainfall.during-previous",
+                      normalizeFourDigitRain(e.target.value)
+                    )
+                  }
+                  inputMode="numeric"
+                  pattern="[0-9]{0,4}"
+                  maxLength={4}
+                  placeholder="0000"
+                  className="border-violet-200 focus:border-violet-500"
+                />
+                <p className="text-xs text-slate-600">
+                  Enter four digits for cumulative 6-hour precipitation (e.g., 0005, 0123).
+                </p>
+              </div>
+            )}
             <div className="grid gap-2">
               <Label htmlFor="last-24-hours">
                 Last 24 Hours Precipitation (mm)
               </Label>
               <Input
                 id="last-24-hours"
-                type="number"
+                type="text"
                 step="0.1"
                 value={rainfall["last-24-hours"] || ""}
                 onChange={(e) =>

@@ -1,7 +1,7 @@
 // app/dashboard/data-entry/second-card/SecondCard.tsx
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import {
   CloudIcon,
@@ -108,72 +108,6 @@ type WeatherObservationFormData = {
 };
 
 // --- VALIDATION SCHEMAS (same logic as your code) ---
-const rainfallSchema = Yup.object({
-  rainfall: Yup.object({
-    timeSlots: Yup.array()
-      .of(
-        Yup.object({
-          timeStart: Yup.string().matches(
-            /^([01]\d|2[0-3]):([0-5]\d)$/,
-            "Use HH:MM"
-          ),
-          timeEnd: Yup.string().matches(
-            /^([01]\d|2[0-3]):([0-5]\d)$/,
-            "Use HH:MM"
-          ),
-        })
-      )
-      .notRequired(),
-    "since-previous": Yup.string()
-      .required("Since previous observation is required")
-      .test(
-        "is-non-negative-number",
-        "Please enter a non-negative number",
-        (v) => !v || (!isNaN(parseFloat(v)) && parseFloat(v) >= 0)
-      ),
-    "during-previous": Yup.string()
-      .required("During previous 6 hours is required")
-      .matches(/^\d{4}$/, "Must be a 4-digit integer between 0000 and 9999"),
-    "last-24-hours": Yup.string()
-      .required("Last 24 hours precipitation is required")
-      .test(
-        "is-non-negative-number",
-        "Please enter a non-negative number",
-        (v) => !v || (!isNaN(parseFloat(v)) && parseFloat(v) >= 0)
-      ),
-    rainfallType: Yup.mixed<"continuous" | "intermittent" | "">().notRequired(),
-  }),
-});
-
-const windSchema = Yup.object({
-  wind: Yup.object({
-    "first-anemometer": Yup.string()
-      .required("1st Anemometer reading is required")
-      .matches(/^\d{5}$/, "Must be exactly 5 digits (e.g., 10123)"),
-
-    "second-anemometer": Yup.string()
-      .required("2nd Anemometer reading is required")
-      .matches(/^\d{5}$/, "Must be exactly 5 digits (e.g., 10123)"),
-
-    speed: Yup.string()
-      .required("Wind speed is required")
-      .matches(/^\d{3}$/, "Must be exactly 3 digits (e.g., 025, 100)"),
-
-    "wind-direction": Yup.string()
-      .required("Wind direction is required")
-      .test(
-        "is-valid-direction",
-        "Must be wind direction between 5 to 360 degrees",
-        (value) => {
-          if (!value) return false;
-          if (value === "00") return true;
-          const num = Number(value);
-          return Number.isInteger(num) && num >= 5 && num <= 360;
-        }
-      ),
-  }),
-});
-
 const cloudSchema = Yup.object({
   clouds: Yup.object({
     low: Yup.object({
@@ -223,20 +157,40 @@ const significantCloudSchema = Yup.object({
   }),
 });
 
+const windSchema = Yup.object({
+  wind: Yup.object({
+    "first-anemometer": Yup.string()
+      .required("1st Anemometer reading is required")
+      .matches(/^\d{5}$/, "Must be exactly 5 digits (e.g., 10123)"),
+
+    "second-anemometer": Yup.string()
+      .required("2nd Anemometer reading is required")
+      .matches(/^\d{5}$/, "Must be exactly 5 digits (e.g., 10123)"),
+
+    speed: Yup.string()
+      .required("Wind speed is required")
+      .matches(/^\d{3}$/, "Must be exactly 3 digits (e.g., 025, 100)"),
+
+    "wind-direction": Yup.string()
+      .required("Wind direction is required")
+      .test(
+        "is-valid-direction",
+        "Must be wind direction between 5 to 360 degrees",
+        (value) => {
+          if (!value) return false;
+          if (value === "00") return true;
+          const num = Number(value);
+          return Number.isInteger(num) && num >= 5 && num <= 360;
+        }
+      ),
+  }),
+});
+
 const observerSchema = Yup.object({
   observer: Yup.object({
     "observer-initial": Yup.string().required("Observer initials are required"),
     "observation-time": Yup.string().required("Observation time is required"),
   }),
-});
-
-const validationSchema = Yup.object({
-  ...cloudSchema.fields,
-  ...totalCloudSchema.fields,
-  ...significantCloudSchema.fields,
-  ...rainfallSchema.fields,
-  ...windSchema.fields,
-  ...observerSchema.fields,
 });
 
 // --- MAIN COMPONENT ---
@@ -256,7 +210,66 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
     resetStates,
   } = useHour();
 
+  // Check if current hour is 00, 06, 12, or 18 UTC
+  const isSixHourReport = useMemo(() => {
+    if (!selectedHour) return false;
+    const hour = Number.parseInt(selectedHour, 10);
+    if (Number.isNaN(hour)) return false;
+    return [0, 6, 12, 18].includes(hour);
+  }, [selectedHour]);
+
   const { formData, updateFields, resetForm } = useWeatherObservationForm();
+
+  // Dynamic validation schema based on isSixHourReport
+  const validationSchema = useMemo(() => {
+    const rainfallSchema = Yup.object({
+      rainfall: Yup.object({
+        timeSlots: Yup.array()
+          .of(
+            Yup.object({
+              timeStart: Yup.string().matches(
+                /^([01]\d|2[0-3]):([0-5]\d)$/,
+                "Use HH:MM"
+              ),
+              timeEnd: Yup.string().matches(
+                /^([01]\d|2[0-3]):([0-5]\d)$/,
+                "Use HH:MM"
+              ),
+            })
+          )
+          .notRequired(),
+        "since-previous": Yup.string()
+          .required("Since previous observation is required")
+          .test(
+            "is-non-negative-number",
+            "Please enter a non-negative number",
+            (v) => !v || (!isNaN(parseFloat(v)) && parseFloat(v) >= 0)
+          ),
+        "during-previous": isSixHourReport
+          ? Yup.string()
+              .required("During previous 6 hours is required")
+              .matches(/^\d{4}$/, "Must be a 4-digit integer between 0000 and 9999")
+          : Yup.string().notRequired(),
+        "last-24-hours": Yup.string()
+          .required("Last 24 hours precipitation is required")
+          .test(
+            "is-non-negative-number",
+            "Please enter a non-negative number",
+            (v) => !v || (!isNaN(parseFloat(v)) && parseFloat(v) >= 0)
+          ),
+        rainfallType: Yup.mixed<"continuous" | "intermittent" | "">().notRequired(),
+      }),
+    });
+
+    return Yup.object({
+      ...cloudSchema.fields,
+      ...totalCloudSchema.fields,
+      ...significantCloudSchema.fields,
+      ...rainfallSchema.fields,
+      ...windSchema.fields,
+      ...observerSchema.fields,
+    });
+  }, [isSixHourReport]);
 
   // Tab styles only for the top pills (design same as your version)
   const tabStyles = {
@@ -678,6 +691,15 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
     setIsSubmitting(true);
 
     try {
+      // Check if session is valid before submitting
+      if (!session?.user?.id) {
+        toast.error("Authentication required", {
+          description: "Please log in again to submit your observation",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
       const submissionData = {
         ...values,
         observingTimeId: selectedHour || "",
@@ -698,6 +720,19 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
       });
 
       const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          toast.error("Session expired", {
+            description: "Please log in again to continue",
+          });
+          // Optionally redirect to login page
+          window.location.href = "/login";
+          return;
+        }
+        toast.error(data.message || "Submission failed");
+        return;
+      }
 
       if (data.error) {
         toast.error(data.message);
@@ -1022,6 +1057,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                         handlePrevious={handlePrevious}
                         handleReset={handleReset}
                         isSubmitting={isSubmitting}
+                        selectedHour={selectedHour}
                       />
                     </TabsContent>
                   </div>

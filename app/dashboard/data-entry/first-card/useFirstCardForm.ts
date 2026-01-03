@@ -16,8 +16,8 @@ import {
 } from "./calculations";
 
 export const tabOrder = [
-  "pressure",
   "temperature",
+  "pressure",
   "squall",
   "V.V",
   "meteors",
@@ -26,7 +26,7 @@ export const tabOrder = [
 ] as const;
 
 export const useFirstCardForm = () => {
-  const [activeTab, setActiveTab] = useState<string>("pressure");
+  const [activeTab, setActiveTab] = useState<string>("temperature");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hygrometricData, setHygrometricData] = useState<HygrometricData>({
     dryBulb: "",
@@ -582,7 +582,7 @@ export const useFirstCardForm = () => {
     });
 
     toast.info("All form data has been cleared.");
-    setActiveTab("pressure");
+    setActiveTab("temperature");
   };
 
   const nextTab = () => {

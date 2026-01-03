@@ -5,14 +5,7 @@ import React, { useCallback, useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
-import {
-  Thermometer,
-  Wind,
-  Eye,
-  Cloud,
-  BarChart3,
-  Flame,
-} from "lucide-react";
+import { Thermometer, Wind, Eye, Cloud, BarChart3, Flame } from "lucide-react";
 import dynamic from "next/dynamic";
 
 import BasicInfoTab from "@/components/basic-info-tab";
@@ -53,15 +46,15 @@ const SummaryTab = dynamic(() => import("./tabs/SummaryTab"), {
 });
 
 const tabStyles = {
+    temperature: {
+    icon: Thermometer,
+    iconColor: "text-blue-500",
+    card: "bg-gradient-to-br from-blue-50 to-white border-l-4 border-blue-200 shadow-sm",
+  },
   pressure: {
     icon: BarChart3,
     iconColor: "text-rose-500",
     card: "bg-gradient-to-br from-rose-50 to-white border-l-4 border-rose-200 shadow-sm",
-  },
-  temperature: {
-    icon: Thermometer,
-    iconColor: "text-blue-500",
-    card: "bg-gradient-to-br from-blue-50 to-white border-l-4 border-blue-200 shadow-sm",
   },
   squall: {
     icon: Wind,
@@ -164,7 +157,11 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
           />
 
           <div className="relative rounded-xl">
-            <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+            <Tabs
+              value={activeTab}
+              onValueChange={handleTabChange}
+              className="w-full"
+            >
               {/* ✅ Top pill tab selector */}
               <div className="relative mb-8 p-4">
                 <div className="relative p-1 bg-slate-50/80 backdrop-blur-sm rounded-full border border-slate-200 shadow-sm max-w-max mx-auto">
@@ -222,7 +219,6 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                               {key === "V.V" ? "VV" : key}
                             </span>
                           </div>
-
                         </motion.button>
                       );
                     })}
@@ -231,16 +227,6 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
               </div>
 
               {/* ✅ Tabs content */}
-              <TabsContent value="pressure" className="mt-6">
-                <PressureTab
-                  formik={formik}
-                  handleNumericInput={handleNumericInput}
-                  handleChange={handleChange}
-                  getFieldError={getFieldError}
-                  nextTab={nextTab}
-                  cardClassName={tabStyles.pressure.card}
-                />
-              </TabsContent>
 
               <TabsContent value="temperature" className="mt-6">
                 <TemperatureTab
@@ -254,6 +240,17 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                   nextTab={nextTab}
                   isFirstTab={isFirstTab}
                   cardClassName={tabStyles.temperature.card}
+                />
+              </TabsContent>
+
+              <TabsContent value="pressure" className="mt-6">
+                <PressureTab
+                  formik={formik}
+                  handleNumericInput={handleNumericInput}
+                  handleChange={handleChange}
+                  getFieldError={getFieldError}
+                  nextTab={nextTab}
+                  cardClassName={tabStyles.pressure.card}
                 />
               </TabsContent>
 

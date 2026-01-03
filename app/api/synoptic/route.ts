@@ -82,12 +82,40 @@ export async function GET() {
     measurements[1] = stationNo;
 
     // 3. iRiXhvv (22-26) - 32 + low cloud height + visibility
+    // iR logic: 1 = rainfall observe time 00,06,12,18; 2 = rainfall observe time 03,09,15,21; 3 = No precipitation
+    const hour = dateObj.getUTCHours();
+    let iR: string;
+    
+    if (weatherObs.rainfallType && weatherObs.rainfallType !== "") {
+      // Has precipitation
+      if ([0, 6, 12, 18].includes(hour)) {
+        iR = "1"; // rainfall observe time 00,06,12,18
+      } else if ([3, 9, 15, 21].includes(hour)) {
+        iR = "2"; // rainfall observe time 03,09,15,21
+      } else {
+        iR = "1"; // default to 1 for other hours with precipitation
+      }
+    } else {
+      iR = "3"; // No precipitation
+    }
+
+    // iX logic based on present and past weather codes
+    const ww = Number(firstCard.presentWeatherWW) || 0;
+    const W1 = Number(firstCard.pastWeatherW1) || 0;
+    const W2 = Number(firstCard.pastWeatherW2) || 0;
+    
+    let iX: string;
+    if ((ww >= 4 && ww <= 99) && (W1 >= 3 && W1 <= 9) && (W2 >= 3 && W2 <= 9)) {
+      iX = "1"; // ww code 04-99; W1W2 code 3-9
+    } else if ((ww >= 0 && ww <= 3) && (W1 >= 0 && W1 <= 2) && (W2 >= 0 && W2 <= 2)) {
+      iX = "2"; // ww code 00-03; W1W2 code 0-2
+    } else {
+      iX = "2"; // default case
+    }
+    
     const lowCloudHeight = weatherObs.lowCloudHeight || "0";
-    const visibility = pad(
-      (Number(firstCard.horizontalVisibility?.toString()?.[0]) || 0) * 10,
-      2
-    );
-    measurements[2] = `32${lowCloudHeight}${visibility}`;
+    const visibility = firstCard.horizontalVisibility || "00";
+    measurements[2] = `${iR}${iX}${lowCloudHeight}${visibility}`;
 
     // 4. Nddff (27-31) - Total cloud + wind direction + speed
     const totalCloud = weatherObs.totalCloudAmount || "0";
