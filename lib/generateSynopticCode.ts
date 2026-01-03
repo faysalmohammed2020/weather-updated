@@ -138,7 +138,22 @@ export function generateSynopticCode(): SynopticFormValues {
   measurements[6] = `3${stationPressure}/4${seaLevelPressure}`;
 
   // 8. 6RRRtR (47-51) - Precipitation (4 digits) + duration (1 digit)
-  measurements[7] = `6${pad(precipitation, 4)}0`;
+  const obsTimeFor6RRRtR = weatherObs.observer?.["observation-time"] || "";
+  const obsHourFor6RRRtR = obsTimeFor6RRRtR
+    ? Number(obsTimeFor6RRRtR.split("T")[1]?.split(":")[0] || "0")
+    : now.getUTCHours();
+  const shouldInclude6RRRtR = [0, 6, 12, 18].includes(obsHourFor6RRRtR);
+
+  // precipitation is treated as 0.1 mm units here (e.g., 0020 => 2.0 mm => RRR=002)
+  const precipRaw = Number(precipitation) || 0;
+  const precipMm = Math.floor(precipRaw / 10);
+
+  if (!shouldInclude6RRRtR || precipRaw <= 0) {
+    measurements[7] = "";
+  } else {
+    const tR = "/";
+    measurements[7] = `6${pad((precipMm % 1000).toString(), 3)}${tR}`;
+  }
 
   // 9. 7wwW1W2 (52-56) - Weather codes
   const presentWeather = firstCard.presentWeatherWW || "00";

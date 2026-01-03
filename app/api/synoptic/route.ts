@@ -146,10 +146,14 @@ export async function GET() {
 
     // 8. 6RRRtR (47-51) - Precipitation
 
-    const rainFall = Number(weatherObs.rainfallDuringPrevious) || 0;
-    const rainFallPadded = pad(rainFall.toString().slice(-3), 3); // শেষ ৩ সংখ্যা
-
     const observationTime = new Date(observingTime.utcTime); // H (রিপোর্ট টাইম)
+    const obsHour = observationTime.getUTCHours();
+    const shouldInclude6RRRtR = [0, 6, 12, 18].includes(obsHour);
+
+    // rainfallDuringPrevious is stored in 0.1 mm units (e.g., 0250 => 25.0 mm)
+    const rainFallRaw = Number(weatherObs.rainfallDuringPrevious) || 0;
+    const rainFallMm = Math.floor(rainFallRaw / 10);
+    const rainFallPadded = pad((rainFallMm % 1000).toString(), 3);
 
     // Handle both new (timeSlots) and old (single start/end) format
     let rainStart: Date | null = null;
@@ -238,64 +242,66 @@ export async function GET() {
       isIntermittentRain = false;
     }
 
-    let tr = "/";
+    // Only include 6RRRtR at 00/06/12/18 UTC AND only if rainfall exists.
+    // If rainfall is 0000 then the group should not appear.
+    if (!shouldInclude6RRRtR || rainFallRaw <= 0) {
+      measurements[7] = "";
+    } else {
+      let tr = "/";
 
-    // ৬ ঘণ্টার window নির্ধারণ
-    const H = observationTime;
-    const H_3 = new Date(H.getTime() - 3 * 60 * 60 * 1000);
-    const H_6 = new Date(H.getTime() - 6 * 60 * 60 * 1000);
+      // ৬ ঘণ্টার window নির্ধারণ
+      const H = observationTime;
+      const H_3 = new Date(H.getTime() - 3 * 60 * 60 * 1000);
+      const H_6 = new Date(H.getTime() - 6 * 60 * 60 * 1000);
 
-    if (rainStart && rainEnd) {
-      if (isIntermittentRain) {
-        // WMO Chart-Based Intermittent Logic
-        const startedInFirstHalf = rainStart >= H_6 && rainStart < H_3;
-        const endedInFirstHalf = rainEnd <= H_3;
-
-        const startedInSecondHalf = rainStart >= H_3 && rainStart < H;
-        const endedInSecondHalf = rainEnd <= H;
-
-        if (startedInFirstHalf && endedInFirstHalf) {
-          tr = "1"; // H-6 to H-3
-        } else if (startedInSecondHalf && endedInSecondHalf) {
-          tr = "2"; // H-3 to H
-        } else if (rainStart <= H_6 && rainEnd >= H) {
-          tr = "3"; // Full H-6 to H
-        } else {
-          tr = "/"; // Invalid range
-        }
-      } else {
-        // Continuous rain — WMO tr = 4-9
-        if (rainStart < H_6 || rainEnd > H) {
-          tr = "/";
-        } else {
-          const durationHours =
-            (rainEnd.getTime() - rainStart.getTime()) / (1000 * 60 * 60);
-          let hoursSinceEnd =
-            (H.getTime() - rainEnd.getTime()) / (1000 * 60 * 60);
-
-          if (hoursSinceEnd < 0) hoursSinceEnd += 24;
-
-          if (durationHours <= 2) {
-            if (hoursSinceEnd <= 2) tr = "4";
-            else if (hoursSinceEnd <= 4) tr = "5";
-            else if (hoursSinceEnd <= 6) tr = "6";
-          } else if (durationHours <= 4) {
-            if (hoursSinceEnd <= 2) tr = "7";
-            else if (hoursSinceEnd <= 4) tr = "8";
-          } else if (durationHours <= 6 && hoursSinceEnd <= 2) {
-            tr = "9";
-          } else {
+      if (rainStart && rainEnd) {
+        if (isIntermittentRain) {
+          // WMO chart: Intermittent rain (tR = 1..3)
+          // 1: occurred only in H-6..H-3
+          // 2: occurred only in H-3..H
+          // 3: occurred in both halves (spans across H-3)
+          if (rainStart < H_6 || rainEnd > H) {
             tr = "/";
+          } else if (rainEnd <= H_3) {
+            tr = "1";
+          } else if (rainStart >= H_3) {
+            tr = "2";
+          } else {
+            tr = "3";
+          }
+        } else {
+          // Continuous rain — WMO tr = 4-9
+          if (rainStart < H_6 || rainEnd > H) {
+            tr = "/";
+          } else {
+            const durationHours =
+              (rainEnd.getTime() - rainStart.getTime()) / (1000 * 60 * 60);
+            let hoursSinceEnd =
+              (H.getTime() - rainEnd.getTime()) / (1000 * 60 * 60);
+
+            if (hoursSinceEnd < 0) hoursSinceEnd += 24;
+
+            if (durationHours <= 2) {
+              if (hoursSinceEnd <= 2) tr = "4";
+              else if (hoursSinceEnd <= 4) tr = "5";
+              else if (hoursSinceEnd <= 6) tr = "6";
+            } else if (durationHours <= 4) {
+              if (hoursSinceEnd <= 2) tr = "7";
+              else if (hoursSinceEnd <= 4) tr = "8";
+            } else if (durationHours <= 6 && hoursSinceEnd <= 2) {
+              tr = "9";
+            } else {
+              tr = "/";
+            }
           }
         }
+      } else {
+        // If rain amount exists but no timing, image/chart doesn't define a code
+        tr = "/";
       }
-    } else {
-      if (rainFall > 0 && (!rainStart || !rainEnd)) {
-        tr = "0"; // বৃষ্টি হয়েছে, কিন্তু সময় বা ধরণ অজানা
-      }
-    }
 
-    measurements[7] = `6${rainFallPadded}${tr}`;
+      measurements[7] = `6${rainFallPadded}${tr}`;
+    }
 
     // 9. 7wwW1W2 (52-56) - Weather codes
     const presentWeather = firstCard.presentWeatherWW || "00";
