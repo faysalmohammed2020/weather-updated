@@ -586,13 +586,6 @@ export const useFirstCardForm = () => {
   };
 
   const nextTab = () => {
-    if (!validateTab(activeTab)) {
-      toast.error("অনুগ্রহ করে সকল প্রয়োজনীয় তথ্য পূরণ করুন", {
-        description:
-          "পরবর্তী ট্যাবে যাওয়ার আগে বর্তমান ট্যাবের সকল তথ্য পূরণ করুন",
-      });
-      return;
-    }
 
     const currentIndex = tabOrder.indexOf(activeTab as any);
     if (currentIndex < tabOrder.length - 1) {
