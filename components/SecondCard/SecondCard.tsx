@@ -222,50 +222,11 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
 
   // Dynamic validation schema based on isSixHourReport
   const validationSchema = useMemo(() => {
-    const rainfallSchema = Yup.object({
-      rainfall: Yup.object({
-        timeSlots: Yup.array()
-          .of(
-            Yup.object({
-              timeStart: Yup.string().matches(
-                /^([01]\d|2[0-3]):([0-5]\d)$/,
-                "Use HH:MM"
-              ),
-              timeEnd: Yup.string().matches(
-                /^([01]\d|2[0-3]):([0-5]\d)$/,
-                "Use HH:MM"
-              ),
-            })
-          )
-          .notRequired(),
-        "since-previous": Yup.string()
-          .required("Since previous observation is required")
-          .test(
-            "is-non-negative-number",
-            "Please enter a non-negative number",
-            (v) => !v || (!isNaN(parseFloat(v)) && parseFloat(v) >= 0)
-          ),
-        "during-previous": isSixHourReport
-          ? Yup.string()
-              .required("During previous 6 hours is required")
-              .matches(/^\d{4}$/, "Must be a 4-digit integer between 0000 and 9999")
-          : Yup.string().notRequired(),
-        "last-24-hours": Yup.string()
-          .required("Last 24 hours precipitation is required")
-          .test(
-            "is-non-negative-number",
-            "Please enter a non-negative number",
-            (v) => !v || (!isNaN(parseFloat(v)) && parseFloat(v) >= 0)
-          ),
-        rainfallType: Yup.mixed<"continuous" | "intermittent" | "">().notRequired(),
-      }),
-    });
 
     return Yup.object({
       ...cloudSchema.fields,
       ...totalCloudSchema.fields,
       ...significantCloudSchema.fields,
-      ...rainfallSchema.fields,
       ...windSchema.fields,
       ...observerSchema.fields,
     });

@@ -114,11 +114,23 @@ export async function GET() {
     }
 
     const lowCloudHeight = weatherObs.lowCloudHeight || "0";
-    const visibility = Math.round(
-      (Number(firstCard.horizontalVisibility) || 0) * 10
-    )
-      .toString()
-      .padStart(2, "0");
+
+    const visibility = (() => {
+      const v = Number(firstCard.horizontalVisibility) || 0;
+      // decimal থাকলে ×10
+      if (v % 1 !== 0) {
+        return Math.round(v * 10)
+          .toString()
+          .padStart(2, "0");
+      }
+      // integer হলে
+      if (v >= 1 && v <= 9) {
+        return v.toString().padStart(2, "0");
+      }
+      // 10–99 as it is
+      return v.toString();
+    })();
+
     measurements[2] = `${iR}${iX}${lowCloudHeight}${visibility}`;
 
     // 4. Nddff (27-31) - Total cloud + wind direction + speed
