@@ -5,7 +5,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { BarChart3, ChevronRight ,AlertCircle } from "lucide-react";
+import { BarChart3, ChevronRight, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -51,9 +51,26 @@ const PressureTab: React.FC<Props> = ({
             id="alteredThermometer"
             name="alteredThermometer"
             value={formik.values.alteredThermometer || ""}
-            onChange={handleChange}
-            className="border-slate-600 transition-all focus:border-rose-400 focus:ring-rose-500/30"
+            onChange={handleNumericInput}
+            className={cn(
+              "border-slate-600 transition-all focus:border-rose-400 focus:ring-rose-500/30",
+              {
+                "border-red-500":
+                  formik.touched.alteredThermometer &&
+                  formik.errors.alteredThermometer,
+              }
+            )}
           />
+          {(() => {
+            const error = getFieldError("alteredThermometer");
+            if (!error) return null;
+            return (
+              <div className="text-red-500 text-sm mt-1 flex items-start">
+                <AlertCircle className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
+                <span>{error}</span>
+              </div>
+            );
+          })()}
         </div>
 
         <div className="space-y-2">
@@ -72,15 +89,15 @@ const PressureTab: React.FC<Props> = ({
             )}
           />
           {(() => {
-  const error = getFieldError("barAsRead");
-  if (!error) return null;
-  return (
-    <div className="text-red-500 text-sm mt-1 flex items-start">
-      <AlertCircle className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
-      <span>{error}</span>
-    </div>
-  );
-})()}
+            const error = getFieldError("barAsRead");
+            if (!error) return null;
+            return (
+              <div className="text-red-500 text-sm mt-1 flex items-start">
+                <AlertCircle className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
+                <span>{error}</span>
+              </div>
+            );
+          })()}
         </div>
 
         <div className="space-y-2">
@@ -91,9 +108,26 @@ const PressureTab: React.FC<Props> = ({
             id="correctedForIndex"
             name="correctedForIndex"
             value={formik.values.correctedForIndex || ""}
-            onChange={handleChange}
-            className="border-slate-600 transition-all focus:border-rose-400 focus:ring-rose-500/30"
+            onChange={handleNumericInput}
+            className={cn(
+              "border-slate-600 transition-all focus:border-rose-400 focus:ring-rose-500/30",
+              {
+                "border-red-500":
+                  formik.touched.correctedForIndex &&
+                  formik.errors.correctedForIndex,
+              }
+            )}
           />
+          {(() => {
+            const error = getFieldError("correctedForIndex");
+            if (!error) return null;
+            return (
+              <div className="text-red-500 text-sm mt-1 flex items-start">
+                <AlertCircle className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
+                <span>{error}</span>
+              </div>
+            );
+          })()}
         </div>
 
         <div className="space-y-2">
@@ -158,9 +192,26 @@ const PressureTab: React.FC<Props> = ({
             id="afternoonReading"
             name="afternoonReading"
             value={formik.values.afternoonReading || ""}
-            onChange={handleChange}
-            className="border-slate-600 transition-all focus:border-rose-400 focus:ring-rose-500/30"
+            onChange={handleNumericInput}
+            className={cn(
+              "border-slate-600 transition-all focus:border-rose-400 focus:ring-rose-500/30",
+              {
+                "border-red-500":
+                  formik.touched.afternoonReading &&
+                  formik.errors.afternoonReading,
+              }
+            )}
           />
+          {(() => {
+            const error = getFieldError("afternoonReading");
+            if (!error) return null;
+            return (
+              <div className="text-red-500 text-sm mt-1 flex items-start">
+                <AlertCircle className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
+                <span>{error}</span>
+              </div>
+            );
+          })()}
         </div>
 
         <div className="space-y-2">

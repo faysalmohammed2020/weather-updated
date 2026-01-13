@@ -43,12 +43,6 @@ const TableRow = ({
     observingTime.station?.stationId ?? ""
   }`.trim();
   const visibilityValue = record.horizontalVisibility
-    // ? Number.parseInt(record.horizontalVisibility, 10) % 10 === 0
-    //   ? Number.parseInt(record.horizontalVisibility, 10) / 10
-    //   : (
-    //       Number.parseInt(record.horizontalVisibility, 10) / 10
-    //     ).toFixed(1)
-    // : "--";
 
   return (
     <tr
