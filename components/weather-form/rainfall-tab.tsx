@@ -55,6 +55,14 @@ export default function RainfallTab() {
     return [0, 6, 12, 18].includes(hour);
   }, [selectedHour]);
 
+  // Check if current hour is 00 UTC only
+  const isMidnightReport = useMemo(() => {
+    if (!selectedHour) return false;
+    const hour = Number.parseInt(selectedHour, 10);
+    if (Number.isNaN(hour)) return false;
+    return hour === 0;
+  }, [selectedHour]);
+
   const [rainfallType, setRainfallType] = useState<
     "continuous" | "intermittent" | ""
   >(rainfall.rainfallType || "");
@@ -571,7 +579,7 @@ export default function RainfallTab() {
                 className="border-violet-200 focus:border-violet-500"
               />
             </div>
-            
+
             {/* During Previous 6 Hours - Only visible at 00, 06, 12, 18 UTC */}
             {isSixHourReport && (
               <div className="grid gap-2">
@@ -596,25 +604,30 @@ export default function RainfallTab() {
                   className="border-violet-200 focus:border-violet-500"
                 />
                 <p className="text-xs text-slate-600">
-                  Enter four digits for cumulative 6-hour precipitation (e.g., 0005, 0123).
+                  Enter four digits for cumulative 6-hour precipitation (e.g.,
+                  0005, 0123).
                 </p>
               </div>
             )}
-            <div className="grid gap-2">
-              <Label htmlFor="last-24-hours">
-                Last 24 Hours Precipitation (mm)
-              </Label>
-              <Input
-                id="last-24-hours"
-                type="text"
-                step="0.1"
-                value={rainfall["last-24-hours"] || ""}
-                onChange={(e) =>
-                  setFieldValue("rainfall.last-24-hours", e.target.value)
-                }
-                className="border-violet-200 focus:border-violet-500"
-              />
-            </div>
+            {/* Last 24 Hours Precipitation - Only visible at 00 UTC */}
+            {isMidnightReport && (
+              <div className="grid gap-2">
+                <Label htmlFor="last-24-hours">
+                  Last 24 Hours Precipitation (mm)
+                </Label>
+                <Input
+                  id="last-24-hours"
+                  type="text"
+                  maxLength={3}
+                  step="0.1"
+                  value={rainfall["last-24-hours"] || ""}
+                  onChange={(e) =>
+                    setFieldValue("rainfall.last-24-hours", e.target.value)
+                  }
+                  className="border-violet-200 focus:border-violet-500"
+                />
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

@@ -440,7 +440,6 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
         fieldsToValidate = [
           "rainfall.since-previous",
           "rainfall.during-previous",
-          "rainfall.last-24-hours",
         ];
         break;
       case "wind":
