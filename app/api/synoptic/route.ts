@@ -82,7 +82,6 @@ export async function GET() {
     measurements[1] = stationNo;
 
     // 3. iRiXhvv (22-26) - 32 + low cloud height + visibility
-    // iR logic: 1 = rainfall observe time 00,06,12,18; 2 = rainfall observe time 03,09,15,21; 3 = No precipitation
     const hour = dateObj.getUTCHours();
     let iR: string;
 
@@ -115,23 +114,61 @@ export async function GET() {
 
     const lowCloudHeight = weatherObs.lowCloudHeight || "0";
 
-    const visibility = (() => {
-      const v = Number(firstCard.horizontalVisibility) || 0;
-      // decimal থাকলে ×10
-      if (v % 1 !== 0) {
-        return Math.round(v * 10)
-          .toString()
-          .padStart(2, "0");
-      }
-      // integer হলে
-      if (v >= 1 && v <= 9) {
-        return v.toString().padStart(2, "0");
-      }
-      // 10–99 as it is
-      return v.toString();
-    })();
+    const kmToVV = (km: number): number | null => {
+      if (!Number.isFinite(km)) return null;
 
-    measurements[2] = `${iR}${iX}${lowCloudHeight}${visibility}`;
+      // Special cases for very low visibility
+      if (km === 0.05) return 90; // 0.05 km
+      if (km === 0) return 0; // 0.0 km -> 00
+      if (km < 0.1) return null; // Other values < 0.1 not valid
+
+      // 0.1 .. 5.0  => 01 .. 50
+      if (km >= 0.1 && km <= 5.0) {
+        const code = Math.round(km * 10); // 0.1->1, 1.0->10, 5.0->50
+        return code; // 1..50
+      }
+
+      // 5.1 .. 5.5 would produce 51..55, which are NOT USED
+      if (km > 5.0 && km < 6.0) return null;
+
+      // 6 .. 30 => 56 .. 80 (must be integer km)
+      if (km >= 6 && km <= 30) {
+        if (!Number.isInteger(km)) return null; // avoid 6.3 etc
+        return km + 50; // 6->56, 30->80
+      }
+
+      // Extended range values
+      if (km === 35) return 81;
+      if (km === 40) return 82;
+      if (km === 45) return 83;
+      if (km === 50) return 84;
+      if (km === 55) return 85;
+      if (km === 60) return 86;
+      if (km === 65) return 87;
+      if (km === 70) return 88;
+      if (km === 75) return 89;
+
+      // Special high visibility codes
+      if (km === 0.2) return 92; // Alternative mapping for 0.2 km
+      if (km === 0.5) return 93; // Alternative mapping for 0.5 km
+      if (km === 1) return 94; // Alternative mapping for 1 km
+      if (km === 2) return 95; // Alternative mapping for 2 km
+      if (km === 4) return 96; // Alternative mapping for 4 km
+      if (km === 10) return 97; // Alternative mapping for 10 km
+      if (km === 20) return 98; // Alternative mapping for 20 km
+      if (km === 50) return 99; // Alternative mapping for 50 km
+
+      return null;
+    };
+
+    const pad2 = (n: number) => String(n).padStart(2, "0");
+
+    const visibilityKm = Number(firstCard.horizontalVisibility) / 10 || 0;
+
+    const vvCode = kmToVV(visibilityKm);
+    const VV = vvCode === null ? "00" : pad2(vvCode);
+
+    measurements[2] = `${iR}${iX}${lowCloudHeight}${VV}`;
 
     // 4. Nddff (27-31) - Total cloud + wind direction + speed
     const totalCloud = weatherObs.totalCloudAmount || "0";
@@ -463,7 +500,12 @@ export async function GET() {
     const sqD = firstCard.squallDirection;
     const sqT = firstCard.squallTime;
 
-    measurements[19] = `90${sqD}0${sqT}`;
+    // Only set measurements[19] if both sqD and sqT have valid values (not 0 or empty)
+    if (sqD && sqT && sqD !== "0" && sqT !== "0") {
+      measurements[19] = `90${sqD}${sqT}`;
+    } else {
+      measurements[19] = "";
+    }
 
     // 21. 91fqfqfq (39-43) - Relative humidity
     const humidity = firstCard.relativeHumidity || "0";

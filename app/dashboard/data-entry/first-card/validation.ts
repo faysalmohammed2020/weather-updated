@@ -87,17 +87,17 @@ const squallSchema = Yup.object({
   }),
 });
 
-const visibilitySchema = Yup.object({
-  horizontalVisibilityCode: Yup.number()
-    .typeError("VV Code must be a number")
-    .integer("VV Code must be an integer")
-    .min(0, "Min 0")
-    .max(80, "Max 80")
-    .test("not-used", "51-55 codes are not used", (v: number | undefined | null) =>
-      v === undefined || v === null ? true : !(v >= 51 && v <= 55)
-    )
-    .required("VV Code is required"),
-});
+// const visibilitySchema = Yup.object({
+//   horizontalVisibilityCode: Yup.number()
+//     .typeError("VV Code must be a number")
+//     .integer("VV Code must be an integer")
+//     .min(0, "Min 0")
+//     .max(80, "Max 80")
+//     .test("not-used", "51-55 codes are not used", (v: number | undefined | null) =>
+//       v === undefined || v === null ? true : !(v >= 51 && v <= 55)
+//     )
+//     .required("VV Code is required"),
+// });
 
 const weatherSchema = Yup.object({
   pastWeatherW1: Yup.string()
@@ -119,6 +119,6 @@ export const validationSchema = Yup.object({
   ...temperatureSchema.fields,
   ...pressureSchema.fields,
   ...squallSchema.fields,
-  ...visibilitySchema.fields,
+  // ...visibilitySchema.fields,
   ...weatherSchema.fields,
 });

@@ -146,13 +146,15 @@ const measurements = [
   {
     id: 17,
     label: (
-      <span style={{ display: "inline-block", textAlign: "center" }}>
-        (
-        <span>
-          6RRRt<sub>R</sub>
-        </span>
-        )
-      </span>
+      <div style={{ display: "inline-block", textAlign: "center" }}>
+        <div>
+          (6RRRt<sub>R</sub>)
+          <br />
+          <span style={{ borderTop: "1px solid black" }}>
+            7R<sub>24</sub>R<sub>24</sub>R<sub>24</sub>
+          </span>
+        </div>
+      </div>
     ),
     range: "24-28",
   },
@@ -202,12 +204,12 @@ export function SynopticCode() {
     isLoading: true,
   });
 
-  const [manuallyChangedFields, setManuallyChangedFields] = useState<Set<number>>(
-    new Set()
-  );
+  const [manuallyChangedFields, setManuallyChangedFields] = useState<
+    Set<number>
+  >(new Set());
 
   // ✅ hooks must stay above any early return
-  const specialFieldsSet = useMemo(() => new Set([2, 7, 12, 19, 20]), []);
+  const specialFieldsSet = useMemo(() => new Set([2, 7, 12, 17, 19, 20]), []);
   const isSpecialField = useCallback(
     (index: number) => specialFieldsSet.has(index),
     [specialFieldsSet]
@@ -600,7 +602,7 @@ function MeasurementList({
                       />
 
                       {special && manuallyChangedFields.has(item.id) && (
-                        <div className="absolute -bottom-6 left-0 right-0">
+                        <div className="absolute left-0 right-0">
                           <div className="flex items-center text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded border border-amber-200">
                             <AlertTriangle className="w-3 h-3 mr-1" />
                             <span>Analyze with card data</span>
