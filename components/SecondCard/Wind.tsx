@@ -30,34 +30,34 @@ const WindTab = memo(function WindTab({
   isFirstTab,
 }: WindProps) {
 
-  // ✅ Auto-calculate wind speed
-  useEffect(() => {
-    const first = Number(values.wind?.["first-anemometer"]);
-    const second = Number(values.wind?.["second-anemometer"]);
+  // // ✅ Auto-calculate wind speed
+  // useEffect(() => {
+  //   const first = Number(values.wind?.["first-anemometer"]);
+  //   const second = Number(values.wind?.["second-anemometer"]);
 
-    if (!isNaN(first) && !isNaN(second)) {
-      const speed = ((second - first) * 60) / 10;
-      const roundedSpeed = Math.round(speed);
+  //   if (!isNaN(first) && !isNaN(second)) {
+  //     const speed = ((second - first) * 60) / 10;
+  //     const roundedSpeed = Math.round(speed);
       
-      // Add leading zeros: 00 for 1-digit, 0 for 2-digit values
-      let formattedSpeed = roundedSpeed.toString();
-      if (roundedSpeed < 10) {
-        formattedSpeed = "00" + formattedSpeed;
-      } else if (roundedSpeed < 100) {
-        formattedSpeed = "0" + formattedSpeed;
-      }
+  //     // Add leading zeros: 00 for 1-digit, 0 for 2-digit values
+  //     let formattedSpeed = roundedSpeed.toString();
+  //     if (roundedSpeed < 10) {
+  //       formattedSpeed = "00" + formattedSpeed;
+  //     } else if (roundedSpeed < 100) {
+  //       formattedSpeed = "0" + formattedSpeed;
+  //     }
 
-      handleInputChange({
-        target: {
-          name: "speed",
-          value: formattedSpeed,
-        },
-      } as React.ChangeEvent<HTMLInputElement>);
-    }
-  }, [
-    values.wind?.["first-anemometer"],
-    values.wind?.["second-anemometer"],
-  ]);
+  //     handleInputChange({
+  //       target: {
+  //         name: "speed",
+  //         value: formattedSpeed,
+  //       },
+  //     } as React.ChangeEvent<HTMLInputElement>);
+  //   }
+  // }, [
+  //   values.wind?.["first-anemometer"],
+  //   values.wind?.["second-anemometer"],
+  // ]);
 
   return (
     <Card className={cn("overflow-hidden", tabStyle)}>
@@ -104,7 +104,6 @@ const WindTab = memo(function WindTab({
             onChange={handleInputChange}
             required
             numeric
-            disabled
             error={renderErrorMessage("wind.speed")}
           />
 
