@@ -249,7 +249,9 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                   handleNumericInput={handleNumericInput}
                   handleChange={handleChange}
                   getFieldError={getFieldError}
+                  prevTab={prevTab}
                   nextTab={nextTab}
+                  isFirstTab={isFirstTab}
                   cardClassName={tabStyles.pressure.card}
                 />
               </TabsContent>

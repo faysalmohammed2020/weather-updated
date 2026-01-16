@@ -5,7 +5,12 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { BarChart3, ChevronRight, AlertCircle } from "lucide-react";
+import {
+  BarChart3,
+  ChevronRight,
+  AlertCircle,
+  ChevronLeft,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -14,6 +19,8 @@ type Props = {
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   getFieldError: (fieldName: string) => string | null;
   nextTab: () => void;
+  prevTab: () => void;
+  isFirstTab: boolean;
   cardClassName: string;
 };
 
@@ -23,6 +30,8 @@ const PressureTab: React.FC<Props> = ({
   handleChange,
   getFieldError,
   nextTab,
+  prevTab,
+  isFirstTab,
   cardClassName,
 }) => {
   return (
@@ -226,7 +235,15 @@ const PressureTab: React.FC<Props> = ({
           />
         </div>
       </CardContent>
-      <CardFooter className="flex justify-end">
+      <CardFooter className="flex justify-between">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={prevTab}
+          disabled={isFirstTab}
+        >
+          <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+        </Button>
         <Button
           type="button"
           onClick={nextTab}

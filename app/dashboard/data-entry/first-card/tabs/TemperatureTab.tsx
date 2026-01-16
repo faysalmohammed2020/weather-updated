@@ -261,15 +261,7 @@ const TemperatureTab: React.FC<Props> = ({
           </TabsContent>
         </Tabs>
       </CardContent>
-      <CardFooter className="flex justify-between p-6">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={prevTab}
-          disabled={isFirstTab}
-        >
-          <ChevronLeft className="mr-2 h-4 w-4" /> Previous
-        </Button>
+      <CardFooter className="flex justify-end p-6">
         <Button
           type="button"
           onClick={nextTab}

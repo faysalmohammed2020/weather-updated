@@ -23,6 +23,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useLocation } from "@/contexts/divisionContext";
 import {
@@ -157,6 +166,14 @@ export const UserTableClient = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
+  // ============================================================================
+  // FILTER STATE
+  // ============================================================================
+  const [roleFilter, setRoleFilter] = useState<string>("all");
+  const [stationFilter, setStationFilter] = useState<string>("all");
+  const [dateFromFilter, setDateFromFilter] = useState<string>("");
+  const [dateToFilter, setDateToFilter] = useState<string>("");
+
   useEffect(() => {
     const t = setTimeout(() => {
       setDebouncedSearch(searchTerm.trim());
@@ -187,6 +204,24 @@ export const UserTableClient = ({
     return map;
   }, [stations]);
 
+  const uniqueRoles = useMemo(() => {
+    const roles = new Set<string>();
+    users.forEach((user) => {
+      if (user.role) roles.add(user.role);
+    });
+    return Array.from(roles).sort();
+  }, [users]);
+
+  const uniqueStations = useMemo(() => {
+    const stationList = new Set<string>();
+    users.forEach((user) => {
+      if (user.stationId && stationNameById.has(user.stationId)) {
+        stationList.add(stationNameById.get(user.stationId)!);
+      }
+    });
+    return Array.from(stationList).sort();
+  }, [users, stationNameById]);
+
   // ============================================================================
   // PAGINATION FUNCTIONS
   // ============================================================================
@@ -206,9 +241,42 @@ export const UserTableClient = ({
         params.delete("search");
       }
 
+      // filter parameters maintain korbo
+      if (roleFilter !== "all") {
+        params.set("role", roleFilter);
+      } else {
+        params.delete("role");
+      }
+
+      if (stationFilter !== "all") {
+        params.set("station", stationFilter);
+      } else {
+        params.delete("station");
+      }
+
+      if (dateFromFilter) {
+        params.set("dateFrom", dateFromFilter);
+      } else {
+        params.delete("dateFrom");
+      }
+
+      if (dateToFilter) {
+        params.set("dateTo", dateToFilter);
+      } else {
+        params.delete("dateTo");
+      }
+
       router.push(`/dashboard/user?${params.toString()}`, { scroll: false });
     },
-    [router, searchParams, debouncedSearch]
+    [
+      router,
+      searchParams,
+      debouncedSearch,
+      roleFilter,
+      stationFilter,
+      dateFromFilter,
+      dateToFilter,
+    ]
   );
 
   const nextPage = useCallback(() => {
@@ -242,6 +310,16 @@ export const UserTableClient = ({
     }
   }, [debouncedSearch]);
 
+  // filter change hole first page e niye jabe
+  useEffect(() => {
+    if (pageIndex !== 0) {
+      setPageIndex(0);
+      updatePageInUrl(0);
+    } else {
+      updatePageInUrl(0);
+    }
+  }, [roleFilter, stationFilter, dateFromFilter, dateToFilter]);
+
   // ============================================================================
   // DATA REFRESH FUNCTION (SERVER-SIDE SEARCH INCLUDED)
   // ============================================================================
@@ -253,7 +331,23 @@ export const UserTableClient = ({
       params.set("offset", (pageIndex * pageSize).toString());
 
       if (debouncedSearch) {
-        params.set("search", debouncedSearch); // backend e "search" support korte hobe
+        params.set("search", debouncedSearch);
+      }
+
+      if (roleFilter !== "all") {
+        params.set("role", roleFilter);
+      }
+
+      if (stationFilter !== "all") {
+        params.set("station", stationFilter);
+      }
+
+      if (dateFromFilter) {
+        params.set("dateFrom", dateFromFilter);
+      }
+
+      if (dateToFilter) {
+        params.set("dateTo", dateToFilter);
       }
 
       const response = await fetch(
@@ -280,11 +374,27 @@ export const UserTableClient = ({
     } finally {
       setIsLoading(false);
     }
-  }, [pageIndex, pageSize, debouncedSearch]);
+  }, [
+    pageIndex,
+    pageSize,
+    debouncedSearch,
+    roleFilter,
+    stationFilter,
+    dateFromFilter,
+    dateToFilter,
+  ]);
 
   useEffect(() => {
     refreshUsers();
-  }, [pageIndex, debouncedSearch, refreshUsers]);
+  }, [
+    pageIndex,
+    debouncedSearch,
+    roleFilter,
+    stationFilter,
+    dateFromFilter,
+    dateToFilter,
+    refreshUsers,
+  ]);
 
   // ============================================================================
   // FORM MANAGEMENT FUNCTIONS
@@ -472,29 +582,105 @@ export const UserTableClient = ({
         )}
       </div>
 
-      {/* Search Bar */}
-      <div className="mb-6">
-        <div className="relative max-w-md">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+      {/* Search and Filters Section */}
+      <div className="bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl border border-slate-200 p-6 mb-6 shadow-sm">
+        {/* Filters and Search in Same Row */}
+        <div className="flex flex-wrap items-center gap-4 justify-between">
+          <div className="flex flex-wrap gap-4">
+            {/* Role Filter */}
+            <div className="min-w-[180px]">
+              <Label htmlFor="role-filter" className="text-sm font-semibold text-slate-700 mb-2 block">
+                Role
+              </Label>
+              <Select value={roleFilter} onValueChange={setRoleFilter}>
+                <SelectTrigger id="role-filter" className="bg-white border-slate-300 rounded-lg shadow-sm hover:border-slate-400 transition-colors">
+                  <SelectValue placeholder="All roles" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-slate-200 rounded-lg shadow-lg">
+                  <SelectItem value="all">All roles</SelectItem>
+                  {uniqueRoles.map((role) => (
+                    <SelectItem key={role} value={role} className="hover:bg-slate-50">
+                      {role}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Station Filter */}
+            <div className="min-w-[180px]">
+              <Label htmlFor="station-filter" className="text-sm font-semibold text-slate-700 mb-2 block">
+                Station
+              </Label>
+              <Select value={stationFilter} onValueChange={setStationFilter}>
+                <SelectTrigger id="station-filter" className="bg-white border-slate-300 rounded-lg shadow-sm hover:border-slate-400 transition-colors">
+                  <SelectValue placeholder="All stations" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-slate-200 rounded-lg shadow-lg">
+                  <SelectItem value="all">All stations</SelectItem>
+                  {uniqueStations.map((station) => (
+                    <SelectItem key={station} value={station} className="hover:bg-slate-50">
+                      {station}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Search Bar */}
+          <div className="relative min-w-[300px]">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg
+                className="h-4 w-4 text-slate-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </div>
+            <input
+              type="text"
+              className="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg text-sm bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent shadow-sm transition-all duration-200 hover:border-slate-400"
+              placeholder="Search users..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          {/* Clear Filters Button */}
+          <Button
+            variant="outline"
+            onClick={() => {
+              setRoleFilter("all");
+              setStationFilter("all");
+              setDateFromFilter("");
+              setDateToFilter("");
+              setSearchTerm("");
+            }}
+            className="bg-white border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 rounded-lg shadow-sm transition-all duration-200 font-medium whitespace-nowrap"
+          >
             <svg
-              className="h-5 w-5 text-gray-400"
-              fill="currentColor"
-              viewBox="0 0 20 20"
+              className="h-4 w-4 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
               <path
-                fillRule="evenodd"
-                d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                clipRule="evenodd"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
               />
             </svg>
-          </div>
-          <input
-            type="text"
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 sm:text-sm"
-            placeholder="Search users by name or email..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+            Clear
+          </Button>
         </div>
       </div>
 
