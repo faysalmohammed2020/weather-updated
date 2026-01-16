@@ -22,6 +22,11 @@ import { useEffect, useMemo, useState } from "react";
 import { useHour } from "@/contexts/hourContext";
 import TimePickerUTC from "@/components/ui/time-picker-utc";
 
+interface RainfallApiData {
+  utcTime: string;
+  rainfallSincePrevious: string;
+}
+
 interface TimeSlot {
   id: string;
   timeStart: string;
@@ -46,6 +51,24 @@ export default function RainfallTab() {
 
   const rainfall = values.rainfall || {};
   const timeSlots = rainfall.timeSlots || [];
+  const [rainfallApiData, setRainfallApiData] = useState<RainfallApiData[]>([]);
+
+  // Fetch rainfall calculation data
+  useEffect(() => {
+    const fetchRainfallData = async () => {
+      try {
+        const response = await fetch("/api/rainfallcalculation");
+        if (response.ok) {
+          const data = await response.json();
+          setRainfallApiData(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch rainfall data:", error);
+      }
+    };
+
+    fetchRainfallData();
+  }, []);
 
   // Check if current hour is 00, 06, 12, or 18 UTC
   const isSixHourReport = useMemo(() => {
@@ -164,11 +187,6 @@ export default function RainfallTab() {
     ).padStart(2, "0")}`;
   };
 
-  /**
-   * RULE (Bangladesh calendar):
-   * - 00 UTC  → previous BD date
-   * - non-00  → today BD date
-   */
   const getCurrentUTCInfo = () => {
     const now = new Date();
     const utcHour = selectedHour
@@ -257,6 +275,122 @@ export default function RainfallTab() {
   const normalizeFourDigitRain = (value: string) =>
     value.replace(/\D/g, "").slice(0, 4);
 
+  // ---------- Rainfall Calculation Functions ----------
+  const formatToFourDigits = (value: number): string => {
+    return String(value).padStart(4, "0");
+  };
+
+  const getRainfallValue = (utcTime: string): number => {
+    const item = rainfallApiData.find((data) => data.utcTime === utcTime);
+    return item ? parseInt(item.rainfallSincePrevious, 10) || 0 : 0;
+  };
+
+  const calculateDuringPrevious6Hours = (): string => {
+    if (!selectedHour) return "";
+
+    const hour = parseInt(selectedHour, 10);
+    const now = new Date();
+
+    // Calculate based on the rules provided
+    let total = 0;
+
+    if (hour === 0) {
+      // 00 UTC: previous day 21 + 24
+      const yesterday = new Date(now);
+      yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+      const dateStr = yesterday.toISOString().split("T")[0];
+
+      total += getRainfallValue(`${dateStr}T21:00:00.000Z`);
+      total += getRainfallValue(`${dateStr}T24:00:00.000Z`);
+    } else if (hour === 6) {
+      // 06 UTC: current day 00 + 03
+      const dateStr = now.toISOString().split("T")[0];
+      total += getRainfallValue(`${dateStr}T00:00:00.000Z`);
+      total += getRainfallValue(`${dateStr}T03:00:00.000Z`);
+    } else if (hour === 12) {
+      // 12 UTC: current day 06 + 09
+      const dateStr = now.toISOString().split("T")[0];
+      total += getRainfallValue(`${dateStr}T06:00:00.000Z`);
+      total += getRainfallValue(`${dateStr}T09:00:00.000Z`);
+    } else if (hour === 18) {
+      // 18 UTC: current day 12 + 15
+      const dateStr = now.toISOString().split("T")[0];
+      total += getRainfallValue(`${dateStr}T12:00:00.000Z`);
+      total += getRainfallValue(`${dateStr}T15:00:00.000Z`);
+    }
+
+    return formatToFourDigits(total);
+  };
+
+  const calculateLast24Hours = (): string => {
+    if (!selectedHour || parseInt(selectedHour, 10) !== 0) return "";
+
+    const now = new Date();
+    const yesterday = new Date(now);
+    yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+    const dateStr = yesterday.toISOString().split("T")[0];
+
+    // Sum all values from previous day 03 to current day 00 UTC
+    const timesToSum = [
+      `${dateStr}T03:00:00.000Z`,
+      `${dateStr}T06:00:00.000Z`,
+      `${dateStr}T09:00:00.000Z`,
+      `${dateStr}T12:00:00.000Z`,
+      `${dateStr}T15:00:00.000Z`,
+      `${dateStr}T18:00:00.000Z`,
+      `${dateStr}T21:00:00.000Z`,
+      `${dateStr}T24:00:00.000Z`,
+    ];
+
+    let total = 0;
+    timesToSum.forEach((time) => {
+      total += getRainfallValue(time);
+    });
+
+    // Add the Since Previous Observation input value
+    const sincePreviousValue = parseFloat(rainfall["since-previous"] || "0") || 0;
+    total += sincePreviousValue;
+
+    return String(total);
+  };
+
+  // Auto-fill calculated values
+  useEffect(() => {
+    if (rainfallApiData.length === 0) return;
+
+    // Auto-fill During Previous 6 Hours
+    if (isSixHourReport) {
+      const calculated6Hours = calculateDuringPrevious6Hours();
+      if (calculated6Hours) {
+        setFieldValue("rainfall.during-previous", calculated6Hours);
+      }
+    }
+
+    // Auto-fill Last 24 Hours (only at 00 UTC)
+    if (isMidnightReport) {
+      const calculated24Hours = calculateLast24Hours();
+      if (calculated24Hours) {
+        setFieldValue("rainfall.last-24-hours", calculated24Hours);
+      }
+    }
+  }, [
+    rainfallApiData,
+    selectedHour,
+    isSixHourReport,
+    isMidnightReport,
+    setFieldValue,
+  ]);
+
+  // Separate useEffect for Last 24 Hours calculation when since-previous changes
+  useEffect(() => {
+    if (rainfallApiData.length === 0 || !isMidnightReport) return;
+
+    const calculated24Hours = calculateLast24Hours();
+    if (calculated24Hours) {
+      setFieldValue("rainfall.last-24-hours", calculated24Hours);
+    }
+  }, [rainfall["since-previous"], rainfallApiData, isMidnightReport, setFieldValue]);
+
   return (
     <div className="space-y-6">
       {/* Title */}
@@ -343,36 +477,8 @@ export default function RainfallTab() {
                 }
                 className="border-violet-300 focus:border-violet-500 font-medium"
               />
-              {/* <div className="text-xs text-violet-600 space-y-1">
-                <p className="font-medium">সাধারণত Start Date-এর সমান থাকে</p>
-                <p className="text-violet-500">
-                  বৃষ্টি একাধিক দিনে হলে পরিবর্তন করুন
-                </p>
-              </div> */}
             </div>
           </div>
-
-          {/* <div className="mt-4 p-3 bg-violet-50 border border-violet-200 rounded-lg">
-            <p className="text-xs font-semibold text-violet-900 mb-2">
-              📋 Rule (Bangladesh Calendar):
-            </p>
-            <div className="text-xs text-violet-700 space-y-1">
-              <p>
-                • <span className="font-medium">00 UTC</span> → আগের দিনের তারিখ
-              </p>
-              <p>
-                • <span className="font-medium">non-00 UTC</span> → বর্তমান
-                দিনের তারিখ
-              </p>
-              <p className="text-violet-600 mt-1">Examples:</p>
-              <p className="ml-4">
-                - আজ (BD) 2025-10-16 হলে → 00 UTC = 2025-10-15
-              </p>
-              <p className="ml-4">
-                - আজ (BD) 2025-10-16 হলে → 03/06/12/18 UTC = 2025-10-16
-              </p>
-            </div>
-          </div> */}
         </CardContent>
       </Card>
 
@@ -585,28 +691,18 @@ export default function RainfallTab() {
               <div className="grid gap-2">
                 <Label htmlFor="during-previous">
                   During Previous 6 Hours (At 00, 06, 12, 18 UTC) - mm (4-digit)
+                  <span className="ml-2 text-xs text-green-600 font-medium">
+                    (Auto-calculated)
+                  </span>
                 </Label>
                 <Input
                   id="during-previous"
                   type="text"
                   step="0.1"
                   value={rainfall["during-previous"] || ""}
-                  onChange={(e) =>
-                    setFieldValue(
-                      "rainfall.during-previous",
-                      normalizeFourDigitRain(e.target.value)
-                    )
-                  }
-                  inputMode="numeric"
-                  pattern="[0-9]{0,4}"
-                  maxLength={4}
-                  placeholder="0000"
-                  className="border-violet-200 focus:border-violet-500"
+                  readOnly
+                  className="border-violet-200 focus:border-violet-500 bg-green-50 font-mono"
                 />
-                <p className="text-xs text-slate-600">
-                  Enter four digits for cumulative 6-hour precipitation (e.g.,
-                  0005, 0123).
-                </p>
               </div>
             )}
             {/* Last 24 Hours Precipitation - Only visible at 00 UTC */}
@@ -614,6 +710,9 @@ export default function RainfallTab() {
               <div className="grid gap-2">
                 <Label htmlFor="last-24-hours">
                   Last 24 Hours Precipitation (mm)
+                  <span className="ml-2 text-xs text-green-600 font-medium">
+                    (Auto-calculated)
+                  </span>
                 </Label>
                 <Input
                   id="last-24-hours"
@@ -621,10 +720,8 @@ export default function RainfallTab() {
                   maxLength={3}
                   step="0.1"
                   value={rainfall["last-24-hours"] || ""}
-                  onChange={(e) =>
-                    setFieldValue("rainfall.last-24-hours", e.target.value)
-                  }
-                  className="border-violet-200 focus:border-violet-500"
+                  readOnly
+                  className="border-violet-200 focus:border-violet-500 bg-green-50 font-mono"
                 />
               </div>
             )}
