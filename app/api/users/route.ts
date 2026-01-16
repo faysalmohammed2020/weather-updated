@@ -31,6 +31,8 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "10");
     const offset = parseInt(searchParams.get("offset") || "0");
     const search = (searchParams.get("search") || "").trim(); // ✅ NEW
+    const roleFilter = searchParams.get("role") || "";
+    const stationFilter = searchParams.get("station") || "";
 
     const isSuper = session.user.role === "super_admin";
 
@@ -42,11 +44,23 @@ export async function GET(request: NextRequest) {
           stationId: session.user.station?.id,
         };
 
+    // ✅ Additional filters for super admin
+    const additionalFilters: Record<string, string> = isSuper ? {} : {};
+    if (isSuper && roleFilter && roleFilter !== "all") {
+      additionalFilters.role = roleFilter;
+    }
+    if (isSuper && stationFilter && stationFilter !== "all") {
+      additionalFilters.stationId = stationFilter;
+    }
+
+    // ✅ Combine all filters
+    const allFilters = Object.keys(additionalFilters).length > 0 ? additionalFilters : {};
+
     // ✅ search filter add (name/email)
     const where = search
       ? {
           AND: [
-            baseWhere,
+            { ...baseWhere, ...allFilters },
             {
               OR: [
                 { name: { contains: search, mode: "insensitive" as const } },
@@ -55,7 +69,7 @@ export async function GET(request: NextRequest) {
             },
           ],
         }
-      : baseWhere;
+      : { ...baseWhere, ...allFilters };
 
     const [users, total] = await Promise.all([
       prisma.users.findMany({

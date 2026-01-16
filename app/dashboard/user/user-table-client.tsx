@@ -216,7 +216,7 @@ export const UserTableClient = ({
     const stationList = new Set<string>();
     users.forEach((user) => {
       if (user.stationId && stationNameById.has(user.stationId)) {
-        stationList.add(stationNameById.get(user.stationId)!);
+        stationList.add(user.stationId); // Use stationId instead of station name
       }
     });
     return Array.from(stationList).sort();
@@ -618,9 +618,9 @@ export const UserTableClient = ({
                 </SelectTrigger>
                 <SelectContent className="bg-white border-slate-200 rounded-lg shadow-lg">
                   <SelectItem value="all">All stations</SelectItem>
-                  {uniqueStations.map((station) => (
-                    <SelectItem key={station} value={station} className="hover:bg-slate-50">
-                      {station}
+                  {uniqueStations.map((stationId) => (
+                    <SelectItem key={stationId} value={stationId} className="hover:bg-slate-50">
+                      {stationNameById.get(stationId) || stationId}
                     </SelectItem>
                   ))}
                 </SelectContent>
