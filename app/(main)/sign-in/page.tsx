@@ -36,6 +36,7 @@ import { Station } from "@/data/stations";
 
 // Available roles
 const roles = [
+  { value: "root_admin", label: "Root Admin" },
   { value: "super_admin", label: "Super Admin" },
   { value: "station_admin", label: "Station Admin" },
   { value: "observer", label: "Observer" },

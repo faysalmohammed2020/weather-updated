@@ -23,7 +23,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -36,7 +35,6 @@ import { toast } from "sonner";
 import { useLocation } from "@/contexts/divisionContext";
 import {
   USER_ROLES,
-  PAGINATION,
   ERROR_MESSAGES,
   API_ENDPOINTS,
 } from "@/lib/constants/user-management";
@@ -184,8 +182,10 @@ export const UserTableClient = ({
   // ============================================================================
   // COMPUTED VALUES
   // ============================================================================
-  const isUserSuperAdmin = useMemo(
-    () => session?.user?.role === USER_ROLES.SUPER_ADMIN,
+  const isPrivilegedAdmin = useMemo(
+    () =>
+      session?.user?.role === USER_ROLES.SUPER_ADMIN ||
+      session?.user?.role === USER_ROLES.ROOT_ADMIN,
     [session?.user?.role]
   );
 
@@ -198,25 +198,36 @@ export const UserTableClient = ({
     [locationLoading]
   );
 
+  // ✅ FIX: map both station.id and station.stationId to name
   const stationNameById = useMemo(() => {
     const map = new Map<string, string>();
-    stations.forEach((s) => map.set(s.id, s.name));
+    stations.forEach((s: any) => {
+      if (s?.id) map.set(String(s.id), s.name);
+      if (s?.stationId) map.set(String(s.stationId), s.name);
+    });
     return map;
   }, [stations]);
 
-  const uniqueRoles = useMemo(() => {
-    const roles = new Set<string>();
-    users.forEach((user) => {
-      if (user.role) roles.add(user.role);
-    });
-    return Array.from(roles).sort();
-  }, [users]);
+const visibleUsers = useMemo(() => {
+  const actorRole = session?.user?.role;
+  if (actorRole === USER_ROLES.ROOT_ADMIN) return users;
+  return users.filter((u) => u.role !== USER_ROLES.ROOT_ADMIN);
+}, [users, session?.user?.role]);
+
+const uniqueRoles = useMemo(() => {
+  const roles = new Set<string>();
+  visibleUsers.forEach((user) => {
+    if (user.role) roles.add(user.role);
+  });
+  return Array.from(roles).sort();
+}, [visibleUsers]);
+
 
   const uniqueStations = useMemo(() => {
     const stationList = new Set<string>();
     users.forEach((user) => {
-      if (user.stationId && stationNameById.has(user.stationId)) {
-        stationList.add(user.stationId); // Use stationId instead of station name
+      if (user.stationId && stationNameById.has(String(user.stationId))) {
+        stationList.add(String(user.stationId));
       }
     });
     return Array.from(stationList).sort();
@@ -234,37 +245,20 @@ export const UserTableClient = ({
         params.set("page", newPage.toString());
       }
 
-      // search query maintain korbo
-      if (debouncedSearch) {
-        params.set("search", debouncedSearch);
-      } else {
-        params.delete("search");
-      }
+      if (debouncedSearch) params.set("search", debouncedSearch);
+      else params.delete("search");
 
-      // filter parameters maintain korbo
-      if (roleFilter !== "all") {
-        params.set("role", roleFilter);
-      } else {
-        params.delete("role");
-      }
+      if (roleFilter !== "all") params.set("role", roleFilter);
+      else params.delete("role");
 
-      if (stationFilter !== "all") {
-        params.set("station", stationFilter);
-      } else {
-        params.delete("station");
-      }
+      if (stationFilter !== "all") params.set("station", stationFilter);
+      else params.delete("station");
 
-      if (dateFromFilter) {
-        params.set("dateFrom", dateFromFilter);
-      } else {
-        params.delete("dateFrom");
-      }
+      if (dateFromFilter) params.set("dateFrom", dateFromFilter);
+      else params.delete("dateFrom");
 
-      if (dateToFilter) {
-        params.set("dateTo", dateToFilter);
-      } else {
-        params.delete("dateTo");
-      }
+      if (dateToFilter) params.set("dateTo", dateToFilter);
+      else params.delete("dateTo");
 
       router.push(`/dashboard/user?${params.toString()}`, { scroll: false });
     },
@@ -300,7 +294,6 @@ export const UserTableClient = ({
     updatePageInUrl(0);
   }, [updatePageInUrl]);
 
-  // search change hole first page e niye jabe
   useEffect(() => {
     if (pageIndex !== 0) {
       setPageIndex(0);
@@ -308,9 +301,8 @@ export const UserTableClient = ({
     } else {
       updatePageInUrl(0);
     }
-  }, [debouncedSearch]);
+  }, [debouncedSearch]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // filter change hole first page e niye jabe
   useEffect(() => {
     if (pageIndex !== 0) {
       setPageIndex(0);
@@ -318,7 +310,7 @@ export const UserTableClient = ({
     } else {
       updatePageInUrl(0);
     }
-  }, [roleFilter, stationFilter, dateFromFilter, dateToFilter]);
+  }, [roleFilter, stationFilter, dateFromFilter, dateToFilter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ============================================================================
   // DATA REFRESH FUNCTION (SERVER-SIDE SEARCH INCLUDED)
@@ -330,25 +322,11 @@ export const UserTableClient = ({
       params.set("limit", pageSize.toString());
       params.set("offset", (pageIndex * pageSize).toString());
 
-      if (debouncedSearch) {
-        params.set("search", debouncedSearch);
-      }
-
-      if (roleFilter !== "all") {
-        params.set("role", roleFilter);
-      }
-
-      if (stationFilter !== "all") {
-        params.set("station", stationFilter);
-      }
-
-      if (dateFromFilter) {
-        params.set("dateFrom", dateFromFilter);
-      }
-
-      if (dateToFilter) {
-        params.set("dateTo", dateToFilter);
-      }
+      if (debouncedSearch) params.set("search", debouncedSearch);
+      if (roleFilter !== "all") params.set("role", roleFilter);
+      if (stationFilter !== "all") params.set("station", stationFilter);
+      if (dateFromFilter) params.set("dateFrom", dateFromFilter);
+      if (dateToFilter) params.set("dateTo", dateToFilter);
 
       const response = await fetch(
         `${API_ENDPOINTS.USERS}?${params.toString()}`,
@@ -454,9 +432,22 @@ export const UserTableClient = ({
   // ============================================================================
   // USER EDITING
   // ============================================================================
-  const openEditDialog = useCallback((user: User) => {
+const openEditDialog = useCallback(
+  (user: User) => {
+    const actorRole = session?.user?.role;
+
+    // ✅ root_admin allow to edit super_admin
     if (user.role === USER_ROLES.SUPER_ADMIN) {
-      toast.error(ERROR_MESSAGES.CANNOT_MODIFY_SUPER_ADMIN);
+      if (actorRole !== USER_ROLES.ROOT_ADMIN) {
+        toast.error(ERROR_MESSAGES.CANNOT_MODIFY_SUPER_ADMIN);
+        return;
+      }
+      // actor is root_admin -> allow
+    }
+
+    // ✅ root_admin account protection (unchanged): nobody edits root_admin here
+    if (user.role === USER_ROLES.ROOT_ADMIN) {
+      toast.error(ERROR_MESSAGES.CANNOT_MODIFY_ROOT_ADMIN);
       return;
     }
 
@@ -471,8 +462,12 @@ export const UserTableClient = ({
       upazila: user.upazila || "",
       stationId: user.stationId || "",
     });
+
     setOpenDialog(true);
-  }, []);
+  },
+  [session?.user?.role] // ✅ dependency add
+);
+
 
   const confirmRoleUpdate = useCallback(() => {
     if (!editUser) return;
@@ -493,7 +488,7 @@ export const UserTableClient = ({
       newRole: formData.role,
     });
     setOpenRoleUpdateDialog(true);
-  }, [editUser, formData]);
+  }, [editUser, formData]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleUpdateUser = useCallback(async () => {
     if (!editUser) return;
@@ -520,7 +515,14 @@ export const UserTableClient = ({
   // ============================================================================
   const openDeleteConfirmation = useCallback(
     (userId: string, userRole: string | null) => {
-      const check = canDeleteUser(session?.user?.id || "", userId, userRole);
+      // ✅ FIX: pass actor role so root_admin can delete super_admin (per API)
+      const check = canDeleteUser(
+        session?.user?.id || "",
+        userId,
+        userRole,
+        session?.user?.role
+      );
+
       if (!check.canDelete) {
         toast.error(check.error);
         return;
@@ -529,7 +531,7 @@ export const UserTableClient = ({
       setUserToDelete(userId);
       setOpenDeleteDialog(true);
     },
-    [session?.user?.id]
+    [session?.user?.id, session?.user?.role]
   );
 
   const handleDeleteUser = useCallback(async () => {
@@ -548,11 +550,7 @@ export const UserTableClient = ({
   // USER IMPERSONATION
   // ============================================================================
   const handleImpersonate = useCallback(
-    async (
-      userId: string,
-      userName: string | null,
-      userRole: string | null
-    ) => {
+    async (userId: string, userName: string | null, userRole: string | null) => {
       const check = canImpersonate(session?.user?.id || "", userId, userRole);
       if (!check.canImpersonate) {
         toast.error(check.error);
@@ -572,11 +570,8 @@ export const UserTableClient = ({
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">User Management</h1>
-        {isUserSuperAdmin && (
-          <Button
-            className="bg-sky-600 hover:bg-sky-400"
-            onClick={openCreateDialog}
-          >
+        {isPrivilegedAdmin && (
+          <Button className="bg-sky-600 hover:bg-sky-400" onClick={openCreateDialog}>
             + Create User
           </Button>
         )}
@@ -584,16 +579,21 @@ export const UserTableClient = ({
 
       {/* Search and Filters Section */}
       <div className="bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl border border-slate-200 p-6 mb-6 shadow-sm">
-        {/* Filters and Search in Same Row */}
         <div className="flex flex-wrap items-center gap-4 justify-between">
           <div className="flex flex-wrap gap-4">
             {/* Role Filter */}
             <div className="min-w-[180px]">
-              <Label htmlFor="role-filter" className="text-sm font-semibold text-slate-700 mb-2 block">
+              <Label
+                htmlFor="role-filter"
+                className="text-sm font-semibold text-slate-700 mb-2 block"
+              >
                 Role
               </Label>
               <Select value={roleFilter} onValueChange={setRoleFilter}>
-                <SelectTrigger id="role-filter" className="bg-white border-slate-300 rounded-lg shadow-sm hover:border-slate-400 transition-colors">
+                <SelectTrigger
+                  id="role-filter"
+                  className="bg-white border-slate-300 rounded-lg shadow-sm hover:border-slate-400 transition-colors"
+                >
                   <SelectValue placeholder="All roles" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-slate-200 rounded-lg shadow-lg">
@@ -609,11 +609,17 @@ export const UserTableClient = ({
 
             {/* Station Filter */}
             <div className="min-w-[180px]">
-              <Label htmlFor="station-filter" className="text-sm font-semibold text-slate-700 mb-2 block">
+              <Label
+                htmlFor="station-filter"
+                className="text-sm font-semibold text-slate-700 mb-2 block"
+              >
                 Station
               </Label>
               <Select value={stationFilter} onValueChange={setStationFilter}>
-                <SelectTrigger id="station-filter" className="bg-white border-slate-300 rounded-lg shadow-sm hover:border-slate-400 transition-colors">
+                <SelectTrigger
+                  id="station-filter"
+                  className="bg-white border-slate-300 rounded-lg shadow-sm hover:border-slate-400 transition-colors"
+                >
                   <SelectValue placeholder="All stations" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-slate-200 rounded-lg shadow-lg">
@@ -653,7 +659,6 @@ export const UserTableClient = ({
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-
         </div>
       </div>
 
@@ -686,9 +691,12 @@ export const UserTableClient = ({
           <TableBody>
             {isLoading ? (
               <UserTableSkeletonRows rows={pageSize} />
-            ) : users.length > 0 ? (
-              users.map((user) => {
-                const stationName = stationNameById.get(user.stationId);
+            ) : visibleUsers.length > 0 ? (
+              visibleUsers.map((user) => {
+                const stationName = user.stationId
+                  ? stationNameById.get(String(user.stationId))
+                  : undefined;
+
                 return (
                   <TableRow key={user.id}>
                     <TableCell className="p-3 text-left truncate max-w-[250px] text-base">
@@ -709,7 +717,7 @@ export const UserTableClient = ({
                     <TableCell>
                       <UserActionButtons
                         user={user}
-                        isSuper={isUserSuperAdmin}
+                        isSuper={isPrivilegedAdmin}
                         currentUserId={session?.user?.id}
                         onEdit={openEditDialog}
                         onDelete={openDeleteConfirmation}
@@ -742,12 +750,7 @@ export const UserTableClient = ({
             )}
           </div>
           <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={prevPage}
-              disabled={pageIndex === 0 || isLoading}
-            >
+            <Button variant="outline" size="sm" onClick={prevPage} disabled={pageIndex === 0 || isLoading}>
               Previous
             </Button>
             <Button
@@ -775,33 +778,18 @@ export const UserTableClient = ({
           isLoading={isOperating}
           stations={stations}
           loadingStations={false}
-          divisions={divisions.map((d) => ({
-            osmId: d.osmId.toString(),
-            name: d.name,
-          }))}
-          districts={districts.map((d) => ({
-            osmId: d.osmId.toString(),
-            name: d.name,
-          }))}
-          upazilas={upazilas.map((u) => ({
-            osmId: u.osmId.toString(),
-            name: u.name,
-          }))}
+          divisions={divisions.map((d) => ({ osmId: d.osmId.toString(), name: d.name }))}
+          districts={districts.map((d) => ({ osmId: d.osmId.toString(), name: d.name }))}
+          upazilas={upazilas.map((u) => ({ osmId: u.osmId.toString(), name: u.name }))}
           selectedDivision={
             selectedDivision
-              ? {
-                  osmId: selectedDivision.osmId.toString(),
-                  name: selectedDivision.name,
-                }
+              ? { osmId: selectedDivision.osmId.toString(), name: selectedDivision.name }
               : null
           }
           onDivisionChange={setSelectedDivision}
           selectedDistrict={
             selectedDistrict
-              ? {
-                  osmId: selectedDistrict.osmId.toString(),
-                  name: selectedDistrict.name,
-                }
+              ? { osmId: selectedDistrict.osmId.toString(), name: selectedDistrict.name }
               : null
           }
           onDistrictChange={setSelectedDistrict}
@@ -809,10 +797,10 @@ export const UserTableClient = ({
           loadingDivisions={canLoadingLocationData.loadingDivisions}
           loadingDistricts={canLoadingLocationData.loadingDistricts}
           loadingUpazilas={canLoadingLocationData.loadingUpazilas}
-          canShowRoleSelector={isUserSuperAdmin}
+          canShowRoleSelector={isPrivilegedAdmin}
         />
 
-        {isUserSuperAdmin && (
+        {isPrivilegedAdmin && (
           <DeleteConfirmationDialog
             open={openDeleteDialog}
             onOpenChange={setOpenDeleteDialog}
@@ -861,7 +849,7 @@ const UserActionButtons = ({
   isImpersonating,
 }: UserActionButtonsProps) => {
   const canImpersonateUser = isSuper || user.role === USER_ROLES.OBSERVER;
-  const canDeleteUser = isSuper;
+  const canDeleteUserLocal = isSuper;
 
   return (
     <div className="flex gap-2">
@@ -869,7 +857,7 @@ const UserActionButtons = ({
         Edit
       </Button>
 
-      {canDeleteUser && (
+      {canDeleteUserLocal && (
         <Button
           variant="destructive"
           size="sm"
@@ -881,6 +869,7 @@ const UserActionButtons = ({
 
       {canImpersonateUser &&
         user.role !== USER_ROLES.SUPER_ADMIN &&
+        user.role !== USER_ROLES.ROOT_ADMIN &&
         user.id !== currentUserId && (
           <Button
             variant="default"

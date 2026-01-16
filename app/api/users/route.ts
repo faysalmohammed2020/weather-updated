@@ -8,9 +8,8 @@ import { LogAction, LogActionType, LogModule } from "@/lib/log";
 
 // ✅ NextAuth server session
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth"; // <-- তোমার authOptions export থাকতে হবে
+import { authOptions } from "@/lib/auth"; 
 
-// ✅ BetterAuth admin.revokeUserSessions replacement
 async function revokeUserSessions(userId: string) {
   await prisma.sessions.deleteMany({
     where: { userId },
@@ -18,7 +17,7 @@ async function revokeUserSessions(userId: string) {
 }
 
 /* ----------------------------- GET USERS ----------------------------- */
-/* ----------------------------- GET USERS ----------------------------- */
+
 export async function GET(request: NextRequest) {
   const session = await getSession();
 
@@ -34,10 +33,12 @@ export async function GET(request: NextRequest) {
     const roleFilter = searchParams.get("role") || "";
     const stationFilter = searchParams.get("station") || "";
 
-    const isSuper = session.user.role === "super_admin";
+    // ✅ root_admin + super_admin => see all users
+    const isPrivileged =
+      session.user.role === "super_admin" || session.user.role === "root_admin";
 
-    // ✅ base filter (existing logic)
-    const baseWhere = isSuper
+    // ✅ base filter
+    const baseWhere = isPrivileged
       ? {}
       : {
           role: "observer",
@@ -45,11 +46,11 @@ export async function GET(request: NextRequest) {
         };
 
     // ✅ Additional filters for super admin
-    const additionalFilters: Record<string, string> = isSuper ? {} : {};
-    if (isSuper && roleFilter && roleFilter !== "all") {
+    const additionalFilters: Record<string, string> = isPrivileged ? {} : {};
+    if (isPrivileged && roleFilter && roleFilter !== "all") {
       additionalFilters.role = roleFilter;
     }
-    if (isSuper && stationFilter && stationFilter !== "all") {
+    if (isPrivileged && stationFilter && stationFilter !== "all") {
       additionalFilters.stationId = stationFilter;
     }
 
@@ -90,7 +91,6 @@ export async function GET(request: NextRequest) {
     );
   }
 }
-
 /* ----------------------------- UPDATE USER ----------------------------- */
 export async function PUT(request: NextRequest) {
   try {
@@ -103,10 +103,7 @@ export async function PUT(request: NextRequest) {
     const { id, password, ...rest } = body;
 
     if (!id) {
-      return NextResponse.json(
-        { error: "User ID is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "User ID is required" }, { status: 400 });
     }
 
     const existingUser = await prisma.users.findUnique({ where: { id } });
@@ -115,10 +112,37 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Authorization checks (same as before)
+    const actorRole = session.user.role;
+    const isRoot = actorRole === "root_admin";
+    const isSuper = actorRole === "super_admin";
+    const isPrivileged = isRoot || isSuper;
+
+    // ============================================================
+    // ✅ HARD RULES (as per your requirement)
+    // ============================================================
+
+    // ✅ super_admin cannot edit root_admin
+    if (isSuper && existingUser.role === "root_admin") {
+      return NextResponse.json(
+        { error: "Super admin cannot edit root admin accounts" },
+        { status: 403 }
+      );
+    }
+
+    // ✅ non-privileged cannot edit super_admin/root_admin
+    if (!isPrivileged && (existingUser.role === "super_admin" || existingUser.role === "root_admin")) {
+      return NextResponse.json(
+        { error: "You are not authorized to do this action" },
+        { status: 403 }
+      );
+    }
+
+    // ✅ station_admin editing another station_admin blocked (keep old behavior)
+    // privileged হলে এই restriction থাকবে না
     if (
-      existingUser.role === "super_admin" &&
-      session.user.role !== "super_admin"
+      !isPrivileged &&
+      actorRole === "station_admin" &&
+      existingUser.role === "station_admin"
     ) {
       return NextResponse.json(
         { error: "You are not authorized to do this action" },
@@ -126,28 +150,34 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    if (
-      existingUser.role === "station_admin" &&
-      session.user.role === "station_admin"
-    ) {
+    // ============================================================
+    // ✅ ROLE PROMOTION RULES
+    // ============================================================
+
+    // ✅ Promote someone to super_admin:
+    // - root_admin allowed
+    // - super_admin allowed
+    // - others not allowed
+    if (rest.role === "super_admin" && !isPrivileged) {
       return NextResponse.json(
-        { error: "You are not authorized to do this action" },
+        { error: "Only super/root admins can promote users to super admin role" },
         { status: 403 }
       );
     }
 
-    if (
-      existingUser.role !== "super_admin" &&
-      rest.role === "super_admin" &&
-      session.user.role !== "super_admin"
-    ) {
+    // ✅ Promote someone to root_admin:
+    // - ONLY root_admin allowed (because super_admin cannot touch root_admin)
+    if (rest.role === "root_admin" && !isRoot) {
       return NextResponse.json(
-        { error: "Only super admins can promote users to super admin role" },
+        { error: "Only root admin can promote users to root admin role" },
         { status: 403 }
       );
     }
 
-    // ✅ bcrypt hash
+    // ============================================================
+    // ✅ PASSWORD UPDATE (bcrypt)
+    // ============================================================
+
     let hashedPassword: string | undefined;
     if (password && password.trim() !== "") {
       hashedPassword = await bcrypt.hash(password, 10);
@@ -182,7 +212,6 @@ export async function PUT(request: NextRequest) {
           });
         }
 
-        // ✅ revoke sessions (NextAuth style)
         await revokeUserSessions(existingUser.id);
       }
 
@@ -212,12 +241,11 @@ export async function PUT(request: NextRequest) {
     );
   } catch (error) {
     console.error("Error updating user:", error);
-    return NextResponse.json(
-      { error: "Failed to update user" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to update user" }, { status: 500 });
   }
 }
+
+
 
 /* ----------------------------- CREATE USER ----------------------------- */
 export async function POST(request: NextRequest) {
@@ -227,7 +255,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (session.user.role !== "super_admin") {
+    // ✅ super_admin OR root_admin can create users
+    const isPrivileged =
+      session.user.role === "super_admin" || session.user.role === "root_admin";
+
+    if (!isPrivileged) {
       return NextResponse.json(
         { error: "You are not authorized to do this action" },
         { status: 403 }
@@ -253,13 +285,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // ✅ add root_admin + password rule
     const passwordMinLength = {
+      root_admin: 12,
       super_admin: 12,
       station_admin: 11,
       observer: 10,
-    };
+    } as const;
 
-    if (!["super_admin", "station_admin", "observer"].includes(role)) {
+    if (
+      !["root_admin", "super_admin", "station_admin", "observer"].includes(role)
+    ) {
       return NextResponse.json({ error: "Invalid role" }, { status: 400 });
     }
 
@@ -359,7 +395,10 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (session.user.role !== "super_admin") {
+    const actorRole = session.user.role;
+
+    // ✅ Only super_admin or root_admin can delete
+    if (actorRole !== "super_admin" && actorRole !== "root_admin") {
       return NextResponse.json(
         { error: "You are not authorized to do this action" },
         { status: 403 }
@@ -376,6 +415,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
+    // ✅ cannot delete self
     if (session.user.id === userId) {
       return NextResponse.json(
         { error: "You cannot delete your own account" },
@@ -391,12 +431,16 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    if (userToDelete.role === "super_admin") {
+    // ✅ Rule: super_admin cannot delete root_admin
+    if (actorRole === "super_admin" && userToDelete.role === "root_admin") {
       return NextResponse.json(
-        { error: "Super admin accounts cannot be deleted" },
+        { error: "Super admin cannot delete root admin accounts" },
         { status: 403 }
       );
     }
+
+    // ✅ Rule: root_admin can delete anyone (including super_admin/root_admin)
+    // so no extra blocks here
 
     await prisma.$transaction(async (tx) => {
       await revokeUserSessions(userToDelete.id);
@@ -431,3 +475,4 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
+

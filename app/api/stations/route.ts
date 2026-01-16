@@ -16,7 +16,7 @@ export async function GET() {
     }
 
     // Filter stations based on user role
-    if (session.user.role === "super_admin") {
+    if (session.user.role === "super_admin" || session.user.role === "root_admin") {
       // Super admin can see all stations
       stations = await prisma.station.findMany();
     } else if (

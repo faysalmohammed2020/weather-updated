@@ -62,8 +62,7 @@ export async function signUp(data: {
 }
 
 // ---- admin helper ----
-// BetterAuth adminClient() এর কাজ সাধারণত role check / admin actions।
-export function useAdminGuard(allowedRoles: UserRole[] = ["super_admin"]) {
+export function useAdminGuard(allowedRoles: UserRole[] = ["super_admin", "root_admin"]) {
   const { data, status } = naUseSession();
   const router = useRouter();
 

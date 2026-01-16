@@ -115,12 +115,12 @@ const Sidebar = () => {
       href: "/dashboard",
       icon: <LayoutDashboard className="w-5 h-5" />,
       label: "Dashboard",
-      roles: ["super_admin", "observer", "station_admin"],
+      roles: ["root_admin", "super_admin", "observer", "station_admin"],
     },
     {
       icon: <PencilIcon className="w-5 h-5" />,
       label: "Data Entry",
-      roles: ["observer", "station_admin", "super_admin"],
+      roles: ["root_admin","observer", "station_admin", "super_admin"],
       subMenu: [
         {
           icon: <CloudHail className="w-5 h-5" />,
@@ -152,7 +152,7 @@ const Sidebar = () => {
     {
       icon: <Eye className="w-5 h-5" />,
       label: "View & Manage",
-      roles: ["observer", "station_admin", "super_admin"],
+      roles: ["root_admin","observer", "station_admin", "super_admin"],
       subMenu: [
         {
           icon: <CloudHail className="w-5 h-5" />,
@@ -191,38 +191,38 @@ const Sidebar = () => {
       href: "/dashboard/netcdf-visualizer",
       icon: <Monitor className="w-5 h-5" />,
       label: "NetCDF Visualizer",
-      roles: ["super_admin", "station_admin"],
+      roles: ["root_admin","super_admin", "station_admin"],
     },
     {
       href: "/dashboard/radio-sond-analyzer",
       icon: <BarChart2 className="w-5 h-5" />,
       label: "Radiosonde Analyzer",
-      roles: ["super_admin", "station_admin"],
+      roles: ["root_admin","super_admin", "station_admin"],
     },
     {
       href: "/dashboard/user",
       icon: <Users className="w-5 h-5" />,
       label: "User Management",
-      roles: ["super_admin", "station_admin"],
+      roles: ["root_admin","super_admin", "station_admin"],
     },
     {
       href: "/dashboard/activity-logs",
       icon: <Eye className="w-5 h-5" />,
       label: "Activity Logs",
-      roles: ["super_admin", "station_admin"],
+      roles: ["root_admin","super_admin", "station_admin"],
     },
     {
       href: "/dashboard/stations",
       icon: <CloudFog className="w-5 h-5" />,
       label: "Station Management",
-      roles: ["super_admin"],
+      roles: ["root_admin","super_admin"],
     },
 
     {
       href: "/dashboard/settings",
       icon: <Settings className="w-5 h-5" />,
       label: "Settings",
-      roles: ["super_admin"],
+      roles: ["root_admin","super_admin"],
     },
   ];
 

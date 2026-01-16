@@ -200,21 +200,29 @@ export const canImpersonate = (
  * @param targetUserRole - Target user role
  * @returns Object with canDelete flag and error message if cannot
  */
-export const canDeleteUser = (
+export function canDeleteUser(
   currentUserId: string,
   targetUserId: string,
-  targetUserRole: string | null
-): { canDelete: boolean; error?: string } => {
+  targetRole: string | null,
+  actorRole: string | null | undefined
+) {
   if (currentUserId === targetUserId) {
-    return { canDelete: false, error: ERROR_MESSAGES.CANNOT_DELETE_SELF };
+    return { canDelete: false, error: "You cannot delete your own account" };
   }
 
-  if (targetUserRole === "super_admin") {
-    return {
-      canDelete: false,
-      error: ERROR_MESSAGES.CANNOT_DELETE_SUPER_ADMIN,
-    };
+  const isRoot = actorRole === "root_admin";
+  const isSuper = actorRole === "super_admin";
+
+  if (!isRoot && !isSuper) {
+    return { canDelete: false, error: "You are not authorized to do this action" };
   }
 
-  return { canDelete: true };
-};
+  // ✅ API rule: super_admin cannot delete root_admin
+  if (isSuper && targetRole === "root_admin") {
+    return { canDelete: false, error: "Super admin cannot delete root admin accounts" };
+  }
+
+  // ✅ API rule: root_admin can delete anyone (including super_admin/root_admin)
+  return { canDelete: true, error: "" };
+}
+
