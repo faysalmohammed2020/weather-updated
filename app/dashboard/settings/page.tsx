@@ -31,7 +31,7 @@ const Settings = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [setupStep, setSetupStep] = useState<"password" | "qrcode" | "verify">(
-    "password"
+    "password",
   );
   const [totpUri, setTotpUri] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
@@ -45,7 +45,7 @@ const Settings = () => {
   useEffect(() => {
     if (!isPending && session) {
       const role = session?.user?.role;
-      if (role !== "super_admin") {
+      if (role !== "super_admin" && role !== "root_admin") {
         router.replace("/dashboard");
         return;
       }
@@ -64,7 +64,11 @@ const Settings = () => {
   }
 
   // If no session or not super_admin, show nothing (redirect will happen)
-  if (!session || session?.user?.role !== "super_admin") {
+  if (
+    !session ||
+    (session?.user?.role !== "super_admin" &&
+      session?.user?.role !== "root_admin")
+  ) {
     return null;
   }
 

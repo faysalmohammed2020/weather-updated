@@ -27,13 +27,11 @@ const getSessionCookieName = (request: NextRequest) => {
 };
 
 const buildStationPayload = (
-  station?:
-    | {
-        id: string;
-        stationId: string;
-        name: string;
-      }
-    | null
+  station?: {
+    id: string;
+    stationId: string;
+    name: string;
+  } | null,
 ) => {
   if (!station) return null;
 
@@ -63,7 +61,7 @@ const ensureSecret = () =>
 const setSessionCookie = (
   response: NextResponse,
   request: NextRequest,
-  value: string
+  value: string,
 ) => {
   const cookieName = getSessionCookieName(request);
 
@@ -84,7 +82,7 @@ export async function POST(request: NextRequest) {
     if (!secret) {
       return NextResponse.json(
         { error: "Auth secret not configured on the server" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -94,28 +92,32 @@ export async function POST(request: NextRequest) {
     if (!session || !session.user) {
       return NextResponse.json(
         { error: "Unauthorized. User not authenticated." },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
     if ((session.user as any).isImpersonating) {
       return NextResponse.json(
-        { error: "You are already impersonating a user. Stop impersonation first." },
-        { status: 400 }
+        {
+          error:
+            "You are already impersonating a user. Stop impersonation first.",
+        },
+        { status: 400 },
       );
     }
 
     // Check if user has impersonation permissions
     if (
       session.user.role !== "super_admin" &&
+      session.user.role !== "root_admin" &&
       session.user.role !== "station_admin"
     ) {
       return NextResponse.json(
         {
           error:
-            "Unauthorized. Only super admins and station admins can impersonate users.",
+            "Unauthorized. Only super admins, root admins, and station admins can impersonate users.",
         },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -124,7 +126,7 @@ export async function POST(request: NextRequest) {
     if (!targetUserId) {
       return NextResponse.json(
         { error: "Target user ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -137,15 +139,18 @@ export async function POST(request: NextRequest) {
     if (!targetUser) {
       return NextResponse.json(
         { error: "Target user not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
-    // Prevent impersonating another super admin
-    if (targetUser.role === "super_admin") {
+    // Prevent impersonating another super admin unless actor is root_admin
+    if (
+      targetUser.role === "super_admin" &&
+      session.user.role !== "root_admin"
+    ) {
       return NextResponse.json(
         { error: "Cannot impersonate another super admin" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -154,7 +159,7 @@ export async function POST(request: NextRequest) {
       if (targetUser.role !== "observer") {
         return NextResponse.json(
           { error: "Station admins can only impersonate observers" },
-          { status: 403 }
+          { status: 403 },
         );
       }
 
@@ -164,7 +169,7 @@ export async function POST(request: NextRequest) {
             error:
               "Station admins can only impersonate observers in their own station",
           },
-          { status: 403 }
+          { status: 403 },
         );
       }
     }
@@ -173,7 +178,7 @@ export async function POST(request: NextRequest) {
     if (targetUserId === session.user.id) {
       return NextResponse.json(
         { error: "Cannot impersonate yourself" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -182,7 +187,7 @@ export async function POST(request: NextRequest) {
     if (!baseToken) {
       return NextResponse.json(
         { error: "Unable to read the current session" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -248,7 +253,7 @@ export async function POST(request: NextRequest) {
     console.error("Impersonation error:", error);
     return NextResponse.json(
       { error: "Internal server error during impersonation" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -261,7 +266,7 @@ export async function DELETE(request: NextRequest) {
     if (!secret) {
       return NextResponse.json(
         { error: "Auth secret not configured on the server" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -276,7 +281,7 @@ export async function DELETE(request: NextRequest) {
     if (!(session.user as any).isImpersonating || !originalUserFromToken) {
       return NextResponse.json(
         { error: "No active impersonation session found" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -285,7 +290,7 @@ export async function DELETE(request: NextRequest) {
     if (!baseToken) {
       return NextResponse.json(
         { error: "Unable to read the current session" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -301,7 +306,7 @@ export async function DELETE(request: NextRequest) {
     if (!restoredUser) {
       return NextResponse.json(
         { error: "Unable to restore the original session" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -323,7 +328,8 @@ export async function DELETE(request: NextRequest) {
       where: { id: session.user.id },
     });
 
-    const logActor = originalUserRecord || originalUserFromToken || session.user;
+    const logActor =
+      originalUserRecord || originalUserFromToken || session.user;
     const logTarget = impersonatedUser || session.user;
 
     await LogAction({
@@ -354,7 +360,7 @@ export async function DELETE(request: NextRequest) {
     console.error("Stop impersonation error:", error);
     return NextResponse.json(
       { error: "Internal server error while stopping impersonation" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

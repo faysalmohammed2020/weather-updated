@@ -17,7 +17,7 @@ import {
  */
 export const validatePassword = (
   password: string,
-  role: UserRole
+  role: UserRole,
 ): { isValid: boolean; error?: string } => {
   if (!password || password.trim() === "") {
     return { isValid: false, error: "Password is required" };
@@ -49,7 +49,7 @@ export const validateUserForm = (
     district: string;
     upazila: string;
   },
-  isEdit: boolean = false
+  isEdit: boolean = false,
 ): { isValid: boolean; error?: string } => {
   // Validate role
   if (!formData.role) {
@@ -76,7 +76,7 @@ export const validateUserForm = (
   if (!isEdit && formData.password) {
     const passwordValidation = validatePassword(
       formData.password,
-      formData.role
+      formData.role,
     );
     if (!passwordValidation.isValid) {
       return passwordValidation;
@@ -84,7 +84,7 @@ export const validateUserForm = (
   } else if (isEdit && formData.password && formData.password.trim() !== "") {
     const passwordValidation = validatePassword(
       formData.password,
-      formData.role
+      formData.role,
     );
     if (!passwordValidation.isValid) {
       return passwordValidation;
@@ -143,7 +143,7 @@ export const buildUserUpdatePayload = (
     district: string;
     upazila: string;
     stationId: string;
-  }
+  },
 ) => {
   const payload: Record<string, any> = {
     id: user.id,
@@ -174,12 +174,12 @@ export const buildUserUpdatePayload = (
 export const canImpersonate = (
   currentUserId: string,
   targetUserId: string,
-  targetUserRole: string | null
+  targetUserRole: string | null,
 ): { canImpersonate: boolean; error?: string } => {
-  if (targetUserRole === "super_admin") {
+  if (targetUserRole === "root_admin") {
     return {
       canImpersonate: false,
-      error: ERROR_MESSAGES.CANNOT_IMPERSONATE_SUPER_ADMIN,
+      error: ERROR_MESSAGES.CANNOT_IMPERSONATE_ROOT_ADMIN,
     };
   }
 
@@ -190,6 +190,7 @@ export const canImpersonate = (
     };
   }
 
+  // root_admin can impersonate super_admin
   return { canImpersonate: true };
 };
 
@@ -204,7 +205,7 @@ export function canDeleteUser(
   currentUserId: string,
   targetUserId: string,
   targetRole: string | null,
-  actorRole: string | null | undefined
+  actorRole: string | null | undefined,
 ) {
   if (currentUserId === targetUserId) {
     return { canDelete: false, error: "You cannot delete your own account" };
@@ -214,15 +215,20 @@ export function canDeleteUser(
   const isSuper = actorRole === "super_admin";
 
   if (!isRoot && !isSuper) {
-    return { canDelete: false, error: "You are not authorized to do this action" };
+    return {
+      canDelete: false,
+      error: "You are not authorized to do this action",
+    };
   }
 
   // ✅ API rule: super_admin cannot delete root_admin
   if (isSuper && targetRole === "root_admin") {
-    return { canDelete: false, error: "Super admin cannot delete root admin accounts" };
+    return {
+      canDelete: false,
+      error: "Super admin cannot delete root admin accounts",
+    };
   }
 
   // ✅ API rule: root_admin can delete anyone (including super_admin/root_admin)
   return { canDelete: true, error: "" };
 }
-

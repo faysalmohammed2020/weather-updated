@@ -1,21 +1,21 @@
-"use client"
+"use client";
 
-import { useRef, useState } from "react"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import FirstCardTable from "../first-card-view/FirstCardTable"
-import SecondCardTable from "../second-card-view/SecondCardTable"
-import SynopticCodeTable from "../synoptic-code/SynopticCodeTable"
-import ExcelJS from "exceljs"
-import { Button } from "@/components/ui/button"
-import { Download } from "lucide-react"
+import { useRef, useState } from "react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import FirstCardTable from "../first-card-view/FirstCardTable";
+import SecondCardTable from "../second-card-view/SecondCardTable";
+import SynopticCodeTable from "../synoptic-code/SynopticCodeTable";
+import ExcelJS from "exceljs";
+import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
 // ✅ CHANGED: useSession now from next-auth
-import { useSession } from "next-auth/react"
-import dynamic from "next/dynamic"
-import DailySummaryTable from "../daily-summery"
-import MargeTable from "@/components/margeTable"
-import type { DailySummaryRecord } from "@/lib/types/dailySummary"
-import type { WeatherObservationRecord } from "@/types/weather-observation"
-import type { SynopticRecord } from "@/lib/types/synoptic"
+import { useSession } from "next-auth/react";
+import dynamic from "next/dynamic";
+import DailySummaryTable from "../daily-summery";
+import MargeTable from "@/components/margeTable";
+import type { DailySummaryRecord } from "@/lib/types/dailySummary";
+import type { WeatherObservationRecord } from "@/types/weather-observation";
+import type { SynopticRecord } from "@/lib/types/synoptic";
 
 // ✅ CHANGED: keep only one dynamic import (no redeclare inside component)
 const CompactPDFExportButton = dynamic(() => import("../PdfExportComponent"), {
@@ -26,16 +26,16 @@ const CompactPDFExportButton = dynamic(() => import("../PdfExportComponent"), {
       Loading PDF...
     </Button>
   ),
-})
+});
 
 export default function AllViewAndManagePage() {
-  const [activeTab, setActiveTab] = useState("full-table")
-  const { data: session } = useSession()
+  const [activeTab, setActiveTab] = useState("full-table");
+  const { data: session } = useSession();
 
-  const firstCardRef = useRef<any>(null)
-  const secondCardRef = useRef<any>(null)
-  const synopticRef = useRef<any>(null)
-  const dailySummeryRef = useRef<any>(null)
+  const firstCardRef = useRef<any>(null);
+  const secondCardRef = useRef<any>(null);
+  const synopticRef = useRef<any>(null);
+  const dailySummeryRef = useRef<any>(null);
 
   const exportToExcel = async () => {
     const wb = new ExcelJS.Workbook();
@@ -46,18 +46,18 @@ export default function AllViewAndManagePage() {
     const dailySummaryData = dailySummeryRef.current?.getData?.() || [];
 
     const excludedKeys = [
-      'id',
-      'stationId',
-      'stationCode',
-      'stationName',
-      'submittedAt',
-      'createdAt',
-      'updatedAt',
-      'tabActive',
-      'observingTime',
-      'observingTimeId',
-      'localTime',
-      'c2Indicator'
+      "id",
+      "stationId",
+      "stationCode",
+      "stationName",
+      "submittedAt",
+      "createdAt",
+      "updatedAt",
+      "tabActive",
+      "observingTime",
+      "observingTimeId",
+      "localTime",
+      "c2Indicator",
     ];
 
     const cleanFirst = firstCardData.map((item: WeatherObservationRecord) => {
@@ -97,8 +97,8 @@ export default function AllViewAndManagePage() {
       const secondRow = cleanSecond[i] || {};
 
       mergedRows.push([
-        ...firstKeys.map(k => firstRow[k] || ""),
-        ...secondKeys.map(k => secondRow[k] || "")
+        ...firstKeys.map((k) => firstRow[k] || ""),
+        ...secondKeys.map((k) => secondRow[k] || ""),
       ]);
     }
 
@@ -106,7 +106,7 @@ export default function AllViewAndManagePage() {
     const mergedSheet = wb.addWorksheet("First+Second Card");
     mergedSheet.addRow(fullHeaderRow);
     mergedSheet.addRow(subHeaderRow);
-    mergedRows.forEach(row => mergedSheet.addRow(row));
+    mergedRows.forEach((row) => mergedSheet.addRow(row));
 
     // Merge header cells
     const firstColEnd = firstKeys.length;
@@ -129,7 +129,7 @@ export default function AllViewAndManagePage() {
       const synopticKeys = Object.keys(cleanSynoptic[0]);
       synopticSheet.addRow(synopticKeys);
       cleanSynoptic.forEach((item: any) => {
-        synopticSheet.addRow(synopticKeys.map(k => item[k]));
+        synopticSheet.addRow(synopticKeys.map((k) => item[k]));
       });
     }
 
@@ -148,7 +148,7 @@ export default function AllViewAndManagePage() {
       const summaryKeys = Object.keys(cleanSummary[0]);
       summarySheet.addRow(summaryKeys);
       cleanSummary.forEach((item: any) => {
-        summarySheet.addRow(summaryKeys.map(k => item[k]));
+        summarySheet.addRow(summaryKeys.map((k) => item[k]));
       });
     }
 
@@ -173,7 +173,7 @@ export default function AllViewAndManagePage() {
     stationId: session?.user?.station?.stationId || "41953",
     stationName: session?.user?.station?.name || "Weather Station",
     date: new Date().toLocaleDateString(),
-  }
+  };
 
   return (
     <div className="p-3 sm:p-4 md:p-6 space-y-4 md:space-y-6 min-h-screen">
@@ -184,11 +184,13 @@ export default function AllViewAndManagePage() {
         </h1>
 
         {/* Export Buttons - Responsive Layout */}
-        {(session?.user?.role === "super_admin" || session?.user?.role === "station_admin") && (
+        {(session?.user?.role === "super_admin" ||
+          session?.user?.role === "root_admin" ||
+          session?.user?.role === "station_admin") && (
           <div className="flex items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
             {/* Excel Export Button */}
-            <Button 
-              onClick={() => exportToExcel()} 
+            <Button
+              onClick={() => exportToExcel()}
               className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 w-1/2 sm:w-auto text-sm sm:text-base px-3 py-2"
             >
               <Download className="h-4 w-4 flex-shrink-0" />
@@ -210,7 +212,11 @@ export default function AllViewAndManagePage() {
       </div>
 
       {/* Tabs Section - Responsive */}
-      <Tabs defaultValue="full-table" onValueChange={(value) => setActiveTab(value)} className="w-full">
+      <Tabs
+        defaultValue="full-table"
+        onValueChange={(value) => setActiveTab(value)}
+        className="w-full"
+      >
         {/* Tab Navigation - Responsive with Horizontal Scroll */}
         <div className="w-full overflow-x-auto">
           <TabsList className="min-w-max w-full sm:w-auto">
@@ -269,5 +275,5 @@ export default function AllViewAndManagePage() {
         </div>
       </Tabs>
     </div>
-  )
+  );
 }

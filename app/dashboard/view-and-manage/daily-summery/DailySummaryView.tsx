@@ -40,7 +40,7 @@ interface DailySummaryViewProps {
 }
 
 const buildDefaultHeaderInfo = (
-  user?: DailySummaryUser | null
+  user?: DailySummaryUser | null,
 ): DailySummaryHeaderInfo => {
   const now = new Date();
   return {
@@ -54,7 +54,7 @@ const buildDefaultHeaderInfo = (
 
 const deriveHeaderInfo = (
   record?: DailySummaryRecord,
-  user?: DailySummaryUser | null
+  user?: DailySummaryUser | null,
 ): DailySummaryHeaderInfo => {
   if (!record) {
     return buildDefaultHeaderInfo(user);
@@ -79,11 +79,12 @@ const deriveHeaderInfo = (
 
 const DailySummaryViewComponent = (
   { initialRecords, initialStations }: DailySummaryViewProps,
-  ref: Ref<DailySummaryViewHandle>
+  ref: Ref<DailySummaryViewHandle>,
 ) => {
   const { data: session } = useSession();
   const user = session?.user as DailySummaryUser | undefined;
-  const isSuperAdmin = user?.role === "super_admin";
+  const isSuperAdmin =
+    user?.role === "super_admin" || user?.role === "root_admin";
   const isStationAdmin = user?.role === "station_admin";
 
   const [dateRange, setDateRange] = useState<DateRange>({
@@ -92,40 +93,46 @@ const DailySummaryViewComponent = (
   });
   const [dateError, setDateError] = useState<string | null>(null);
   const [stationFilter, setStationFilter] = useState("all");
-  const [records, setRecords] = useState<DailySummaryRecord[]>(initialRecords || []);
+  const [records, setRecords] = useState<DailySummaryRecord[]>(
+    initialRecords || [],
+  );
   const [stations, setStations] = useState<Station[]>(initialStations || []);
   const [headerInfo, setHeaderInfo] = useState<DailySummaryHeaderInfo>(() =>
-    buildDefaultHeaderInfo(user)
+    buildDefaultHeaderInfo(user),
   );
   const [isLoading, setIsLoading] = useState(false); // Start with false since we have initial data
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState<DailySummaryRecord | null>(null);
+  const [selectedRecord, setSelectedRecord] =
+    useState<DailySummaryRecord | null>(null);
   const [isPermissionDeniedOpen, setIsPermissionDeniedOpen] = useState(false);
 
   const stationQuery =
     isSuperAdmin && stationFilter !== "all" ? stationFilter : undefined;
 
   // Safe date formatting utility
-  const formatDate = useCallback((dateValue: string | Date | null | undefined): string => {
-    try {
-      if (!dateValue) return "N/A";
-      
-      if (typeof dateValue === 'string') {
-        const date = parseISO(dateValue);
-        if (isValid(date)) {
-          return format(date, "MMM d, yyyy");
+  const formatDate = useCallback(
+    (dateValue: string | Date | null | undefined): string => {
+      try {
+        if (!dateValue) return "N/A";
+
+        if (typeof dateValue === "string") {
+          const date = parseISO(dateValue);
+          if (isValid(date)) {
+            return format(date, "MMM d, yyyy");
+          }
+        } else if (dateValue instanceof Date) {
+          if (isValid(dateValue)) {
+            return format(dateValue, "MMM d, yyyy");
+          }
         }
-      } else if (dateValue instanceof Date) {
-        if (isValid(dateValue)) {
-          return format(dateValue, "MMM d, yyyy");
-        }
+        return "Invalid Date";
+      } catch (error) {
+        console.error("Error formatting date:", error);
+        return "Invalid Date";
       }
-      return "Invalid Date";
-    } catch (error) {
-      console.error("Error formatting date:", error);
-      return "Invalid Date";
-    }
-  }, []);
+    },
+    [],
+  );
 
   const loadDailySummary = useCallback(async () => {
     setIsLoading(true);
@@ -283,7 +290,7 @@ const DailySummaryViewComponent = (
 
   const handleRecordUpdated = (updated: DailySummaryRecord) => {
     setRecords((prev) =>
-      prev.map((record) => (record.id === updated.id ? updated : record))
+      prev.map((record) => (record.id === updated.id ? updated : record)),
     );
     setSelectedRecord(updated);
   };
@@ -400,6 +407,9 @@ const DailySummaryViewComponent = (
   );
 };
 
-export const DailySummaryView = forwardRef<DailySummaryViewHandle, DailySummaryViewProps>(DailySummaryViewComponent);
+export const DailySummaryView = forwardRef<
+  DailySummaryViewHandle,
+  DailySummaryViewProps
+>(DailySummaryViewComponent);
 
 export default DailySummaryView;

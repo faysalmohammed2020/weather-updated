@@ -85,7 +85,7 @@ const initialFormValues: WeatherFormValues = {
 };
 
 const mapObservationToForm = (
-  observation?: WeatherObservation
+  observation?: WeatherObservation,
 ): WeatherFormValues => ({
   ...initialFormValues,
   totalCloudAmount: observation?.totalCloudAmount || "",
@@ -125,15 +125,12 @@ const mapObservationToForm = (
   rainfallTimeEnd: observation?.rainfallTimeEnd || "",
 });
 
-const canEditObservation = (
-  record: WeatherObservationRecord,
-  user: any
-) => {
+const canEditObservation = (record: WeatherObservationRecord, user: any) => {
   if (!user || !record.WeatherObservation?.[0]) return false;
   const observationDate = new Date(record.WeatherObservation[0].createdAt);
   const now = new Date();
   const diffDays = Math.floor(
-    (now.getTime() - observationDate.getTime()) / (1000 * 60 * 60 * 24)
+    (now.getTime() - observationDate.getTime()) / (1000 * 60 * 60 * 24),
   );
   const role = user.role;
   const userId = user.id;
@@ -143,8 +140,7 @@ const canEditObservation = (
   if (role === "super_admin") return diffDays <= 365;
   if (role === "station_admin")
     return diffDays <= 30 && userStationId === recordStationId;
-  if (role === "observer")
-    return diffDays <= 2 && userId === record.userId;
+  if (role === "observer") return diffDays <= 2 && userId === record.userId;
   return false;
 };
 
@@ -158,8 +154,7 @@ const SecondCardTable = forwardRef<SecondCardTableHandle, SecondCardTableProps>(
     const [selectedRecord, setSelectedRecord] =
       useState<WeatherObservationRecord | null>(null);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-    const [isPermissionDialogOpen, setIsPermissionDialogOpen] =
-      useState(false);
+    const [isPermissionDialogOpen, setIsPermissionDialogOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
     const form = useForm<WeatherFormValues>({
@@ -168,7 +163,8 @@ const SecondCardTable = forwardRef<SecondCardTableHandle, SecondCardTableProps>(
 
     const { data: session } = useSession();
     const user = session?.user;
-    const isSuperAdmin = user?.role === "super_admin";
+    const isSuperAdmin =
+      user?.role === "super_admin" || user?.role === "root_admin";
     const isStationAdmin = user?.role === "station_admin";
     const canExport = Boolean(isSuperAdmin || isStationAdmin);
 
@@ -179,12 +175,8 @@ const SecondCardTable = forwardRef<SecondCardTableHandle, SecondCardTableProps>(
       refreshKey: refreshTrigger,
     };
 
-    const {
-      observations,
-      isLoading,
-      error,
-      mutate,
-    } = useWeatherData(weatherQuery);
+    const { observations, isLoading, error, mutate } =
+      useWeatherData(weatherQuery);
     const { stations } = useStations(Boolean(isSuperAdmin));
 
     useEffect(() => {
@@ -205,7 +197,7 @@ const SecondCardTable = forwardRef<SecondCardTableHandle, SecondCardTableProps>(
             localTime: record.localTime,
           } as FlattenedWeatherObservation;
         }),
-      [observations]
+      [observations],
     );
 
     useImperativeHandle(ref, () => ({
@@ -213,7 +205,7 @@ const SecondCardTable = forwardRef<SecondCardTableHandle, SecondCardTableProps>(
     }));
 
     const changeRange = (
-      getRange: () => { startDate: string; endDate: string } | null
+      getRange: () => { startDate: string; endDate: string } | null,
     ) => {
       const range = getRange();
       if (!range) return;
@@ -282,7 +274,7 @@ const SecondCardTable = forwardRef<SecondCardTableHandle, SecondCardTableProps>(
         if (!response.ok) {
           const message = await response.text();
           throw new Error(
-            message || "Failed to update weather observation record"
+            message || "Failed to update weather observation record",
           );
         }
 
@@ -293,7 +285,7 @@ const SecondCardTable = forwardRef<SecondCardTableHandle, SecondCardTableProps>(
         mutate();
       } catch (err) {
         toast.error(
-          err instanceof Error ? err.message : "Failed to update record"
+          err instanceof Error ? err.message : "Failed to update record",
         );
       } finally {
         setIsSaving(false);
@@ -500,7 +492,9 @@ const SecondCardTable = forwardRef<SecondCardTableHandle, SecondCardTableProps>(
                             record={record}
                             rowIndex={index}
                             onEdit={handleEditClick}
-                            canEdit={Boolean(user && canEditObservation(record, user))}
+                            canEdit={Boolean(
+                              user && canEditObservation(record, user),
+                            )}
                           />
                         ))
                       )}
@@ -533,7 +527,7 @@ const SecondCardTable = forwardRef<SecondCardTableHandle, SecondCardTableProps>(
         />
       </div>
     );
-  }
+  },
 );
 
 SecondCardTable.displayName = "SecondCardTable";

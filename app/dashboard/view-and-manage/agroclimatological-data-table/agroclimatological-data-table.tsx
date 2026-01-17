@@ -95,11 +95,13 @@ interface AgroclimatologicalDataTableProps {
   initialStations: Station[];
 }
 
-export default function AgroclimatologicalDataTable({ 
-  initialData, 
-  initialStations 
+export default function AgroclimatologicalDataTable({
+  initialData,
+  initialStations,
 }: AgroclimatologicalDataTableProps) {
-  const [data, setData] = useState<AgroclimatologicalData[]>(initialData.data || []);
+  const [data, setData] = useState<AgroclimatologicalData[]>(
+    initialData.data || [],
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [stations] = useState<Station[]>(initialStations);
@@ -153,14 +155,17 @@ export default function AgroclimatologicalDataTable({
     return () => clearTimeout(timeoutId);
   }, [startDate, endDate, stationFilter, fetchData]);
 
-  const formatValue = useCallback((value: number | null | undefined): string => {
-    if (value === null || value === undefined) return "--";
-    return value.toString();
-  }, []);
+  const formatValue = useCallback(
+    (value: number | null | undefined): string => {
+      if (value === null || value === undefined) return "--";
+      return value.toString();
+    },
+    [],
+  );
 
   const formatDate = useCallback((dateValue: string): string => {
     try {
-      if (typeof dateValue === 'string') {
+      if (typeof dateValue === "string") {
         const date = parseISO(dateValue);
         if (isValid(date)) {
           return format(date, "MMM d, yyyy");
@@ -233,7 +238,7 @@ export default function AgroclimatologicalDataTable({
 
       if (newEnd > today) {
         if (end >= today) return;
-        
+
         const adjustedEnd = new Date(today);
         const adjustedStart = new Date(adjustedEnd);
         adjustedStart.setDate(adjustedEnd.getDate() - daysInRange);
@@ -252,102 +257,118 @@ export default function AgroclimatologicalDataTable({
     }
   }, [startDate, endDate]);
 
-  const handleDateChange = useCallback((type: "start" | "end", newDate: string) => {
-    if (!newDate) {
-      if (type === "start") setStartDate("");
-      else setEndDate("");
-      setDateError(null);
-      return;
-    }
-
-    try {
-      const date = parseISO(newDate);
-      if (!isValid(date)) {
-        setDateError("Invalid date format");
+  const handleDateChange = useCallback(
+    (type: "start" | "end", newDate: string) => {
+      if (!newDate) {
+        if (type === "start") setStartDate("");
+        else setEndDate("");
+        setDateError(null);
         return;
       }
 
-      setDateError(null);
+      try {
+        const date = parseISO(newDate);
+        if (!isValid(date)) {
+          setDateError("Invalid date format");
+          return;
+        }
 
-      if (type === "start") {
-        if (endDate && date > parseISO(endDate)) {
-          setDateError("Start date cannot be after end date");
-          return;
+        setDateError(null);
+
+        if (type === "start") {
+          if (endDate && date > parseISO(endDate)) {
+            setDateError("Start date cannot be after end date");
+            return;
+          }
+          setStartDate(newDate);
+        } else {
+          if (startDate && date < parseISO(startDate)) {
+            setDateError("End date cannot be before start date");
+            return;
+          }
+          setEndDate(newDate);
         }
-        setStartDate(newDate);
-      } else {
-        if (startDate && date < parseISO(startDate)) {
-          setDateError("End date cannot be before start date");
-          return;
-        }
-        setEndDate(newDate);
+      } catch (e) {
+        setDateError("Invalid date value");
       }
-    } catch (e) {
-      setDateError("Invalid date value");
-    }
-  }, [startDate, endDate]);
+    },
+    [startDate, endDate],
+  );
 
-  const getStationNameById = useCallback((stationId: string): string => {
-    const station = stations.find((s) => s.id === stationId);
-    return station ? station.name : stationId;
-  }, [stations]);
+  const getStationNameById = useCallback(
+    (stationId: string): string => {
+      const station = stations.find((s) => s.id === stationId);
+      return station ? station.name : stationId;
+    },
+    [stations],
+  );
 
-  const exportToCSV = useCallback((data: AgroclimatologicalData[], filename = "agroclimatological_data.csv") => {
-    if (!data.length) {
-      toast.warning("No data to export");
-      return;
-    }
+  const exportToCSV = useCallback(
+    (
+      data: AgroclimatologicalData[],
+      filename = "agroclimatological_data.csv",
+    ) => {
+      if (!data.length) {
+        toast.warning("No data to export");
+        return;
+      }
 
-    const headers = Object.keys(data[0]).filter(
-      (k) => typeof data[0][k as keyof AgroclimatologicalData] !== "object"
-    );
-    const rows = data.map((row) =>
-      headers
-        .map((key) => {
-          const val = row[key as keyof AgroclimatologicalData];
-          return typeof val === "number" || typeof val === "string"
-            ? `"${val}"`
-            : "";
-        })
-        .join(",")
-    );
+      const headers = Object.keys(data[0]).filter(
+        (k) => typeof data[0][k as keyof AgroclimatologicalData] !== "object",
+      );
+      const rows = data.map((row) =>
+        headers
+          .map((key) => {
+            const val = row[key as keyof AgroclimatologicalData];
+            return typeof val === "number" || typeof val === "string"
+              ? `"${val}"`
+              : "";
+          })
+          .join(","),
+      );
 
-    const csvContent = [headers.join(","), ...rows].join("\n");
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
+      const csvContent = [headers.join(","), ...rows].join("\n");
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
 
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = filename;
-    link.click();
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      link.click();
 
-    URL.revokeObjectURL(url);
-  }, []);
+      URL.revokeObjectURL(url);
+    },
+    [],
+  );
 
-  const exportToTXT = useCallback((data: AgroclimatologicalData[], filename = "agroclimatological_data.txt") => {
-    if (!data.length) {
-      toast.warning("No data to export");
-      return;
-    }
+  const exportToTXT = useCallback(
+    (
+      data: AgroclimatologicalData[],
+      filename = "agroclimatological_data.txt",
+    ) => {
+      if (!data.length) {
+        toast.warning("No data to export");
+        return;
+      }
 
-    const currentDate = new Date().toISOString().split("T")[0];
-    const currentTime = new Date().toLocaleTimeString();
+      const currentDate = new Date().toISOString().split("T")[0];
+      const currentTime = new Date().toLocaleTimeString();
 
-    const excludedFields = [
-      "id",
-      "createdAt",
-      "updatedAt",
-      "elevation",
-      "userId",
-      "stationId",
-    ];
-    const headers = Object.keys(data[0]).filter(
-      (k) =>
-        typeof data[0][k as keyof AgroclimatologicalData] !== "object" &&
-        !excludedFields.includes(k)
-    );
+      const excludedFields = [
+        "id",
+        "createdAt",
+        "updatedAt",
+        "elevation",
+        "userId",
+        "stationId",
+      ];
+      const headers = Object.keys(data[0]).filter(
+        (k) =>
+          typeof data[0][k as keyof AgroclimatologicalData] !== "object" &&
+          !excludedFields.includes(k),
+      );
 
-    let txtContent = `AGROCLIMATOLOGICAL DATA REPORT
+      let txtContent = `AGROCLIMATOLOGICAL DATA REPORT
 ${"=".repeat(60)}
 
 REPORT INFORMATION:
@@ -358,77 +379,195 @@ DATA VALUES:
 ${"=".repeat(60)}
 `;
 
-    data.forEach((row, index) => {
-      txtContent += `\nRecord ${index + 1}:\n`;
-      txtContent += `${"-".repeat(30)}\n`;
+      data.forEach((row, index) => {
+        txtContent += `\nRecord ${index + 1}:\n`;
+        txtContent += `${"-".repeat(30)}\n`;
 
-      headers.forEach((key) => {
-        const val = row[key as keyof AgroclimatologicalData];
-        const formattedValue =
-          typeof val === "number" || typeof val === "string" ? `${val}` : "N/A";
+        headers.forEach((key) => {
+          const val = row[key as keyof AgroclimatologicalData];
+          const formattedValue =
+            typeof val === "number" || typeof val === "string"
+              ? `${val}`
+              : "N/A";
 
-        txtContent += `${key.padEnd(20)} ---> ${formattedValue}\n`;
+          txtContent += `${key.padEnd(20)} ---> ${formattedValue}\n`;
+        });
       });
-    });
 
-    txtContent += `\n${"=".repeat(60)}
+      txtContent += `\n${"=".repeat(60)}
 Report End
 ${"=".repeat(60)}`;
 
-    const blob = new Blob([txtContent], { type: "text/plain;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
+      const blob = new Blob([txtContent], {
+        type: "text/plain;charset=utf-8;",
+      });
+      const url = URL.createObjectURL(blob);
 
-    const link = document.createElement("a");
-    link.href = url;
-    link.download =
-      filename.replace(".txt", `_${currentDate}.txt`) ||
-      `agroclimatological_data_${currentDate}.txt`;
-    link.click();
+      const link = document.createElement("a");
+      link.href = url;
+      link.download =
+        filename.replace(".txt", `_${currentDate}.txt`) ||
+        `agroclimatological_data_${currentDate}.txt`;
+      link.click();
 
-    URL.revokeObjectURL(url);
-  }, []);
+      URL.revokeObjectURL(url);
+    },
+    [],
+  );
 
   // Memoized table headers to prevent unnecessary re-renders
-  const tableHeaders = useMemo(() => (
-    <>
-      <tr className="bg-gradient-to-r from-slate-100 to-slate-200">
-        <th rowSpan={2} className="border border-slate-400 p-2 bg-blue-50 text-blue-800 font-semibold min-w-[80px]">Date</th>
-        <th rowSpan={2} className="border border-slate-400 p-2 bg-blue-50 text-blue-800 font-semibold min-w-[100px]">Hour</th>
-        <th rowSpan={2} className="border border-slate-400 p-2 bg-yellow-50 text-yellow-800 font-semibold">Solar Radiation (Langley day⁻¹)</th>
-        <th rowSpan={2} className="border border-slate-400 p-2 bg-orange-50 text-orange-800 font-semibold">Sun Shine Hour</th>
-        <th colSpan={6} className="border border-slate-400 p-2 bg-red-50 text-red-800 font-semibold">Air Temperature (°C) at</th>
-        <th colSpan={2} className="border border-slate-400 p-2 bg-pink-50 text-pink-800 font-semibold">Min/Max Temp (°C)</th>
-        <th rowSpan={2} className="border border-slate-400 p-2 bg-purple-50 text-purple-800 font-semibold min-w-[100px]">Grass Min Temp (°C)</th>
-        <th colSpan={5} className="border border-slate-400 p-2 bg-green-50 text-green-800 font-semibold">Soil Temperature (°C) at</th>
-        <th rowSpan={2} className="border border-slate-400 p-2 bg-teal-50 text-teal-800 font-semibold min-w-[100px]">Pan Water Temp (°C)</th>
-        <th rowSpan={2} className="border border-slate-400 p-2 bg-cyan-50 text-cyan-800 font-semibold min-w-[120px]">Elevation (mm)</th>
-        <th rowSpan={2} className="border border-slate-400 p-2 bg-sky-50 text-sky-800 font-semibold min-w-[120px]">Evapotranspiration (mm)</th>
-        <th colSpan={2} className="border border-slate-400 p-2 bg-indigo-50 text-indigo-800 font-semibold">Soil Moisture % Between</th>
-        <th rowSpan={2} className="border border-slate-400 p-2 bg-violet-50 text-violet-800 font-semibold min-w-[120px]">Wind Run at 2m ht (KM)</th>
-        <th colSpan={2} className="border border-slate-400 p-2 bg-amber-50 text-amber-800 font-semibold">Dew</th>
-        <th rowSpan={2} className="border border-slate-400 p-2 bg-blue-50 text-blue-800 font-semibold min-w-[120px]">Rain Amount (mm)</th>
-      </tr>
-      <tr className="bg-gradient-to-r from-slate-50 to-slate-100">
-        <th className="border border-slate-400 p-1 bg-red-100 text-red-700 text-xs">0.5m Dry</th>
-        <th className="border border-slate-400 p-1 bg-red-100 text-red-700 text-xs">0.5m Wet</th>
-        <th className="border border-slate-400 p-1 bg-red-100 text-red-700 text-xs">1.2m Dry</th>
-        <th className="border border-slate-400 p-1 bg-red-100 text-red-700 text-xs">1.2m Wet</th>
-        <th className="border border-slate-400 p-1 bg-red-100 text-red-700 text-xs">2.2m Dry</th>
-        <th className="border border-slate-400 p-1 bg-red-100 text-red-700 text-xs">2.2m Wet</th>
-        <th className="border border-slate-400 p-1 bg-pink-100 text-pink-700 text-xs">Min</th>
-        <th className="border border-slate-400 p-1 bg-pink-100 text-pink-700 text-xs">Max</th>
-        <th className="border border-slate-400 p-1 bg-green-100 text-green-700 text-xs">5cm</th>
-        <th className="border border-slate-400 p-1 bg-green-100 text-green-700 text-xs">10cm</th>
-        <th className="border border-slate-400 p-1 bg-green-100 text-green-700 text-xs">20cm</th>
-        <th className="border border-slate-400 p-1 bg-green-100 text-green-700 text-xs">30cm</th>
-        <th className="border border-slate-400 p-1 bg-green-100 text-green-700 text-xs">50cm</th>
-        <th className="border border-slate-400 p-1 bg-indigo-100 text-indigo-700 text-xs">0-20cm</th>
-        <th className="border border-slate-400 p-1 bg-indigo-100 text-indigo-700 text-xs">20-50cm</th>
-        <th className="border border-slate-400 p-1 bg-amber-100 text-amber-700 text-xs">Amount (MM)</th>
-        <th className="border border-slate-400 p-1 bg-amber-100 text-amber-700 text-xs">Duration (hrs)</th>
-      </tr>
-    </>
-  ), []);
+  const tableHeaders = useMemo(
+    () => (
+      <>
+        <tr className="bg-gradient-to-r from-slate-100 to-slate-200">
+          <th
+            rowSpan={2}
+            className="border border-slate-400 p-2 bg-blue-50 text-blue-800 font-semibold min-w-[80px]"
+          >
+            Date
+          </th>
+          <th
+            rowSpan={2}
+            className="border border-slate-400 p-2 bg-blue-50 text-blue-800 font-semibold min-w-[100px]"
+          >
+            Hour
+          </th>
+          <th
+            rowSpan={2}
+            className="border border-slate-400 p-2 bg-yellow-50 text-yellow-800 font-semibold"
+          >
+            Solar Radiation (Langley day⁻¹)
+          </th>
+          <th
+            rowSpan={2}
+            className="border border-slate-400 p-2 bg-orange-50 text-orange-800 font-semibold"
+          >
+            Sun Shine Hour
+          </th>
+          <th
+            colSpan={6}
+            className="border border-slate-400 p-2 bg-red-50 text-red-800 font-semibold"
+          >
+            Air Temperature (°C) at
+          </th>
+          <th
+            colSpan={2}
+            className="border border-slate-400 p-2 bg-pink-50 text-pink-800 font-semibold"
+          >
+            Min/Max Temp (°C)
+          </th>
+          <th
+            rowSpan={2}
+            className="border border-slate-400 p-2 bg-purple-50 text-purple-800 font-semibold min-w-[100px]"
+          >
+            Grass Min Temp (°C)
+          </th>
+          <th
+            colSpan={5}
+            className="border border-slate-400 p-2 bg-green-50 text-green-800 font-semibold"
+          >
+            Soil Temperature (°C) at
+          </th>
+          <th
+            rowSpan={2}
+            className="border border-slate-400 p-2 bg-teal-50 text-teal-800 font-semibold min-w-[100px]"
+          >
+            Pan Water Temp (°C)
+          </th>
+          <th
+            rowSpan={2}
+            className="border border-slate-400 p-2 bg-cyan-50 text-cyan-800 font-semibold min-w-[120px]"
+          >
+            Elevation (mm)
+          </th>
+          <th
+            rowSpan={2}
+            className="border border-slate-400 p-2 bg-sky-50 text-sky-800 font-semibold min-w-[120px]"
+          >
+            Evapotranspiration (mm)
+          </th>
+          <th
+            colSpan={2}
+            className="border border-slate-400 p-2 bg-indigo-50 text-indigo-800 font-semibold"
+          >
+            Soil Moisture % Between
+          </th>
+          <th
+            rowSpan={2}
+            className="border border-slate-400 p-2 bg-violet-50 text-violet-800 font-semibold min-w-[120px]"
+          >
+            Wind Run at 2m ht (KM)
+          </th>
+          <th
+            colSpan={2}
+            className="border border-slate-400 p-2 bg-amber-50 text-amber-800 font-semibold"
+          >
+            Dew
+          </th>
+          <th
+            rowSpan={2}
+            className="border border-slate-400 p-2 bg-blue-50 text-blue-800 font-semibold min-w-[120px]"
+          >
+            Rain Amount (mm)
+          </th>
+        </tr>
+        <tr className="bg-gradient-to-r from-slate-50 to-slate-100">
+          <th className="border border-slate-400 p-1 bg-red-100 text-red-700 text-xs">
+            0.5m Dry
+          </th>
+          <th className="border border-slate-400 p-1 bg-red-100 text-red-700 text-xs">
+            0.5m Wet
+          </th>
+          <th className="border border-slate-400 p-1 bg-red-100 text-red-700 text-xs">
+            1.2m Dry
+          </th>
+          <th className="border border-slate-400 p-1 bg-red-100 text-red-700 text-xs">
+            1.2m Wet
+          </th>
+          <th className="border border-slate-400 p-1 bg-red-100 text-red-700 text-xs">
+            2.2m Dry
+          </th>
+          <th className="border border-slate-400 p-1 bg-red-100 text-red-700 text-xs">
+            2.2m Wet
+          </th>
+          <th className="border border-slate-400 p-1 bg-pink-100 text-pink-700 text-xs">
+            Min
+          </th>
+          <th className="border border-slate-400 p-1 bg-pink-100 text-pink-700 text-xs">
+            Max
+          </th>
+          <th className="border border-slate-400 p-1 bg-green-100 text-green-700 text-xs">
+            5cm
+          </th>
+          <th className="border border-slate-400 p-1 bg-green-100 text-green-700 text-xs">
+            10cm
+          </th>
+          <th className="border border-slate-400 p-1 bg-green-100 text-green-700 text-xs">
+            20cm
+          </th>
+          <th className="border border-slate-400 p-1 bg-green-100 text-green-700 text-xs">
+            30cm
+          </th>
+          <th className="border border-slate-400 p-1 bg-green-100 text-green-700 text-xs">
+            50cm
+          </th>
+          <th className="border border-slate-400 p-1 bg-indigo-100 text-indigo-700 text-xs">
+            0-20cm
+          </th>
+          <th className="border border-slate-400 p-1 bg-indigo-100 text-indigo-700 text-xs">
+            20-50cm
+          </th>
+          <th className="border border-slate-400 p-1 bg-amber-100 text-amber-700 text-xs">
+            Amount (MM)
+          </th>
+          <th className="border border-slate-400 p-1 bg-amber-100 text-amber-700 text-xs">
+            Duration (hrs)
+          </th>
+        </tr>
+      </>
+    ),
+    [],
+  );
 
   return (
     <div className="w-full space-y-6">
@@ -484,7 +623,7 @@ ${"=".repeat(60)}`;
             </div>
           </div>
 
-          {user?.role === "super_admin" && (
+          {(user?.role === "super_admin" || user?.role === "root_admin") && (
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-2">
                 <Button
@@ -543,9 +682,7 @@ ${"=".repeat(60)}`;
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-sm">
-              <thead>
-                {tableHeaders}
-              </thead>
+              <thead>{tableHeaders}</thead>
 
               <tbody>
                 {loading ? (
@@ -568,7 +705,8 @@ ${"=".repeat(60)}`;
                           No Data Available
                         </h3>
                         <p className="text-sm text-slate-500 mb-4">
-                          No agroclimatological data found for the selected criteria.
+                          No agroclimatological data found for the selected
+                          criteria.
                         </p>
                         <Button
                           onClick={fetchData}

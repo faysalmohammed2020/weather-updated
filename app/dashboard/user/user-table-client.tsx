@@ -57,17 +57,17 @@ import UserTableSkeletonRows from "./UserTableSkeletonRows";
 const CreateEditUserDialog = lazy(() =>
   import("@/components/user-management/CreateEditUserDialog").then((m) => ({
     default: m.CreateEditUserDialog,
-  }))
+  })),
 );
 const DeleteConfirmationDialog = lazy(() =>
   import("@/components/user-management/ConfirmationDialogs").then((m) => ({
     default: m.DeleteConfirmationDialog,
-  }))
+  })),
 );
 const RoleChangeConfirmationDialog = lazy(() =>
   import("@/components/user-management/ConfirmationDialogs").then((m) => ({
     default: m.RoleChangeConfirmationDialog,
-  }))
+  })),
 );
 
 interface UserFormData {
@@ -98,6 +98,10 @@ export const UserTableClient = ({
   pageSize,
   session,
 }: UserTableClientProps) => {
+  // Track which user is being impersonated for button loading
+  const [impersonatingUserId, setImpersonatingUserId] = useState<string | null>(
+    null,
+  );
   // ============================================================================
   // ROUTER & SEARCH PARAMS
   // ============================================================================
@@ -186,7 +190,7 @@ export const UserTableClient = ({
     () =>
       session?.user?.role === USER_ROLES.SUPER_ADMIN ||
       session?.user?.role === USER_ROLES.ROOT_ADMIN,
-    [session?.user?.role]
+    [session?.user?.role],
   );
 
   const canLoadingLocationData = useMemo(
@@ -195,7 +199,7 @@ export const UserTableClient = ({
       loadingDistricts: locationLoading,
       loadingUpazilas: locationLoading,
     }),
-    [locationLoading]
+    [locationLoading],
   );
 
   // ✅ FIX: map both station.id and station.stationId to name
@@ -208,20 +212,19 @@ export const UserTableClient = ({
     return map;
   }, [stations]);
 
-const visibleUsers = useMemo(() => {
-  const actorRole = session?.user?.role;
-  if (actorRole === USER_ROLES.ROOT_ADMIN) return users;
-  return users.filter((u) => u.role !== USER_ROLES.ROOT_ADMIN);
-}, [users, session?.user?.role]);
+  const visibleUsers = useMemo(() => {
+    const actorRole = session?.user?.role;
+    if (actorRole === USER_ROLES.ROOT_ADMIN) return users;
+    return users.filter((u) => u.role !== USER_ROLES.ROOT_ADMIN);
+  }, [users, session?.user?.role]);
 
-const uniqueRoles = useMemo(() => {
-  const roles = new Set<string>();
-  visibleUsers.forEach((user) => {
-    if (user.role) roles.add(user.role);
-  });
-  return Array.from(roles).sort();
-}, [visibleUsers]);
-
+  const uniqueRoles = useMemo(() => {
+    const roles = new Set<string>();
+    visibleUsers.forEach((user) => {
+      if (user.role) roles.add(user.role);
+    });
+    return Array.from(roles).sort();
+  }, [visibleUsers]);
 
   const uniqueStations = useMemo(() => {
     const stationList = new Set<string>();
@@ -270,7 +273,7 @@ const uniqueRoles = useMemo(() => {
       stationFilter,
       dateFromFilter,
       dateToFilter,
-    ]
+    ],
   );
 
   const nextPage = useCallback(() => {
@@ -334,7 +337,7 @@ const uniqueRoles = useMemo(() => {
           cache: "no-store",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
-        }
+        },
       );
 
       if (!response.ok) {
@@ -432,42 +435,41 @@ const uniqueRoles = useMemo(() => {
   // ============================================================================
   // USER EDITING
   // ============================================================================
-const openEditDialog = useCallback(
-  (user: User) => {
-    const actorRole = session?.user?.role;
+  const openEditDialog = useCallback(
+    (user: User) => {
+      const actorRole = session?.user?.role;
 
-    // ✅ root_admin allow to edit super_admin
-    if (user.role === USER_ROLES.SUPER_ADMIN) {
-      if (actorRole !== USER_ROLES.ROOT_ADMIN) {
-        toast.error(ERROR_MESSAGES.CANNOT_MODIFY_SUPER_ADMIN);
+      // ✅ root_admin allow to edit super_admin
+      if (user.role === USER_ROLES.SUPER_ADMIN) {
+        if (actorRole !== USER_ROLES.ROOT_ADMIN) {
+          toast.error(ERROR_MESSAGES.CANNOT_MODIFY_SUPER_ADMIN);
+          return;
+        }
+        // actor is root_admin -> allow
+      }
+
+      // ✅ root_admin account protection (unchanged): nobody edits root_admin here
+      if (user.role === USER_ROLES.ROOT_ADMIN) {
+        toast.error(ERROR_MESSAGES.CANNOT_MODIFY_ROOT_ADMIN);
         return;
       }
-      // actor is root_admin -> allow
-    }
 
-    // ✅ root_admin account protection (unchanged): nobody edits root_admin here
-    if (user.role === USER_ROLES.ROOT_ADMIN) {
-      toast.error(ERROR_MESSAGES.CANNOT_MODIFY_ROOT_ADMIN);
-      return;
-    }
+      setEditUser(user);
+      setFormData({
+        name: user.name || "",
+        email: user.email || "",
+        password: "",
+        role: user.role as UserRole,
+        division: user.division || "",
+        district: user.district || "",
+        upazila: user.upazila || "",
+        stationId: user.stationId || "",
+      });
 
-    setEditUser(user);
-    setFormData({
-      name: user.name || "",
-      email: user.email || "",
-      password: "",
-      role: user.role as UserRole,
-      division: user.division || "",
-      district: user.district || "",
-      upazila: user.upazila || "",
-      stationId: user.stationId || "",
-    });
-
-    setOpenDialog(true);
-  },
-  [session?.user?.role] // ✅ dependency add
-);
-
+      setOpenDialog(true);
+    },
+    [session?.user?.role], // ✅ dependency add
+  );
 
   const confirmRoleUpdate = useCallback(() => {
     if (!editUser) return;
@@ -520,7 +522,7 @@ const openEditDialog = useCallback(
         session?.user?.id || "",
         userId,
         userRole,
-        session?.user?.role
+        session?.user?.role,
       );
 
       if (!check.canDelete) {
@@ -531,7 +533,7 @@ const openEditDialog = useCallback(
       setUserToDelete(userId);
       setOpenDeleteDialog(true);
     },
-    [session?.user?.id, session?.user?.role]
+    [session?.user?.id, session?.user?.role],
   );
 
   const handleDeleteUser = useCallback(async () => {
@@ -550,16 +552,24 @@ const openEditDialog = useCallback(
   // USER IMPERSONATION
   // ============================================================================
   const handleImpersonate = useCallback(
-    async (userId: string, userName: string | null, userRole: string | null) => {
+    async (
+      userId: string,
+      userName: string | null,
+      userRole: string | null,
+    ) => {
       const check = canImpersonate(session?.user?.id || "", userId, userRole);
       if (!check.canImpersonate) {
         toast.error(check.error);
         return;
       }
-
-      await impersonateUser(userId, userName, userRole);
+      setImpersonatingUserId(userId);
+      try {
+        await impersonateUser(userId, userName, userRole);
+      } finally {
+        setImpersonatingUserId(null);
+      }
     },
-    [session?.user?.id, impersonateUser]
+    [session?.user?.id, impersonateUser],
   );
 
   // ============================================================================
@@ -571,7 +581,10 @@ const openEditDialog = useCallback(
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">User Management</h1>
         {isPrivilegedAdmin && (
-          <Button className="bg-sky-600 hover:bg-sky-400" onClick={openCreateDialog}>
+          <Button
+            className="bg-sky-600 hover:bg-sky-400"
+            onClick={openCreateDialog}
+          >
             + Create User
           </Button>
         )}
@@ -599,7 +612,11 @@ const openEditDialog = useCallback(
                 <SelectContent className="bg-white border-slate-200 rounded-lg shadow-lg">
                   <SelectItem value="all">All roles</SelectItem>
                   {uniqueRoles.map((role) => (
-                    <SelectItem key={role} value={role} className="hover:bg-slate-50">
+                    <SelectItem
+                      key={role}
+                      value={role}
+                      className="hover:bg-slate-50"
+                    >
                       {role}
                     </SelectItem>
                   ))}
@@ -625,7 +642,11 @@ const openEditDialog = useCallback(
                 <SelectContent className="bg-white border-slate-200 rounded-lg shadow-lg">
                   <SelectItem value="all">All stations</SelectItem>
                   {uniqueStations.map((stationId) => (
-                    <SelectItem key={stationId} value={stationId} className="hover:bg-slate-50">
+                    <SelectItem
+                      key={stationId}
+                      value={stationId}
+                      className="hover:bg-slate-50"
+                    >
                       {stationNameById.get(stationId) || stationId}
                     </SelectItem>
                   ))}
@@ -722,7 +743,7 @@ const openEditDialog = useCallback(
                         onEdit={openEditDialog}
                         onDelete={openDeleteConfirmation}
                         onImpersonate={handleImpersonate}
-                        isImpersonating={isOperating}
+                        isImpersonating={impersonatingUserId === user.id}
                       />
                     </TableCell>
                   </TableRow>
@@ -750,7 +771,12 @@ const openEditDialog = useCallback(
             )}
           </div>
           <div className="flex items-center space-x-2">
-            <Button variant="outline" size="sm" onClick={prevPage} disabled={pageIndex === 0 || isLoading}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={prevPage}
+              disabled={pageIndex === 0 || isLoading}
+            >
               Previous
             </Button>
             <Button
@@ -778,18 +804,33 @@ const openEditDialog = useCallback(
           isLoading={isOperating}
           stations={stations}
           loadingStations={false}
-          divisions={divisions.map((d) => ({ osmId: d.osmId.toString(), name: d.name }))}
-          districts={districts.map((d) => ({ osmId: d.osmId.toString(), name: d.name }))}
-          upazilas={upazilas.map((u) => ({ osmId: u.osmId.toString(), name: u.name }))}
+          divisions={divisions.map((d) => ({
+            osmId: d.osmId.toString(),
+            name: d.name,
+          }))}
+          districts={districts.map((d) => ({
+            osmId: d.osmId.toString(),
+            name: d.name,
+          }))}
+          upazilas={upazilas.map((u) => ({
+            osmId: u.osmId.toString(),
+            name: u.name,
+          }))}
           selectedDivision={
             selectedDivision
-              ? { osmId: selectedDivision.osmId.toString(), name: selectedDivision.name }
+              ? {
+                  osmId: selectedDivision.osmId.toString(),
+                  name: selectedDivision.name,
+                }
               : null
           }
           onDivisionChange={setSelectedDivision}
           selectedDistrict={
             selectedDistrict
-              ? { osmId: selectedDistrict.osmId.toString(), name: selectedDistrict.name }
+              ? {
+                  osmId: selectedDistrict.osmId.toString(),
+                  name: selectedDistrict.name,
+                }
               : null
           }
           onDistrictChange={setSelectedDistrict}
@@ -834,7 +875,7 @@ interface UserActionButtonsProps {
   onImpersonate: (
     userId: string,
     userName: string | null,
-    userRole: string | null
+    userRole: string | null,
   ) => void;
   isImpersonating: boolean;
 }
@@ -848,7 +889,8 @@ const UserActionButtons = ({
   onImpersonate,
   isImpersonating,
 }: UserActionButtonsProps) => {
-  const canImpersonateUser = isSuper || user.role === USER_ROLES.OBSERVER;
+  // Allow root_admin and super_admin to impersonate any user except themselves
+  const canImpersonateUser = isSuper;
   const canDeleteUserLocal = isSuper;
 
   return (
@@ -868,7 +910,6 @@ const UserActionButtons = ({
       )}
 
       {canImpersonateUser &&
-        user.role !== USER_ROLES.SUPER_ADMIN &&
         user.role !== USER_ROLES.ROOT_ADMIN &&
         user.id !== currentUserId && (
           <Button

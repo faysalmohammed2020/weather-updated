@@ -1,6 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, forwardRef, useImperativeHandle, Ref } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  forwardRef,
+  useImperativeHandle,
+  Ref,
+} from "react";
 import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { DateFilters } from "@/components/synoptic/Filters/DateFilters";
@@ -39,7 +47,7 @@ const buildDefaultHeaderInfo = (user?: SynopticUser): SynopticHeaderInfo => {
 
 const deriveHeaderInfo = (
   record?: SynopticRecord,
-  user?: SynopticUser
+  user?: SynopticUser,
 ): SynopticHeaderInfo => {
   if (!record) {
     return buildDefaultHeaderInfo(user);
@@ -61,10 +69,14 @@ const deriveHeaderInfo = (
   };
 };
 
-const SynopticCodeViewComponent = (props: {}, ref: Ref<SynopticCodeViewHandle>) => {
+const SynopticCodeViewComponent = (
+  props: {},
+  ref: Ref<SynopticCodeViewHandle>,
+) => {
   const { data: session } = useSession();
   const user = session?.user as SynopticUser | undefined;
-  const isSuperAdmin = user?.role === "super_admin";
+  const isSuperAdmin =
+    user?.role === "super_admin" || user?.role === "root_admin";
   const isStationAdmin = user?.role === "station_admin";
 
   const initialDate = useMemo(
@@ -72,7 +84,7 @@ const SynopticCodeViewComponent = (props: {}, ref: Ref<SynopticCodeViewHandle>) 
       startDate: todayISO(),
       endDate: todayISO(),
     }),
-    []
+    [],
   );
 
   const [dateRange, setDateRange] = useState<DateRange>(initialDate);
@@ -80,18 +92,22 @@ const SynopticCodeViewComponent = (props: {}, ref: Ref<SynopticCodeViewHandle>) 
   const [records, setRecords] = useState<SynopticRecord[]>([]);
   const [stations, setStations] = useState<Station[]>([]);
   const [headerInfo, setHeaderInfo] = useState<SynopticHeaderInfo>(() =>
-    buildDefaultHeaderInfo(user)
+    buildDefaultHeaderInfo(user),
   );
   const [isLoading, setIsLoading] = useState(true);
   const [selectedRecord, setSelectedRecord] = useState<SynopticRecord | null>(
-    null
+    null,
   );
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isPermissionDeniedOpen, setIsPermissionDeniedOpen] = useState(false);
 
-  useImperativeHandle(ref, () => ({
-    getData: () => records
-  }), [records]);
+  useImperativeHandle(
+    ref,
+    () => ({
+      getData: () => records,
+    }),
+    [records],
+  );
 
   const stationQuery =
     stationFilter !== "all" ? { stationId: stationFilter } : undefined;
@@ -165,7 +181,9 @@ const SynopticCodeViewComponent = (props: {}, ref: Ref<SynopticCodeViewHandle>) 
 
   const handleRecordUpdated = (updated: SynopticRecord) => {
     setRecords((prev) =>
-      prev.map((entry) => (entry.id === updated.id ? { ...entry, ...updated } : entry))
+      prev.map((entry) =>
+        entry.id === updated.id ? { ...entry, ...updated } : entry,
+      ),
     );
     setSelectedRecord(updated);
   };
@@ -294,6 +312,8 @@ const SynopticCodeViewComponent = (props: {}, ref: Ref<SynopticCodeViewHandle>) 
   );
 };
 
-export const SynopticCodeView = forwardRef<SynopticCodeViewHandle>(SynopticCodeViewComponent);
+export const SynopticCodeView = forwardRef<SynopticCodeViewHandle>(
+  SynopticCodeViewComponent,
+);
 
 export default SynopticCodeView;

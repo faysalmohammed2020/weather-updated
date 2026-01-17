@@ -1,6 +1,12 @@
 "use client";
 
-import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useState,
+} from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
@@ -14,7 +20,10 @@ import type {
   MeteorologicalEntry,
   ObservingTimeEntry,
 } from "@/types/meteorological";
-import { useMeteorologicalEntries, useStationsQuery } from "@/lib/queries/meteorological";
+import {
+  useMeteorologicalEntries,
+  useStationsQuery,
+} from "@/lib/queries/meteorological";
 import { exportToCSV as buildCsv } from "@/lib/export/meteorologicalCSV";
 import { exportToTXT as buildTxt } from "@/lib/export/meteorologicalTXT";
 import { getNextRange, getPreviousRange } from "@/lib/utils/date-utils";
@@ -51,21 +60,17 @@ const FirstCardTable = forwardRef<FirstCardTableHandle, FirstCardTableProps>(
 
     const { data: session } = useSession();
     const user = session?.user;
-    const isSuperAdmin = user?.role === "super_admin";
+    const isSuperAdmin =
+      user?.role === "super_admin" || user?.role === "root_admin";
     const isStationAdmin = user?.role === "station_admin";
 
-    const {
-      entries,
-      flattenedData,
-      isLoading,
-      error,
-      mutate,
-    } = useMeteorologicalEntries({
-      startDate,
-      endDate,
-      stationFilter,
-      refreshKey: refreshTrigger,
-    });
+    const { entries, flattenedData, isLoading, error, mutate } =
+      useMeteorologicalEntries({
+        startDate,
+        endDate,
+        stationFilter,
+        refreshKey: refreshTrigger,
+      });
     const { stations } = useStationsQuery(Boolean(isSuperAdmin));
 
     useEffect(() => {
@@ -78,7 +83,7 @@ const FirstCardTable = forwardRef<FirstCardTableHandle, FirstCardTableProps>(
       getData: () =>
         flattenedData.map((record) => {
           const observingTime = entries.find(
-            (ot) => ot.id === record.observingTimeId
+            (ot) => ot.id === record.observingTimeId,
           );
           return {
             ...record,
@@ -116,7 +121,9 @@ const FirstCardTable = forwardRef<FirstCardTableHandle, FirstCardTableProps>(
       }
     };
 
-    const changeRange = (getRange: () => { startDate: string; endDate: string } | null) => {
+    const changeRange = (
+      getRange: () => { startDate: string; endDate: string } | null,
+    ) => {
       const range = getRange();
       if (!range) return;
       setStartDate(range.startDate);
@@ -151,7 +158,7 @@ const FirstCardTable = forwardRef<FirstCardTableHandle, FirstCardTableProps>(
 
     const handleEditClick = (
       record: MeteorologicalEntry,
-      observingTime: ObservingTimeEntry
+      observingTime: ObservingTimeEntry,
     ) => {
       setSelectedRecord(record);
       setSelectedObservingTime(observingTime);
@@ -187,7 +194,7 @@ const FirstCardTable = forwardRef<FirstCardTableHandle, FirstCardTableProps>(
         mutate();
       } catch (err) {
         toast.error(
-          err instanceof Error ? err.message : "Failed to update record"
+          err instanceof Error ? err.message : "Failed to update record",
         );
       } finally {
         setIsSaving(false);
@@ -226,7 +233,7 @@ const FirstCardTable = forwardRef<FirstCardTableHandle, FirstCardTableProps>(
         return user?.station?.name || "All Stations";
       }
       const selectedStation = stations.find(
-        (station) => station.id === stationFilter
+        (station) => station.id === stationFilter,
       );
       return selectedStation?.name || user?.station?.name || "Selected Station";
     }, [stationFilter, stations, user?.station?.name]);
@@ -318,16 +325,23 @@ const FirstCardTable = forwardRef<FirstCardTableHandle, FirstCardTableProps>(
                       YEAR
                     </div>
                     <div className="flex">
-                      {new Date().getFullYear().toString().slice(-2).split("").map((digit, index) => (
-                        <div
-                          key={`${digit}-${index}`}
-                          className={`w-8 sm:w-10 h-8 sm:h-9 border border-slate-400 flex items-center justify-center p-1 font-mono ${
-                            index === 0 ? "rounded-l-md" : "rounded-r-md border-l-0"
-                          } bg-white text-xs sm:text-sm`}
-                        >
-                          {digit}
-                        </div>
-                      ))}
+                      {new Date()
+                        .getFullYear()
+                        .toString()
+                        .slice(-2)
+                        .split("")
+                        .map((digit, index) => (
+                          <div
+                            key={`${digit}-${index}`}
+                            className={`w-8 sm:w-10 h-8 sm:h-9 border border-slate-400 flex items-center justify-center p-1 font-mono ${
+                              index === 0
+                                ? "rounded-l-md"
+                                : "rounded-r-md border-l-0"
+                            } bg-white text-xs sm:text-sm`}
+                          >
+                            {digit}
+                          </div>
+                        ))}
                     </div>
                   </div>
                   <div className="flex flex-col items-center min-w-[120px] sm:min-w-[150px]">
@@ -361,7 +375,10 @@ const FirstCardTable = forwardRef<FirstCardTableHandle, FirstCardTableProps>(
                         <tr>
                           <td colSpan={27} className="text-center py-12">
                             <div className="flex flex-col items-center justify-center text-slate-500">
-                              <CloudSun size={48} className="text-slate-400 mb-3" />
+                              <CloudSun
+                                size={48}
+                                className="text-slate-400 mb-3"
+                              />
                               <p className="text-lg font-medium">
                                 No meteorological data found
                               </p>
@@ -405,7 +422,7 @@ const FirstCardTable = forwardRef<FirstCardTableHandle, FirstCardTableProps>(
         />
       </>
     );
-  }
+  },
 );
 
 FirstCardTable.displayName = "FirstCardTable";

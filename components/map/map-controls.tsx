@@ -12,7 +12,7 @@ import { useSession } from "next-auth/react";
 
 interface Station {
   id: string;
-  stationId: string;   // station code like "41923"
+  stationId: string; // station code like "41923"
   name: string;
   latitude: number;
   longitude: number;
@@ -63,7 +63,7 @@ export default function MapControls({
         const userStationCode = session?.user?.station?.stationId;
         if (userStationCode) {
           const userStation = data.find(
-            (s: Station) => s.stationId === userStationCode
+            (s: Station) => s.stationId === userStationCode,
           );
           if (userStation) {
             setSelectedStation(userStation);
@@ -79,7 +79,11 @@ export default function MapControls({
     };
 
     fetchStations();
-  }, [session?.user?.station?.stationId, setSelectedStation, setSelectedRegion]);
+  }, [
+    session?.user?.station?.stationId,
+    setSelectedStation,
+    setSelectedRegion,
+  ]);
 
   // ✅ Safe role check
   const role = session?.user?.role;
@@ -87,7 +91,7 @@ export default function MapControls({
   // ✅ permittedStations safe + memo
   const permittedStations = useMemo(() => {
     if (!role) return stations; // session লোড হওয়া পর্যন্ত সব দেখাও
-    if (role === "super_admin") return stations;
+    if (role === "super_admin" || role === "root_admin") return stations;
 
     const userStationCode = session?.user?.station?.stationId;
     return stations.filter((s) => s.stationId === userStationCode);
@@ -117,8 +121,8 @@ export default function MapControls({
               loading
                 ? "Loading..."
                 : permittedStations.length === 0
-                ? "No stations"
-                : "Select Station"
+                  ? "No stations"
+                  : "Select Station"
             }
           />
         </SelectTrigger>
@@ -132,9 +136,7 @@ export default function MapControls({
         </SelectContent>
       </Select>
 
-      {error && (
-        <div className="mt-4 text-red-600 text-sm">Error: {error}</div>
-      )}
+      {error && <div className="mt-4 text-red-600 text-sm">Error: {error}</div>}
     </div>
   );
 }
