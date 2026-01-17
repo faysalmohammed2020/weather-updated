@@ -37,10 +37,13 @@ export async function GET(request: NextRequest) {
     const isPrivileged =
       session.user.role === "super_admin" || session.user.role === "root_admin";
 
+    const notBannedFilter = { banned: { not: true } };
+
     // ✅ base filter
     const baseWhere = isPrivileged
-      ? {}
+      ? notBannedFilter
       : {
+          ...notBannedFilter,
           role: "observer",
           stationId: session.user.station?.id,
         };
@@ -431,6 +434,13 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    if (userToDelete.banned) {
+      return NextResponse.json(
+        { message: "User already deleted" },
+        { status: 200 }
+      );
+    }
+
     // ✅ Rule: super_admin cannot delete root_admin
     if (actorRole === "super_admin" && userToDelete.role === "root_admin") {
       return NextResponse.json(
@@ -458,7 +468,15 @@ export async function DELETE(request: NextRequest) {
         details: userToDelete,
       });
 
-      await tx.users.delete({ where: { id: userId } });
+      await tx.users.update({
+        where: { id: userId },
+        data: {
+          banned: true,
+          banReason: "soft_deleted",
+          banExpires: null,
+          updatedAt: new Date(),
+        },
+      });
     });
 
     revalidateTag("logs");

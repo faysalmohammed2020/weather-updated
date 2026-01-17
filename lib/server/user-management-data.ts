@@ -13,10 +13,13 @@ export async function getUsersForSession(params: {
 }): Promise<{ users: any[]; total: number }> {
   const session = await getSession();
 
+  const notBannedFilter = { banned: { not: true } };
+
   // No session (আপনার ইচ্ছামতো রাখুন)
   if (!session?.user) {
     const [users, total] = await Promise.all([
       prisma.users.findMany({
+        where: notBannedFilter,
         skip: params.offset,
         take: params.limit,
         orderBy: { createdAt: "desc" },
@@ -26,7 +29,7 @@ export async function getUsersForSession(params: {
           },
         },
       }),
-      prisma.users.count(),
+      prisma.users.count({ where: notBannedFilter }),
     ]);
     return { users, total };
   }
@@ -38,14 +41,14 @@ export async function getUsersForSession(params: {
   if (!isPrivileged) {
     const [users, total] = await Promise.all([
       prisma.users.findMany({
-        where: { id: session.user.id },
+        where: { id: session.user.id, ...notBannedFilter },
         include: {
           Station: {
             select: { id: true, name: true, securityCode: true },
           },
         },
       }),
-      prisma.users.count({ where: { id: session.user.id } }),
+      prisma.users.count({ where: { id: session.user.id, ...notBannedFilter } }),
     ]);
     return { users, total };
   }
@@ -53,6 +56,7 @@ export async function getUsersForSession(params: {
   // ✅ super_admin/root_admin → all users
   const [users, total] = await Promise.all([
     prisma.users.findMany({
+      where: notBannedFilter,
       skip: params.offset,
       take: params.limit,
       orderBy: { createdAt: "desc" },
@@ -62,7 +66,7 @@ export async function getUsersForSession(params: {
         },
       },
     }),
-    prisma.users.count(),
+    prisma.users.count({ where: notBannedFilter }),
   ]);
 
   return { users, total };
