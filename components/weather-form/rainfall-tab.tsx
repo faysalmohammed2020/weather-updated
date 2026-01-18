@@ -51,6 +51,7 @@ export default function RainfallTab() {
 
   const rainfall = values.rainfall || {};
   const timeSlots = rainfall.timeSlots || [];
+  const sincePrevious = rainfall["since-previous"] || "";
   const [rainfallApiData, setRainfallApiData] = useState<RainfallApiData[]>([]);
 
   // Fetch rainfall calculation data
@@ -123,7 +124,7 @@ export default function RainfallTab() {
     }
     // Sort by start time for consistent check
     const sorted = [...slots].sort((a, b) =>
-      (a.timeStart || "").localeCompare(b.timeStart || "")
+      (a.timeStart || "").localeCompare(b.timeStart || ""),
     );
 
     // If any gap >= 30m between consecutive intervals ⇒ intermittent
@@ -161,10 +162,10 @@ export default function RainfallTab() {
   const updateTimeSlot = (
     id: string,
     field: "timeStart" | "timeEnd",
-    value: string
+    value: string,
   ) => {
     const updated = timeSlots.map((s) =>
-      s.id === id ? { ...s, [field]: value } : s
+      s.id === id ? { ...s, [field]: value } : s,
     );
     setFieldValue("rainfall.timeSlots", updated);
   };
@@ -183,7 +184,7 @@ export default function RainfallTab() {
     const dt = new Date(Date.UTC(y, m - 1, d));
     dt.setUTCDate(dt.getUTCDate() + delta);
     return `${dt.getUTCFullYear()}-${String(dt.getUTCMonth() + 1).padStart(2, "0")}-${String(
-      dt.getUTCDate()
+      dt.getUTCDate(),
     ).padStart(2, "0")}`;
   };
 
@@ -201,9 +202,9 @@ export default function RainfallTab() {
         : `${String(utcHour).padStart(2, "0")} UTC → Present date `;
 
     const currentUTCTime = `${now.getUTCFullYear()}-${String(
-      now.getUTCMonth() + 1
+      now.getUTCMonth() + 1,
     ).padStart(2, "0")}-${String(now.getUTCDate()).padStart(2, "0")} ${String(
-      now.getUTCHours()
+      now.getUTCHours(),
     ).padStart(2, "0")}:${String(now.getUTCMinutes()).padStart(2, "0")} UTC`;
 
     return { utcHour, selectedDate, rule, currentUTCTime, bdToday };
@@ -235,7 +236,7 @@ export default function RainfallTab() {
       };
     }
     const sorted = [...timeSlots].sort((a, b) =>
-      (a.timeStart || "").localeCompare(b.timeStart || "")
+      (a.timeStart || "").localeCompare(b.timeStart || ""),
     );
     let completed = 0;
     let totalMin = 0;
@@ -280,6 +281,16 @@ export default function RainfallTab() {
     return String(value).padStart(4, "0");
   };
 
+  const parseSincePreviousInput = () =>
+    parseInt(rainfall["since-previous"] || "0", 10) || 0;
+
+  const getUtcDateStrings = () => {
+    const now = new Date();
+    const todayUTC = now.toISOString().split("T")[0];
+    const prevUTC = shiftISOByDays(todayUTC, -1);
+    return { todayUTC, prevUTC };
+  };
+
   const getRainfallValue = (utcTime: string): number => {
     const item = rainfallApiData.find((data) => data.utcTime === utcTime);
     return item ? parseInt(item.rainfallSincePrevious, 10) || 0 : 0;
@@ -289,57 +300,45 @@ export default function RainfallTab() {
     if (!selectedHour) return "";
 
     const hour = parseInt(selectedHour, 10);
-    const now = new Date();
+    if (![0, 6, 12, 18].includes(hour)) return "";
 
-    // Calculate based on the rules provided
-    let total = 0;
+    const { todayUTC, prevUTC } = getUtcDateStrings();
+    const currentSincePrevious = parseSincePreviousInput();
 
     if (hour === 0) {
-      // 00 UTC: previous day 21 + 24
-      const yesterday = new Date(now);
-      yesterday.setUTCDate(yesterday.getUTCDate() - 1);
-      const dateStr = yesterday.toISOString().split("T")[0];
-
-      total += getRainfallValue(`${dateStr}T21:00:00.000Z`);
-      total += getRainfallValue(`${dateStr}T24:00:00.000Z`);
-    } else if (hour === 6) {
-      // 06 UTC: current day 00 + 03
-      const dateStr = now.toISOString().split("T")[0];
-      total += getRainfallValue(`${dateStr}T00:00:00.000Z`);
-      total += getRainfallValue(`${dateStr}T03:00:00.000Z`);
-    } else if (hour === 12) {
-      // 12 UTC: current day 06 + 09
-      const dateStr = now.toISOString().split("T")[0];
-      total += getRainfallValue(`${dateStr}T06:00:00.000Z`);
-      total += getRainfallValue(`${dateStr}T09:00:00.000Z`);
-    } else if (hour === 18) {
-      // 18 UTC: current day 12 + 15
-      const dateStr = now.toISOString().split("T")[0];
-      total += getRainfallValue(`${dateStr}T12:00:00.000Z`);
-      total += getRainfallValue(`${dateStr}T15:00:00.000Z`);
+      const total =
+        getRainfallValue(`${prevUTC}T21:00:00.000Z`) + currentSincePrevious;
+      return formatToFourDigits(total);
     }
 
+    const lookups: Record<number, string> = {
+      6: `${todayUTC}T03:00:00.000Z`,
+      12: `${todayUTC}T09:00:00.000Z`,
+      18: `${todayUTC}T15:00:00.000Z`,
+    };
+
+    const previousUtc = lookups[hour];
+    if (!previousUtc) return "";
+
+    const total = getRainfallValue(previousUtc) + currentSincePrevious;
     return formatToFourDigits(total);
   };
 
   const calculateLast24Hours = (): string => {
     if (!selectedHour || parseInt(selectedHour, 10) !== 0) return "";
 
-    const now = new Date();
-    const yesterday = new Date(now);
-    yesterday.setUTCDate(yesterday.getUTCDate() - 1);
-    const dateStr = yesterday.toISOString().split("T")[0];
+    const { prevUTC } = getUtcDateStrings();
+    const currentSincePrevious = parseSincePreviousInput();
 
-    // Sum all values from previous day 03 to current day 00 UTC
+    // Sum all values from previous day 03 to previous day 21 UTC
     const timesToSum = [
-      `${dateStr}T03:00:00.000Z`,
-      `${dateStr}T06:00:00.000Z`,
-      `${dateStr}T09:00:00.000Z`,
-      `${dateStr}T12:00:00.000Z`,
-      `${dateStr}T15:00:00.000Z`,
-      `${dateStr}T18:00:00.000Z`,
-      `${dateStr}T21:00:00.000Z`,
-      `${dateStr}T24:00:00.000Z`,
+      `${prevUTC}T03:00:00.000Z`,
+      `${prevUTC}T06:00:00.000Z`,
+      `${prevUTC}T09:00:00.000Z`,
+      `${prevUTC}T12:00:00.000Z`,
+      `${prevUTC}T15:00:00.000Z`,
+      `${prevUTC}T18:00:00.000Z`,
+      `${prevUTC}T21:00:00.000Z`,
     ];
 
     let total = 0;
@@ -347,9 +346,8 @@ export default function RainfallTab() {
       total += getRainfallValue(time);
     });
 
-    // Add the Since Previous Observation input value
-    const sincePreviousValue = parseFloat(rainfall["since-previous"] || "0") || 0;
-    total += sincePreviousValue;
+    // Add the Since Previous Observation input value (current 00 UTC)
+    total += currentSincePrevious;
 
     return String(total);
   };
@@ -361,9 +359,7 @@ export default function RainfallTab() {
     // Auto-fill During Previous 6 Hours
     if (isSixHourReport) {
       const calculated6Hours = calculateDuringPrevious6Hours();
-      if (calculated6Hours) {
-        setFieldValue("rainfall.during-previous", calculated6Hours);
-      }
+      setFieldValue("rainfall.during-previous", calculated6Hours || "");
     }
 
     // Auto-fill Last 24 Hours (only at 00 UTC)
@@ -376,6 +372,7 @@ export default function RainfallTab() {
   }, [
     rainfallApiData,
     selectedHour,
+    sincePrevious,
     isSixHourReport,
     isMidnightReport,
     setFieldValue,
@@ -389,7 +386,12 @@ export default function RainfallTab() {
     if (calculated24Hours) {
       setFieldValue("rainfall.last-24-hours", calculated24Hours);
     }
-  }, [rainfall["since-previous"], rainfallApiData, isMidnightReport, setFieldValue]);
+  }, [
+    rainfall["since-previous"],
+    rainfallApiData,
+    isMidnightReport,
+    setFieldValue,
+  ]);
 
   return (
     <div className="space-y-6">
