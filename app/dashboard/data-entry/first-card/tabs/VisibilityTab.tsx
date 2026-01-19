@@ -43,8 +43,16 @@ const VisibilityTab: React.FC<Props> = ({
             id="horizontalVisibility"
             name="horizontalVisibility"
             value={formik.values.horizontalVisibility || ""}
-            onChange={handleNumericInput}
+            onChange={(e) => {
+              const value = e.target.value;
+              // Only allow numbers and limit to 3 digits
+              if (value === '' || (value.length <= 3 && /^\d+$/.test(value))) {
+                handleNumericInput(e);
+              }
+            }}
             onBlur={formik.handleBlur}
+            maxLength={3}
+            placeholder="000"
             className={cn(
               "border-slate-600 transition-all focus:border-orange-500 focus:ring-orange-500/30",
               {
@@ -56,6 +64,14 @@ const VisibilityTab: React.FC<Props> = ({
           />
           {(() => {
             const error = getFieldError("horizontalVisibility");
+            if (!error && (!formik.values.horizontalVisibility || formik.values.horizontalVisibility.length !== 3)) {
+              return (
+                <div className="text-orange-500 text-sm mt-1 flex items-start">
+                  <AlertCircle className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
+                  <span>Must be exactly 3 digits</span>
+                </div>
+              );
+            }
             if (!error) return null;
             return (
               <div className="text-red-500 text-sm mt-1 flex items-start">
@@ -74,8 +90,18 @@ const VisibilityTab: React.FC<Props> = ({
         </Button>
         <Button
           type="button"
-          onClick={nextTab}
+          onClick={() => {
+            // Validate horizontal visibility before proceeding
+            if (!formik.values.horizontalVisibility || formik.values.horizontalVisibility.length !== 3) {
+              // Mark the field as touched to show validation error
+              formik.setFieldTouched('horizontalVisibility', true);
+              // Optionally show a toast or alert
+              return;
+            }
+            nextTab();
+          }}
           className="bg-blue-600 hover:bg-blue-700"
+          disabled={!formik.values.horizontalVisibility || formik.values.horizontalVisibility.length !== 3}
         >
           Next <ChevronRight className="ml-2 h-4 w-4" />
         </Button>

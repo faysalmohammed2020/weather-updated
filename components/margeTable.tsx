@@ -297,13 +297,7 @@ const MargeTable = forwardRef(({ refreshTrigger = 0 }: MargeTableProps, ref) => 
         metEntry?.squallForce || "--",
         metEntry?.squallDirection || "--",
         metEntry?.squallTime || "--",
-        metEntry?.horizontalVisibility
-          ? (() => {
-              const value = parseFloat(metEntry.horizontalVisibility);
-              if (isNaN(value)) return "--";
-              return value % 1 === 0 ? value.toString() : value.toFixed(1);
-            })()
-          : "--",
+        metEntry?.horizontalVisibility || "--",
         metEntry?.miscMeteors || "--",
         metEntry?.pastWeatherW1 || "--",
         metEntry?.pastWeatherW2 || "--",
@@ -425,15 +419,7 @@ ${"=".repeat(60)}
     txtContent += `Squall Force (KTS)${" ".repeat(4)} ---> ${metEntry?.squallForce || "--"}\n`;
     txtContent += `Squall Direction (°)${" ".repeat(3)} ---> ${metEntry?.squallDirection || "--"}\n`;
     txtContent += `Squall Time${" ".repeat(10)} ---> ${metEntry?.squallTime || "--"}\n`;
-    txtContent += `Horizontal Visibility${" ".repeat(2)} ---> ${
-      metEntry?.horizontalVisibility
-        ? (() => {
-            const value = parseFloat(metEntry.horizontalVisibility);
-            if (isNaN(value)) return "--";
-            return value % 1 === 0 ? value.toString() : value.toFixed(1);
-          })()
-        : "--"
-    }\n`;
+    txtContent += `Horizontal Visibility${" ".repeat(2)} ---> ${metEntry?.horizontalVisibility || "--"}\n`;
     txtContent += `Misc Meteors (Code)${" ".repeat(3)} ---> ${metEntry?.miscMeteors || "--"}\n`;
     txtContent += `Past Weather (W₁)${" ".repeat(5)} ---> ${metEntry?.pastWeatherW1 || "--"}\n`;
     txtContent += `Past Weather (W₂)${" ".repeat(5)} ---> ${metEntry?.pastWeatherW2 || "--"}\n`;
@@ -1355,13 +1341,7 @@ ${"=".repeat(60)}`;
                           <td className="border border-slate-300 p-1">{metEntry?.squallDirection || "--"}</td>
                           <td className="border border-slate-300 p-1">{metEntry?.squallTime || "--"}</td>
                           <td className="border border-slate-300 p-1 font-medium text-blue-700">
-                            {metEntry?.horizontalVisibility
-                              ? (() => {
-                                  const value = parseFloat(metEntry.horizontalVisibility);
-                                  if (isNaN(value)) return "--";
-                                  return value % 1 === 0 ? value.toString() : value.toFixed(1);
-                                })()
-                              : "--"}
+                            {metEntry?.horizontalVisibility || "--"}
                           </td>
                           <td className="border border-slate-300 p-1">{metEntry?.miscMeteors || "--"}</td>
                           <td className="border border-slate-300 p-1">{metEntry?.pastWeatherW1 || "--"}</td>
