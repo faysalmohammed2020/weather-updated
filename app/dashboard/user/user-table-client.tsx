@@ -298,22 +298,26 @@ export const UserTableClient = ({
   }, [updatePageInUrl]);
 
   useEffect(() => {
-    if (pageIndex !== 0) {
-      setPageIndex(0);
+    setPageIndex((prev) => {
+      if (prev !== 0) {
+        updatePageInUrl(0);
+        return 0;
+      }
       updatePageInUrl(0);
-    } else {
-      updatePageInUrl(0);
-    }
-  }, [debouncedSearch]); // eslint-disable-line react-hooks/exhaustive-deps
+      return prev;
+    });
+  }, [debouncedSearch, updatePageInUrl]);
 
   useEffect(() => {
-    if (pageIndex !== 0) {
-      setPageIndex(0);
+    setPageIndex((prev) => {
+      if (prev !== 0) {
+        updatePageInUrl(0);
+        return 0;
+      }
       updatePageInUrl(0);
-    } else {
-      updatePageInUrl(0);
-    }
-  }, [roleFilter, stationFilter, dateFromFilter, dateToFilter]); // eslint-disable-line react-hooks/exhaustive-deps
+      return prev;
+    });
+  }, [roleFilter, stationFilter, dateFromFilter, dateToFilter, updatePageInUrl]);
 
   // ============================================================================
   // DATA REFRESH FUNCTION (SERVER-SIDE SEARCH INCLUDED)
@@ -471,27 +475,6 @@ export const UserTableClient = ({
     [session?.user?.role], // ✅ dependency add
   );
 
-  const confirmRoleUpdate = useCallback(() => {
-    if (!editUser) return;
-
-    const validation = validateUserForm(formData, true);
-    if (!validation.isValid) {
-      toast.error(validation.error);
-      return;
-    }
-
-    if (editUser.role === formData.role) {
-      handleUpdateUser();
-      return;
-    }
-
-    setRoleChangeData({
-      originalRole: editUser.role,
-      newRole: formData.role,
-    });
-    setOpenRoleUpdateDialog(true);
-  }, [editUser, formData]); // eslint-disable-line react-hooks/exhaustive-deps
-
   const handleUpdateUser = useCallback(async () => {
     if (!editUser) return;
 
@@ -511,6 +494,27 @@ export const UserTableClient = ({
       refreshUsers();
     }
   }, [editUser, formData, updateUser, handleCloseDialog, refreshUsers]);
+
+  const confirmRoleUpdate = useCallback(() => {
+    if (!editUser) return;
+
+    const validation = validateUserForm(formData, true);
+    if (!validation.isValid) {
+      toast.error(validation.error);
+      return;
+    }
+
+    if (editUser.role === formData.role) {
+      handleUpdateUser();
+      return;
+    }
+
+    setRoleChangeData({
+      originalRole: editUser.role,
+      newRole: formData.role,
+    });
+    setOpenRoleUpdateDialog(true);
+  }, [editUser, formData, handleUpdateUser]);
 
   // ============================================================================
   // USER DELETION

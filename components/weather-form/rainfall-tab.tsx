@@ -25,6 +25,10 @@ import TimePickerUTC from "@/components/ui/time-picker-utc";
 interface RainfallApiData {
   utcTime: string;
   rainfallSincePrevious: string;
+  rainfallTimeSlots?: TimeSlot[] | null;
+  rainfallTimeStart?: string | null;
+  rainfallTimeEnd?: string | null;
+  rainfallType?: string | null;
 }
 
 interface TimeSlot {
@@ -87,6 +91,35 @@ export default function RainfallTab() {
     return hour === 0;
   }, [selectedHour]);
 
+  const padHour = (hour: number) => String(hour).padStart(2, "0");
+
+  const windowInfo = useMemo(() => {
+    if (!selectedHour) return null;
+    const hour = Number.parseInt(selectedHour, 10);
+    if (Number.isNaN(hour)) return null;
+    const startHour = (hour + 24 - 3) % 24;
+    const startMin = startHour * 60;
+    const endMin = hour * 60;
+    return {
+      startHour,
+      endHour: hour,
+      startMin,
+      endMin,
+      crossesMidnight: startMin > endMin,
+      startLabel: `${padHour(startHour)}:00`,
+      endLabel: `${padHour(hour)}:00`,
+    };
+  }, [selectedHour]);
+
+  const normalizeToWindow = (
+    minutes: number,
+    windowStartMin: number,
+    crossesMidnight: boolean,
+  ) => {
+    if (!crossesMidnight) return minutes;
+    return minutes < windowStartMin ? minutes + 24 * 60 : minutes;
+  };
+
   const [rainfallType, setRainfallType] = useState<
     "continuous" | "intermittent" | ""
   >(rainfall.rainfallType || "");
@@ -122,10 +155,24 @@ export default function RainfallTab() {
       setFieldValue("rainfall.rainfallType", "");
       return;
     }
-    // Sort by start time for consistent check
-    const sorted = [...slots].sort((a, b) =>
-      (a.timeStart || "").localeCompare(b.timeStart || ""),
-    );
+    // Sort by start time for consistent check (respect UTC window if crossing midnight)
+    const sorted = [...slots].sort((a, b) => {
+      const aMin = toMinutes(a.timeStart || "");
+      const bMin = toMinutes(b.timeStart || "");
+      if (aMin === null || bMin === null) return 0;
+      if (!windowInfo) return aMin - bMin;
+      const aNorm = normalizeToWindow(
+        aMin,
+        windowInfo.startMin,
+        windowInfo.crossesMidnight,
+      );
+      const bNorm = normalizeToWindow(
+        bMin,
+        windowInfo.startMin,
+        windowInfo.crossesMidnight,
+      );
+      return aNorm - bNorm;
+    });
 
     // If any gap >= 30m between consecutive intervals ⇒ intermittent
     let intermittent = false;
@@ -133,7 +180,24 @@ export default function RainfallTab() {
       const curEnd = sorted[i].timeEnd;
       const nextStart = sorted[i + 1].timeStart;
       if (!curEnd || !nextStart) continue;
-      const gap = gapMinutes(curEnd, nextStart);
+      const curEndMin = toMinutes(curEnd);
+      const nextStartMin = toMinutes(nextStart);
+      if (curEndMin === null || nextStartMin === null) continue;
+      const curEndNorm = windowInfo
+        ? normalizeToWindow(
+            curEndMin,
+            windowInfo.startMin,
+            windowInfo.crossesMidnight,
+          )
+        : curEndMin;
+      const nextStartNorm = windowInfo
+        ? normalizeToWindow(
+            nextStartMin,
+            windowInfo.startMin,
+            windowInfo.crossesMidnight,
+          )
+        : nextStartMin;
+      const gap = nextStartNorm - curEndNorm;
       if (gap >= 30) {
         intermittent = true;
         break;
@@ -210,6 +274,39 @@ export default function RainfallTab() {
     return { utcHour, selectedDate, rule, currentUTCTime, bdToday };
   };
 
+  const getUtcDateStrings = () => {
+    const now = new Date();
+    const todayUTC = now.toISOString().split("T")[0];
+    const prevUTC = shiftISOByDays(todayUTC, -1);
+    return { todayUTC, prevUTC };
+  };
+
+  const formatUtcClock = (value?: string | null) => {
+    if (!value) return "--";
+    const dt = new Date(value);
+    if (Number.isNaN(dt.getTime())) return "--";
+    return `${padHour(dt.getUTCHours())}:${String(dt.getUTCMinutes()).padStart(
+      2,
+      "0",
+    )}`;
+  };
+
+  const previousTimecardInfo = useMemo(() => {
+    if (!selectedHour) return null;
+    const hour = parseInt(selectedHour, 10);
+    if (Number.isNaN(hour)) return null;
+    const prevHour = (hour + 24 - 3) % 24;
+    const { todayUTC, prevUTC } = getUtcDateStrings();
+    const date = hour < 3 ? prevUTC : todayUTC;
+    const utcTime = `${date}T${padHour(prevHour)}:00:00.000Z`;
+    const data = rainfallApiData.find((item) => item.utcTime === utcTime);
+    return {
+      utcTime,
+      label: `${padHour(prevHour)}:00 UTC`,
+      data: data || null,
+    };
+  }, [rainfallApiData, selectedHour]);
+
   // Auto-select when hour changes
   useEffect(() => {
     if (selectedHour) {
@@ -223,6 +320,54 @@ export default function RainfallTab() {
   useEffect(() => {
     detectRainfallType(timeSlots);
   }, [timeSlots]);
+
+  const slotWindowValidation = useMemo(() => {
+    if (!windowInfo || timeSlots.length === 0) {
+      return { isValid: true, invalidSlots: [] as number[] };
+    }
+
+    const invalidSlots: number[] = [];
+    const windowEndNormalized = windowInfo.crossesMidnight
+      ? windowInfo.endMin + 24 * 60
+      : windowInfo.endMin;
+
+    timeSlots.forEach((slot, index) => {
+      if (!slot.timeStart || !slot.timeEnd) return;
+      const startMin = toMinutes(slot.timeStart);
+      const endMin = toMinutes(slot.timeEnd);
+      if (startMin === null || endMin === null) return;
+
+      const normalizedStart = normalizeToWindow(
+        startMin,
+        windowInfo.startMin,
+        windowInfo.crossesMidnight,
+      );
+      let normalizedEnd = normalizeToWindow(
+        endMin,
+        windowInfo.startMin,
+        windowInfo.crossesMidnight,
+      );
+
+      if (normalizedEnd < normalizedStart) {
+        normalizedEnd += 24 * 60;
+      }
+
+      if (
+        normalizedStart < windowInfo.startMin ||
+        normalizedEnd > windowEndNormalized
+      ) {
+        invalidSlots.push(index + 1);
+      }
+    });
+
+    return { isValid: invalidSlots.length === 0, invalidSlots };
+  }, [timeSlots, windowInfo]);
+
+  const slotWindowMessage = useMemo(() => {
+    if (!windowInfo || slotWindowValidation.isValid) return "";
+    const slotList = slotWindowValidation.invalidSlots.join(", ");
+    return `Only previous 3 hours (${windowInfo.startLabel}-${windowInfo.endLabel} UTC) are allowed. Invalid slot(s): ${slotList}.`;
+  }, [slotWindowValidation, windowInfo]);
 
   // ---------- UX: slot summary ----------
   const slotSummary = useMemo(() => {
@@ -283,13 +428,6 @@ export default function RainfallTab() {
 
   const parseSincePreviousInput = () =>
     parseInt(rainfall["since-previous"] || "0", 10) || 0;
-
-  const getUtcDateStrings = () => {
-    const now = new Date();
-    const todayUTC = now.toISOString().split("T")[0];
-    const prevUTC = shiftISOByDays(todayUTC, -1);
-    return { todayUTC, prevUTC };
-  };
 
   const getRainfallValue = (utcTime: string): number => {
     const item = rainfallApiData.find((data) => data.utcTime === utcTime);
@@ -519,6 +657,79 @@ export default function RainfallTab() {
             </div>
           </div>
 
+          {windowInfo && (
+            <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="h-4 w-4 mt-0.5 text-amber-700" />
+                <div className="text-xs text-amber-800">
+                  <p className="font-semibold">
+                    Allowed window: {windowInfo.startLabel}-{windowInfo.endLabel}{" "}
+                    UTC (previous 3 hours)
+                  </p>
+                  <p>
+                    Only this 3-hour range is valid for the current observation.
+                    Older ranges will show validation.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {previousTimecardInfo && (
+            <div className="mb-4 p-3 bg-slate-50 border border-slate-200 rounded-lg">
+              <div className="flex items-start gap-2">
+                <Clock className="h-4 w-4 mt-0.5 text-slate-700" />
+                <div className="text-xs text-slate-700">
+                  <p className="font-semibold">
+                    Previous timecard ({previousTimecardInfo.label})
+                  </p>
+                  {previousTimecardInfo.data ? (
+                    <>
+                      <p>
+                        Since Previous:{" "}
+                        <span className="font-semibold">
+                          {previousTimecardInfo.data.rainfallSincePrevious ||
+                            "--"}
+                        </span>{" "}
+                        mm
+                      </p>
+                      {Array.isArray(
+                        previousTimecardInfo.data.rainfallTimeSlots,
+                      ) &&
+                      previousTimecardInfo.data.rainfallTimeSlots.length ? (
+                        <div className="mt-1">
+                          <p className="font-medium">Slots:</p>
+                          <ul className="mt-1 space-y-1">
+                            {previousTimecardInfo.data.rainfallTimeSlots.map(
+                              (slot, idx) => (
+                                <li key={slot.id || idx}>
+                                  {slot.timeStart}-{slot.timeEnd}
+                                </li>
+                              ),
+                            )}
+                          </ul>
+                        </div>
+                      ) : (
+                        <p className="mt-1">
+                          Slots:{" "}
+                          {formatUtcClock(
+                            previousTimecardInfo.data.rainfallTimeStart,
+                          )}
+                          {" - "}
+                          {formatUtcClock(
+                            previousTimecardInfo.data.rainfallTimeEnd,
+                          )}
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <p>No previous timecard found for this UTC window.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Slots */}
           <div className="space-y-4">
             {timeSlots.map((slot: TimeSlot, index: number) => (
@@ -610,6 +821,12 @@ export default function RainfallTab() {
               </Badge>
             )}
           </div>
+
+          {slotWindowMessage && (
+            <div className="mt-3 p-2 text-xs text-red-700 bg-red-50 border border-red-200 rounded-lg">
+              {slotWindowMessage}
+            </div>
+          )}
         </CardContent>
       </Card>
 

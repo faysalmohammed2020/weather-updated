@@ -24,6 +24,10 @@ export async function GET() {
     },
     select: {
       rainfallSincePrevious: true,
+      rainfallTimeSlots: true,
+      rainfallTimeStart: true,
+      rainfallTimeEnd: true,
+      rainfallType: true,
       ObservingTime: {
         select: {
           utcTime: true,
@@ -41,6 +45,10 @@ export async function GET() {
     data.map((item) => ({
       utcTime: item.ObservingTime.utcTime,
       rainfallSincePrevious: item.rainfallSincePrevious,
+      rainfallTimeSlots: item.rainfallTimeSlots,
+      rainfallTimeStart: item.rainfallTimeStart,
+      rainfallTimeEnd: item.rainfallTimeEnd,
+      rainfallType: item.rainfallType,
     }))
   );
 }

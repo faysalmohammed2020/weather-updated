@@ -68,7 +68,6 @@ export function generateSynopticCode(): SynopticFormValues {
 
   // 3. iRiXhvv (22-26) - 32 + low cloud height (2 digits) + visibility (1 digit)
   // "iRiXhW 22-26" field data will come from : 32 is constant + "clouds>low>height" fields+ "horizontalVisibility" of "first-card-data.json"
-  const precipitation = weatherObs.rainfall?.["last-24-hours"] || "0";
   const lowCloudHeight = weatherObs.clouds?.low?.height || 0;
   const visibility = pad(
     (Number(firstCard.horizontalVisibility?.toString()?.[0]) || 0) * 10,
@@ -144,14 +143,226 @@ export function generateSynopticCode(): SynopticFormValues {
     : now.getUTCHours();
   const shouldInclude6RRRtR = [0, 6, 12, 18].includes(obsHourFor6RRRtR);
 
+  const parseObservationTime = (value: string) => {
+    if (!value || !value.includes("T")) return null;
+    const [datePart, timePart] = value.split("T");
+    if (!datePart || !timePart) return null;
+    const [year, month, day] = datePart.split("-").map(Number);
+    const [hour, minute] = timePart.split(":").map(Number);
+    if (
+      [year, month, day, hour, minute].some((v) => Number.isNaN(v))
+    ) {
+      return null;
+    }
+    return new Date(Date.UTC(year, month - 1, day, hour, minute));
+  };
+
+  const formatObservationTime = (date: Date) => {
+    const yyyy = date.getUTCFullYear();
+    const mm = pad(date.getUTCMonth() + 1, 2);
+    const dd = pad(date.getUTCDate(), 2);
+    const hh = pad(date.getUTCHours(), 2);
+    const min = pad(date.getUTCMinutes(), 2);
+    return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+  };
+
+  const currentObservationTime =
+    parseObservationTime(obsTimeFor6RRRtR) || now;
+  const previousObservationTime = new Date(
+    currentObservationTime.getTime() - 3 * 60 * 60 * 1000
+  );
+  const previousObservationKey = formatObservationTime(
+    previousObservationTime
+  );
+  const previousWeatherObs =
+    weatherObservations.find(
+      (obs) => obs.observer?.["observation-time"] === previousObservationKey
+    ) || null;
+
+  const precipitation =
+    weatherObs.rainfall?.["during-previous"] ||
+    weatherObs.rainfall?.["since-previous"] ||
+    "0";
+
   // precipitation is treated as 0.1 mm units here (e.g., 0020 => 2.0 mm => RRR=002)
   const precipRaw = Number(precipitation) || 0;
   const precipMm = Math.floor(precipRaw / 10);
 
+  const buildSlotRanges = (obs: any, obsTime: Date) => {
+    if (!obs) return [] as Array<{ start: Date; end: Date }>;
+    const ranges: Array<{ start: Date; end: Date }> = [];
+
+    const pushRange = (start: Date, end: Date) => {
+      if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return;
+      let normalizedEnd = end;
+      if (end.getTime() < start.getTime()) {
+        normalizedEnd = new Date(end.getTime() + 24 * 60 * 60 * 1000);
+      }
+      ranges.push({ start, end: normalizedEnd });
+    };
+
+    const timeSlots = Array.isArray(obs?.rainfall?.timeSlots)
+      ? obs.rainfall.timeSlots
+      : [];
+
+    if (timeSlots.length > 0) {
+      const slotDate = new Date(obsTime);
+      if (obsTime.getUTCHours() === 0) {
+        slotDate.setUTCDate(slotDate.getUTCDate() - 1);
+      }
+      timeSlots.forEach((slot: any) => {
+        if (!slot?.timeStart || !slot?.timeEnd) return;
+        const [startHour, startMin] = slot.timeStart.split(":").map(Number);
+        const [endHour, endMin] = slot.timeEnd.split(":").map(Number);
+        if (
+          Number.isNaN(startHour) ||
+          Number.isNaN(startMin) ||
+          Number.isNaN(endHour) ||
+          Number.isNaN(endMin)
+        ) {
+          return;
+        }
+        const start = new Date(
+          Date.UTC(
+            slotDate.getUTCFullYear(),
+            slotDate.getUTCMonth(),
+            slotDate.getUTCDate(),
+            startHour,
+            startMin
+          )
+        );
+        const end = new Date(
+          Date.UTC(
+            slotDate.getUTCFullYear(),
+            slotDate.getUTCMonth(),
+            slotDate.getUTCDate(),
+            endHour,
+            endMin
+          )
+        );
+        pushRange(start, end);
+      });
+    } else if (obs?.rainfall?.["time-start"] && obs?.rainfall?.["time-end"]) {
+      const [startHour, startMin] = String(obs.rainfall["time-start"])
+        .split(":")
+        .map(Number);
+      const [endHour, endMin] = String(obs.rainfall["time-end"])
+        .split(":")
+        .map(Number);
+      if (
+        !Number.isNaN(startHour) &&
+        !Number.isNaN(startMin) &&
+        !Number.isNaN(endHour) &&
+        !Number.isNaN(endMin)
+      ) {
+        const slotDate = new Date(obsTime);
+        if (obsTime.getUTCHours() === 0) {
+          slotDate.setUTCDate(slotDate.getUTCDate() - 1);
+        }
+        const start = new Date(
+          Date.UTC(
+            slotDate.getUTCFullYear(),
+            slotDate.getUTCMonth(),
+            slotDate.getUTCDate(),
+            startHour,
+            startMin
+          )
+        );
+        const end = new Date(
+          Date.UTC(
+            slotDate.getUTCFullYear(),
+            slotDate.getUTCMonth(),
+            slotDate.getUTCDate(),
+            endHour,
+            endMin
+          )
+        );
+        pushRange(start, end);
+      }
+    }
+
+    return ranges;
+  };
+
+  const detectIntermittent = (slots: Array<{ start: Date; end: Date }>) => {
+    if (slots.length <= 1) return false;
+    const sorted = [...slots].sort(
+      (a, b) => a.start.getTime() - b.start.getTime()
+    );
+    for (let i = 0; i < sorted.length - 1; i++) {
+      const gapMinutes =
+        (sorted[i + 1].start.getTime() - sorted[i].end.getTime()) /
+        (1000 * 60);
+      if (gapMinutes >= 30) return true;
+    }
+    return false;
+  };
+
+  const currentSlots = buildSlotRanges(weatherObs, currentObservationTime);
+  const previousSlots = buildSlotRanges(
+    previousWeatherObs,
+    previousObservationTime
+  );
+  const combinedSlots = [...previousSlots, ...currentSlots].sort(
+    (a, b) => a.start.getTime() - b.start.getTime()
+  );
+
+  const rainStart = combinedSlots.length ? combinedSlots[0].start : null;
+  const rainEnd = combinedSlots.length
+    ? combinedSlots[combinedSlots.length - 1].end
+    : null;
+  const isIntermittentRain = detectIntermittent(combinedSlots);
+
   if (!shouldInclude6RRRtR || precipRaw <= 0) {
     measurements[7] = "";
   } else {
-    const tR = "/";
+    let tR = "/";
+    const H = currentObservationTime;
+    const H_3 = new Date(H.getTime() - 3 * 60 * 60 * 1000);
+    const H_6 = new Date(H.getTime() - 6 * 60 * 60 * 1000);
+
+    if (!previousWeatherObs) {
+      tR = "/";
+    } else if (rainStart && rainEnd) {
+      if (isIntermittentRain) {
+        if (rainStart < H_6 || rainEnd > H) {
+          tR = "/";
+        } else if (rainEnd <= H_3) {
+          tR = "1";
+        } else if (rainStart >= H_3) {
+          tR = "2";
+        } else {
+          tR = "3";
+        }
+      } else {
+        if (rainStart < H_6 || rainEnd > H) {
+          tR = "/";
+        } else {
+          const durationHours =
+            (rainEnd.getTime() - rainStart.getTime()) / (1000 * 60 * 60);
+          let hoursSinceEnd =
+            (H.getTime() - rainEnd.getTime()) / (1000 * 60 * 60);
+
+          if (hoursSinceEnd < 0) hoursSinceEnd += 24;
+
+          if (durationHours <= 2) {
+            if (hoursSinceEnd <= 2) tR = "4";
+            else if (hoursSinceEnd <= 4) tR = "5";
+            else if (hoursSinceEnd <= 6) tR = "6";
+          } else if (durationHours <= 4) {
+            if (hoursSinceEnd <= 2) tR = "7";
+            else if (hoursSinceEnd <= 4) tR = "8";
+          } else if (durationHours <= 6 && hoursSinceEnd <= 2) {
+            tR = "9";
+          } else {
+            tR = "/";
+          }
+        }
+      }
+    } else {
+      tR = "/";
+    }
+
     measurements[7] = `6${pad((precipMm % 1000).toString(), 3)}${tR}`;
   }
 
