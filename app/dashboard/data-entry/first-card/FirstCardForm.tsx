@@ -296,6 +296,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                   getFieldError={getFieldError}
                   prevTab={prevTab}
                   nextTab={nextTab}
+                  handleTabChange={handleTabChange}
                   cardClassName={tabStyles.weather.card}
                 />
               </TabsContent>

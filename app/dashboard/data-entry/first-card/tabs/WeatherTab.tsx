@@ -5,16 +5,17 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Cloud, ChevronLeft, ChevronRight , AlertCircle} from "lucide-react";
+import { Cloud, ChevronLeft, ChevronRight, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Props = {
   formik: any;
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleNumericInput: (e: React.ChangeEvent<HTMLInputElement>) => void;
-   getFieldError: (fieldName: string) => string | null;
+  getFieldError: (fieldName: string) => string | null;
   prevTab: () => void;
   nextTab: () => void;
+  handleTabChange: (tabName: string) => void;
   cardClassName: string;
 };
 
@@ -25,6 +26,7 @@ const WeatherTab: React.FC<Props> = ({
   getFieldError,
   prevTab,
   nextTab,
+  handleTabChange,
   cardClassName,
 }) => {
   return (
@@ -49,21 +51,20 @@ const WeatherTab: React.FC<Props> = ({
               "border-slate-600 transition-all focus:border-cyan-500 focus:ring-cyan-500/30",
               {
                 "border-red-500":
-                  formik.touched.pastWeatherW1 &&
-                  formik.errors.pastWeatherW1,
-              }
+                  formik.touched.pastWeatherW1 && formik.errors.pastWeatherW1,
+              },
             )}
           />
           {(() => {
-  const error = getFieldError("pastWeatherW1");
-  if (!error) return null;
-  return (
-    <div className="text-red-500 text-sm mt-1 flex items-start">
-      <AlertCircle className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
-      <span>{error}</span>
-    </div>
-  );
-})()}
+            const error = getFieldError("pastWeatherW1");
+            if (!error) return null;
+            return (
+              <div className="text-red-500 text-sm mt-1 flex items-start">
+                <AlertCircle className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
+                <span>{error}</span>
+              </div>
+            );
+          })()}
           <p className="text-xs text-muted-foreground mt-1">
             Weather code for the first part of the observation period
           </p>
@@ -82,21 +83,20 @@ const WeatherTab: React.FC<Props> = ({
               "border-slate-600 transition-all focus:border-cyan-500 focus:ring-cyan-500/30",
               {
                 "border-red-500":
-                  formik.touched.pastWeatherW2 &&
-                  formik.errors.pastWeatherW2,
-              }
+                  formik.touched.pastWeatherW2 && formik.errors.pastWeatherW2,
+              },
             )}
           />
           {(() => {
-  const error = getFieldError("pastWeatherW2");
-  if (!error) return null;
-  return (
-    <div className="text-red-500 text-sm mt-1 flex items-start">
-      <AlertCircle className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
-      <span>{error}</span>
-    </div>
-  );
-})()}
+            const error = getFieldError("pastWeatherW2");
+            if (!error) return null;
+            return (
+              <div className="text-red-500 text-sm mt-1 flex items-start">
+                <AlertCircle className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
+                <span>{error}</span>
+              </div>
+            );
+          })()}
           <p className="text-xs text-muted-foreground mt-1">
             Weather code for the second part of the observation period
           </p>
@@ -118,15 +118,15 @@ const WeatherTab: React.FC<Props> = ({
             })}
           />
           {(() => {
-  const error = getFieldError("presentWeatherWW");
-  if (!error) return null;
-  return (
-    <div className="text-red-500 text-sm mt-1 flex items-start">
-      <AlertCircle className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
-      <span>{error}</span>
-    </div>
-  );
-})()}
+            const error = getFieldError("presentWeatherWW");
+            if (!error) return null;
+            return (
+              <div className="text-red-500 text-sm mt-1 flex items-start">
+                <AlertCircle className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
+                <span>{error}</span>
+              </div>
+            );
+          })()}
           <p className="text-xs text-muted-foreground mt-1">
             Current weather conditions at time of observation
           </p>
@@ -139,7 +139,7 @@ const WeatherTab: React.FC<Props> = ({
         </Button>
         <Button
           type="button"
-          onClick={nextTab}
+          onClick={() => handleTabChange("summary")}
           className="bg-blue-600 hover:bg-blue-700"
         >
           Next <ChevronRight className="ml-2 h-4 w-4" />
