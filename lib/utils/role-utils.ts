@@ -43,7 +43,7 @@ export const canEditRecord = (
     const recordUserId = record.ObservingTime?.userId;
 
     if (role === "root_admin") {
-      return daysDifference <= 365;
+      return true; // No time limit for root_admin
     }
 
     if (role === "super_admin") {

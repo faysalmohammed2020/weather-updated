@@ -146,6 +146,7 @@ const FirstCardTable = forwardRef<FirstCardTableHandle, FirstCardTableProps>(
 
       switch (user.role) {
         case "root_admin":
+          return true; // No time limit for root_admin
         case "super_admin":
           return diffDays <= 365;
         case "station_admin":
