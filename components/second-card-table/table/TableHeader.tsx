@@ -50,7 +50,7 @@ const TableHeader = () => (
         rowSpan={2}
         className="border border-slate-300 bg-gradient-to-b from-emerald-50 to-emerald-100 p-1 text-emerald-800"
       >
-        RAINFALL
+        RAINFALLs
       </th>
       <th
         colSpan={4}
