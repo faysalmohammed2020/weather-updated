@@ -53,6 +53,12 @@ async function main() {
   // Demo users
   const demoUsers = [
     {
+      name: "Root Admin",
+      email: "rootadmin@example.com",
+      role: "root_admin",
+      password: "rootadmin123",
+    },
+    {
       name: "Super Admin",
       email: "superadmin@example.com",
       role: "super_admin",
