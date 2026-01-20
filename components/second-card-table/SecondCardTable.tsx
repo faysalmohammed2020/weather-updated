@@ -82,6 +82,7 @@ const initialFormValues: WeatherFormValues = {
   observerInitial: "",
   rainfallTimeStart: "",
   rainfallTimeEnd: "",
+  rainfallTimeSlots: [],
 };
 
 const mapObservationToForm = (
@@ -123,6 +124,8 @@ const mapObservationToForm = (
   observerInitial: observation?.observerInitial || "",
   rainfallTimeStart: observation?.rainfallTimeStart || "",
   rainfallTimeEnd: observation?.rainfallTimeEnd || "",
+  rainfallTimeSlots: observation?.rainfallTimeSlots || [],
+  rainfallType: observation?.rainfallType || undefined,
 });
 
 const canEditObservation = (record: WeatherObservationRecord, user: any) => {

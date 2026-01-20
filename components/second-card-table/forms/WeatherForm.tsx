@@ -44,6 +44,11 @@ export interface WeatherFormValues {
   rainfallTimeStart: string;
   rainfallTimeEnd: string;
   rainfallType?: string;
+  rainfallTimeSlots: Array<{
+    id: string;
+    timeStart: string;
+    timeEnd: string;
+  }>;
 }
 
 interface WeatherFormProps {
@@ -54,7 +59,7 @@ interface WeatherFormProps {
 
 const WeatherForm = ({ onSubmit, onCancel, isSaving }: WeatherFormProps) => (
   <form onSubmit={onSubmit}>
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4 max-h-[65vh] overflow-y-auto pr-2">
+    <div className="grid grid-cols-1 gap-4 py-4 max-h-[65vh] overflow-y-auto pr-2">
       <CloudFields />
       <SignificantCloudFields />
       <RainFields />

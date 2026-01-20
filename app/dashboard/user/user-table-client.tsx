@@ -12,6 +12,7 @@ import React, {
   useEffect,
   useCallback,
   useMemo,
+  startTransition,
 } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -131,6 +132,7 @@ export const UserTableClient = ({
   const [stations, setStations] = useState<Station[]>(initialStations);
   const [pageIndex, setPageIndex] = useState(initialPage);
   const [isLoading, setIsLoading] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   const { isOperating, createUser, updateUser, deleteUser, impersonateUser } =
     useUserOperations();
@@ -241,29 +243,32 @@ export const UserTableClient = ({
   // ============================================================================
   const updatePageInUrl = useCallback(
     (newPage: number) => {
-      const params = new URLSearchParams(searchParams);
-      if (newPage === 0) {
-        params.delete("page");
-      } else {
-        params.set("page", newPage.toString());
-      }
+      // Use startTransition to prevent blocking render
+      startTransition(() => {
+        const params = new URLSearchParams(searchParams);
+        if (newPage === 0) {
+          params.delete("page");
+        } else {
+          params.set("page", newPage.toString());
+        }
 
-      if (debouncedSearch) params.set("search", debouncedSearch);
-      else params.delete("search");
+        if (debouncedSearch) params.set("search", debouncedSearch);
+        else params.delete("search");
 
-      if (roleFilter !== "all") params.set("role", roleFilter);
-      else params.delete("role");
+        if (roleFilter !== "all") params.set("role", roleFilter);
+        else params.delete("role");
 
-      if (stationFilter !== "all") params.set("station", stationFilter);
-      else params.delete("station");
+        if (stationFilter !== "all") params.set("station", stationFilter);
+        else params.delete("station");
 
-      if (dateFromFilter) params.set("dateFrom", dateFromFilter);
-      else params.delete("dateFrom");
+        if (dateFromFilter) params.set("dateFrom", dateFromFilter);
+        else params.delete("dateFrom");
 
-      if (dateToFilter) params.set("dateTo", dateToFilter);
-      else params.delete("dateTo");
+        if (dateToFilter) params.set("dateTo", dateToFilter);
+        else params.delete("dateTo");
 
-      router.push(`/dashboard/user?${params.toString()}`, { scroll: false });
+        router.push(`/dashboard/user?${params.toString()}`, { scroll: false });
+      });
     },
     [
       router,
@@ -294,30 +299,42 @@ export const UserTableClient = ({
 
   const resetPagination = useCallback(() => {
     setPageIndex(0);
-    updatePageInUrl(0);
-  }, [updatePageInUrl]);
+    if (isMounted) {
+      updatePageInUrl(0);
+    }
+  }, [updatePageInUrl, isMounted]);
+
+  // Set mounted flag after component mounts
+  useEffect(() => {
+    setIsMounted(true);
+    return () => setIsMounted(false);
+  }, []);
 
   useEffect(() => {
-    setPageIndex((prev) => {
-      if (prev !== 0) {
-        updatePageInUrl(0);
-        return 0;
-      }
-      updatePageInUrl(0);
-      return prev;
-    });
-  }, [debouncedSearch, updatePageInUrl]);
+    // Only update URL if component is mounted
+    if (isMounted) {
+      setPageIndex((prev) => {
+        if (prev !== 0) {
+          updatePageInUrl(0);
+          return 0;
+        }
+        return prev;
+      });
+    }
+  }, [debouncedSearch, updatePageInUrl, isMounted]);
 
   useEffect(() => {
-    setPageIndex((prev) => {
-      if (prev !== 0) {
-        updatePageInUrl(0);
-        return 0;
-      }
-      updatePageInUrl(0);
-      return prev;
-    });
-  }, [roleFilter, stationFilter, dateFromFilter, dateToFilter, updatePageInUrl]);
+    // Only update URL if component is mounted
+    if (isMounted) {
+      setPageIndex((prev) => {
+        if (prev !== 0) {
+          updatePageInUrl(0);
+          return 0;
+        }
+        return prev;
+      });
+    }
+  }, [roleFilter, stationFilter, dateFromFilter, dateToFilter, updatePageInUrl, isMounted]);
 
   // ============================================================================
   // DATA REFRESH FUNCTION (SERVER-SIDE SEARCH INCLUDED)
@@ -843,6 +860,7 @@ export const UserTableClient = ({
           loadingDistricts={canLoadingLocationData.loadingDistricts}
           loadingUpazilas={canLoadingLocationData.loadingUpazilas}
           canShowRoleSelector={isPrivilegedAdmin}
+          currentUserRole={session?.user?.role as UserRole | null}
         />
 
         {isPrivilegedAdmin && (

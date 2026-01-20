@@ -65,6 +65,7 @@ interface CreateEditUserDialogProps {
   loadingDistricts?: boolean;
   loadingUpazilas?: boolean;
   canShowRoleSelector: boolean;
+  currentUserRole: UserRole | null;
   createTrigger?: React.ReactNode;
 }
 
@@ -103,12 +104,17 @@ const RoleField = memo(
     value,
     onChange,
     visible,
+    currentUserRole,
   }: {
     value: UserRole | null;
     onChange: (value: UserRole) => void;
     visible: boolean;
+    currentUserRole: UserRole | null;
   }) => {
     if (!visible) return null;
+
+    // Hide Super Admin role for Super Admin users
+    const shouldHideSuperAdmin = currentUserRole === USER_ROLES.SUPER_ADMIN;
 
     return (
       <div className="flex flex-col gap-2">
@@ -120,7 +126,9 @@ const RoleField = memo(
             <SelectValue placeholder="Select Role" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={USER_ROLES.SUPER_ADMIN}>Super Admin</SelectItem>
+            {!shouldHideSuperAdmin && (
+              <SelectItem value={USER_ROLES.SUPER_ADMIN}>Super Admin</SelectItem>
+            )}
             <SelectItem value={USER_ROLES.STATION_ADMIN}>
               Station Admin
             </SelectItem>
@@ -411,6 +419,7 @@ export const CreateEditUserDialog = memo((props: CreateEditUserDialogProps) => {
     loadingDistricts,
     loadingUpazilas,
     canShowRoleSelector,
+    currentUserRole,
     createTrigger,
   } = props;
 
@@ -482,6 +491,7 @@ export const CreateEditUserDialog = memo((props: CreateEditUserDialogProps) => {
               );
             }}
             visible={canShowRoleSelector}
+            currentUserRole={currentUserRole}
           />
 
           <EmailPasswordFields
