@@ -307,6 +307,7 @@ export async function PUT(req: Request) {
         const recordStationId = record.ObservingTime.stationId;
         const recordUserId = record.ObservingTime.userId;
 
+        if (role === "root_admin") return daysDifference <= 365;
         if (role === "super_admin") return daysDifference <= 365;
         if (role === "station_admin") {
           return daysDifference <= 30 && userStationId === recordStationId;

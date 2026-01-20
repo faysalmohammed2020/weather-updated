@@ -279,7 +279,7 @@ export async function PUT(req: Request) {
     const userStationId = session.user.station?.id;
     const recordStationId = existingRecord.ObservingTime?.stationId;
 
-    if (session.user.role !== "super_admin" && userStationId !== recordStationId) {
+    if (session.user.role !== "super_admin" && session.user.role !== "root_admin" && userStationId !== recordStationId) {
       return NextResponse.json(
         { success: false, error: "Permission denied" },
         { status: 403 }

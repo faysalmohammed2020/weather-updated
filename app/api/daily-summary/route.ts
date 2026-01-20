@@ -313,6 +313,7 @@ export async function PUT(req: Request) {
 
     if (
       session.user.role !== "super_admin" &&
+      session.user.role !== "root_admin" &&
       userStationId !== recordStationId
     ) {
       return NextResponse.json(
