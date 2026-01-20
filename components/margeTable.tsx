@@ -354,7 +354,7 @@ const MargeTable = forwardRef(
                 .map((slot, index) => `Slot ${index + 1}: ${slot.timeStart}`)
                 .join(", ")
             : weatherObs?.rainfallTimeStart
-              ? moment(weatherObs.rainfallTimeStart).format(
+              ? moment.utc(weatherObs.rainfallTimeStart).format(
                   "MMMM Do YYYY, h:mm",
                 )
               : "--",
@@ -364,7 +364,7 @@ const MargeTable = forwardRef(
                 .map((slot, index) => `Slot ${index + 1}: ${slot.timeEnd}`)
                 .join(", ")
             : weatherObs?.rainfallTimeEnd
-              ? moment(weatherObs.rainfallTimeEnd).format("MMMM Do YYYY, h:mm")
+              ? moment.utc(weatherObs.rainfallTimeEnd).format("MMMM Do YYYY, h:mm")
               : "--",
           weatherObs?.rainfallSincePrevious || "--",
           weatherObs?.rainfallDuringPrevious || "--",
@@ -502,7 +502,7 @@ ${"=".repeat(60)}
                 .map((slot, index) => `Slot ${index + 1}: ${slot.timeStart}`)
                 .join(", ")
             : weatherObs?.rainfallTimeStart
-              ? moment(weatherObs.rainfallTimeStart).format(
+              ? moment.utc(weatherObs.rainfallTimeStart).format(
                   "MMMM Do YYYY, h:mm",
                 )
               : "--"
@@ -514,7 +514,7 @@ ${"=".repeat(60)}
                 .map((slot, index) => `Slot ${index + 1}: ${slot.timeEnd}`)
                 .join(", ")
             : weatherObs?.rainfallTimeEnd
-              ? moment(weatherObs.rainfallTimeEnd).format("MMMM Do YYYY, h:mm")
+              ? moment.utc(weatherObs.rainfallTimeEnd).format("MMMM Do YYYY, h:mm")
               : "--"
         }\n`;
         txtContent += `Rainfall Since Prev${" ".repeat(3)} ---> ${weatherObs?.rainfallSincePrevious || "--"}\n`;
@@ -1667,7 +1667,7 @@ ${"=".repeat(60)}`;
                             >
                               {weatherObs?.rainfallTimeSlots &&
                               weatherObs.rainfallTimeSlots.length > 0
-                                ? `${weatherObs?.rainfallTimeStart ? moment(weatherObs.rainfallTimeStart).format("MMMM Do YYYY") : ""} - ` +
+                                ? `${weatherObs?.rainfallTimeStart ? moment.utc(weatherObs.rainfallTimeStart).format("MMMM Do YYYY") : ""} - ` +
                                   weatherObs.rainfallTimeSlots
                                     .map(
                                       (slot, index) =>
@@ -1675,7 +1675,7 @@ ${"=".repeat(60)}`;
                                     )
                                     .join(", ")
                                 : weatherObs?.rainfallTimeStart
-                                  ? moment(weatherObs.rainfallTimeStart).format(
+                                  ? moment.utc(weatherObs.rainfallTimeStart).format(
                                       "MMMM Do YYYY, h:mm",
                                     )
                                   : "--"}
@@ -1686,7 +1686,7 @@ ${"=".repeat(60)}`;
                             >
                               {weatherObs?.rainfallTimeSlots &&
                               weatherObs.rainfallTimeSlots.length > 0
-                                ? `${weatherObs?.rainfallTimeEnd ? moment(weatherObs.rainfallTimeEnd).format("MMMM Do YYYY") : ""} - ` +
+                                ? `${weatherObs?.rainfallTimeEnd ? moment.utc(weatherObs.rainfallTimeEnd).format("MMMM Do YYYY") : ""} - ` +
                                   weatherObs.rainfallTimeSlots
                                     .map(
                                       (slot, index) =>
@@ -1694,7 +1694,7 @@ ${"=".repeat(60)}`;
                                     )
                                     .join(", ")
                                 : weatherObs?.rainfallTimeEnd
-                                  ? moment(weatherObs.rainfallTimeEnd).format(
+                                  ? moment.utc(weatherObs.rainfallTimeEnd).format(
                                       "MMMM Do YYYY, h:mm",
                                     )
                                   : "--"}
