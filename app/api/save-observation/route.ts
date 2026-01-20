@@ -359,7 +359,7 @@ export async function GET(request: Request) {
 
     const stationId = stationIdParam || session.user.station?.id;
 
-    if (!stationId && session.user.role !== "super_admin") {
+    if (!stationId && session.user.role !== "super_admin" && session.user.role !== "root_admin") {
       return NextResponse.json(
         { success: false, error: "Station ID is required" },
         { status: 400 }
@@ -379,7 +379,7 @@ export async function GET(request: Request) {
     const startTime = toUtcStart(startISO);
     const endTime = toUtcEnd(endISO);
 
-    const superFilter = session.user.role === "super_admin";
+    const superFilter = session.user.role === "super_admin" || session.user.role === "root_admin";
 
     const entries = await prisma.observingTime.findMany({
       where: {
@@ -459,6 +459,7 @@ export async function PUT(request: Request) {
         const recordStationId = record.ObservingTime?.stationId;
         const recordUserId = record.ObservingTime?.userId;
 
+        if (role === "root_admin") return daysDifference <= 365;
         if (role === "super_admin") return daysDifference <= 365;
         if (role === "station_admin") {
           return daysDifference <= 30 && userStationId === recordStationId;
@@ -499,7 +500,8 @@ export async function PUT(request: Request) {
       const isOwner = session.user.id === existing.ObservingTime?.userId;
 
       let canEdit = false;
-      if (userRole === "super_admin") canEdit = true;
+      if (userRole === "root_admin") canEdit = true;
+      else if (userRole === "super_admin") canEdit = true;
       else if (
         userRole === "station_admin" &&
         userStationId === existing.ObservingTime?.station?.id
