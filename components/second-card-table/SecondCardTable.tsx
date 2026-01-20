@@ -140,6 +140,7 @@ const canEditObservation = (record: WeatherObservationRecord, user: any) => {
   const userStationId = user.station?.id;
   const recordStationId = record.station?.id;
 
+  if (role === "root_admin") return diffDays <= 365;
   if (role === "super_admin") return diffDays <= 365;
   if (role === "station_admin")
     return diffDays <= 30 && userStationId === recordStationId;

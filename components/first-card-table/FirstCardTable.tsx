@@ -145,6 +145,7 @@ const FirstCardTable = forwardRef<FirstCardTableHandle, FirstCardTableProps>(
       const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
       switch (user.role) {
+        case "root_admin":
         case "super_admin":
           return diffDays <= 365;
         case "station_admin":

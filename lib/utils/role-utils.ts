@@ -42,6 +42,10 @@ export const canEditRecord = (
     const recordStationId = record.ObservingTime?.stationId;
     const recordUserId = record.ObservingTime?.userId;
 
+    if (role === "root_admin") {
+      return daysDifference <= 365;
+    }
+
     if (role === "super_admin") {
       return daysDifference <= 365;
     }
