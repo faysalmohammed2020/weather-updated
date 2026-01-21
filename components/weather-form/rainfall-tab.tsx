@@ -487,7 +487,7 @@ export default function RainfallTab() {
     // Add the Since Previous Observation input value (current 00 UTC)
     total += currentSincePrevious;
 
-    return String(total);
+    return String(total).padStart(3, '0');
   };
 
   // Auto-fill calculated values
