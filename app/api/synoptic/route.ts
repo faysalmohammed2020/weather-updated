@@ -46,7 +46,7 @@ export async function GET() {
     ) {
       return NextResponse.json(
         { error: "First or second card data not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -56,7 +56,7 @@ export async function GET() {
     // Get the observation date from the most recent record
     const dateObj = new Date(observingTime.utcTime);
     const previousObservationTime = new Date(
-      dateObj.getTime() - 3 * 60 * 60 * 1000
+      dateObj.getTime() - 3 * 60 * 60 * 1000,
     );
     const previousStart = new Date(
       Date.UTC(
@@ -66,8 +66,8 @@ export async function GET() {
         previousObservationTime.getUTCHours(),
         0,
         0,
-        0
-      )
+        0,
+      ),
     );
     const previousEnd = new Date(previousStart.getTime() + 3 * 60 * 60 * 1000);
 
@@ -94,7 +94,7 @@ export async function GET() {
     // Helper functions
     const pad = (
       num: number | string | null | undefined,
-      length: number
+      length: number,
     ): string => {
       return String(num ?? 0).padStart(length, "0");
     };
@@ -252,7 +252,7 @@ export async function GET() {
 
     const stationPressure = formatPressure(firstCard.stationLevelPressure);
     const seaLevelPressure = formatPressure(
-      firstCard.correctedSeaLevelPressure
+      firstCard.correctedSeaLevelPressure,
     );
 
     measurements[6] = `3${stationPressure}/4${seaLevelPressure}`;
@@ -270,14 +270,13 @@ export async function GET() {
       return Number.isFinite(parsed) ? parsed : null;
     };
 
-    const rainFallRaw =
-      parseRainValue(weatherObs.rainfallDuringPrevious) ?? 0;
+    const rainFallRaw = parseRainValue(weatherObs.rainfallDuringPrevious) ?? 0;
     const rainFallMm = Math.floor(rainFallRaw / 10);
     const rainFallPadded = pad((rainFallMm % 1000).toString(), 3);
 
     const buildSlotRanges = (
       obs: typeof weatherObs | null,
-      obsTime: Date
+      obsTime: Date,
     ): Array<{ start: Date; end: Date }> => {
       if (!obs) return [];
       const ranges: Array<{ start: Date; end: Date }> = [];
@@ -299,16 +298,16 @@ export async function GET() {
           slotDate.setUTCDate(slotDate.getUTCDate() - 1);
         }
 
-        (obs.rainfallTimeSlots as Array<{
-          id: string;
-          timeStart: string;
-          timeEnd: string;
-        }>)
+        (
+          obs.rainfallTimeSlots as Array<{
+            id: string;
+            timeStart: string;
+            timeEnd: string;
+          }>
+        )
           .filter((slot) => slot.timeStart && slot.timeEnd)
           .forEach((slot) => {
-            const [startHour, startMin] = slot.timeStart
-              .split(":")
-              .map(Number);
+            const [startHour, startMin] = slot.timeStart.split(":").map(Number);
             const [endHour, endMin] = slot.timeEnd.split(":").map(Number);
             if (
               Number.isNaN(startHour) ||
@@ -324,8 +323,8 @@ export async function GET() {
                 slotDate.getUTCMonth(),
                 slotDate.getUTCDate(),
                 startHour,
-                startMin
-              )
+                startMin,
+              ),
             );
             const end = new Date(
               Date.UTC(
@@ -333,8 +332,8 @@ export async function GET() {
                 slotDate.getUTCMonth(),
                 slotDate.getUTCDate(),
                 endHour,
-                endMin
-              )
+                endMin,
+              ),
             );
             pushRange(start, end);
           });
@@ -347,12 +346,10 @@ export async function GET() {
       return ranges;
     };
 
-    const detectIntermittent = (
-      slots: Array<{ start: Date; end: Date }>
-    ) => {
+    const detectIntermittent = (slots: Array<{ start: Date; end: Date }>) => {
       if (slots.length <= 1) return false;
       const sorted = [...slots].sort(
-        (a, b) => a.start.getTime() - b.start.getTime()
+        (a, b) => a.start.getTime() - b.start.getTime(),
       );
       for (let i = 0; i < sorted.length - 1; i++) {
         const gapMinutes =
@@ -366,10 +363,10 @@ export async function GET() {
     const currentSlots = buildSlotRanges(weatherObs, observationTime);
     const previousSlots = buildSlotRanges(
       previousWeatherObs,
-      previousObservationTime
+      previousObservationTime,
     );
     const combinedSlots = [...previousSlots, ...currentSlots].sort(
-      (a, b) => a.start.getTime() - b.start.getTime()
+      (a, b) => a.start.getTime() - b.start.getTime(),
     );
 
     const rainStart = combinedSlots.length ? combinedSlots[0].start : null;
@@ -517,7 +514,7 @@ export async function GET() {
     const pushCloudSegment = (
       amount: string | undefined,
       form: string | undefined,
-      height: string | undefined
+      height: string | undefined,
     ) => {
       if (amount || form || height) {
         const a = amount || "0";
@@ -530,22 +527,22 @@ export async function GET() {
     pushCloudSegment(
       weatherObs.layer1Amount ?? undefined,
       weatherObs.layer1Form ?? undefined,
-      weatherObs.layer1Height ?? undefined
+      weatherObs.layer1Height ?? undefined,
     );
     pushCloudSegment(
       weatherObs.layer2Amount ?? undefined,
       weatherObs.layer2Form ?? undefined,
-      weatherObs.layer2Height ?? undefined
+      weatherObs.layer2Height ?? undefined,
     );
     pushCloudSegment(
       weatherObs.layer3Amount ?? undefined,
       weatherObs.layer3Form ?? undefined,
-      weatherObs.layer3Height ?? undefined
+      weatherObs.layer3Height ?? undefined,
     );
     pushCloudSegment(
       weatherObs.layer4Amount ?? undefined,
       weatherObs.layer4Form ?? undefined,
-      weatherObs.layer4Height ?? undefined
+      weatherObs.layer4Height ?? undefined,
     );
 
     measurements[18] = cloudSegments.join(" / ");
@@ -565,8 +562,13 @@ export async function GET() {
     }
 
     // 21. 91fqfqfq (39-43) - Relative humidity
-    const humidity = firstCard.relativeHumidity || "0";
-    measurements[20] = `91${pad(humidity, 3)}`;
+    const fqfqfq = firstCard.squallForce || "0";
+    const fqfqfqPadded = pad(Number(fqfqfq), 3);
+    if (sqD && sqT && sqD !== "0" && sqT !== "0") {
+      measurements[20] = `91${fqfqfqPadded}`;
+    } else {
+      measurements[20] = "";
+    }
 
     // Create the form values
     const formValues = {
@@ -584,7 +586,7 @@ export async function GET() {
     console.error("Error generating synoptic code:", error);
     return NextResponse.json(
       { error: "Failed to generate synoptic code" },
-      { status: 500 }
+      { status: 500 },
     );
   } finally {
     await prisma.$disconnect();
