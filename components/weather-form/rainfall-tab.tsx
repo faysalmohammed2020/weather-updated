@@ -479,26 +479,22 @@ export default function RainfallTab() {
       `${prevUTC}T21:00:00.000Z`,
     ];
 
-    let total = 0;
+    // Apply the rainfall code logic - convert to decimal, sum, round, then convert back to code
+    let totalDecimal = 0;
     timesToSum.forEach((time) => {
-      total += getRainfallValue(time);
+      const value = getRainfallValue(time);
+      totalDecimal += value / 10; // Convert code to decimal (e.g., 0120 → 12.0)
     });
 
     // Add the Since Previous Observation input value (current 00 UTC)
-    total += currentSincePrevious;
+    totalDecimal += currentSincePrevious / 10;
 
-    // Apply the rainfall code logic
-    const totalStr = String(total).padStart(4, '0');
-    const lastDigit = parseInt(totalStr[3], 10);
+    // Round to nearest integer
+    const roundedTotal = Math.round(totalDecimal);
     
-    if (lastDigit >= 5) {
-      // Subtract 1 from the last digit
-      const newValue = total - 1;
-      return String(newValue).padStart(3, '0');
-    } else {
-      // Keep the same value
-      return String(total).padStart(3, '0');
-    }
+    // Convert back to 4-digit code and take first 3 digits
+    const totalStr = String(roundedTotal).padStart(4, '0');
+    return totalStr.substring(0, 3);
   };
 
   // Auto-fill calculated values
