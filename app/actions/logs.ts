@@ -31,48 +31,46 @@ export async function getLogs({
         status: 401,
       };
     }
+
     let whereCondition: any;
 
     if (session.user.role === "root_admin") {
      
       whereCondition = {};
     } else if (session.user.role === "super_admin") {
-    
+     
       whereCondition = {
-        NOT: [{ role: "root_admin" }],
+        NOT: { role: "root_admin" },
       };
     } else if (session.user.role === "station_admin") {
-     
+    
+      const stationPk = session.user.station?.id;
+      const stationCode = session.user.station?.stationId;
+
       whereCondition = {
         OR: [
           {
             AND: [
               { role: "observer" },
               {
-                actor: {
-                  stationId: session.user.station?.id,
-                },
+                OR: [
+                  stationPk ? { targetUser: { stationId: stationPk } } : undefined,
+                  stationCode ? { targetUser: { stationId: stationCode } } : undefined,
+                ].filter(Boolean),
               },
             ],
           },
           {
-            AND: [
-              { actionText: "User Impersonation Started" },
-              {
-                actor: {
-                  id: session.user.id, 
-                },
-              },
-            ],
+            actor: { id: session.user.id },
           },
-         
           {
             AND: [
-              { actionText: "User Impersonation Stopped" },
+              { role: "observer" },
               {
-                actor: {
-                  id: session.user.id, 
-                },
+                OR: [
+                  stationPk ? { actor: { stationId: stationPk } } : undefined,
+                  stationCode ? { actor: { stationId: stationCode } } : undefined,
+                ].filter(Boolean),
               },
             ],
           },
@@ -83,8 +81,6 @@ export async function getLogs({
         AND: [{ role: "observer" }],
       };
     }
-
-    // Apply search filters
     const searchFilters: any[] = [];
 
     if (search && search.trim()) {
@@ -126,7 +122,6 @@ export async function getLogs({
       };
     }
 
-    // Get logs with pagination
     const [logs, total] = await Promise.all([
       prisma.logs.findMany({
         where: whereCondition,
