@@ -249,8 +249,6 @@ export function SynopticCode() {
           throw new Error(generatedValues.error);
         }
 
-        console.log("generated synoptic", generatedValues);
-
         const now = new Date();
         const todayUtcStr = `${now.getUTCFullYear()}-${String(
           now.getUTCMonth() + 1

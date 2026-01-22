@@ -295,8 +295,6 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
         ...editFormData,
       };
   
-      console.log("Sending payload:", payload); // Debug log
-  
       const response = await fetch("/api/first-card-data", {
         method: "PUT",
         headers: {
@@ -310,10 +308,6 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
         console.error("Error response:", errorData); // Debug log
         throw new Error(errorData.message || "Failed to update record");
       }
-  
-      const result = await response.json();
-      console.log("Update successful:", result); // Debug log
-  
       // Update the local state
       setFlattenedData((prevData) =>
         prevData.map((item) =>

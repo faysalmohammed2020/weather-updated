@@ -382,7 +382,6 @@ export function generateSynopticCode(): SynopticFormValues {
 
   // 11. 2SnTnTnTn/InInInIn (62-66) - Min temperature / ground state
   const minTemp = Number.parseFloat(firstCard.maxMinTempAsRead || "0");
-  console.log("minTemp", minTemp);
   let sN, x;
   if (minTemp >= 0) {
     sN = 0;

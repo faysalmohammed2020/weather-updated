@@ -36,8 +36,6 @@ export async function POST(request: Request) {
       stationId: string
     } = await request.json()
 
-    console.log("Received submission data:", JSON.stringify(data, null, 2))
-
     // Prepare data for database insertion
     const dbData = {
       // Station Information
@@ -90,14 +88,10 @@ export async function POST(request: Request) {
       stationId: data.stationId,
     }
 
-    console.log("Processed data for database:", JSON.stringify(dbData, null, 2))
-
     // Create the database entry
     const result = await prisma.agroclimatologicalData.create({
       data: dbData,
     })
-
-    console.log("Database insertion successful:", result)
 
     return NextResponse.json({
       success: true,
