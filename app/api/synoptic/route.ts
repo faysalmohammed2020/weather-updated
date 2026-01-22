@@ -38,8 +38,6 @@ export async function GET() {
       },
     });
 
-    console.log(observingTime);
-
     if (
       !observingTime?.MeteorologicalEntry.length ||
       !observingTime?.WeatherObservation.length

@@ -43,7 +43,6 @@ function verifyBetterAuthScryptColon(plain: string, stored: string) {
           });
 
           if (crypto.timingSafeEqual(derived, expected)) {
-            console.log("✅ scrypt params matched:", { ln, r, p });
             return true;
           }
         } catch {
@@ -78,10 +77,7 @@ export const authOptions: NextAuthOptions = {
 
       async authorize(credentials) {
         try {
-          console.log("CREDENTIALS IN:", credentials);
-
           if (!credentials?.email || !credentials?.password) {
-            console.log("❌ missing email/password");
             return null;
           }
 
@@ -95,20 +91,8 @@ export const authOptions: NextAuthOptions = {
           });
 
           if (!user) {
-            console.log("❌ user not found:", email);
             return null;
           }
-
-          console.log(
-            "✅ user found:",
-            user.id,
-            "role:",
-            user.role,
-            "stationId(id):",
-            user.stationId
-          );
-          console.log("✅ user station code:", user.Station?.stationId);
-
           // 2) Account lookup: pick latest password account, prefer credential provider
           const account =
             (await prisma.accounts.findFirst({
@@ -127,20 +111,8 @@ export const authOptions: NextAuthOptions = {
             }));
 
           if (!account?.password) {
-            console.log("❌ no password account found for user:", user.id);
             return null;
           }
-
-          console.log(
-            "✅ account found:",
-            account.id,
-            "providerId:",
-            account.providerId
-          );
-          console.log(
-            "✅ stored password prefix:",
-            account.password.slice(0, 10)
-          );
 
           // 3) Password compare (bcrypt OR BetterAuth scrypt formats)
           let ok = false;
@@ -170,7 +142,6 @@ export const authOptions: NextAuthOptions = {
           }
 
           if (!ok) {
-            console.log("❌ password mismatch for user:", user.id);
             return null;
           }
 
@@ -181,10 +152,6 @@ export const authOptions: NextAuthOptions = {
               where: { id: account.id },
               data: { password: newHash, providerId: "credentials" },
             });
-            console.log(
-              "✅ password upgraded to bcrypt for account:",
-              account.id
-            );
           }
 
           // 4) Role / Station code checks (safer)
@@ -195,16 +162,10 @@ export const authOptions: NextAuthOptions = {
 
           // role null হলে observer ধরে allow করো
           if (role && (user.role ?? "observer") !== role) {
-            console.log("❌ role mismatch:", role, user.role);
             return null;
           }
 
           if (stationCode && user.Station?.stationId !== stationCode) {
-            console.log(
-              "❌ station code mismatch:",
-              stationCode,
-              user.Station?.stationId
-            );
             return null;
           }
 
@@ -215,16 +176,9 @@ export const authOptions: NextAuthOptions = {
               where: { id: account.id },
               data: { password: newHash, providerId: "credentials" },
             });
-            console.log(
-              "✅ password upgraded to bcrypt for account:",
-              account.id
-            );
           }
 
           // 6) Success user object
-          console.log("✅ authorize success for:", user.id);
-
-          // ✅ UPDATED: lat/lon/elevation added here
           const stationSafe = user.Station
             ? {
                 id: user.Station.id,
@@ -270,7 +224,6 @@ export const authOptions: NextAuthOptions = {
         token.district = (user as any).district;
         token.upazila = (user as any).upazila;
 
-        // ✅ IMPORTANT
         token.station = (user as any).station;
       }
       token.isImpersonating = (token as any).isImpersonating ?? false;

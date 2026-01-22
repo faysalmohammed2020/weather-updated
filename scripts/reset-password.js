@@ -28,8 +28,6 @@ async function main() {
       updatedAt: new Date(),
     },
   });
-
-  console.log("✅ Password reset to bcrypt for:", email);
 }
 
 main()
