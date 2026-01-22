@@ -422,9 +422,6 @@ export default function RainfallTab() {
     value.replace(/\D/g, "").slice(0, 4);
 
   // ---------- Rainfall Calculation Functions ----------
-  const parseSincePreviousInput = () =>
-    Number.parseFloat(rainfall["since-previous"] || "0") || 0;
-
   const parseRainfallCodeToMm = (value?: string | null): number => {
     if (!value) return 0;
     const trimmed = value.trim();
@@ -434,6 +431,9 @@ export default function RainfallTab() {
     if (trimmed.includes(".")) return numeric;
     return trimmed.length >= 4 ? numeric / 10 : numeric;
   };
+
+  const parseSincePreviousInput = () =>
+    parseRainfallCodeToMm(rainfall["since-previous"]);
 
   const formatToFourDigitCode = (mm: number): string => {
     const tenths = Math.round(mm * 10);
