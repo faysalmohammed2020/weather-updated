@@ -479,15 +479,15 @@ export default function RainfallTab() {
       `${prevUTC}T21:00:00.000Z`,
     ];
 
-    // Apply the rainfall code logic - convert to decimal, sum, round, then convert back to code
+    // Apply the rainfall code logic - convert codes to decimal, sum with decimal since-previous, round, then convert back to code
     let totalDecimal = 0;
     timesToSum.forEach((time) => {
       const value = getRainfallValue(time);
       totalDecimal += value / 10; // Convert code to decimal (e.g., 0120 → 12.0)
     });
 
-    // Add the Since Previous Observation input value (current 00 UTC)
-    totalDecimal += currentSincePrevious / 10;
+    // Add the Since Previous Observation input value (current 00 UTC) - this is already in mm/decimal
+    totalDecimal += currentSincePrevious;
 
     // Round to nearest integer
     const roundedTotal = Math.round(totalDecimal);
