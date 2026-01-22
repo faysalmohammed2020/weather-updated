@@ -37,9 +37,14 @@ export async function getLogs({
     // For observer: not allowed to view logs (blocked in page.tsx)
     let whereCondition: any;
 
-    if (session.user.role === "super_admin") {
-      // Super admin sees all logs
+    if (session.user.role === "root_admin") {
+      // ✅ root_admin sees all logs
       whereCondition = {};
+    } else if (session.user.role === "super_admin") {
+      // ✅ super_admin sees all logs EXCEPT root_admin logs
+      whereCondition = {
+        NOT: [{ role: "root_admin" }],
+      };
     } else if (session.user.role === "station_admin") {
       // Station admin sees:
       // 1. Observer logs in their station

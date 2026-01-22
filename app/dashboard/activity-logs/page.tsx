@@ -21,19 +21,20 @@ const ActivityLogsPage = async ({
 }) => {
   const session = await getSession();
 
+  // ✅ Server-side log (terminal এ দেখাবে)
+  console.log("[ActivityLogsPage] role:", session?.user?.role);
+  console.log("[ActivityLogsPage] user:", session?.user);
+
   // Only observers are not allowed to view activity logs
   if (session?.user?.role === "observer") {
     redirect("/dashboard");
   }
-
-  // super_admin and station_admin can view activity logs
 
   const params = await searchParams;
   const parsedPage = parseInt(params.page || "1");
   const parsedLimit = parseInt(params.limit || "10");
   const offset = (parsedPage - 1) * parsedLimit;
 
-  // Parse date filters
   const startDate = params.startDate ? new Date(params.startDate) : undefined;
   const endDate = params.endDate ? new Date(params.endDate) : undefined;
 
@@ -48,7 +49,6 @@ const ActivityLogsPage = async ({
     endDate,
   });
 
-  // Handle error case
   if ("error" in logsData) {
     return (
       <div className="text-red-600">Error loading logs: {logsData.error}</div>
@@ -57,11 +57,7 @@ const ActivityLogsPage = async ({
 
   return (
     <div className="p-6">
-      <LogsTable
-        logs={logsData.logs || []}
-        total={logsData.total}
-        limit={parsedLimit}
-      />
+      <LogsTable logs={logsData.logs || []} total={logsData.total} limit={parsedLimit} />
     </div>
   );
 };
