@@ -237,13 +237,6 @@ export const useFirstCardForm = () => {
     setActiveTab(tabName);
   };
 
-  // ---- EFFECTS ----
-  useEffect(() => {
-    console.log("Form data updated:", formik.values);
-    console.log("Form errors updated:", formik.errors);
-    console.log("selectedHour:", selectedHour);
-  }, [formik.values, formik.errors, selectedHour]);
-
   useEffect(() => {
     const year = new Date().getFullYear().toString();
     formik.setFieldValue("year", year.slice(2));

@@ -141,8 +141,6 @@ export function AgroclimatologicalForm() {
       formik.setFieldValue("stationInfo.stationName", st.name ?? "")
       formik.setFieldValue("stationInfo.latitude", String(st.latitude ?? ""))
       formik.setFieldValue("stationInfo.longitude", String(st.longitude ?? ""))
-      console.log("station from session:", st)
-  console.log("lat:", st?.latitude, "lon:", st?.longitude)
     }
   }, [session])
 
@@ -338,9 +336,6 @@ export function AgroclimatologicalForm() {
           return
         }
       }
-
-      console.log("Submitting values:", values)
-
       const dateParts = values.stationInfo.date.split("-").map(Number)
       const [year, month, day] = dateParts
       const dateOnly = new Date(Date.UTC(year, month - 1, day))
@@ -371,7 +366,6 @@ export function AgroclimatologicalForm() {
       }
 
       const result = await response.json()
-      console.log("Result:", result)
 
       if (!result.success) {
         throw new Error(
