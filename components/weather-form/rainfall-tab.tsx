@@ -932,6 +932,7 @@ export default function RainfallTab() {
               </div>
             )}
             {/* Last 24 Hours Precipitation - Only visible at 00 UTC */}
+             {/* Last 24 Hours Precipitation - Only visible at 00 UTC */}
             {isMidnightReport && (
               <div className="grid gap-2">
                 <Label htmlFor="last-24-hours">
