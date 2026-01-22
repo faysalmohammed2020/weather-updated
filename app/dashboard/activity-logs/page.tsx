@@ -20,11 +20,6 @@ const ActivityLogsPage = async ({
   }>;
 }) => {
   const session = await getSession();
-
-  // ✅ Server-side log (terminal এ দেখাবে)
-  console.log("[ActivityLogsPage] role:", session?.user?.role);
-  console.log("[ActivityLogsPage] user:", session?.user);
-
   // Only observers are not allowed to view activity logs
   if (session?.user?.role === "observer") {
     redirect("/dashboard");
