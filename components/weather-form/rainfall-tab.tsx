@@ -483,7 +483,7 @@ export default function RainfallTab() {
     let totalDecimal = 0;
     timesToSum.forEach((time) => {
       const value = getRainfallValue(time);
-      totalDecimal += value / 10; // Convert code to decimal (e.g., 0120 → 12.0)
+      totalDecimal += value;
     });
 
     // Add the Since Previous Observation input value (current 00 UTC) - this is already in mm/decimal
