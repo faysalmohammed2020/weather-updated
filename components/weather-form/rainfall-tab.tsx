@@ -487,7 +487,18 @@ export default function RainfallTab() {
     // Add the Since Previous Observation input value (current 00 UTC)
     total += currentSincePrevious;
 
-    return String(total).padStart(3, '0');
+    // Apply the rainfall code logic
+    const totalStr = String(total).padStart(4, '0');
+    const lastDigit = parseInt(totalStr[3], 10);
+    
+    if (lastDigit >= 5) {
+      // Subtract 1 from the last digit
+      const newValue = total - 1;
+      return String(newValue).padStart(3, '0');
+    } else {
+      // Keep the same value
+      return String(total).padStart(3, '0');
+    }
   };
 
   // Auto-fill calculated values
