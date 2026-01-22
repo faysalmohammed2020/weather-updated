@@ -422,16 +422,32 @@ export default function RainfallTab() {
     value.replace(/\D/g, "").slice(0, 4);
 
   // ---------- Rainfall Calculation Functions ----------
-  const formatToFourDigits = (value: number): string => {
-    return String(value).padStart(4, "0");
+  const parseSincePreviousInput = () =>
+    Number.parseFloat(rainfall["since-previous"] || "0") || 0;
+
+  const parseRainfallCodeToMm = (value?: string | null): number => {
+    if (!value) return 0;
+    const trimmed = value.trim();
+    if (!trimmed) return 0;
+    const numeric = Number.parseFloat(trimmed);
+    if (Number.isNaN(numeric)) return 0;
+    if (trimmed.includes(".")) return numeric;
+    return trimmed.length >= 4 ? numeric / 10 : numeric;
   };
 
-  const parseSincePreviousInput = () =>
-    parseInt(rainfall["since-previous"] || "0", 10) || 0;
+  const formatToFourDigitCode = (mm: number): string => {
+    const tenths = Math.round(mm * 10);
+    return String(tenths).padStart(4, "0");
+  };
 
-  const getRainfallValue = (utcTime: string): number => {
+  const formatToThreeDigitCode = (mm: number): string => {
+    const rounded = Math.round(mm);
+    return String(rounded).padStart(3, "0");
+  };
+
+  const getRainfallValueMm = (utcTime: string): number => {
     const item = rainfallApiData.find((data) => data.utcTime === utcTime);
-    return item ? parseInt(item.rainfallSincePrevious, 10) || 0 : 0;
+    return item ? parseRainfallCodeToMm(item.rainfallSincePrevious) : 0;
   };
 
   const calculateDuringPrevious6Hours = (): string => {
@@ -444,9 +460,9 @@ export default function RainfallTab() {
     const currentSincePrevious = parseSincePreviousInput();
 
     if (hour === 0) {
-      const total =
-        getRainfallValue(`${prevUTC}T21:00:00.000Z`) + currentSincePrevious;
-      return formatToFourDigits(total);
+      const totalMm =
+        getRainfallValueMm(`${prevUTC}T21:00:00.000Z`) + currentSincePrevious;
+      return formatToFourDigitCode(totalMm);
     }
 
     const lookups: Record<number, string> = {
@@ -458,8 +474,8 @@ export default function RainfallTab() {
     const previousUtc = lookups[hour];
     if (!previousUtc) return "";
 
-    const total = getRainfallValue(previousUtc) + currentSincePrevious;
-    return formatToFourDigits(total);
+    const totalMm = getRainfallValueMm(previousUtc) + currentSincePrevious;
+    return formatToFourDigitCode(totalMm);
   };
 
   const calculateLast24Hours = (): string => {
@@ -479,22 +495,17 @@ export default function RainfallTab() {
       `${prevUTC}T21:00:00.000Z`,
     ];
 
-    // Apply the rainfall code logic - convert codes to decimal, sum with decimal since-previous, round, then convert back to code
-    let totalDecimal = 0;
+    // Convert 4-digit rainfall codes (tenths) to mm, add since-previous (mm), then round to 3-digit code
+    let totalMm = 0;
     timesToSum.forEach((time) => {
-      const value = getRainfallValue(time);
-      totalDecimal += value;
+      const valueMm = getRainfallValueMm(time);
+      totalMm += valueMm;
     });
 
     // Add the Since Previous Observation input value (current 00 UTC) - this is already in mm/decimal
-    totalDecimal += currentSincePrevious;
+    totalMm += currentSincePrevious;
 
-    // Round to nearest integer
-    const roundedTotal = Math.round(totalDecimal);
-    
-    // Convert back to 4-digit code and take first 3 digits
-    const totalStr = String(roundedTotal).padStart(4, '0');
-    return totalStr.substring(0, 3);
+    return formatToThreeDigitCode(totalMm);
   };
 
   // Auto-fill calculated values
