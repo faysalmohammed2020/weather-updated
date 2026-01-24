@@ -13,7 +13,7 @@ import HourSelector from "@/components/hour-selector";
 import type { TimeInfo } from "@/lib/data-type";
 
 import { useFirstCardForm } from "./useFirstCardForm";
-import FirstCardSkeleton from "./FirstCardSkeleton"; // 👈 skeleton component
+import FirstCardSkeleton from "./FirstCardSkeleton"; 
 
 // ✅ lazy load heavy tabs (code-splitting)
 const PressureTab = dynamic(() => import("./tabs/PressureTab"), {
