@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getSession } from "@/lib/getSession";
+import { LogAction, LogActionType, LogModule } from "@/lib/log";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -10,9 +12,14 @@ export async function PUT(
 ) {
   try {
     const { id } = await params; // ✅ await params
+    const session = await getSession();
 
     const { name, stationId, securityCode, latitude, longitude } =
       await request.json();
+
+    const existingStation = await prisma.station.findUnique({
+      where: { id },
+    });
 
     const updatedStation = await prisma.station.update({
       where: { id },
@@ -28,6 +35,42 @@ export async function PUT(
         }),
       },
     });
+
+    if (session?.user?.id) {
+      const safeBefore = existingStation
+        ? {
+            id: existingStation.id,
+            stationId: existingStation.stationId,
+            name: existingStation.name,
+            latitude: existingStation.latitude,
+            longitude: existingStation.longitude,
+          }
+        : null;
+      const safeAfter = {
+        id: updatedStation.id,
+        stationId: updatedStation.stationId,
+        name: updatedStation.name,
+        latitude: updatedStation.latitude,
+        longitude: updatedStation.longitude,
+      };
+
+      await LogAction({
+        init: prisma,
+        action: LogActionType.UPDATE,
+        actionText: "Station Updated",
+        role: session.user.role ?? "observer",
+        actorId: session.user.id!,
+        actorEmail: session.user.email ?? undefined,
+        module: LogModule.STATION,
+        details: {
+          before: safeBefore,
+          after: safeAfter,
+          securityCodeChanged: existingStation
+            ? existingStation.securityCode !== updatedStation.securityCode
+            : undefined,
+        },
+      });
+    }
 
     return NextResponse.json(updatedStation);
   } catch (error) {
@@ -46,10 +89,38 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params; // ✅ await params
+    const session = await getSession();
+
+    const existingStation = await prisma.station.findUnique({
+      where: { id },
+    });
 
     await prisma.station.delete({
       where: { id },
     });
+
+    if (session?.user?.id) {
+      const safeDetails = existingStation
+        ? {
+            id: existingStation.id,
+            stationId: existingStation.stationId,
+            name: existingStation.name,
+            latitude: existingStation.latitude,
+            longitude: existingStation.longitude,
+          }
+        : { id };
+
+      await LogAction({
+        init: prisma,
+        action: LogActionType.DELETE,
+        actionText: "Station Deleted",
+        role: session.user.role ?? "observer",
+        actorId: session.user.id!,
+        actorEmail: session.user.email ?? undefined,
+        module: LogModule.STATION,
+        details: safeDetails,
+      });
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
