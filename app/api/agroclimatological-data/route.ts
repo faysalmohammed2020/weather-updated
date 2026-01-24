@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
 import { getSession } from "@/lib/getSession"
+import { LogAction, LogActionType, LogModule } from "@/lib/log"
 import type { AgroclimatologicalFormData } from "@/app/dashboard/data-entry/agroclimatological/agroclimatological-form"
 
 export const dynamic = "force-dynamic"
@@ -91,6 +92,22 @@ export async function POST(request: Request) {
     // Create the database entry
     const result = await prisma.agroclimatologicalData.create({
       data: dbData,
+    })
+
+    await LogAction({
+      init: prisma,
+      action: LogActionType.CREATE,
+      actionText: "Agroclimatological Data Created",
+      role: session.user.role ?? "observer",
+      actorId: session.user.id!,
+      actorEmail: session.user.email ?? undefined,
+      module: LogModule.AGROCLIMATOLOGICAL_DATA,
+      details: {
+        id: result.id,
+        stationId: result.stationId,
+        date: result.date.toISOString(),
+        utcTime: result.utcTime,
+      },
     })
 
     return NextResponse.json({

@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth"; // ✅ authOptions export থাকতে হবে
+import { LogAction, LogActionType, LogModule } from "@/lib/log";
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
@@ -65,6 +66,22 @@ export async function POST(req: Request) {
         },
       });
 
+      await LogAction({
+        init: prisma,
+        action: LogActionType.UPDATE,
+        actionText: "Soil Moisture Updated",
+        role: user.role ?? "observer",
+        actorId: user.id,
+        actorEmail: user.email ?? undefined,
+        module: LogModule.SOIL_MOISTURE,
+        details: {
+          id: record.id,
+          stationId,
+          date: record.date.toISOString(),
+          depth: record.depth,
+        },
+      });
+
       return NextResponse.json(
         { message: "Data updated successfully", data: record },
         { status: 200 }
@@ -86,6 +103,22 @@ export async function POST(req: Request) {
         userId: user.id,
         createdAt: new Date(),
         updatedAt: new Date(),
+      },
+    });
+
+    await LogAction({
+      init: prisma,
+      action: LogActionType.CREATE,
+      actionText: "Soil Moisture Created",
+      role: user.role ?? "observer",
+      actorId: user.id,
+      actorEmail: user.email ?? undefined,
+      module: LogModule.SOIL_MOISTURE,
+      details: {
+        id: record.id,
+        stationId,
+        date: record.date.toISOString(),
+        depth: record.depth,
       },
     });
 

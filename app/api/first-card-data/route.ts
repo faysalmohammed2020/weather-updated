@@ -157,6 +157,21 @@ export async function POST(req: Request) {
       prisma.meteorologicalEntry.count(),
     ]);
 
+    await LogAction({
+      init: prisma,
+      action: LogActionType.CREATE,
+      actionText: "Observing Time Created",
+      role: session.user.role!,
+      actorId: session.user.id!,
+      actorEmail: session.user.email ?? undefined,
+      module: LogModule.OBSERVING_TIME,
+      details: {
+        id: savedEntry.id,
+        utcTime: savedEntry.utcTime.toISOString(),
+        stationId: stationRecord.id,
+      },
+    });
+
     // Log The Action
     await LogAction({
       init: prisma,

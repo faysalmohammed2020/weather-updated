@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/getSession";
+import { LogAction, LogActionType, LogModule } from "@/lib/log";
 
 export async function POST(req: Request) {
   try {
@@ -50,6 +51,21 @@ export async function POST(req: Request) {
 
     await prisma.sunshineData.create({
       data: { date: parsedDate, hours, total, stationId, userId },
+    });
+
+    await LogAction({
+      init: prisma,
+      action: LogActionType.CREATE,
+      actionText: "Sunshine Data Created",
+      role: session.user.role ?? "observer",
+      actorId: session.user.id!,
+      actorEmail: session.user.email ?? undefined,
+      module: LogModule.SUNSHINE,
+      details: {
+        stationId,
+        date: parsedDate.toISOString(),
+        total,
+      },
     });
 
     return NextResponse.json({ success: true });

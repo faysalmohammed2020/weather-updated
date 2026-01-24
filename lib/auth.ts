@@ -4,6 +4,7 @@ import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter"; // v4 adapter
 import prisma from "@/lib/prisma";
+import { LogAction, LogActionType, LogModule } from "@/lib/log";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 
@@ -220,6 +221,7 @@ export const authOptions: NextAuthOptions = {
         token.id = (user as any).id;
         token.role = (user as any).role ?? "observer";
         token.stationId = (user as any).stationId;
+        token.email = (user as any).email ?? token.email;
         token.division = (user as any).division;
         token.district = (user as any).district;
         token.upazila = (user as any).upazila;
@@ -249,6 +251,50 @@ export const authOptions: NextAuthOptions = {
           (token as any).originalUser ?? null;
       }
       return session;
+    },
+  },
+  events: {
+    async signIn({ user, account, isNewUser }) {
+      try {
+        if (!user?.id) return;
+
+        await LogAction({
+          init: prisma,
+          action: LogActionType.CREATE,
+          actionText: "User Logged In",
+          role: (user as any).role ?? "observer",
+          actorId: (user as any).id,
+          actorEmail: (user as any).email ?? undefined,
+          module: LogModule.AUTH,
+          details: {
+            provider: account?.provider,
+            isNewUser: Boolean(isNewUser),
+          },
+        });
+      } catch (error) {
+        console.error("AUTH_SIGNIN_LOG_ERROR:", error);
+      }
+    },
+    async signOut(message) {
+      try {
+        const token = (message as any)?.token;
+        const session = (message as any)?.session;
+
+        const actorId = token?.id ?? token?.sub ?? session?.user?.id;
+        if (!actorId) return;
+
+        await LogAction({
+          init: prisma,
+          action: LogActionType.DELETE,
+          actionText: "User Logged Out",
+          role: token?.role ?? session?.user?.role ?? "observer",
+          actorId,
+          actorEmail: token?.email ?? session?.user?.email ?? undefined,
+          module: LogModule.AUTH,
+        });
+      } catch (error) {
+        console.error("AUTH_SIGNOUT_LOG_ERROR:", error);
+      }
     },
   },
 };

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/getSession";
+import { LogAction, LogActionType, LogModule } from "@/lib/log";
 
 // GET stations based on role
 export async function GET() {
@@ -53,6 +54,7 @@ export async function GET() {
 // POST create new station
 export async function POST(request: Request) {
   try {
+    const session = await getSession();
     const { name, stationId, securityCode, latitude, longitude } =
       await request.json();
 
@@ -73,6 +75,23 @@ export async function POST(request: Request) {
         longitude: longitude ? Number.parseFloat(longitude) : 90.3563, // Default longitude if not provided
       },
     });
+
+    if (session?.user?.id) {
+      await LogAction({
+        init: prisma,
+        action: LogActionType.CREATE,
+        actionText: "Station Created",
+        role: session.user.role ?? "observer",
+        actorId: session.user.id!,
+        actorEmail: session.user.email ?? undefined,
+        module: LogModule.STATION,
+        details: {
+          id: station.id,
+          stationId: station.stationId,
+          name: station.name,
+        },
+      });
+    }
 
     return NextResponse.json(station);
   } catch (error) {

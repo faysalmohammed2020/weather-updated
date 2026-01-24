@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/getSession";
+import { LogAction, LogActionType, LogModule } from "@/lib/log";
 
 export async function POST(req: Request) {
   const session = await getSession();
@@ -69,6 +70,22 @@ export async function POST(req: Request) {
 
         userId: session.user.id,
         stationId: body.stationId,
+      },
+    });
+
+    await LogAction({
+      init: prisma,
+      action: LogActionType.CREATE,
+      actionText: "Agroclimatological Data Created",
+      role: session.user.role ?? "observer",
+      actorId: session.user.id!,
+      actorEmail: session.user.email ?? undefined,
+      module: LogModule.AGROCLIMATOLOGICAL_DATA,
+      details: {
+        id: result.id,
+        stationId: result.stationId,
+        date: result.date.toISOString(),
+        utcTime: result.utcTime,
       },
     });
 
