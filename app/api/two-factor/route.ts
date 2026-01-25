@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 import { authenticator } from "otplib";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 
-import { authOptions } from "@/lib/auth";
+import { getSession } from "@/lib/getSession";
 import prisma from "@/lib/prisma";
 
 type Action = "enable" | "verifyTotp" | "verifyBackupCode" | "disable";
@@ -89,7 +88,7 @@ function generateBackupCodes(count = 8) {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions);
+  const session = await getSession();
 
   if (!session?.user?.id || !session.user.email) {
     return jsonError("Unauthorized", 401);

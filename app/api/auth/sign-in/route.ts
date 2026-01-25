@@ -24,12 +24,18 @@ export async function POST(request: NextRequest) {
     // 2) User exists with email + role
     const user = await prisma.users.findFirst({
       where: { email, role },
-      select: { id: true, email: true, role: true, Station: true },
+      select: { id: true, email: true, role: true, banned: true, Station: true },
     });
     if (!user) {
       return NextResponse.json(
         { error: "User not found or does not have the requested role" },
         { status: 404 }
+      );
+    }
+    if (user.banned) {
+      return NextResponse.json(
+        { error: "Account is disabled" },
+        { status: 403 }
       );
     }
 

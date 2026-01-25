@@ -175,6 +175,8 @@ export default function SignInForm() {
 
     if (errorMessage.includes("credentials")) {
       errorMessage = "Invalid email or password";
+    } else if (errorMessage.includes("ACCOUNT_BANNED")) {
+      errorMessage = "Your account has been disabled. Please contact an administrator.";
     } else if (
       errorMessage.includes("permission") ||
       errorMessage.includes("role")

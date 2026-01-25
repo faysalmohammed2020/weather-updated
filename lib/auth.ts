@@ -94,6 +94,10 @@ export const authOptions: NextAuthOptions = {
           if (!user) {
             return null;
           }
+
+          if (user.banned) {
+            throw new Error("ACCOUNT_BANNED");
+          }
           // 2) Account lookup: pick latest password account, prefer credential provider
           const account =
             (await prisma.accounts.findFirst({
@@ -205,6 +209,9 @@ export const authOptions: NextAuthOptions = {
           } as any;
         } catch (e) {
           console.error("AUTHORIZE_ERROR:", e);
+          if (e instanceof Error && e.message === "ACCOUNT_BANNED") {
+            throw e;
+          }
           return null;
         }
       },
