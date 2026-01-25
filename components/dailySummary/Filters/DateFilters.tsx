@@ -20,7 +20,7 @@ export const DateFilters = ({
 
   return (
     <div className="flex flex-col gap-2 w-full">
-      <div className="flex items-center gap-2 w-full">
+      <div className="flex items-center gap-2">
         <Button
           variant="outline"
           size="icon"
@@ -30,7 +30,7 @@ export const DateFilters = ({
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <div className="flex flex-col md:flex-row items-center gap-2 w-full">
+        <div className="flex flex-col md:flex-row items-center gap-2 w-full md:w-auto">
           <input
             type="date"
             value={startDate}
@@ -44,9 +44,7 @@ export const DateFilters = ({
           <input
             type="date"
             value={endDate}
-            onChange={(event) =>
-              onDateChange("end", event.currentTarget.value)
-            }
+            onChange={(event) => onDateChange("end", event.currentTarget.value)}
             min={startDate}
             max={today}
             className="text-xs sm:text-sm p-2 border border-slate-300 focus:ring-purple-500 focus:ring-2 rounded w-full sm:w-auto min-w-[120px]"
