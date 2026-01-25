@@ -52,12 +52,14 @@ export interface UsersResponse {
  */
 export async function getUsersServer(
   pageIndex: number = 0,
-  pageSize: number = 10
+  pageSize: number = 10,
+  status: "active" | "banned" | "all" = "active"
 ): Promise<UsersResponse> {
   try {
     const { users, total } = await getUsersForSession({
       limit: pageSize,
       offset: pageIndex * pageSize,
+      status,
     });
 
     return {

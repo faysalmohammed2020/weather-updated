@@ -18,6 +18,9 @@ export default function UserTableSkeletonRows({ rows = 5 }: { rows?: number }) {
             <div className="h-4 w-24 bg-slate-200 rounded" />
           </TableCell>
           <TableCell className="p-3">
+            <div className="h-4 w-20 bg-slate-200 rounded" />
+          </TableCell>
+          <TableCell className="p-3">
             <div className="h-4 w-32 bg-slate-200 rounded" />
           </TableCell>
           <TableCell className="p-3">

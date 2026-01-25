@@ -65,6 +65,11 @@ const DeleteConfirmationDialog = lazy(() =>
     default: m.DeleteConfirmationDialog,
   })),
 );
+const RestoreConfirmationDialog = lazy(() =>
+  import("@/components/user-management/ConfirmationDialogs").then((m) => ({
+    default: m.RestoreConfirmationDialog,
+  })),
+);
 const RoleChangeConfirmationDialog = lazy(() =>
   import("@/components/user-management/ConfirmationDialogs").then((m) => ({
     default: m.RoleChangeConfirmationDialog,
@@ -156,9 +161,11 @@ export const UserTableClient = ({
   // ============================================================================
   const [openDialog, setOpenDialog] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [openRestoreDialog, setOpenRestoreDialog] = useState(false);
   const [openRoleUpdateDialog, setOpenRoleUpdateDialog] = useState(false);
   const [editUser, setEditUser] = useState<User | null>(null);
   const [userToDelete, setUserToDelete] = useState<string | null>(null);
+  const [userToRestore, setUserToRestore] = useState<User | null>(null);
   const [roleChangeData, setRoleChangeData] = useState<{
     originalRole: string | null;
     newRole: string | null;
@@ -174,6 +181,18 @@ export const UserTableClient = ({
   // FILTER STATE
   // ============================================================================
   const [roleFilter, setRoleFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>(() => {
+    const statusParam = searchParams.get("status");
+    if (statusParam === "banned" || statusParam === "all") {
+      return statusParam;
+    }
+
+    const isPrivileged =
+      session?.user?.role === USER_ROLES.SUPER_ADMIN ||
+      session?.user?.role === USER_ROLES.ROOT_ADMIN;
+
+    return isPrivileged ? "all" : "active";
+  });
   const [stationFilter, setStationFilter] = useState<string>("all");
   const [dateFromFilter, setDateFromFilter] = useState<string>("");
   const [dateToFilter, setDateToFilter] = useState<string>("");
@@ -220,23 +239,23 @@ export const UserTableClient = ({
     return users.filter((u) => u.role !== USER_ROLES.ROOT_ADMIN);
   }, [users, session?.user?.role]);
 
-  const uniqueRoles = useMemo(() => {
-    const roles = new Set<string>();
-    visibleUsers.forEach((user) => {
-      if (user.role) roles.add(user.role);
-    });
-    return Array.from(roles).sort();
-  }, [visibleUsers]);
+  const allRoles = useMemo(
+    () => [
+      USER_ROLES.ROOT_ADMIN,
+      USER_ROLES.SUPER_ADMIN,
+      USER_ROLES.STATION_ADMIN,
+      USER_ROLES.OBSERVER,
+    ],
+    [],
+  );
 
-  const uniqueStations = useMemo(() => {
-    const stationList = new Set<string>();
-    users.forEach((user) => {
-      if (user.stationId && stationNameById.has(String(user.stationId))) {
-        stationList.add(String(user.stationId));
-      }
-    });
-    return Array.from(stationList).sort();
-  }, [users, stationNameById]);
+  const allStations = useMemo(
+    () =>
+      stations
+        .filter((station) => station?.id || station?.stationId)
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    [stations],
+  );
 
   // ============================================================================
   // PAGINATION FUNCTIONS
@@ -258,6 +277,9 @@ export const UserTableClient = ({
         if (roleFilter !== "all") params.set("role", roleFilter);
         else params.delete("role");
 
+        if (statusFilter !== "active") params.set("status", statusFilter);
+        else params.delete("status");
+
         if (stationFilter !== "all") params.set("station", stationFilter);
         else params.delete("station");
 
@@ -275,6 +297,7 @@ export const UserTableClient = ({
       searchParams,
       debouncedSearch,
       roleFilter,
+      statusFilter,
       stationFilter,
       dateFromFilter,
       dateToFilter,
@@ -334,7 +357,15 @@ export const UserTableClient = ({
         return prev;
       });
     }
-  }, [roleFilter, stationFilter, dateFromFilter, dateToFilter, updatePageInUrl, isMounted]);
+  }, [
+    roleFilter,
+    statusFilter,
+    stationFilter,
+    dateFromFilter,
+    dateToFilter,
+    updatePageInUrl,
+    isMounted,
+  ]);
 
   // ============================================================================
   // DATA REFRESH FUNCTION (SERVER-SIDE SEARCH INCLUDED)
@@ -348,6 +379,7 @@ export const UserTableClient = ({
 
       if (debouncedSearch) params.set("search", debouncedSearch);
       if (roleFilter !== "all") params.set("role", roleFilter);
+      if (statusFilter !== "active") params.set("status", statusFilter);
       if (stationFilter !== "all") params.set("station", stationFilter);
       if (dateFromFilter) params.set("dateFrom", dateFromFilter);
       if (dateToFilter) params.set("dateTo", dateToFilter);
@@ -381,6 +413,7 @@ export const UserTableClient = ({
     pageSize,
     debouncedSearch,
     roleFilter,
+    statusFilter,
     stationFilter,
     dateFromFilter,
     dateToFilter,
@@ -392,6 +425,7 @@ export const UserTableClient = ({
     pageIndex,
     debouncedSearch,
     roleFilter,
+    statusFilter,
     stationFilter,
     dateFromFilter,
     dateToFilter,
@@ -569,6 +603,36 @@ export const UserTableClient = ({
     }
   }, [userToDelete, deleteUser, refreshUsers]);
 
+  const openRestoreConfirmation = useCallback((user: User) => {
+    if (!user.banned) return;
+    setUserToRestore(user);
+    setOpenRestoreDialog(true);
+  }, []);
+
+  const handleRestoreDialogChange = useCallback((open: boolean) => {
+    setOpenRestoreDialog(open);
+    if (!open) {
+      setUserToRestore(null);
+    }
+  }, []);
+
+  const handleRestoreUser = useCallback(async () => {
+    if (!userToRestore) return;
+
+    const result = await updateUser({
+      id: userToRestore.id,
+      banned: false,
+      banReason: null,
+      banExpires: null,
+    });
+
+    if (result.success) {
+      setOpenRestoreDialog(false);
+      setUserToRestore(null);
+      refreshUsers();
+    }
+  }, [userToRestore, updateUser, refreshUsers]);
+
   // ============================================================================
   // USER IMPERSONATION
   // ============================================================================
@@ -632,7 +696,7 @@ export const UserTableClient = ({
                 </SelectTrigger>
                 <SelectContent className="bg-white border-slate-200 rounded-lg shadow-lg">
                   <SelectItem value="all">All roles</SelectItem>
-                  {uniqueRoles.map((role) => (
+                  {allRoles.map((role) => (
                     <SelectItem
                       key={role}
                       value={role}
@@ -644,6 +708,30 @@ export const UserTableClient = ({
                 </SelectContent>
               </Select>
             </div>
+
+            {isPrivilegedAdmin && (
+              <div className="min-w-[160px]">
+                <Label
+                  htmlFor="status-filter"
+                  className="text-sm font-semibold text-slate-700 mb-2 block"
+                >
+                  Status
+                </Label>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger
+                    id="status-filter"
+                    className="bg-white border-slate-300 rounded-lg shadow-sm hover:border-slate-400 transition-colors"
+                  >
+                    <SelectValue placeholder="Active" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-slate-200 rounded-lg shadow-lg">
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="banned">Banned</SelectItem>
+                    <SelectItem value="all">All</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             {/* Station Filter */}
             <div className="min-w-[180px]">
@@ -662,13 +750,13 @@ export const UserTableClient = ({
                 </SelectTrigger>
                 <SelectContent className="bg-white border-slate-200 rounded-lg shadow-lg">
                   <SelectItem value="all">All stations</SelectItem>
-                  {uniqueStations.map((stationId) => (
+                  {allStations.map((station) => (
                     <SelectItem
-                      key={stationId}
-                      value={stationId}
+                      key={station.id ?? station.stationId}
+                      value={String(station.id ?? station.stationId)}
                       className="hover:bg-slate-50"
                     >
-                      {stationNameById.get(stationId) || stationId}
+                      {station.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -718,6 +806,9 @@ export const UserTableClient = ({
               <TableHead className="p-3 text-lg font-medium whitespace-nowrap min-w-max-[250px] text-left">
                 Role
               </TableHead>
+              <TableHead className="p-3 text-lg font-medium whitespace-nowrap min-w-max-[200px] text-left">
+                Status
+              </TableHead>
               <TableHead className="p-3 text-lg font-medium whitespace-nowrap min-w-max-[250px] text-left">
                 Station
               </TableHead>
@@ -738,6 +829,11 @@ export const UserTableClient = ({
                 const stationName = user.stationId
                   ? stationNameById.get(String(user.stationId))
                   : undefined;
+                const isBanned = Boolean(user.banned);
+                const statusLabel = isBanned ? "Banned" : "Active";
+                const statusClasses = isBanned
+                  ? "bg-rose-50 text-rose-700"
+                  : "bg-emerald-50 text-emerald-700";
 
                 return (
                   <TableRow key={user.id}>
@@ -750,6 +846,13 @@ export const UserTableClient = ({
                     <TableCell className="p-3 text-left truncate max-w-[250px] text-base">
                       {user.role || "N/A"}
                     </TableCell>
+                    <TableCell className="p-3 text-left">
+                      <span
+                        className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold ${statusClasses}`}
+                      >
+                        {statusLabel}
+                      </span>
+                    </TableCell>
                     <TableCell className="p-3 text-left truncate max-w-[250px] text-base">
                       {stationName || "N/A"}
                     </TableCell>
@@ -760,9 +863,11 @@ export const UserTableClient = ({
                       <UserActionButtons
                         user={user}
                         isSuper={isPrivilegedAdmin}
+                        actorRole={session?.user?.role as UserRole | null}
                         currentUserId={session?.user?.id}
                         onEdit={openEditDialog}
                         onDelete={openDeleteConfirmation}
+                        onRestore={openRestoreConfirmation}
                         onImpersonate={handleImpersonate}
                         isImpersonating={impersonatingUserId === user.id}
                       />
@@ -772,7 +877,7 @@ export const UserTableClient = ({
               })
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">
+                <TableCell colSpan={7} className="h-24 text-center">
                   No users found.
                 </TableCell>
               </TableRow>
@@ -872,6 +977,15 @@ export const UserTableClient = ({
           />
         )}
 
+        {isPrivilegedAdmin && (
+          <RestoreConfirmationDialog
+            open={openRestoreDialog}
+            onOpenChange={handleRestoreDialogChange}
+            onConfirm={handleRestoreUser}
+            isLoading={isOperating}
+          />
+        )}
+
         <RoleChangeConfirmationDialog
           open={openRoleUpdateDialog}
           onOpenChange={setOpenRoleUpdateDialog}
@@ -891,9 +1005,11 @@ export const UserTableClient = ({
 interface UserActionButtonsProps {
   user: User;
   isSuper: boolean;
+  actorRole?: UserRole | null;
   currentUserId?: string;
   onEdit: (user: User) => void;
   onDelete: (userId: string, userRole: string | null) => void;
+  onRestore: (user: User) => void;
   onImpersonate: (
     userId: string,
     userName: string | null,
@@ -905,15 +1021,20 @@ interface UserActionButtonsProps {
 const UserActionButtons = ({
   user,
   isSuper,
+  actorRole,
   currentUserId,
   onEdit,
   onDelete,
+  onRestore,
   onImpersonate,
   isImpersonating,
 }: UserActionButtonsProps) => {
   // Allow root_admin and super_admin to impersonate any user except themselves
-  const canImpersonateUser = isSuper;
-  const canDeleteUserLocal = isSuper;
+  const isRootActor = actorRole === USER_ROLES.ROOT_ADMIN;
+  const canImpersonateUser = isSuper && !user.banned;
+  const canManageStatus = isSuper;
+  const canManageTarget =
+    user.role !== USER_ROLES.ROOT_ADMIN || isRootActor;
 
   return (
     <div className="flex gap-2">
@@ -921,15 +1042,21 @@ const UserActionButtons = ({
         Edit
       </Button>
 
-      {canDeleteUserLocal && (
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={() => onDelete(user.id, user.role)}
-        >
-          Delete
-        </Button>
-      )}
+      {canManageStatus &&
+        canManageTarget &&
+        (user.banned ? (
+          <Button variant="outline" size="sm" onClick={() => onRestore(user)}>
+            Restore
+          </Button>
+        ) : (
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => onDelete(user.id, user.role)}
+          >
+            Deactivate
+          </Button>
+        ))}
 
       {canImpersonateUser &&
         user.role !== USER_ROLES.ROOT_ADMIN &&

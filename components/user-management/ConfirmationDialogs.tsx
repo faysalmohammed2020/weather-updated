@@ -111,10 +111,10 @@ export const DeleteConfirmationDialog = memo(
     <ConfirmationDialog
       open={open}
       onOpenChange={onOpenChange}
-      title="Confirm Deletion"
-      description="Are you sure you want to delete this user? This action cannot be undone."
+      title="Confirm Deactivation"
+      description="This will disable the account. You can restore it later."
       onConfirm={onConfirm}
-      confirmText="Delete"
+      confirmText="Deactivate"
       isDangerous
       isLoading={isLoading}
     />
@@ -122,6 +122,35 @@ export const DeleteConfirmationDialog = memo(
 );
 
 DeleteConfirmationDialog.displayName = "DeleteConfirmationDialog";
+
+/**
+ * Restore confirmation dialog
+ */
+export const RestoreConfirmationDialog = memo(
+  ({
+    open,
+    onOpenChange,
+    onConfirm,
+    isLoading,
+  }: {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    onConfirm: () => void;
+    isLoading?: boolean;
+  }) => (
+    <ConfirmationDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Confirm Restore"
+      description="Restore this user and allow them to sign in again."
+      onConfirm={onConfirm}
+      confirmText="Restore"
+      isLoading={isLoading}
+    />
+  )
+);
+
+RestoreConfirmationDialog.displayName = "RestoreConfirmationDialog";
 
 /**
  * Role change confirmation dialog

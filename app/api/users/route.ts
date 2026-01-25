@@ -32,16 +32,23 @@ export async function GET(request: NextRequest) {
     const search = (searchParams.get("search") || "").trim(); // ✅ NEW
     const roleFilter = searchParams.get("role") || "";
     const stationFilter = searchParams.get("station") || "";
+    const statusFilterParam = (searchParams.get("status") || "active").toLowerCase();
 
     // ✅ root_admin + super_admin => see all users
     const isPrivileged =
       session.user.role === "super_admin" || session.user.role === "root_admin";
 
     const notBannedFilter = { banned: { not: true } };
+    const statusFilter =
+      statusFilterParam === "banned"
+        ? { banned: true }
+        : statusFilterParam === "all"
+        ? {}
+        : notBannedFilter;
 
     // ✅ base filter
     const baseWhere = isPrivileged
-      ? notBannedFilter
+      ? statusFilter
       : {
           ...notBannedFilter,
           role: "observer",

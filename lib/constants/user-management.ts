@@ -48,7 +48,7 @@ export const ERROR_MESSAGES = {
   FAILED_FETCH_STATIONS: "Failed to load stations",
   FAILED_CREATE_USER: "Failed to create user",
   FAILED_UPDATE_USER: "Failed to update user",
-  FAILED_DELETE_USER: "Failed to delete user",
+  FAILED_DELETE_USER: "Failed to deactivate user",
   FAILED_IMPERSONATE: "Failed to start impersonation",
 
   INVALID_PASSWORD_LENGTH: (length: number, role: UserRole) =>
@@ -77,7 +77,7 @@ export const ERROR_MESSAGES = {
 export const SUCCESS_MESSAGES = {
   USER_CREATED: "User created successfully",
   USER_UPDATED: "User updated successfully",
-  USER_DELETED: "User deleted successfully",
+  USER_DELETED: "User deactivated successfully",
   IMPERSONATION_STARTED: (name: string, role: string) =>
     `Now impersonating ${name} (${role}). Redirecting...`,
 } as const;

@@ -15,7 +15,7 @@ import { UserTableClient } from "./user-table-client";
 const UserPage = async ({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; status?: string }>;
 }) => {
   const session = await getSession();
 
@@ -27,11 +27,19 @@ const UserPage = async ({
   // Await searchParams and parse page parameter
   const params = await searchParams;
   const page = parseInt(params.page || "0", 10);
+  const statusParamRaw = params.status;
+  const statusParam =
+    statusParamRaw === "banned" || statusParamRaw === "all"
+      ? statusParamRaw
+      : session?.user?.role === "super_admin" ||
+        session?.user?.role === "root_admin"
+      ? "all"
+      : "active";
   const pageSize = 10;
 
   // Fetch data server-side
   const [usersData, stations] = await Promise.all([
-    getUsersServer(page, pageSize),
+    getUsersServer(page, pageSize, statusParam),
     getStationsServer(),
   ]);
 

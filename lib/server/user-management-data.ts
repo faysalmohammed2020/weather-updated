@@ -10,10 +10,18 @@ import type { Station } from "@prisma/client";
 export async function getUsersForSession(params: {
   limit: number;
   offset: number;
+  status?: "active" | "banned" | "all";
 }): Promise<{ users: any[]; total: number }> {
   const session = await getSession();
 
   const notBannedFilter = { banned: { not: true } };
+  const statusFilterParam = params.status || "active";
+  const statusFilter =
+    statusFilterParam === "banned"
+      ? { banned: true }
+      : statusFilterParam === "all"
+      ? {}
+      : notBannedFilter;
 
   // No session (আপনার ইচ্ছামতো রাখুন)
   if (!session?.user) {
@@ -56,7 +64,7 @@ export async function getUsersForSession(params: {
   // ✅ super_admin/root_admin → all users
   const [users, total] = await Promise.all([
     prisma.users.findMany({
-      where: notBannedFilter,
+      where: statusFilter,
       skip: params.offset,
       take: params.limit,
       orderBy: { createdAt: "desc" },
@@ -66,7 +74,7 @@ export async function getUsersForSession(params: {
         },
       },
     }),
-    prisma.users.count({ where: notBannedFilter }),
+    prisma.users.count({ where: statusFilter }),
   ]);
 
   return { users, total };
