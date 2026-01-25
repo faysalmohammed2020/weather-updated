@@ -39,38 +39,27 @@ async function main() {
   console.log("🏙️ Dhaka station:", dhakaStation.id);
 
 
-  // Demo users
-  const seedDemoUsers = process.env.SEED_DEMO_USERS === "true";
-  if (!seedDemoUsers) {
-    console.log("ℹ️ Demo users skipped (set SEED_DEMO_USERS=true to create them)");
-    console.log("🎉 Seed completed successfully!");
-    return;
-  }
+  // Demo users (always seeded)
+  console.log("👥 Seeding demo users...");
 
   const demoUsers = [
     {
-      name: "Root Admin",
-      email: "rootadmin@example.com",
-      role: "root_admin",
-      password: "rootadmin123",
-    },
-    {
-      name: "Super Admin",
-      email: "superadmin@example.com",
+      name: "Nayma Baten",
+      email: "shuvra.swc@gmail.com",
       role: "super_admin",
       password: "superadmin123",
     },
     {
-      name: "Dhaka Station Admin",
-      email: "stationadmin@example.com",
-      role: "station_admin",
-      password: "stationadmin123",
+      name: "Akram",
+      email: "akramclimate@gmail.com",
+      role: "super_admin",
+      password: "superadmin123",
     },
     {
-      name: "Observer",
-      email: "observer@example.com",
-      role: "observer",
-      password: "observer123",
+      name: "Rashaduzzaman",
+      email: "rashaduzzamanbmd@gmail.com",
+      role: "root_admin",
+      password: "rootadmin123",
     },
   ];
 
