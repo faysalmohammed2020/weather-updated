@@ -459,9 +459,17 @@ export default function RainfallTab() {
     const { todayUTC, prevUTC } = getUtcDateStrings();
     const currentSincePrevious = parseSincePreviousInput();
 
+    // Helper to check if an API entry exists for a given utcTime
+    const hasEntry = (utcTime: string) =>
+      rainfallApiData.some((data) => data.utcTime === utcTime);
+
     if (hour === 0) {
-      const totalMm =
-        getRainfallValueMm(`${prevUTC}T21:00:00.000Z`) + currentSincePrevious;
+      const prevKey = `${prevUTC}T21:00:00.000Z`;
+      if (!hasEntry(prevKey)) {
+        // No previous data — show the current input (or 0000 if empty)
+        return formatToFourDigitCode(currentSincePrevious);
+      }
+      const totalMm = getRainfallValueMm(prevKey) + currentSincePrevious;
       return formatToFourDigitCode(totalMm);
     }
 
@@ -473,6 +481,11 @@ export default function RainfallTab() {
 
     const previousUtc = lookups[hour];
     if (!previousUtc) return "";
+
+    if (!hasEntry(previousUtc)) {
+      // If previous timecard missing, show the current input (or 0000)
+      return formatToFourDigitCode(currentSincePrevious);
+    }
 
     const totalMm = getRainfallValueMm(previousUtc) + currentSincePrevious;
     return formatToFourDigitCode(totalMm);
@@ -494,36 +507,44 @@ export default function RainfallTab() {
       `${prevUTC}T18:00:00.000Z`,
       `${prevUTC}T21:00:00.000Z`,
     ];
+    // Helper to check presence of any previous timecards in this range
+    const anyPrevious = timesToSum.some((t) =>
+      rainfallApiData.some((d) => d.utcTime === t),
+    );
 
-    // Convert 4-digit rainfall codes (tenths) to mm, add since-previous (mm), then round to 3-digit code
+    // If no previous timecards exist, show the current input (or 000)
+    if (!anyPrevious) {
+      return formatToThreeDigitCode(currentSincePrevious);
+    }
+
+    // Otherwise sum existing values (missing entries treated as 0)
     let totalMm = 0;
     timesToSum.forEach((time) => {
-      const valueMm = getRainfallValueMm(time);
-      totalMm += valueMm;
+      totalMm += getRainfallValueMm(time);
     });
 
-    // Add the Since Previous Observation input value (current 00 UTC) - this is already in mm/decimal
+    // Add the Since Previous Observation input value (current 00 UTC)
     totalMm += currentSincePrevious;
 
     return formatToThreeDigitCode(totalMm);
   };
 
-  // Auto-fill calculated values
+  // Auto-fill calculated values (run even when API data is empty — functions handle missing entries)
   useEffect(() => {
-    if (rainfallApiData.length === 0) return;
-
     // Auto-fill During Previous 6 Hours
     if (isSixHourReport) {
       const calculated6Hours = calculateDuringPrevious6Hours();
       setFieldValue("rainfall.during-previous", calculated6Hours || "");
+    } else {
+      setFieldValue("rainfall.during-previous", "");
     }
 
     // Auto-fill Last 24 Hours (only at 00 UTC)
     if (isMidnightReport) {
       const calculated24Hours = calculateLast24Hours();
-      if (calculated24Hours) {
-        setFieldValue("rainfall.last-24-hours", calculated24Hours);
-      }
+      setFieldValue("rainfall.last-24-hours", calculated24Hours || "");
+    } else {
+      setFieldValue("rainfall.last-24-hours", "");
     }
   }, [
     rainfallApiData,
@@ -536,12 +557,10 @@ export default function RainfallTab() {
 
   // Separate useEffect for Last 24 Hours calculation when since-previous changes
   useEffect(() => {
-    if (rainfallApiData.length === 0 || !isMidnightReport) return;
+    if (!isMidnightReport) return;
 
     const calculated24Hours = calculateLast24Hours();
-    if (calculated24Hours) {
-      setFieldValue("rainfall.last-24-hours", calculated24Hours);
-    }
+    setFieldValue("rainfall.last-24-hours", calculated24Hours || "");
   }, [
     rainfall["since-previous"],
     rainfallApiData,
@@ -681,8 +700,8 @@ export default function RainfallTab() {
                 <AlertCircle className="h-4 w-4 mt-0.5 text-amber-700" />
                 <div className="text-xs text-amber-800">
                   <p className="font-semibold">
-                    Allowed window: {windowInfo.startLabel}-{windowInfo.endLabel}{" "}
-                    UTC (previous 3 hours)
+                    Allowed window: {windowInfo.startLabel}-
+                    {windowInfo.endLabel} UTC (previous 3 hours)
                   </p>
                   <p>
                     Only this 3-hour range is valid for the current observation.
