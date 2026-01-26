@@ -778,17 +778,15 @@ export default function RainfallTab() {
                   <span className="text-sm font-semibold text-violet-700 flex items-center gap-2">
                     <Clock className="h-4 w-4" /> Slot {index + 1}
                   </span>
-                  {timeSlots.length > 1 && (
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => removeTimeSlot(slot.id)}
-                      className="h-7 text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  )}
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => removeTimeSlot(slot.id)}
+                    className="h-7 text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
                 <div className="grid gap-3 md:grid-cols-2">
                   <div className="grid gap-2">

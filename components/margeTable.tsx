@@ -200,6 +200,7 @@ const MargeTable = forwardRef(
     const user = session?.user;
     const isSuperAdmin = user?.role === "super_admin";
     const isStationAdmin = user?.role === "station_admin";
+    const isRootAdmin = user?.role === "root_admin";
 
     // Expose getData method via ref
     useImperativeHandle(ref, () => ({
@@ -354,9 +355,9 @@ const MargeTable = forwardRef(
                 .map((slot, index) => `Slot ${index + 1}: ${slot.timeStart}`)
                 .join(", ")
             : weatherObs?.rainfallTimeStart
-              ? moment.utc(weatherObs.rainfallTimeStart).format(
-                  "MMMM Do YYYY, h:mm",
-                )
+              ? moment
+                  .utc(weatherObs.rainfallTimeStart)
+                  .format("MMMM Do YYYY, h:mm")
               : "--",
           weatherObs?.rainfallTimeSlots &&
           weatherObs.rainfallTimeSlots.length > 0
@@ -364,7 +365,9 @@ const MargeTable = forwardRef(
                 .map((slot, index) => `Slot ${index + 1}: ${slot.timeEnd}`)
                 .join(", ")
             : weatherObs?.rainfallTimeEnd
-              ? moment.utc(weatherObs.rainfallTimeEnd).format("MMMM Do YYYY, h:mm")
+              ? moment
+                  .utc(weatherObs.rainfallTimeEnd)
+                  .format("MMMM Do YYYY, h:mm")
               : "--",
           weatherObs?.rainfallSincePrevious || "--",
           weatherObs?.rainfallDuringPrevious || "--",
@@ -502,9 +505,9 @@ ${"=".repeat(60)}
                 .map((slot, index) => `Slot ${index + 1}: ${slot.timeStart}`)
                 .join(", ")
             : weatherObs?.rainfallTimeStart
-              ? moment.utc(weatherObs.rainfallTimeStart).format(
-                  "MMMM Do YYYY, h:mm",
-                )
+              ? moment
+                  .utc(weatherObs.rainfallTimeStart)
+                  .format("MMMM Do YYYY, h:mm")
               : "--"
         }\n`;
         txtContent += `Rainfall Time End${" ".repeat(4)} ---> ${
@@ -514,7 +517,9 @@ ${"=".repeat(60)}
                 .map((slot, index) => `Slot ${index + 1}: ${slot.timeEnd}`)
                 .join(", ")
             : weatherObs?.rainfallTimeEnd
-              ? moment.utc(weatherObs.rainfallTimeEnd).format("MMMM Do YYYY, h:mm")
+              ? moment
+                  .utc(weatherObs.rainfallTimeEnd)
+                  .format("MMMM Do YYYY, h:mm")
               : "--"
         }\n`;
         txtContent += `Rainfall Since Prev${" ".repeat(3)} ---> ${weatherObs?.rainfallSincePrevious || "--"}\n`;
@@ -668,7 +673,7 @@ ${"=".repeat(60)}`;
         mergeData(firstData, secondData);
 
         // Fetch stations if super admin and not already loaded
-        if (isSuperAdmin && stations.length === 0) {
+        if ((isSuperAdmin || isRootAdmin) && stations.length === 0) {
           const stationsResponse = await fetch("/api/stations");
           if (stationsResponse.ok) {
             const stationsResult = await stationsResponse.json();
@@ -840,7 +845,7 @@ ${"=".repeat(60)}`;
             {/* Actions and Filters Section */}
             <div className="flex flex-col md:flex-row items-start md:items-center gap-3 md:gap-4 pt-2 md:pt-0 border-t md:border-t-0 border-slate-200">
               {/* Export Button */}
-              {(isSuperAdmin || isStationAdmin) && (
+              {(isRootAdmin || isSuperAdmin || isStationAdmin) && (
                 <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
                   <Button
                     variant="outline"
@@ -865,8 +870,8 @@ ${"=".repeat(60)}`;
                 </div>
               )}
 
-              {/* Station Filter - Super Admin Only */}
-              {isSuperAdmin && (
+              {/* Station Filter - Super Admin and Root admin Only */}
+              {(isSuperAdmin || isRootAdmin) && (
                 <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-3 w-full md:w-auto">
                   <div className="flex items-center gap-2">
                     <Filter
@@ -1675,12 +1680,12 @@ ${"=".repeat(60)}`;
                                     )
                                     .join(", ")
                                 : weatherObs?.rainfallTimeStart
-                                  ? moment.utc(weatherObs.rainfallTimeStart).format(
-                                      "MMMM Do YYYY, h:mm",
-                                    )
+                                  ? moment
+                                      .utc(weatherObs.rainfallTimeStart)
+                                      .format("MMMM Do YYYY, h:mm")
                                   : "--"}
                             </td>
-                            
+
                             <td
                               className={`border border-slate-300 p-1 ${(weatherObs?.rainfallTimeSlots?.length || 0) > 0 ? "text-emerald-700 font-medium" : ""}`}
                             >
@@ -1694,9 +1699,9 @@ ${"=".repeat(60)}`;
                                     )
                                     .join(", ")
                                 : weatherObs?.rainfallTimeEnd
-                                  ? moment.utc(weatherObs.rainfallTimeEnd).format(
-                                      "MMMM Do YYYY, h:mm",
-                                    )
+                                  ? moment
+                                      .utc(weatherObs.rainfallTimeEnd)
+                                      .format("MMMM Do YYYY, h:mm")
                                   : "--"}
                             </td>
                             <td

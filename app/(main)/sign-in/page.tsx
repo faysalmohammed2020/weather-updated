@@ -51,6 +51,8 @@ export default function SignInForm() {
   const [showSecurityCode, setShowSecurityCode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState("");
+  const [twoFactorRequired, setTwoFactorRequired] = useState(false);
+  const [otp, setOtp] = useState("");
   const [stations, setStations] = useState<Station[]>([]);
   const [fetchError, setFetchError] = useState("");
   const router = useRouter();
@@ -116,91 +118,115 @@ export default function SignInForm() {
   };
 
   const handleCredentialsSubmit = async (
-  e: React.FormEvent<HTMLFormElement>
-) => {
-  e.preventDefault();
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
+    e.preventDefault();
 
-  if (!role) {
-    setFormError("Please select a role");
-    return;
-  }
-
-  const formData = new FormData(e.currentTarget as HTMLFormElement);
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
-
-  if (!email || !password) {
-    setFormError("Please enter both email and password");
-    return;
-  }
-
-  const station = stations.find((s) => s.name === selectedStation);
-  if (!station) {
-    setFormError("Invalid station selection");
-    return;
-  }
-
-  setLoading(true);
-  setFormError("");
-
-  try {
-    // ✅ NextAuth client signIn (cookie browser-এ সেট হবে)
-    const res = await signIn("credentials", {
-      email,
-      password,
-
-      // extra fields পাঠানো হলো (authorize() চাইলে চেক করতে পারে)
-      role,
-      stationId: station.stationId,
-
-      redirect: false,          // আমরা নিজে redirect করবো
-      callbackUrl: "/dashboard" // target
-    });
-
-    // 2FA হলে তোমার authorize() থেকে "OTP_REQUIRED" throw করতে পারো
-    if (res?.error === "OTP_REQUIRED") {
-      router.replace("/2fa");
+    if (!role) {
+      setFormError("Please select a role");
       return;
     }
 
-    if (res?.ok) {
-      toast.success("Login successful");
-      router.replace("/dashboard");
-      router.refresh();
+    const formData = new FormData(e.currentTarget as HTMLFormElement);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    if (!email || !password) {
+      setFormError("Please enter both email and password");
       return;
     }
 
-    // error handle
-    let errorMessage = res?.error || "An error occurred during sign in";
-
-    if (errorMessage.includes("credentials")) {
-      errorMessage = "Invalid email or password";
-    } else if (errorMessage.includes("ACCOUNT_BANNED")) {
-      errorMessage = "Your account has been disabled. Please contact an administrator.";
-    } else if (
-      errorMessage.includes("permission") ||
-      errorMessage.includes("role")
-    ) {
-      errorMessage =
-        "You don't have permission to access this station with the selected role";
-    } else if (errorMessage.includes("security code")) {
-      errorMessage = "The security code doesn't match your account";
-    } else if (errorMessage.includes("station")) {
-      errorMessage = "Your account is not associated with this station";
-    } else if (errorMessage.includes("another device")) {
-      errorMessage = "You are already logged in from another device";
+    if (twoFactorRequired && !otp.trim()) {
+      setFormError("Enter your 2FA code or a backup code to continue");
+      return;
     }
 
-    setFormError(errorMessage);
-  } catch (error) {
-    setFormError(
-      error instanceof Error ? error.message : "An unexpected error occurred"
-    );
-  } finally {
-    setLoading(false);
-  }
-};
+    const station = stations.find((s) => s.name === selectedStation);
+    if (!station) {
+      setFormError("Invalid station selection");
+      return;
+    }
 
+    setLoading(true);
+    setFormError("");
+
+    try {
+      const otpValue = otp.trim();
+
+      // NextAuth client signIn (browser cookie will be set)
+      const res = await signIn("credentials", {
+        email,
+        password,
+
+        // extra fields forwarded (authorize() can validate)
+        role,
+        stationId: station.stationId,
+        otp: otpValue || undefined,
+
+        redirect: false, // we'll redirect manually
+        callbackUrl: "/dashboard", // target
+      });
+
+      if (res?.error === "OTP_REQUIRED") {
+        setTwoFactorRequired(true);
+        setFormError("Enter the 6-digit code or a backup code to continue.");
+        return;
+      }
+
+      if (res?.error === "CredentialsSignin" && !otpValue) {
+        // NextAuth masks errors; assume 2FA is required if password already passed
+        setTwoFactorRequired(true);
+        setFormError("Two-factor code required. Enter the 6-digit code or a backup code.");
+        return;
+      }
+
+      if (res?.error === "CredentialsSignin" && otpValue) {
+        setTwoFactorRequired(true);
+        setFormError("Invalid code. Try again or use a backup code.");
+        return;
+      }
+
+      if (res?.ok) {
+        toast.success("Login successful");
+        setOtp("");
+        setTwoFactorRequired(false);
+        router.replace("/dashboard");
+        router.refresh();
+        return;
+      }
+
+      // error handle
+      let errorMessage = res?.error || "An error occurred during sign in";
+
+      if (errorMessage.includes("credentials")) {
+        errorMessage = "Invalid email or password";
+      } else if (errorMessage.includes("ACCOUNT_BANNED")) {
+        errorMessage = "Your account has been disabled. Please contact an administrator.";
+      } else if (
+        errorMessage.includes("permission") ||
+        errorMessage.includes("role")
+      ) {
+        errorMessage =
+          "You don't have permission to access this station with the selected role";
+      } else if (errorMessage.includes("security code")) {
+        errorMessage = "The security code doesn't match your account";
+      } else if (errorMessage.includes("station")) {
+        errorMessage = "Your account is not associated with this station";
+      } else if (errorMessage.includes("another device")) {
+        errorMessage = "You are already logged in from another device";
+      } else if (errorMessage.includes("OTP")) {
+        errorMessage = "Two-factor code is required to finish signing in";
+      }
+
+      setFormError(errorMessage);
+    } catch (error) {
+      setFormError(
+        error instanceof Error ? error.message : "An unexpected error occurred"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Filter roles based on station (you can customize this logic)
   const getAvailableRoles = () => {
@@ -599,6 +625,28 @@ export default function SignInForm() {
               )}
             </button>
           </div>
+
+          {twoFactorRequired && (
+            <div className="relative">
+              <Label
+                htmlFor="otp"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Two-Factor or Backup Code
+              </Label>
+              <Shield className="absolute left-3 top-9 text-gray-400 h-4 w-4" />
+              <Input
+                id="otp"
+                name="otp"
+                type="text"
+                placeholder="123456 or backup code"
+                className="pl-10"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                autoComplete="one-time-code"
+              />
+            </div>
+          )}
         </div>
 
         <div className="flex items-center justify-between text-sm">
@@ -650,6 +698,8 @@ export default function SignInForm() {
             onClick={() => {
               setStep("security");
               setFormError("");
+              setTwoFactorRequired(false);
+              setOtp("");
             }}
           >
             <ArrowLeft className="h-4 w-4" />

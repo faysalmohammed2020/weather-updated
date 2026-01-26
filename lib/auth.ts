@@ -7,6 +7,7 @@ import prisma from "@/lib/prisma";
 import { LogAction, LogActionType, LogModule } from "@/lib/log";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
+import { authenticator } from "otplib";
 
 // Single source of truth for signing/decoding NextAuth JWTs
 export const authSecret =
@@ -74,6 +75,7 @@ export const authOptions: NextAuthOptions = {
         // extra fields from client:
         role: { label: "Role", type: "text" },
         stationId: { label: "StationId", type: "text" },
+        otp: { label: "One-time code", type: "text" },
       },
 
       async authorize(credentials) {
@@ -183,7 +185,59 @@ export const authOptions: NextAuthOptions = {
             });
           }
 
-          // 6) Success user object
+          // 6) Enforce two-factor authentication if enabled
+          const requiresTwoFactor = Boolean(user.twoFactorEnabled);
+          const otp =
+            typeof (credentials as any).otp === "string"
+              ? (credentials as any).otp.trim()
+              : "";
+
+          if (requiresTwoFactor) {
+            if (!otp) {
+              throw new Error("OTP_REQUIRED");
+            }
+
+            const record = await prisma.twoFactor.findFirst({
+              where: { userId: user.id },
+              select: { id: true, secret: true, backupCodes: true },
+            });
+
+            let otpValid = false;
+            let backupUsed = false;
+
+            if (record?.secret) {
+              otpValid = authenticator.verify({
+                token: otp,
+                secret: record.secret,
+              });
+            }
+
+            if (!otpValid && record?.backupCodes) {
+              const codes: string[] = JSON.parse(record.backupCodes || "[]");
+              const index = codes.findIndex((c) => c === otp);
+
+              if (index !== -1) {
+                otpValid = true;
+                backupUsed = true;
+                codes.splice(index, 1);
+
+                await prisma.twoFactor.update({
+                  where: { id: record.id },
+                  data: { backupCodes: JSON.stringify(codes) },
+                });
+              }
+            }
+
+            if (!otpValid) {
+              throw new Error("OTP_REQUIRED");
+            }
+
+            if (backupUsed) {
+              (credentials as any).otp = "";
+            }
+          }
+
+          // 7) Success user object
           const stationSafe = user.Station
             ? {
                 id: user.Station.id,
@@ -204,8 +258,9 @@ export const authOptions: NextAuthOptions = {
             upazila: user.upazila,
             stationId: user.stationId,
 
-            // ✅ JSON-safe (now includes lat/lon)
+            // JSON-safe (now includes lat/lon)
             station: stationSafe,
+            twoFactorEnabled: Boolean(user.twoFactorEnabled),
           } as any;
         } catch (e) {
           console.error("AUTHORIZE_ERROR:", e);
@@ -232,6 +287,7 @@ export const authOptions: NextAuthOptions = {
         token.division = (user as any).division;
         token.district = (user as any).district;
         token.upazila = (user as any).upazila;
+        token.twoFactorEnabled = Boolean((user as any).twoFactorEnabled);
 
         token.station = (user as any).station;
       }
@@ -241,6 +297,17 @@ export const authOptions: NextAuthOptions = {
     },
 
     async session({ session, token }) {
+      // Keep two-factor flag in sync with the DB so toggles reflect immediately
+      let latestTwoFactorEnabled: boolean | null | undefined = (token as any)?.twoFactorEnabled;
+      if (token?.id) {
+        const dbUser = await prisma.users.findUnique({
+          where: { id: token.id as string },
+          select: { twoFactorEnabled: true },
+        });
+        latestTwoFactorEnabled = dbUser?.twoFactorEnabled ?? false;
+        (token as any).twoFactorEnabled = latestTwoFactorEnabled;
+      }
+
       if (session.user) {
         (session.user as any).id = token.id;
         (session.user as any).role = token.role;
@@ -248,8 +315,9 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).division = token.division;
         (session.user as any).district = token.district;
         (session.user as any).upazila = token.upazila;
+        (session.user as any).twoFactorEnabled = Boolean(latestTwoFactorEnabled);
 
-        // ✅ IMPORTANT
+        // IMPORTANT
         (session.user as any).station = (token as any).station ?? null;
         (session.user as any).isImpersonating = Boolean(
           (token as any).isImpersonating
