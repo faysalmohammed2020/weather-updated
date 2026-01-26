@@ -242,18 +242,22 @@ export const UserTableClient = ({
 const allRoles = useMemo<UserRole[]>(() => {
   const actorRole = session?.user?.role as UserRole | undefined;
 
-  const roles: UserRole[] = [
-    USER_ROLES.SUPER_ADMIN,
-    USER_ROLES.STATION_ADMIN,
-    USER_ROLES.OBSERVER,
-  ];
+  // base roles everyone can see
+  const roles: UserRole[] = [USER_ROLES.STATION_ADMIN, USER_ROLES.OBSERVER];
 
+  // ✅ station_admin should NOT see super_admin
+  if (actorRole !== USER_ROLES.STATION_ADMIN) {
+    roles.unshift(USER_ROLES.SUPER_ADMIN);
+  }
+
+  // ✅ only root_admin can see root_admin
   if (actorRole === USER_ROLES.ROOT_ADMIN) {
     roles.unshift(USER_ROLES.ROOT_ADMIN);
   }
 
   return roles;
 }, [session?.user?.role]);
+
 
 
   const allStations = useMemo(
