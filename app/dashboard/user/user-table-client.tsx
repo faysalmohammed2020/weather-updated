@@ -239,15 +239,22 @@ export const UserTableClient = ({
     return users.filter((u) => u.role !== USER_ROLES.ROOT_ADMIN);
   }, [users, session?.user?.role]);
 
-  const allRoles = useMemo(
-    () => [
-      USER_ROLES.ROOT_ADMIN,
-      USER_ROLES.SUPER_ADMIN,
-      USER_ROLES.STATION_ADMIN,
-      USER_ROLES.OBSERVER,
-    ],
-    [],
-  );
+const allRoles = useMemo<UserRole[]>(() => {
+  const actorRole = session?.user?.role as UserRole | undefined;
+
+  const roles: UserRole[] = [
+    USER_ROLES.SUPER_ADMIN,
+    USER_ROLES.STATION_ADMIN,
+    USER_ROLES.OBSERVER,
+  ];
+
+  if (actorRole === USER_ROLES.ROOT_ADMIN) {
+    roles.unshift(USER_ROLES.ROOT_ADMIN);
+  }
+
+  return roles;
+}, [session?.user?.role]);
+
 
   const allStations = useMemo(
     () =>
@@ -1031,16 +1038,25 @@ const UserActionButtons = ({
 }: UserActionButtonsProps) => {
   // Allow root_admin and super_admin to impersonate any user except themselves
   const isRootActor = actorRole === USER_ROLES.ROOT_ADMIN;
-  const canImpersonateUser = isSuper && !user.banned;
-  const canManageStatus = isSuper;
-  const canManageTarget =
-    user.role !== USER_ROLES.ROOT_ADMIN || isRootActor;
+
+  // ✅ NEW: super_admin actor cannot manage another super_admin (UI hide)
+  const isSuperActor = actorRole === USER_ROLES.SUPER_ADMIN;
+  const isTargetSuper = user.role === USER_ROLES.SUPER_ADMIN;
+  const blockSuperOnSuper = isSuperActor && isTargetSuper;
+
+  const canImpersonateUser = isSuper && !user.banned && !blockSuperOnSuper;
+  const canManageStatus = isSuper && !blockSuperOnSuper;
+
+  const canManageTarget = user.role !== USER_ROLES.ROOT_ADMIN || isRootActor;
 
   return (
     <div className="flex gap-2">
-      <Button variant="outline" size="sm" onClick={() => onEdit(user)}>
-        Edit
-      </Button>
+      {/* ✅ Hide edit for super_admin -> super_admin */}
+      {!blockSuperOnSuper && (
+        <Button variant="outline" size="sm" onClick={() => onEdit(user)}>
+          Edit
+        </Button>
+      )}
 
       {canManageStatus &&
         canManageTarget &&
@@ -1073,3 +1089,4 @@ const UserActionButtons = ({
     </div>
   );
 };
+
