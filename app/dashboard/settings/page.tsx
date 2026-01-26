@@ -1,3 +1,4 @@
+//app/dashboard/settings
 "use client";
 
 import { useState } from "react";
@@ -36,6 +37,7 @@ const Settings = () => {
   const [totpUri, setTotpUri] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
   const [backupCodes, setBackupCodes] = useState<string[]>([]);
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [disableDialogOpen, setDisableDialogOpen] = useState(false);
   const [disablePassword, setDisablePassword] = useState("");
   const [disableError, setDisableError] = useState("");
@@ -51,6 +53,10 @@ const Settings = () => {
       }
     }
   }, [session, isPending, router]);
+
+  useEffect(() => {
+    setTwoFactorEnabled(Boolean(session?.user?.twoFactorEnabled));
+  }, [session?.user?.twoFactorEnabled]);
 
   // Don't render anything if session is loading or user is not super_admin
   if (isPending) {
@@ -71,9 +77,6 @@ const Settings = () => {
   ) {
     return null;
   }
-
-  // Get 2FA status from session
-  const isTwoFactorEnabled = session?.user?.twoFactorEnabled || false;
 
   const handleToggle2FA = async (checked: boolean) => {
     if (checked) {
@@ -106,6 +109,8 @@ const Settings = () => {
         toast.success("Two-factor authentication disabled successfully");
         setDisableDialogOpen(false);
         setDisablePassword("");
+        setTwoFactorEnabled(false);
+        router.refresh();
       }
     } catch (err: unknown) {
       setDisableError(err instanceof Error ? err.message : "An error occurred");
@@ -170,6 +175,8 @@ const Settings = () => {
         setPassword("");
         setVerificationCode("");
         setTotpUri("");
+        setTwoFactorEnabled(true);
+        router.refresh();
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -200,7 +207,7 @@ const Settings = () => {
             </div>
           </div>
           <Switch
-            checked={isTwoFactorEnabled}
+            checked={twoFactorEnabled}
             onCheckedChange={handleToggle2FA}
             disabled={isLoading}
           />
