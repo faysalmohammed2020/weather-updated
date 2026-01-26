@@ -30,6 +30,7 @@ import {
   type UserRole,
 } from "@/lib/constants/user-management";
 import { User, Station } from "@/hooks/use-user-management";
+import { DialogDescription } from "@radix-ui/react-dialog";
 
 interface UserFormData {
   name: string;
@@ -66,6 +67,7 @@ interface CreateEditUserDialogProps {
   loadingUpazilas?: boolean;
   canShowRoleSelector: boolean;
   currentUserRole: UserRole | null;
+  userStationId?: string;
   createTrigger?: React.ReactNode;
 }
 
@@ -112,6 +114,25 @@ const RoleField = memo(
     currentUserRole: UserRole | null;
   }) => {
     if (!visible) return null;
+
+    // Station Admin can only create Observer role
+    if (currentUserRole === USER_ROLES.STATION_ADMIN) {
+      return (
+        <div className="flex flex-col gap-2">
+          <label htmlFor="role">
+            Role <span className="text-red-500">*</span>
+          </label>
+          <Select value={USER_ROLES.OBSERVER} disabled>
+            <SelectTrigger id="role" className="w-full">
+              <SelectValue placeholder="Observer" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={USER_ROLES.OBSERVER}>Observer</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      );
+    }
 
     // Hide Super Admin role for Super Admin users
     const shouldHideSuperAdmin = currentUserRole === USER_ROLES.SUPER_ADMIN;
@@ -211,14 +232,24 @@ const StationFields = memo(
     stations,
     loadingStations,
     canSelectStation,
+    currentUserRole,
+    userStationId,
   }: {
     stationId: string;
     onStationChange: (stationId: string) => void;
     stations: Station[];
     loadingStations?: boolean;
     canSelectStation: boolean;
+    currentUserRole: UserRole | null;
+    userStationId?: string;
   }) => {
     const selectedStation = stations.find((s) => s.id === stationId);
+
+    // Station Admin can only select their own station
+    const isStationAdmin = currentUserRole === USER_ROLES.STATION_ADMIN;
+    const availableStations = isStationAdmin 
+      ? stations.filter(s => s.stationId === userStationId || s.id === userStationId)
+      : stations;
 
     return (
       <>
@@ -227,7 +258,7 @@ const StationFields = memo(
           <Select
             value={stationId}
             onValueChange={onStationChange}
-            disabled={!canSelectStation}
+            disabled={!canSelectStation || isStationAdmin}
           >
             <SelectTrigger id="stationName" className="w-full">
               <SelectValue
@@ -235,13 +266,18 @@ const StationFields = memo(
               />
             </SelectTrigger>
             <SelectContent>
-              {stations.map((station) => (
+              {availableStations.map((station) => (
                 <SelectItem key={station.id} value={station.id}>
                   {station.name}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
+          {isStationAdmin && !stationId && (
+            <p className="text-xs text-gray-500">
+              Station Admin can only assign users to their station
+            </p>
+          )}
         </div>
 
         <div className="flex flex-col gap-2">
@@ -420,6 +456,7 @@ export const CreateEditUserDialog = memo((props: CreateEditUserDialogProps) => {
     loadingUpazilas,
     canShowRoleSelector,
     currentUserRole,
+    userStationId,
     createTrigger,
   } = props;
 
@@ -471,9 +508,14 @@ export const CreateEditUserDialog = memo((props: CreateEditUserDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {createTrigger && <DialogTrigger asChild>{createTrigger}</DialogTrigger>}
-      <DialogContent>
+      <DialogContent aria-describedby="user-dialog-description">
         <DialogHeader>
           <DialogTitle_Internal editUser={editUser} />
+          <DialogDescription id="user-dialog-description" className="sr-only">
+            {editUser
+              ? "Update user details. Station Admins can only manage their own station and create observer accounts."
+              : "Enter details to create a new user. Station Admins can only create observer accounts for their station."}
+          </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <NameField
@@ -516,6 +558,8 @@ export const CreateEditUserDialog = memo((props: CreateEditUserDialogProps) => {
             stations={stations}
             loadingStations={loadingStations}
             canSelectStation={canShowRoleSelector}
+            currentUserRole={currentUserRole}
+            userStationId={userStationId}
           />
 
           <LocationFields

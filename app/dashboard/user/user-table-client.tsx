@@ -210,7 +210,8 @@ export const UserTableClient = ({
   const isPrivilegedAdmin = useMemo(
     () =>
       session?.user?.role === USER_ROLES.SUPER_ADMIN ||
-      session?.user?.role === USER_ROLES.ROOT_ADMIN,
+      session?.user?.role === USER_ROLES.ROOT_ADMIN ||
+      session?.user?.role === USER_ROLES.STATION_ADMIN,
     [session?.user?.role],
   );
 
@@ -235,18 +236,37 @@ export const UserTableClient = ({
 
   const visibleUsers = useMemo(() => {
     const actorRole = session?.user?.role;
+    const userStationDbId = session?.user?.station?.id;
+
     if (actorRole === USER_ROLES.ROOT_ADMIN) return users;
+
+    // Station Admin can only see users from their own station
+    if (actorRole === USER_ROLES.STATION_ADMIN) {
+      return users.filter(
+        (u) =>
+          u.role !== USER_ROLES.ROOT_ADMIN &&
+          u.role !== USER_ROLES.SUPER_ADMIN &&
+          u.stationId === userStationDbId,
+      );
+    }
+
+    // Other roles filter out Root Admin
     return users.filter((u) => u.role !== USER_ROLES.ROOT_ADMIN);
-  }, [users, session?.user?.role]);
+  }, [users, session?.user?.role, session?.user?.station?.id]);
 
 const allRoles = useMemo<UserRole[]>(() => {
   const actorRole = session?.user?.role as UserRole | undefined;
 
+  // Station Admin can only create Observer role
+  if (actorRole === USER_ROLES.STATION_ADMIN) {
+    return [USER_ROLES.OBSERVER];
+  }
+
   // base roles everyone can see
   const roles: UserRole[] = [USER_ROLES.STATION_ADMIN, USER_ROLES.OBSERVER];
 
-  // ✅ station_admin should NOT see super_admin
-  if (actorRole !== USER_ROLES.STATION_ADMIN) {
+  // ✅ only super_admin and root_admin can see super_admin role option
+  if (actorRole === USER_ROLES.SUPER_ADMIN || actorRole === USER_ROLES.ROOT_ADMIN) {
     roles.unshift(USER_ROLES.SUPER_ADMIN);
   }
 
@@ -260,13 +280,22 @@ const allRoles = useMemo<UserRole[]>(() => {
 
 
 
-  const allStations = useMemo(
-    () =>
-      stations
-        .filter((station) => station?.id || station?.stationId)
-        .sort((a, b) => a.name.localeCompare(b.name)),
-    [stations],
-  );
+  const allStations = useMemo(() => {
+    const actorRole = session?.user?.role;
+    const userStationDbId = session?.user?.station?.id;
+
+    // Station Admin can only see their own station
+    if (actorRole === USER_ROLES.STATION_ADMIN) {
+      return stations.filter(
+        (station) => station?.id === userStationDbId,
+      );
+    }
+
+    // Other roles see all stations
+    return stations
+      .filter((station) => station?.id || station?.stationId)
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [stations, session?.user?.role, session?.user?.station?.id]);
 
   // ============================================================================
   // PAGINATION FUNCTIONS
@@ -447,18 +476,37 @@ const allRoles = useMemo<UserRole[]>(() => {
   // FORM MANAGEMENT FUNCTIONS
   // ============================================================================
   const resetForm = useCallback(() => {
+    const actorRole = session?.user?.role;
+    const userStationId = session?.user?.station?.stationId;
+    
+    // Auto-populate for Station Admin
+    let defaultStationId = "";
+    let defaultRole = USER_ROLES.OBSERVER;
+    
+    if (actorRole === USER_ROLES.STATION_ADMIN && userStationId) {
+      const userStation = stations.find(s => s.stationId === userStationId || s.id === userStationId);
+      if (userStation) {
+        defaultStationId = userStation.id;
+        defaultRole = USER_ROLES.OBSERVER; // Force Observer role
+      } else {
+        // Debug: Log if station not found
+        console.log("Station not found for userStationId:", userStationId);
+        console.log("Available stations:", stations.map(s => ({ id: s.id, stationId: s.stationId, name: s.name })));
+      }
+    }
+    
     setFormData({
       name: "",
       email: "",
       password: "",
-      role: USER_ROLES.OBSERVER,
+      role: defaultRole,
       division: "",
       district: "",
       upazila: "",
-      stationId: "",
+      stationId: defaultStationId,
     });
     setEditUser(null);
-  }, []);
+  }, [session?.user?.role, session?.user?.station?.stationId, stations]);
 
   const openCreateDialog = useCallback(() => {
     resetForm();
@@ -977,6 +1025,7 @@ const allRoles = useMemo<UserRole[]>(() => {
           loadingUpazilas={canLoadingLocationData.loadingUpazilas}
           canShowRoleSelector={isPrivilegedAdmin}
           currentUserRole={session?.user?.role as UserRole | null}
+          userStationId={session?.user?.station?.stationId}
         />
 
         {isPrivilegedAdmin && (

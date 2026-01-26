@@ -125,6 +125,7 @@ export async function PUT(request: NextRequest) {
     const actorRole = session.user.role;
     const isRoot = actorRole === "root_admin";
     const isSuper = actorRole === "super_admin";
+    const isStationAdmin = actorRole === "station_admin";
     const isPrivileged = isRoot || isSuper;
 
     // ============================================================
@@ -158,6 +159,34 @@ export async function PUT(request: NextRequest) {
         { error: "You are not authorized to do this action" },
         { status: 403 }
       );
+    }
+
+    // ✅ Station Admin hierarchy restrictions
+    if (isStationAdmin) {
+      // Station Admin can only edit users from their own station
+      const userStationId = session.user.station?.stationId;
+      if (!userStationId || existingUser.stationId !== userStationId) {
+        return NextResponse.json(
+          { error: "Station Admin can only edit users from their own station" },
+          { status: 403 }
+        );
+      }
+
+      // Station Admin can only edit Observer roles (cannot promote to Station Admin)
+      if (rest.role && rest.role !== "observer") {
+        return NextResponse.json(
+          { error: "Station Admin can only manage Observer accounts" },
+          { status: 403 }
+        );
+      }
+
+      // Station Admin cannot edit Super Admin or Root Admin
+      if (existingUser.role === "super_admin" || existingUser.role === "root_admin") {
+        return NextResponse.json(
+          { error: "Station Admin cannot edit super admin or root admin accounts" },
+          { status: 403 }
+        );
+      }
     }
 
     // ============================================================
@@ -265,11 +294,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // ✅ super_admin OR root_admin can create users
+    // ✅ super_admin OR root_admin OR station_admin can create users (with restrictions)
     const isPrivileged =
       session.user.role === "super_admin" || session.user.role === "root_admin";
+    const isStationAdmin = session.user.role === "station_admin";
 
-    if (!isPrivileged) {
+    if (!isPrivileged && !isStationAdmin) {
       return NextResponse.json(
         { error: "You are not authorized to do this action" },
         { status: 403 }
@@ -287,6 +317,27 @@ export async function POST(request: NextRequest) {
       upazila,
       stationId,
     } = body;
+
+    // ✅ Station Admin restrictions
+    if (isStationAdmin) {
+      const userStationDbId = session.user.station?.id;
+
+      // Station Admin can only create Observer role
+      if (role !== "observer") {
+        return NextResponse.json(
+          { error: "Station Admin can only create Observer accounts" },
+          { status: 403 }
+        );
+      }
+
+      // Station Admin can only create users for their own station
+      if (!userStationDbId || stationId !== userStationDbId) {
+        return NextResponse.json(
+          { error: "Station Admin can only create users for their own station" },
+          { status: 403 }
+        );
+      }
+    }
 
     if (!email || !password || !role || !division || !district || !upazila) {
       return NextResponse.json(
