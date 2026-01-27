@@ -236,7 +236,8 @@ export async function GET(req: Request) {
       ? new Date(`${endDate}T23:59:59.999Z`)
       : new Date(new Date().toISOString().slice(0, 10) + "T23:59:59.999Z");
 
-    const superFilter = session.user.role === "super_admin";
+    const superFilter =
+  session.user.role === "super_admin" || session.user.role === "root_admin";
 
     const entries = await prisma.observingTime.findMany({
       where: {
