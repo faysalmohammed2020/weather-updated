@@ -4,6 +4,7 @@
  */
 
 import {
+  USER_ROLES,
   UserRole,
   PASSWORD_REQUIREMENTS,
   ERROR_MESSAGES,
@@ -175,11 +176,29 @@ export const canImpersonate = (
   currentUserId: string,
   targetUserId: string,
   targetUserRole: string | null,
+  actorRole?: string | null,
 ): { canImpersonate: boolean; error?: string } => {
+  const isRoot = actorRole === USER_ROLES.ROOT_ADMIN;
+  const isSuper = actorRole === USER_ROLES.SUPER_ADMIN;
+
+  if (!isRoot && !isSuper) {
+    return {
+      canImpersonate: false,
+      error: "You are not authorized to do this action",
+    };
+  }
+
   if (targetUserRole === "root_admin") {
     return {
       canImpersonate: false,
       error: ERROR_MESSAGES.CANNOT_IMPERSONATE_ROOT_ADMIN,
+    };
+  }
+
+  if (targetUserRole === "super_admin" && !isRoot) {
+    return {
+      canImpersonate: false,
+      error: ERROR_MESSAGES.CANNOT_IMPERSONATE_SUPER_ADMIN,
     };
   }
 
@@ -190,7 +209,6 @@ export const canImpersonate = (
     };
   }
 
-  // root_admin can impersonate super_admin
   return { canImpersonate: true };
 };
 

@@ -513,8 +513,8 @@ export const CreateEditUserDialog = memo((props: CreateEditUserDialogProps) => {
           <DialogTitle_Internal editUser={editUser} />
           <DialogDescription id="user-dialog-description" className="sr-only">
             {editUser
-              ? "Update user details. Station Admins can only manage their own station and create observer accounts."
-              : "Enter details to create a new user. Station Admins can only create observer accounts for their station."}
+              ? "Update user details. Station Admins can only manage observer accounts in their own station."
+              : "Enter details to create a new user."}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">

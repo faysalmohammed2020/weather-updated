@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
       : {
           ...notBannedFilter,
           role: "observer",
-          stationId: session.user.station?.id,
+          stationId: session.user.stationId ?? session.user.station?.id,
         };
 
     // ✅ Additional filters for super admin
@@ -163,9 +163,26 @@ export async function PUT(request: NextRequest) {
 
     // ✅ Station Admin hierarchy restrictions
     if (isStationAdmin) {
+      const hasStatusUpdate =
+        "banned" in rest || "banReason" in rest || "banExpires" in rest;
+
+      if (hasStatusUpdate) {
+        return NextResponse.json(
+          { error: "Station Admin cannot deactivate or restore user accounts" },
+          { status: 403 }
+        );
+      }
+
       // Station Admin can only edit users from their own station
-      const userStationId = session.user.station?.stationId;
-      if (!userStationId || existingUser.stationId !== userStationId) {
+      const userStationId =
+        session.user.stationId ?? session.user.station?.id;
+      const userStationCode = session.user.station?.stationId;
+      const sameStation =
+        Boolean(userStationId) &&
+        (existingUser.stationId === userStationId ||
+          existingUser.stationId === userStationCode);
+
+      if (!sameStation) {
         return NextResponse.json(
           { error: "Station Admin can only edit users from their own station" },
           { status: 403 }

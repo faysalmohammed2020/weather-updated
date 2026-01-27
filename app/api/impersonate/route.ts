@@ -109,13 +109,12 @@ export async function POST(request: NextRequest) {
     // Check if user has impersonation permissions
     if (
       session.user.role !== "super_admin" &&
-      session.user.role !== "root_admin" &&
-      session.user.role !== "station_admin"
+      session.user.role !== "root_admin"
     ) {
       return NextResponse.json(
         {
           error:
-            "Unauthorized. Only super admins, root admins, and station admins can impersonate users.",
+            "Unauthorized. Only super admins and root admins can impersonate users.",
         },
         { status: 403 },
       );
@@ -152,26 +151,6 @@ export async function POST(request: NextRequest) {
         { error: "Cannot impersonate another super admin" },
         { status: 403 },
       );
-    }
-
-    // If station_admin, ensure they can only impersonate observers in their station
-    if (session.user.role === "station_admin") {
-      if (targetUser.role !== "observer") {
-        return NextResponse.json(
-          { error: "Station admins can only impersonate observers" },
-          { status: 403 },
-        );
-      }
-
-      if (targetUser.stationId !== (session.user as any).stationId) {
-        return NextResponse.json(
-          {
-            error:
-              "Station admins can only impersonate observers in their own station",
-          },
-          { status: 403 },
-        );
-      }
     }
 
     // Prevent self-impersonation

@@ -218,13 +218,16 @@ export const UserTableClient = ({
   // ============================================================================
   // COMPUTED VALUES
   // ============================================================================
-  const isPrivilegedAdmin = useMemo(
-    () =>
-      session?.user?.role === USER_ROLES.SUPER_ADMIN ||
-      session?.user?.role === USER_ROLES.ROOT_ADMIN ||
-      session?.user?.role === USER_ROLES.STATION_ADMIN,
-    [session?.user?.role],
-  );
+  const actorRole = session?.user?.role as UserRole | null;
+  const isRootAdmin = actorRole === USER_ROLES.ROOT_ADMIN;
+  const isSuperAdmin = actorRole === USER_ROLES.SUPER_ADMIN;
+  const isStationAdmin = actorRole === USER_ROLES.STATION_ADMIN;
+  const canCreateUsers = isRootAdmin || isSuperAdmin || isStationAdmin;
+  const canManageUsers = isRootAdmin || isSuperAdmin;
+  const canShowRoleSelector = isRootAdmin || isSuperAdmin || isStationAdmin;
+  const actorStationId =
+    session?.user?.station?.id ?? session?.user?.stationId;
+  const actorStationCode = session?.user?.station?.stationId;
 
   const canLoadingLocationData = useMemo(
     () => ({
@@ -246,8 +249,9 @@ export const UserTableClient = ({
   }, [stations]);
 
   const visibleUsers = useMemo(() => {
-    const actorRole = session?.user?.role;
-    const userStationDbId = session?.user?.station?.id;
+    const userStationDbId =
+      session?.user?.station?.id ?? session?.user?.stationId;
+    const userStationCode = session?.user?.station?.stationId;
 
     if (actorRole === USER_ROLES.ROOT_ADMIN) return users;
 
@@ -255,9 +259,9 @@ export const UserTableClient = ({
     if (actorRole === USER_ROLES.STATION_ADMIN) {
       return users.filter(
         (u) =>
-          u.role !== USER_ROLES.ROOT_ADMIN &&
-          u.role !== USER_ROLES.SUPER_ADMIN &&
-          u.stationId === userStationDbId,
+          u.role === USER_ROLES.OBSERVER &&
+          (u.stationId === userStationDbId ||
+            u.stationId === userStationCode),
       );
     }
 
@@ -574,8 +578,6 @@ const updatePageInUrl = useCallback(
   // ============================================================================
   const openEditDialog = useCallback(
     (user: User) => {
-      const actorRole = session?.user?.role;
-
       // ✅ root_admin allow to edit super_admin
       if (user.role === USER_ROLES.SUPER_ADMIN) {
         if (actorRole !== USER_ROLES.ROOT_ADMIN) {
@@ -588,6 +590,19 @@ const updatePageInUrl = useCallback(
       if (user.role === USER_ROLES.ROOT_ADMIN) {
         toast.error(ERROR_MESSAGES.CANNOT_MODIFY_ROOT_ADMIN);
         return;
+      }
+
+      if (actorRole === USER_ROLES.STATION_ADMIN) {
+        const sameStation =
+          user.stationId === actorStationId ||
+          user.stationId === actorStationCode;
+
+        if (user.role !== USER_ROLES.OBSERVER || !sameStation) {
+          toast.error(
+            "Station Admin can only edit Observer accounts in their station",
+          );
+          return;
+        }
       }
 
       setEditUser(user);
@@ -604,7 +619,7 @@ const updatePageInUrl = useCallback(
 
       setOpenDialog(true);
     },
-    [session?.user?.role],
+    [actorRole, actorStationId, actorStationCode],
   );
 
   const handleUpdateUser = useCallback(async () => {
@@ -718,7 +733,12 @@ const updatePageInUrl = useCallback(
   // ============================================================================
   const handleImpersonate = useCallback(
     async (userId: string, userName: string | null, userRole: string | null) => {
-      const check = canImpersonate(session?.user?.id || "", userId, userRole);
+      const check = canImpersonate(
+        session?.user?.id || "",
+        userId,
+        userRole,
+        actorRole,
+      );
       if (!check.canImpersonate) {
         toast.error(check.error);
         return;
@@ -730,7 +750,7 @@ const updatePageInUrl = useCallback(
         setImpersonatingUserId(null);
       }
     },
-    [session?.user?.id, impersonateUser],
+    [session?.user?.id, actorRole, impersonateUser],
   );
 
   // ============================================================================
@@ -741,7 +761,7 @@ const updatePageInUrl = useCallback(
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">User Management</h1>
-        {isPrivilegedAdmin && (
+        {canCreateUsers && (
           <Button
             className="bg-sky-600 hover:bg-sky-400"
             onClick={openCreateDialog}
@@ -785,7 +805,7 @@ const updatePageInUrl = useCallback(
               </Select>
             </div>
 
-            {isPrivilegedAdmin && (
+            {canManageUsers && (
               <div className="min-w-[160px]">
                 <Label
                   htmlFor="status-filter"
@@ -938,8 +958,10 @@ const updatePageInUrl = useCallback(
                     <TableCell>
                       <UserActionButtons
                         user={user}
-                        isSuper={isPrivilegedAdmin}
-                        actorRole={session?.user?.role as UserRole | null}
+                        canManageUsers={canManageUsers}
+                        actorRole={actorRole}
+                        actorStationId={actorStationId}
+                        actorStationCode={actorStationCode}
                         currentUserId={session?.user?.id}
                         onEdit={openEditDialog}
                         onDelete={openDeleteConfirmation}
@@ -1040,12 +1062,12 @@ const updatePageInUrl = useCallback(
           loadingDivisions={canLoadingLocationData.loadingDivisions}
           loadingDistricts={canLoadingLocationData.loadingDistricts}
           loadingUpazilas={canLoadingLocationData.loadingUpazilas}
-          canShowRoleSelector={isPrivilegedAdmin}
-          currentUserRole={session?.user?.role as UserRole | null}
+          canShowRoleSelector={canShowRoleSelector}
+          currentUserRole={actorRole}
           userStationId={session?.user?.station?.stationId}
         />
 
-        {isPrivilegedAdmin && (
+        {canManageUsers && (
           <DeleteConfirmationDialog
             open={openDeleteDialog}
             onOpenChange={setOpenDeleteDialog}
@@ -1054,7 +1076,7 @@ const updatePageInUrl = useCallback(
           />
         )}
 
-        {isPrivilegedAdmin && (
+        {canManageUsers && (
           <RestoreConfirmationDialog
             open={openRestoreDialog}
             onOpenChange={handleRestoreDialogChange}
@@ -1081,8 +1103,10 @@ const updatePageInUrl = useCallback(
 // ============================================================================
 interface UserActionButtonsProps {
   user: User;
-  isSuper: boolean;
+  canManageUsers: boolean;
   actorRole?: UserRole | null;
+  actorStationId?: string;
+  actorStationCode?: string;
   currentUserId?: string;
   onEdit: (user: User) => void;
   onDelete: (userId: string, userRole: string | null) => void;
@@ -1097,8 +1121,10 @@ interface UserActionButtonsProps {
 
 const UserActionButtons = ({
   user,
-  isSuper,
+  canManageUsers,
   actorRole,
+  actorStationId,
+  actorStationCode,
   currentUserId,
   onEdit,
   onDelete,
@@ -1107,19 +1133,33 @@ const UserActionButtons = ({
   isImpersonating,
 }: UserActionButtonsProps) => {
   const isRootActor = actorRole === USER_ROLES.ROOT_ADMIN;
-
   const isSuperActor = actorRole === USER_ROLES.SUPER_ADMIN;
+  const isStationActor = actorRole === USER_ROLES.STATION_ADMIN;
   const isTargetSuper = user.role === USER_ROLES.SUPER_ADMIN;
+  const isTargetRoot = user.role === USER_ROLES.ROOT_ADMIN;
   const blockSuperOnSuper = isSuperActor && isTargetSuper;
 
-  const canImpersonateUser = isSuper && !user.banned && !blockSuperOnSuper;
-  const canManageStatus = isSuper && !blockSuperOnSuper;
+  const sameStation =
+    (actorStationId || actorStationCode) &&
+    (user.stationId === actorStationId || user.stationId === actorStationCode);
+
+  const canEditUser = isTargetRoot
+    ? false
+    : isTargetSuper
+      ? isRootActor
+      : isStationActor
+        ? user.role === USER_ROLES.OBSERVER && Boolean(sameStation)
+        : isRootActor || isSuperActor;
+
+  const canImpersonateUser =
+    canManageUsers && !user.banned && !blockSuperOnSuper;
+  const canManageStatus = canManageUsers && !blockSuperOnSuper;
 
   const canManageTarget = user.role !== USER_ROLES.ROOT_ADMIN || isRootActor;
 
   return (
     <div className="flex gap-2">
-      {!blockSuperOnSuper && (
+      {canEditUser && (
         <Button variant="outline" size="sm" onClick={() => onEdit(user)}>
           Edit
         </Button>
