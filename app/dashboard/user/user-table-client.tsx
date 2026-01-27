@@ -108,6 +108,7 @@ export const UserTableClient = ({
   const [impersonatingUserId, setImpersonatingUserId] = useState<string | null>(
     null,
   );
+
   // ============================================================================
   // ROUTER & SEARCH PARAMS
   // ============================================================================
@@ -135,7 +136,17 @@ export const UserTableClient = ({
   const [users, setUsers] = useState<User[]>(initialUsers);
   const [totalUsers, setTotalUsers] = useState(initialTotalUsers);
   const [stations, setStations] = useState<Station[]>(initialStations);
-  const [pageIndex, setPageIndex] = useState(initialPage);
+
+  // ✅ FIX: pageIndex should reflect URL offset if present
+  const [pageIndex, setPageIndex] = useState(() => {
+    const offsetParam = searchParams.get("offset");
+    const offset = Number.parseInt(offsetParam ?? "", 10);
+    if (Number.isFinite(offset) && offset > 0) {
+      return Math.floor(offset / pageSize);
+    }
+    return initialPage ?? 0;
+  });
+
   const [isLoading, setIsLoading] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -254,31 +265,32 @@ export const UserTableClient = ({
     return users.filter((u) => u.role !== USER_ROLES.ROOT_ADMIN);
   }, [users, session?.user?.role, session?.user?.station?.id]);
 
-const allRoles = useMemo<UserRole[]>(() => {
-  const actorRole = session?.user?.role as UserRole | undefined;
+  const allRoles = useMemo<UserRole[]>(() => {
+    const actorRole = session?.user?.role as UserRole | undefined;
 
-  // Station Admin can only create Observer role
-  if (actorRole === USER_ROLES.STATION_ADMIN) {
-    return [USER_ROLES.OBSERVER];
-  }
+    // Station Admin can only create Observer role
+    if (actorRole === USER_ROLES.STATION_ADMIN) {
+      return [USER_ROLES.OBSERVER];
+    }
 
-  // base roles everyone can see
-  const roles: UserRole[] = [USER_ROLES.STATION_ADMIN, USER_ROLES.OBSERVER];
+    // base roles everyone can see
+    const roles: UserRole[] = [USER_ROLES.STATION_ADMIN, USER_ROLES.OBSERVER];
 
-  // ✅ only super_admin and root_admin can see super_admin role option
-  if (actorRole === USER_ROLES.SUPER_ADMIN || actorRole === USER_ROLES.ROOT_ADMIN) {
-    roles.unshift(USER_ROLES.SUPER_ADMIN);
-  }
+    // ✅ only super_admin and root_admin can see super_admin role option
+    if (
+      actorRole === USER_ROLES.SUPER_ADMIN ||
+      actorRole === USER_ROLES.ROOT_ADMIN
+    ) {
+      roles.unshift(USER_ROLES.SUPER_ADMIN);
+    }
 
-  // ✅ only root_admin can see root_admin
-  if (actorRole === USER_ROLES.ROOT_ADMIN) {
-    roles.unshift(USER_ROLES.ROOT_ADMIN);
-  }
+    // ✅ only root_admin can see root_admin
+    if (actorRole === USER_ROLES.ROOT_ADMIN) {
+      roles.unshift(USER_ROLES.ROOT_ADMIN);
+    }
 
-  return roles;
-}, [session?.user?.role]);
-
-
+    return roles;
+  }, [session?.user?.role]);
 
   const allStations = useMemo(() => {
     const actorRole = session?.user?.role;
@@ -286,9 +298,7 @@ const allRoles = useMemo<UserRole[]>(() => {
 
     // Station Admin can only see their own station
     if (actorRole === USER_ROLES.STATION_ADMIN) {
-      return stations.filter(
-        (station) => station?.id === userStationDbId,
-      );
+      return stations.filter((station) => station?.id === userStationDbId);
     }
 
     // Other roles see all stations
@@ -300,49 +310,54 @@ const allRoles = useMemo<UserRole[]>(() => {
   // ============================================================================
   // PAGINATION FUNCTIONS
   // ============================================================================
-  const updatePageInUrl = useCallback(
-    (newPage: number) => {
-      // Use startTransition to prevent blocking render
-      startTransition(() => {
-        const params = new URLSearchParams(searchParams);
-        if (newPage === 0) {
-          params.delete("page");
-        } else {
-          params.set("page", newPage.toString());
-        }
+const updatePageInUrl = useCallback(
+  (newPageIndex: number) => {
+    startTransition(() => {
+      // ✅ IMPORTANT: useSearchParams() না, window.location.search ব্যবহার করছি
+      const params = new URLSearchParams(window.location.search);
 
-        if (debouncedSearch) params.set("search", debouncedSearch);
-        else params.delete("search");
+      const newOffset = newPageIndex * pageSize;
+      if (newOffset === 0) params.delete("offset");
+      else params.set("offset", String(newOffset));
 
-        if (roleFilter !== "all") params.set("role", roleFilter);
-        else params.delete("role");
+      // nice to keep limit
+      params.set("limit", String(pageSize));
 
-        if (statusFilter !== "active") params.set("status", statusFilter);
-        else params.delete("status");
+      // ✅ keep filters/search
+      if (debouncedSearch) params.set("search", debouncedSearch);
+      else params.delete("search");
 
-        if (stationFilter !== "all") params.set("station", stationFilter);
-        else params.delete("station");
+      if (roleFilter !== "all") params.set("role", roleFilter);
+      else params.delete("role");
 
-        if (dateFromFilter) params.set("dateFrom", dateFromFilter);
-        else params.delete("dateFrom");
+      if (statusFilter !== "active") params.set("status", statusFilter);
+      else params.delete("status");
 
-        if (dateToFilter) params.set("dateTo", dateToFilter);
-        else params.delete("dateTo");
+      if (stationFilter !== "all") params.set("station", stationFilter);
+      else params.delete("station");
 
-        router.push(`/dashboard/user?${params.toString()}`, { scroll: false });
-      });
-    },
-    [
-      router,
-      searchParams,
-      debouncedSearch,
-      roleFilter,
-      statusFilter,
-      stationFilter,
-      dateFromFilter,
-      dateToFilter,
-    ],
-  );
+      if (dateFromFilter) params.set("dateFrom", dateFromFilter);
+      else params.delete("dateFrom");
+
+      if (dateToFilter) params.set("dateTo", dateToFilter);
+      else params.delete("dateTo");
+
+      // ✅ replace দিলে history clutter কম হবে, push দিলেও চলবে
+      router.replace(`/dashboard/user?${params.toString()}`, { scroll: false });
+    });
+  },
+  [
+    router,
+    pageSize,
+    debouncedSearch,
+    roleFilter,
+    statusFilter,
+    stationFilter,
+    dateFromFilter,
+    dateToFilter,
+  ],
+);
+
 
   const nextPage = useCallback(() => {
     if ((pageIndex + 1) * pageSize < totalUsers) {
@@ -373,8 +388,8 @@ const allRoles = useMemo<UserRole[]>(() => {
     return () => setIsMounted(false);
   }, []);
 
+  // ✅ when filters/search change: reset to first page
   useEffect(() => {
-    // Only update URL if component is mounted
     if (isMounted) {
       setPageIndex((prev) => {
         if (prev !== 0) {
@@ -387,7 +402,6 @@ const allRoles = useMemo<UserRole[]>(() => {
   }, [debouncedSearch, updatePageInUrl, isMounted]);
 
   useEffect(() => {
-    // Only update URL if component is mounted
     if (isMounted) {
       setPageIndex((prev) => {
         if (prev !== 0) {
@@ -415,7 +429,9 @@ const allRoles = useMemo<UserRole[]>(() => {
     try {
       const params = new URLSearchParams();
       params.set("limit", pageSize.toString());
-      params.set("offset", (pageIndex * pageSize).toString());
+
+      // ✅ FIX: backend expects offset
+      params.set("offset", String(pageIndex * pageSize));
 
       if (debouncedSearch) params.set("search", debouncedSearch);
       if (roleFilter !== "all") params.set("role", roleFilter);
@@ -478,23 +494,30 @@ const allRoles = useMemo<UserRole[]>(() => {
   const resetForm = useCallback(() => {
     const actorRole = session?.user?.role;
     const userStationId = session?.user?.station?.stationId;
-    
-    // Auto-populate for Station Admin
+
     let defaultStationId = "";
     let defaultRole = USER_ROLES.OBSERVER;
-    
+
     if (actorRole === USER_ROLES.STATION_ADMIN && userStationId) {
-      const userStation = stations.find(s => s.stationId === userStationId || s.id === userStationId);
+      const userStation = stations.find(
+        (s) => s.stationId === userStationId || s.id === userStationId,
+      );
       if (userStation) {
         defaultStationId = userStation.id;
-        defaultRole = USER_ROLES.OBSERVER; // Force Observer role
+        defaultRole = USER_ROLES.OBSERVER;
       } else {
-        // Debug: Log if station not found
         console.log("Station not found for userStationId:", userStationId);
-        console.log("Available stations:", stations.map(s => ({ id: s.id, stationId: s.stationId, name: s.name })));
+        console.log(
+          "Available stations:",
+          stations.map((s) => ({
+            id: s.id,
+            stationId: s.stationId,
+            name: s.name,
+          })),
+        );
       }
     }
-    
+
     setFormData({
       name: "",
       email: "",
@@ -559,10 +582,9 @@ const allRoles = useMemo<UserRole[]>(() => {
           toast.error(ERROR_MESSAGES.CANNOT_MODIFY_SUPER_ADMIN);
           return;
         }
-        // actor is root_admin -> allow
       }
 
-      // ✅ root_admin account protection (unchanged): nobody edits root_admin here
+      // ✅ root_admin account protection
       if (user.role === USER_ROLES.ROOT_ADMIN) {
         toast.error(ERROR_MESSAGES.CANNOT_MODIFY_ROOT_ADMIN);
         return;
@@ -582,7 +604,7 @@ const allRoles = useMemo<UserRole[]>(() => {
 
       setOpenDialog(true);
     },
-    [session?.user?.role], // ✅ dependency add
+    [session?.user?.role],
   );
 
   const handleUpdateUser = useCallback(async () => {
@@ -631,7 +653,6 @@ const allRoles = useMemo<UserRole[]>(() => {
   // ============================================================================
   const openDeleteConfirmation = useCallback(
     (userId: string, userRole: string | null) => {
-      // ✅ FIX: pass actor role so root_admin can delete super_admin (per API)
       const check = canDeleteUser(
         session?.user?.id || "",
         userId,
@@ -696,11 +717,7 @@ const allRoles = useMemo<UserRole[]>(() => {
   // USER IMPERSONATION
   // ============================================================================
   const handleImpersonate = useCallback(
-    async (
-      userId: string,
-      userName: string | null,
-      userRole: string | null,
-    ) => {
+    async (userId: string, userName: string | null, userRole: string | null) => {
       const check = canImpersonate(session?.user?.id || "", userId, userRole);
       if (!check.canImpersonate) {
         toast.error(check.error);
@@ -1089,10 +1106,8 @@ const UserActionButtons = ({
   onImpersonate,
   isImpersonating,
 }: UserActionButtonsProps) => {
-  // Allow root_admin and super_admin to impersonate any user except themselves
   const isRootActor = actorRole === USER_ROLES.ROOT_ADMIN;
 
-  // ✅ NEW: super_admin actor cannot manage another super_admin (UI hide)
   const isSuperActor = actorRole === USER_ROLES.SUPER_ADMIN;
   const isTargetSuper = user.role === USER_ROLES.SUPER_ADMIN;
   const blockSuperOnSuper = isSuperActor && isTargetSuper;
@@ -1104,7 +1119,6 @@ const UserActionButtons = ({
 
   return (
     <div className="flex gap-2">
-      {/* ✅ Hide edit for super_admin -> super_admin */}
       {!blockSuperOnSuper && (
         <Button variant="outline" size="sm" onClick={() => onEdit(user)}>
           Edit
@@ -1142,4 +1156,3 @@ const UserActionButtons = ({
     </div>
   );
 };
-
