@@ -5,7 +5,7 @@
 
 "use client";
 
-import { memo, useCallback } from "react";
+import { memo, useCallback, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { Eye, EyeOff } from "lucide-react";
 import {
   USER_ROLES,
   PASSWORD_REQUIREMENTS,
@@ -181,10 +182,11 @@ const EmailPasswordFields = memo(
     editUser: User | null;
     isPasswordDisabled: boolean;
   }) => {
+    const [showPassword, setShowPassword] = useState(false);
     const minLength = role ? PASSWORD_REQUIREMENTS[role] : 0;
 
     return (
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-2">
           <label htmlFor="email">
             Email <span className="text-red-500">*</span>
@@ -206,17 +208,33 @@ const EmailPasswordFields = memo(
               <span className="text-xs text-blue-600 block">{`Min ${minLength} characters`}</span>
             )}
           </label>
-          <Input
-            id="password"
-            type="password"
-            placeholder={
-              role ? `Min ${minLength} characters` : "Select a role first"
-            }
-            value={password}
-            onChange={(e) => onPasswordChange(e.target.value)}
-            required={!editUser}
-            disabled={isPasswordDisabled}
-          />
+          <div className="relative">
+            <Input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              placeholder={
+                role ? `Min ${minLength} characters` : "Select a role first"
+              }
+              value={password}
+              onChange={(e) => onPasswordChange(e.target.value)}
+              required={!editUser}
+              disabled={isPasswordDisabled}
+              className="pr-10"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition-colors hover:text-gray-600 disabled:opacity-50"
+              disabled={isPasswordDisabled}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -345,7 +363,7 @@ const LocationFields = memo(
     if (!visible) return null;
 
     return (
-      <div className="grid grid-cols-3 gap-4 w-full">
+      <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="flex flex-col gap-2">
           <label htmlFor="division">
             Division <span className="text-red-500">*</span>
@@ -508,7 +526,10 @@ export const CreateEditUserDialog = memo((props: CreateEditUserDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {createTrigger && <DialogTrigger asChild>{createTrigger}</DialogTrigger>}
-      <DialogContent aria-describedby="user-dialog-description">
+      <DialogContent
+        aria-describedby="user-dialog-description"
+        className="max-h-[90vh] overflow-y-auto sm:max-w-2xl"
+      >
         <DialogHeader>
           <DialogTitle_Internal editUser={editUser} />
           <DialogDescription id="user-dialog-description" className="sr-only">
