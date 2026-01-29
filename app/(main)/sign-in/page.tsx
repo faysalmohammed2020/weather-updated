@@ -173,10 +173,19 @@ export default function SignInForm() {
         return;
       }
 
+      if (res?.error === "ROLE_MISMATCH") {
+        setFormError("Selected role does not match your account");
+        return;
+      }
+
+      if (res?.error === "STATION_MISMATCH") {
+        setFormError("Your account is not associated with this station");
+        return;
+      }
+
       if (res?.error === "CredentialsSignin" && !otpValue) {
-        // NextAuth masks errors; assume 2FA is required if password already passed
-        setTwoFactorRequired(true);
-        setFormError("Two-factor code required. Enter the 6-digit code or a backup code.");
+        // Wrong password - show password error, not 2FA prompt
+        setFormError("Invalid email or password");
         return;
       }
 
@@ -198,23 +207,25 @@ export default function SignInForm() {
       // error handle
       let errorMessage = res?.error || "An error occurred during sign in";
 
-      if (errorMessage.includes("credentials")) {
+      const errorKey = errorMessage.toLowerCase();
+
+      if (errorKey.includes("credentials")) {
         errorMessage = "Invalid email or password";
-      } else if (errorMessage.includes("ACCOUNT_BANNED")) {
+      } else if (errorKey.includes("account_banned")) {
         errorMessage = "Your account has been disabled. Please contact an administrator.";
       } else if (
-        errorMessage.includes("permission") ||
-        errorMessage.includes("role")
+        errorKey.includes("permission") ||
+        errorKey.includes("role")
       ) {
         errorMessage =
           "You don't have permission to access this station with the selected role";
-      } else if (errorMessage.includes("security code")) {
+      } else if (errorKey.includes("security code")) {
         errorMessage = "The security code doesn't match your account";
-      } else if (errorMessage.includes("station")) {
+      } else if (errorKey.includes("station")) {
         errorMessage = "Your account is not associated with this station";
-      } else if (errorMessage.includes("another device")) {
+      } else if (errorKey.includes("another device")) {
         errorMessage = "You are already logged in from another device";
-      } else if (errorMessage.includes("OTP")) {
+      } else if (errorKey.includes("otp")) {
         errorMessage = "Two-factor code is required to finish signing in";
       }
 

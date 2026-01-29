@@ -169,11 +169,11 @@ export const authOptions: NextAuthOptions = {
 
           // role null হলে observer ধরে allow করো
           if (role && (user.role ?? "observer") !== role) {
-            return null;
+            throw new Error("ROLE_MISMATCH");
           }
 
           if (stationCode && user.Station?.stationId !== stationCode) {
-            return null;
+            throw new Error("STATION_MISMATCH");
           }
 
           // 5) Lazy upgrade to bcrypt (already handled above, kept same)
@@ -264,7 +264,12 @@ export const authOptions: NextAuthOptions = {
           } as any;
         } catch (e) {
           console.error("AUTHORIZE_ERROR:", e);
-          if (e instanceof Error && e.message === "ACCOUNT_BANNED") {
+          if (
+            e instanceof Error &&
+            ["ACCOUNT_BANNED", "OTP_REQUIRED", "ROLE_MISMATCH", "STATION_MISMATCH"].includes(
+              e.message
+            )
+          ) {
             throw e;
           }
           return null;
