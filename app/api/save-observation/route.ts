@@ -9,6 +9,9 @@ import { LogAction, LogActionType, LogModule } from "@/lib/log";
 import { diff } from "deep-object-diff";
 import { generateDailySummary } from "@/lib/getDailySummary";
 
+const formatUtcSlot = (date: Date) =>
+  `${date.toISOString().slice(0, 10)} ${String(date.getUTCHours()).padStart(2, "0")} UTC`;
+
 export async function POST(request: Request) {
   try {
     const session = await getSession();
@@ -33,6 +36,38 @@ export async function POST(request: Request) {
     }
 
     const formattedObservingTime = hourToUtc(data.observingTimeId);
+    const targetUtcTime = new Date(formattedObservingTime);
+
+    const pendingSynopticSlot = await prisma.observingTime.findFirst({
+      where: {
+        stationId: session.user.station?.id,
+        MeteorologicalEntry: { some: {} },
+        WeatherObservation: { some: {} },
+        SynopticCode: { none: {} },
+      },
+      select: {
+        utcTime: true,
+      },
+      orderBy: {
+        utcTime: "desc",
+      },
+    });
+
+    if (
+      pendingSynopticSlot &&
+      pendingSynopticSlot.utcTime.getTime() < targetUtcTime.getTime()
+    ) {
+      return NextResponse.json(
+        {
+          error: true,
+          message: `Synoptic pending for ${formatUtcSlot(
+            pendingSynopticSlot.utcTime
+          )}. Submit it before entering a newer slot.`,
+          pendingSynopticUtc: pendingSynopticSlot.utcTime,
+        },
+        { status: 409 }
+      );
+    }
 
     // First, find the ObservingTime record by its UTC time
     const observingTime = await prisma.observingTime.findFirst({

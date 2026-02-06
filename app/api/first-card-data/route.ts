@@ -9,6 +9,26 @@ import { LogAction, LogActionType, LogModule } from "@/lib/log";
 import { diff } from "deep-object-diff";
 
 const prisma = new PrismaClient();
+const SLOT_HOURS = [0, 3, 6, 9, 12, 15, 18, 21] as const;
+const formatUtcSlot = (date: Date) =>
+  `${date.toISOString().slice(0, 10)} ${String(date.getUTCHours()).padStart(2, "0")} UTC`;
+const getPreviousSlotUtc = (target: Date): Date | null => {
+  const hour = target.getUTCHours();
+  const index = SLOT_HOURS.indexOf(hour as (typeof SLOT_HOURS)[number]);
+  if (index <= 0) return null;
+
+  return new Date(
+    Date.UTC(
+      target.getUTCFullYear(),
+      target.getUTCMonth(),
+      target.getUTCDate(),
+      SLOT_HOURS[index - 1],
+      0,
+      0,
+      0
+    )
+  );
+};
 
 export async function POST(req: Request) {
   try {
@@ -30,6 +50,18 @@ export async function POST(req: Request) {
     }
 
     const formattedObservingTime = hourToUtc(data.observingTimeId);
+    const targetUtcTime = new Date(formattedObservingTime);
+    if (!SLOT_HOURS.includes(targetUtcTime.getUTCHours() as (typeof SLOT_HOURS)[number])) {
+      return NextResponse.json(
+        {
+          error: true,
+          message:
+            "Invalid observing slot. Use 00, 03, 06, 09, 12, 15, 18, or 21 UTC.",
+        },
+        { status: 400 }
+      );
+    }
+
     // ✅ LocalTime আর shift হবে না, UTC-ই localTime হিসেবে রাখা হবে
     const localTime = formattedObservingTime;
 
@@ -64,6 +96,62 @@ export async function POST(req: Request) {
         },
         { status: 404 }
       );
+    }
+
+    const pendingSynopticSlot = await prisma.observingTime.findFirst({
+      where: {
+        stationId: stationRecord.id,
+        MeteorologicalEntry: { some: {} },
+        WeatherObservation: { some: {} },
+        SynopticCode: { none: {} },
+      },
+      select: {
+        utcTime: true,
+      },
+      orderBy: {
+        utcTime: "desc",
+      },
+    });
+
+    if (
+      pendingSynopticSlot &&
+      pendingSynopticSlot.utcTime.getTime() < targetUtcTime.getTime()
+    ) {
+      return NextResponse.json(
+        {
+          error: true,
+          message: `Synoptic pending for ${formatUtcSlot(
+            pendingSynopticSlot.utcTime
+          )}. Submit it before entering a newer slot.`,
+          pendingSynopticUtc: pendingSynopticSlot.utcTime,
+        },
+        { status: 409 }
+      );
+    }
+
+    const previousSlotUtc = getPreviousSlotUtc(targetUtcTime);
+    if (previousSlotUtc) {
+      const previousSlotEntry = await prisma.observingTime.findFirst({
+        where: {
+          stationId: stationRecord.id,
+          utcTime: previousSlotUtc,
+          MeteorologicalEntry: { some: {} },
+        },
+        select: { utcTime: true },
+      });
+
+      if (!previousSlotEntry) {
+        return NextResponse.json(
+          {
+            error: true,
+            message: `Serial entry required. Submit first card for ${formatUtcSlot(
+              previousSlotUtc
+            )} before ${formatUtcSlot(targetUtcTime)}.`,
+            missingPreviousUtc: previousSlotUtc,
+          },
+          { status: 409 }
+        );
+      }
     }
 
     // Check if the observation time already exists
