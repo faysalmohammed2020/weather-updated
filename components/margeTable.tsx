@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { utcToHour } from "@/lib/utils";
+import { formatUtcDate } from "@/lib/utils/table-utils";
 import { Download } from "lucide-react";
 import moment from "moment";
 
@@ -1440,7 +1441,7 @@ ${"=".repeat(60)}`;
                               {metEntry?.subIndicator || "--"}
                             </td>
                             <td className="border border-slate-300 p-1 font-medium text-indigo-700 whitespace-nowrap">
-                              {new Date(record.utcTime).toLocaleDateString()}
+                              {formatUtcDate(record.utcTime)}
                             </td>
                             <td className="border border-slate-300 p-1">
                               <Badge variant="outline" className="font-mono">
