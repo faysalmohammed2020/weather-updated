@@ -175,6 +175,9 @@ export async function GET(request: Request) {
     const limit = Math.min(Number.parseInt(searchParams.get("limit") || "50"), 100)
     const offset = Number.parseInt(searchParams.get("offset") || "0")
 
+    // ✅ root_admin + super_admin can see everything
+    const isGlobalAdmin = session.user.role === "super_admin" || session.user.role === "root_admin"
+
     // Initialize where clause
     const where: any = {}
 
@@ -206,18 +209,17 @@ export async function GET(request: Request) {
       }
     }
 
-    // Station filtering
+    // ✅ Station filtering
     if (stationId && stationId !== "all") {
       where.stationId = stationId
-    } else if (session.user.role !== "super_admin" && session.user.station?.id) {
-      // For non-super admins, default to their station if no specific station is requested
+    } else if (!isGlobalAdmin && session.user.station?.id) {
+      // For non-global admins, default to their station if no specific station is requested
       where.stationId = session.user.station.id
     }
 
-    // User access control
-    if (session.user.role !== "super_admin") {
-      // Non-super admins can only see their own data or data from their station
-      where.OR = [{ userId: session.user.id }, { stationId: session.user.station?.id }].filter(Boolean) // Filter out undefined conditions
+    // ✅ User access control (only for non-global admins)
+    if (!isGlobalAdmin) {
+      where.OR = [{ userId: session.user.id }, { stationId: session.user.station?.id }].filter(Boolean)
     }
 
     // Fetch data with pagination
