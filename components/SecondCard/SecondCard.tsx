@@ -113,17 +113,20 @@ const cloudSchema = Yup.object({
     low: Yup.object({
       form: Yup.string(),
       amount: Yup.string(),
-      height: Yup.string().matches(/^[0-9]*$/, "Please enter numbers only"),
+      height: Yup.string().matches(/^[0-9/]+$/, "Please enter numbers or / only"),
+
     }),
     medium: Yup.object({
       form: Yup.string(),
       amount: Yup.string(),
-      height: Yup.string().matches(/^[0-9]*$/, "Please enter numbers only"),
+      height: Yup.string().matches(/^[0-9/]+$/, "Please enter numbers or / only"),
+
     }),
     high: Yup.object({
       form: Yup.string(),
       amount: Yup.string(),
-      height: Yup.string().matches(/^[0-9]*$/, "Please enter numbers only"),
+      height: Yup.string().matches(/^[0-9/]+$/, "Please enter numbers or / only"),
+
     }),
   }),
 });
@@ -137,22 +140,26 @@ const significantCloudSchema = Yup.object({
     layer1: Yup.object({
       form: Yup.string(),
       amount: Yup.string(),
-      height: Yup.string().matches(/^[0-9]*$/, "Please enter numbers only"),
+      height: Yup.string().matches(/^[0-9/]+$/, "Please enter numbers or / only"),
+
     }),
     layer2: Yup.object({
       form: Yup.string(),
       amount: Yup.string(),
-      height: Yup.string().matches(/^[0-9]*$/, "Please enter numbers only"),
+      height: Yup.string().matches(/^[0-9/]+$/, "Please enter numbers or / only"),
+
     }),
     layer3: Yup.object({
       form: Yup.string(),
       amount: Yup.string(),
-      height: Yup.string().matches(/^[0-9]*$/, "Please enter numbers only"),
+      height: Yup.string().matches(/^[0-9/]+$/, "Please enter numbers or / only"),
+
     }),
     layer4: Yup.object({
       form: Yup.string(),
       amount: Yup.string(),
-      height: Yup.string().matches(/^[0-9]*$/, "Please enter numbers only"),
+      height: Yup.string().matches(/^[0-9/]+$/, "Please enter numbers or / only"),
+
     }),
   }),
 });
