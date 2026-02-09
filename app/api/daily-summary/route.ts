@@ -166,14 +166,23 @@ export async function GET(req: Request) {
   const endDate = searchParams.get("endDate");
   const stationIdParam = searchParams.get("stationId");
 
-  // If stationId is not provided explicitly, try to infer it from the current session
   const session = await getSession();
-  const resolvedStationId = stationIdParam || session?.user?.station?.id || null;
 
-  if (!resolvedStationId) {
+  // ✅ privileged roles: super_admin + root_admin
+  const role = session?.user?.role;
+  const isPrivileged = role === "super_admin" || role === "root_admin";
+
+  // ✅ station resolve rule:
+  // privileged: stationIdParam থাকলে filter, না থাকলে ALL stations (stationId undefined)
+  // non-privileged: stationIdParam বা session stationId (mandatory)
+  const sessionStationId = session?.user?.station?.id ?? null;
+  const resolvedStationId = stationIdParam || (!isPrivileged ? sessionStationId : null);
+
+  // ✅ For non-privileged users, stationId is required
+  if (!isPrivileged && !resolvedStationId) {
     return NextResponse.json(
       { success: false, error: "stationId is required" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -193,7 +202,8 @@ export async function GET(req: Request) {
             gte: startTime,
             lte: endTime,
           },
-          stationId: resolvedStationId,
+          // ✅ Only filter by stationId when we actually have one
+          ...(resolvedStationId ? { stationId: resolvedStationId } : {}),
         },
       },
       orderBy: {
@@ -276,8 +286,11 @@ export async function GET(req: Request) {
   } catch (error) {
     console.error("Daily Summary Error:", error);
     return NextResponse.json(
-      { message: "Server error", error: error instanceof Error ? error.message : "" },
-      { status: 500 }
+      {
+        message: "Server error",
+        error: error instanceof Error ? error.message : "",
+      },
+      { status: 500 },
     );
   }
 }

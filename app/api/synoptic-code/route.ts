@@ -169,7 +169,7 @@ export async function GET(req: Request) {
   if (!session || !session.user?.id) {
     return NextResponse.json(
       { success: false, error: "Unauthorized" },
-      { status: 401 }
+      { status: 401 },
     );
   }
 
@@ -179,35 +179,39 @@ export async function GET(req: Request) {
   const stationIdParam = searchParams.get("stationId");
 
   const userStationId = session.user.station?.id;
-  const isSuperAdmin = session.user.role === "super_admin";
+
+  // ✅ super_admin + root_admin কে privileged ধরা হলো
+  const role = session.user.role;
+  const isPrivileged = role === "super_admin" || role === "root_admin";
 
   // ✅ Pure UTC range (first-card-data এর মতো)
   // যদি startDate/endDate না দেয়, ডিফল্ট last 7 UTC days
   const todayUtcStr = new Date().toISOString().slice(0, 10); // YYYY-MM-DD (UTC)
 
-  const start =
-    startDate
-      ? new Date(`${startDate}T00:00:00.000Z`)
-      : new Date(
-          `${new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+  const start = startDate
+    ? new Date(`${startDate}T00:00:00.000Z`)
+    : new Date(
+        `${
+          new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
             .toISOString()
-            .slice(0, 10)}T00:00:00.000Z`
-        );
+            .slice(0, 10)
+        }T00:00:00.000Z`,
+      );
 
-  const end =
-    endDate
-      ? new Date(`${endDate}T23:59:59.999Z`)
-      : new Date(`${todayUtcStr}T23:59:59.999Z`);
+  const end = endDate
+    ? new Date(`${endDate}T23:59:59.999Z`)
+    : new Date(`${todayUtcStr}T23:59:59.999Z`);
 
-  // Determine which station ID to use
-  const stationId =
-    stationIdParam || (!isSuperAdmin ? userStationId : undefined);
+  // ✅ Determine which station ID to use
+  // privileged হলে stationId না দিলেও all-station data আসবে
+  // non-privileged হলে নিজের station বাধ্যতামূলক
+  const stationId = stationIdParam || (!isPrivileged ? userStationId : undefined);
 
-  // For non-super admins, station ID is mandatory
-  if (!stationId && !isSuperAdmin) {
+  // ✅ For non-privileged users, station ID is mandatory
+  if (!stationId && !isPrivileged) {
     return NextResponse.json(
       { message: "Station ID is required" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -244,7 +248,7 @@ export async function GET(req: Request) {
         message: "Internal server error",
         error: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
