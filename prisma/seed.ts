@@ -2,6 +2,7 @@
 
 import prisma from "../lib/prisma";
 import { stations } from "../data/stations";
+import { observerUserSeeds } from "../data/observer-users";
 import bcrypt from "bcryptjs";
 
 async function main() {
@@ -545,6 +546,95 @@ async function main() {
 
     console.log(
       `👤 Created station user → ${seed.email} (${seed.role}) [${seed.stationName}]`
+    );
+  }
+
+  // Observer users (from observer list.xlsx)
+  console.log("🧭 Seeding observer users...");
+
+  const observerStationAliases: Record<string, string> = {
+    Bogura: "Bogra",
+    Chattogram: "Chittagong",
+    Hizla_Barishal: "Hijla_Barishal",
+    "Maijdee Court": "M.Court",
+    Saidpur: "Sayedpur",
+    Sreemangal: "Srimangal",
+  };
+
+  const normalizeObserverStationName = (stationName: string) =>
+    observerStationAliases[stationName] ?? stationName;
+
+  const observerStationNames = Array.from(
+    new Set(
+      observerUserSeeds.map((seed) =>
+        normalizeObserverStationName(seed.stationName)
+      )
+    )
+  );
+
+  const observerStationRecords = await prisma.station.findMany({
+    where: { name: { in: observerStationNames } },
+  });
+  const observerStationByName = new Map(
+    observerStationRecords.map((station) => [station.name, station])
+  );
+
+  for (const seed of observerUserSeeds) {
+    const normalizedStationName = normalizeObserverStationName(seed.stationName);
+    const station = observerStationByName.get(normalizedStationName);
+
+    if (!station) {
+      throw new Error(
+        `❌ Station not found for observer seed user: ${seed.stationName} (normalized: ${normalizedStationName})`
+      );
+    }
+
+    const existingUser = await prisma.users.findUnique({
+      where: { email: seed.email },
+      select: { id: true, email: true, role: true },
+    });
+
+    if (existingUser) {
+      console.log(
+        `⏭️ Observer already exists, skipping → ${seed.email} (${existingUser.role ?? "no-role"})`
+      );
+      continue;
+    }
+
+    const hashed = await bcrypt.hash(seed.password, 10);
+
+    const user = await prisma.users.create({
+      data: {
+        name: seed.name,
+        email: seed.email,
+        role: seed.role,
+        emailVerified: true,
+        banned: false,
+        banReason: null,
+        banExpires: null,
+        division: normalizedStationName,
+        district: normalizedStationName,
+        upazila: normalizedStationName,
+        stationId: station.id,
+        twoFactorEnabled: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    });
+
+    await prisma.accounts.create({
+      data: {
+        accountId: user.id,
+        providerId: "credentials",
+        userId: user.id,
+        password: hashed,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    });
+
+    console.log(
+      `👁️ Created observer user → ${seed.email} (${seed.role}) [${normalizedStationName}]`
     );
   }
 
