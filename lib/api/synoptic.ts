@@ -1,7 +1,4 @@
-import type {
-  SynopticFormData,
-  SynopticRecord,
-} from "@/lib/types/synoptic";
+import type { SynopticFormData, SynopticRecord } from "@/lib/types/synoptic";
 import type { Station } from "@/lib/types/station";
 
 const SYNOPTIC_ENDPOINT = "/api/synoptic-code";
@@ -27,7 +24,7 @@ const buildSynopticUrl = ({ startDate, endDate, stationId }: SynopticQuery) => {
 };
 
 export const fetchSynoptic = async (
-  query: SynopticQuery
+  query: SynopticQuery,
 ): Promise<SynopticRecord[]> => {
   const url = buildSynopticUrl(query);
   const response = await fetch(url);
@@ -51,7 +48,7 @@ export const fetchStations = async (): Promise<Station[]> => {
 
 export const updateSynoptic = async (
   recordId: string,
-  payload: SynopticFormData
+  payload: SynopticFormData,
 ): Promise<SynopticRecord> => {
   const response = await fetch(SYNOPTIC_ENDPOINT, {
     method: "PUT",

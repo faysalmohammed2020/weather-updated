@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState, useEffect, useMemo } from "react"
-import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent } from "@/components/ui/tabs"
-import { cn } from "@/lib/utils"
+import type React from "react";
+import { useState, useEffect, useMemo } from "react";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 import {
   Thermometer,
   Wind,
@@ -18,75 +18,75 @@ import {
   MapPin,
   Calendar,
   Droplets,
-} from "lucide-react"
-import { toast } from "sonner"
-import { useFormik } from "formik"
-import { motion } from "framer-motion"
+} from "lucide-react";
+import { toast } from "sonner";
+import { useFormik } from "formik";
+import { motion } from "framer-motion";
 
 // ✅ NextAuth session hook
-import { useSession } from "next-auth/react"
+import { useSession } from "next-auth/react";
 
 export interface AgroclimatologicalFormData {
   stationInfo: {
-    stationName: string
-    latitude: string
-    longitude: string
-    elevation: string
-    date: string
-    utcHour: 0 | 12 | ""
-  }
-  solarRadiation: string
-  sunShineHour: string
+    stationName: string;
+    latitude: string;
+    longitude: string;
+    elevation: string;
+    date: string;
+    utcHour: 0 | 12 | "";
+  };
+  solarRadiation: string;
+  sunShineHour: string;
   airTemperature: {
-    dry05m: string
-    wet05m: string
-    dry12m: string
-    wet12m: string
-    dry22m: string
-    wet22m: string
-  }
-  minTemp: string
-  maxTemp: string
-  meanTemp: string
-  grassMinTemp: string
+    dry05m: string;
+    wet05m: string;
+    dry12m: string;
+    wet12m: string;
+    dry22m: string;
+    wet22m: string;
+  };
+  minTemp: string;
+  maxTemp: string;
+  meanTemp: string;
+  grassMinTemp: string;
   soilTemperature: {
-    depth5cm: string
-    depth10cm: string
-    depth20cm: string
-    depth30cm: string
-    depth50cm: string
-  }
-  panWaterEvap: string
-  relativeHumidity: string
-  evaporation: string
+    depth5cm: string;
+    depth10cm: string;
+    depth20cm: string;
+    depth30cm: string;
+    depth50cm: string;
+  };
+  panWaterEvap: string;
+  relativeHumidity: string;
+  evaporation: string;
   soilMoisture: {
-    depth0to20cm: string
-    depth20to50cm: string
-  }
-  dewPoint: string
-  windSpeed: string
-  duration: string
-  rainfall: string
-  userId?: string
+    depth0to20cm: string;
+    depth20to50cm: string;
+  };
+  dewPoint: string;
+  windSpeed: string;
+  duration: string;
+  rainfall: string;
+  userId?: string;
 }
 
 export function AgroclimatologicalForm() {
-  const [activeTab, setActiveTab] = useState("station")
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [showDuplicateModal, setShowDuplicateModal] = useState(false)
-  const [duplicateData, setDuplicateData] = useState<any>(null)
-  const [duplicateMessage, setDuplicateMessage] = useState("")
+  const [activeTab, setActiveTab] = useState("station");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [duplicateData, setDuplicateData] = useState<any>(null);
+  const [duplicateMessage, setDuplicateMessage] = useState("");
 
   // ✅ NextAuth session
-  const { data: session } = useSession()
+  const { data: session } = useSession();
 
   const todayISO = useMemo(() => {
-    const d = new Date()
-    const yyyy = d.getFullYear()
-    const mm = String(d.getMonth() + 1).padStart(2, "0")
-    const dd = String(d.getDate()).padStart(2, "0")
-    return `${yyyy}-${mm}-${dd}`
-  }, [])
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  }, []);
 
   const formik = useFormik<AgroclimatologicalFormData>({
     initialValues: {
@@ -132,103 +132,101 @@ export function AgroclimatologicalForm() {
       rainfall: "",
     },
     onSubmit: handleSubmit,
-  })
+  });
 
   // ✅ Fill station info from session (safe)
   useEffect(() => {
-    const st = (session?.user as any)?.station
+    const st = (session?.user as any)?.station;
     if (st) {
-      formik.setFieldValue("stationInfo.stationName", st.name ?? "")
-      formik.setFieldValue("stationInfo.latitude", String(st.latitude ?? ""))
-      formik.setFieldValue("stationInfo.longitude", String(st.longitude ?? ""))
+      formik.setFieldValue("stationInfo.stationName", st.name ?? "");
+      formik.setFieldValue("stationInfo.latitude", String(st.latitude ?? ""));
+      formik.setFieldValue("stationInfo.longitude", String(st.longitude ?? ""));
     }
-  }, [session])
+  }, [session]);
 
   useEffect(() => {
     const fetchAllData = async () => {
       try {
         // Fetch sunshine data (working)
-        const sunshineResponse = await fetch("/api/sunshine")
+        const sunshineResponse = await fetch("/api/sunshine");
         if (sunshineResponse.ok) {
-          const sunshineData = await sunshineResponse.json()
+          const sunshineData = await sunshineResponse.json();
           if (sunshineData.length > 0) {
-            const latestSunshine = sunshineData[0]
+            const latestSunshine = sunshineData[0];
             const toThree = (v: any) => {
-              const raw = (v ?? "").toString().trim()
-              const stripped = raw.replace(/\./g, "")
-              return stripped.padStart(3, "0").slice(-3)
-            }
-            formik.setFieldValue("sunShineHour", toThree(latestSunshine.total))
+              const raw = (v ?? "").toString().trim();
+              const stripped = raw.replace(/\./g, "");
+              return stripped.padStart(3, "0").slice(-3);
+            };
+            formik.setFieldValue("sunShineHour", toThree(latestSunshine.total));
           }
         }
 
         // Fetch soil moisture data
-        const soilResponse = await fetch("/api/soil-moisture")
+        const soilResponse = await fetch("/api/soil-moisture");
         if (soilResponse.ok) {
-          const { data: soilData } = await soilResponse.json()
+          const { data: soilData } = await soilResponse.json();
           if (Array.isArray(soilData) && soilData.length > 0) {
             const validEntries = soilData.filter(
               (entry) =>
-                typeof entry.depth === "number" &&
-                typeof entry.Sm === "number"
-            )
+                typeof entry.depth === "number" && typeof entry.Sm === "number",
+            );
             if (validEntries.length > 0) {
-              const depthMap = new Map<number, number>()
+              const depthMap = new Map<number, number>();
               validEntries.forEach((entry) =>
-                depthMap.set(entry.depth, entry.Sm)
-              )
+                depthMap.set(entry.depth, entry.Sm),
+              );
 
               const calculateAverage = (depths: number[]) => {
                 const values = depths
                   .map((d) => depthMap.get(d))
-                  .filter((v): v is number => v !== undefined)
+                  .filter((v): v is number => v !== undefined);
                 return values.length > 0
                   ? (
-                      values.reduce((sum, val) => sum + val, 0) /
-                      values.length
+                      values.reduce((sum, val) => sum + val, 0) / values.length
                     ).toFixed(1)
-                  : ""
-              }
+                  : "";
+              };
 
-              const avg0to20 = calculateAverage([5, 10, 20])
-              const avg20to50 = calculateAverage([20, 30, 50])
+              const avg0to20 = calculateAverage([5, 10, 20]);
+              const avg20to50 = calculateAverage([20, 30, 50]);
 
               const formatToThree = (v: string) =>
-                v.replace(/\./g, "").padStart(3, "0").slice(-3)
+                v.replace(/\./g, "").padStart(3, "0").slice(-3);
               if (avg0to20)
                 formik.setFieldValue(
                   "soilMoisture.depth0to20cm",
-                  formatToThree(avg0to20)
-                )
+                  formatToThree(avg0to20),
+                );
               if (avg20to50)
                 formik.setFieldValue(
                   "soilMoisture.depth20to50cm",
-                  formatToThree(avg20to50)
-                )
+                  formatToThree(avg20to50),
+                );
             }
           }
         }
 
-        const rainfallResponse = await fetch("/api/save-observation")
+        const rainfallResponse = await fetch("/api/save-observation");
         if (rainfallResponse.ok) {
-          const rainfallJson = await rainfallResponse.json()
-          const latestObservation = rainfallJson?.data?.[0]
-          const weatherObs = latestObservation?.WeatherObservation?.[0]
+          const rainfallJson = await rainfallResponse.json();
+          const latestObservation = rainfallJson?.data?.[0];
+          const weatherObs = latestObservation?.WeatherObservation?.[0];
           if (weatherObs?.rainfallLast24Hours) {
             formik.setFieldValue(
               "rainfall",
-              weatherObs.rainfallLast24Hours.toString()
-            )
+              weatherObs.rainfallLast24Hours.toString(),
+            );
           }
         }
       } catch (error) {
-        console.error("Error fetching auto-fill data:", error)
-        toast.error("Failed to load some auto-fill data")
+        console.error("Error fetching auto-fill data:", error);
+        toast.error("Failed to load some auto-fill data");
       }
-    }
+    };
 
-    fetchAllData()
-  }, [])
+    fetchAllData();
+  }, []);
 
   const tabOrder = [
     "station",
@@ -238,109 +236,152 @@ export function AgroclimatologicalForm() {
     "humidity",
     "weather",
     "summary",
-  ]
+  ];
 
   const tabStyles = {
     station: {
       tab: "relative overflow-hidden",
-      card:
-        "bg-gradient-to-br from-violet-50 via-white to-purple-50 border-l-4 border-violet-400 shadow-xl shadow-violet-500/10",
+      card: "bg-gradient-to-br from-violet-50 via-white to-purple-50 border-l-4 border-violet-400 shadow-xl shadow-violet-500/10",
       icon: <MapPin className="size-5 mr-2 text-violet-600" />,
       header: "bg-gradient-to-r from-violet-500 to-purple-600 text-white",
       color: "violet",
     },
     solar: {
       tab: "relative overflow-hidden",
-      card:
-        "bg-gradient-to-br from-amber-50 via-white to-orange-50 border-l-4 border-amber-400 shadow-xl shadow-amber-500/10",
+      card: "bg-gradient-to-br from-amber-50 via-white to-orange-50 border-l-4 border-amber-400 shadow-xl shadow-amber-500/10",
       icon: <Sun className="size-5 mr-2 text-amber-600" />,
       header: "bg-gradient-to-r from-amber-500 to-orange-500 text-white",
       color: "amber",
     },
     temperature: {
       tab: "relative overflow-hidden",
-      card:
-        "bg-gradient-to-br from-rose-50 via-white to-pink-50 border-l-4 border-rose-400 shadow-xl shadow-rose-500/10",
+      card: "bg-gradient-to-br from-rose-50 via-white to-pink-50 border-l-4 border-rose-400 shadow-xl shadow-rose-500/10",
       icon: <Thermometer className="size-5 mr-2 text-rose-600" />,
       header: "bg-gradient-to-r from-rose-500 to-pink-500 text-white",
       color: "rose",
     },
     soil: {
       tab: "relative overflow-hidden",
-      card:
-        "bg-gradient-to-br from-emerald-50 via-white to-teal-50 border-l-4 border-emerald-400 shadow-xl shadow-emerald-500/10",
+      card: "bg-gradient-to-br from-emerald-50 via-white to-teal-50 border-l-4 border-emerald-400 shadow-xl shadow-emerald-500/10",
       icon: <BarChart3 className="size-5 mr-2 text-emerald-600" />,
       header: "bg-gradient-to-r from-emerald-500 to-teal-500 text-white",
       color: "emerald",
     },
     humidity: {
       tab: "relative overflow-hidden",
-      card:
-        "bg-gradient-to-br from-cyan-50 via-white to-blue-50 border-l-4 border-cyan-400 shadow-xl shadow-cyan-500/10",
+      card: "bg-gradient-to-br from-cyan-50 via-white to-blue-50 border-l-4 border-cyan-400 shadow-xl shadow-cyan-500/10",
       icon: <Droplets className="size-5 mr-2 text-cyan-600" />,
       header: "bg-gradient-to-r from-cyan-500 to-blue-500 text-white",
       color: "cyan",
     },
     weather: {
       tab: "relative overflow-hidden",
-      card:
-        "bg-gradient-to-br from-sky-50 via-white to-indigo-50 border-l-4 border-sky-400 shadow-xl shadow-sky-500/10",
+      card: "bg-gradient-to-br from-sky-50 via-white to-indigo-50 border-l-4 border-sky-400 shadow-xl shadow-sky-500/10",
       icon: <Wind className="size-5 mr-2 text-sky-600" />,
       header: "bg-gradient-to-r from-sky-500 to-indigo-500 text-white",
       color: "sky",
     },
     summary: {
       tab: "relative overflow-hidden",
-      card:
-        "bg-gradient-to-br from-green-50 via-white to-lime-50 border-l-4 border-green-400 shadow-xl shadow-green-500/10",
+      card: "bg-gradient-to-br from-green-50 via-white to-lime-50 border-l-4 border-green-400 shadow-xl shadow-green-500/10",
       icon: <Calendar className="size-5 mr-2 text-green-600" />,
       header: "bg-gradient-to-r from-green-500 to-lime-500 text-white",
       color: "green",
     },
-  }
+  };
 
   const handleTabChange = (tabName: string) => {
-    setActiveTab(tabName)
-  }
+    // Prevent leaving the Station tab without selecting UTC hour
+    if (
+      activeTab === "station" &&
+      tabName !== "station" &&
+      formik.values.stationInfo.utcHour === ""
+    ) {
+      toast.error("Please select UTC hour before proceeding");
+      return;
+    }
+
+    setActiveTab(tabName);
+  };
+
+  const handleUtcChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const raw = e.target.value;
+
+    if (raw === "") {
+      formik.setFieldValue("stationInfo.utcHour", "");
+      return;
+    }
+
+    const num = Number(raw);
+
+    // If user selects 12 UTC, ensure 00 UTC exists for the selected date
+    if (num === 12) {
+      const date = formik.values.stationInfo.date;
+      if (!date) {
+        toast.error("Please select Observation Date before choosing UTC");
+        return;
+      }
+
+      const formattedDate = new Date(date).toISOString().split("T")[0];
+
+      try {
+        const exists00 = await checkForDuplicate(formattedDate, 0);
+        if (!exists00) {
+          toast.error(
+            "00 UTC data for selected date not found. Please submit 00 UTC first.",
+          );
+          // don't set 12 UTC
+          formik.setFieldValue("stationInfo.utcHour", "");
+          return;
+        }
+        formik.setFieldValue("stationInfo.utcHour", 12);
+      } catch (err) {
+        console.error("Error verifying 00 UTC:", err);
+        toast.error("Failed to verify existing 00 UTC data");
+      }
+    } else {
+      formik.setFieldValue("stationInfo.utcHour", num);
+    }
+  };
 
   const checkForDuplicate = async (date: string, utcHour: number) => {
     try {
       const response = await fetch(
-        `/api/agroclimatological-data/check-duplicate?date=${date}&utcHour=${utcHour}`
-      )
+        `/api/agroclimatological-data/check-duplicate?date=${date}&utcHour=${utcHour}`,
+      );
       if (response.ok) {
-        const result = await response.json()
-        return result.exists ? result.data : null
+        const result = await response.json();
+        return result.exists ? result.data : null;
       }
-      return null
+      return null;
     } catch (error) {
-      console.error("Error checking for duplicate:", error)
-      return null
+      console.error("Error checking for duplicate:", error);
+      return null;
     }
-  }
+  };
 
   async function handleSubmit(values: AgroclimatologicalFormData) {
-    if (isSubmitting) return
-    setIsSubmitting(true)
+    if (isSubmitting) return;
+    setIsSubmitting(true);
 
     try {
       if (values.stationInfo.date && values.stationInfo.utcHour !== "") {
         const duplicate = await checkForDuplicate(
           values.stationInfo.date,
-          values.stationInfo.utcHour
-        )
+          values.stationInfo.utcHour,
+        );
         if (duplicate) {
-          setDuplicateData(duplicate)
-          setShowDuplicateModal(true)
-          setIsSubmitting(false)
-          return
+          setDuplicateData(duplicate);
+          setShowDuplicateModal(true);
+          setIsSubmitting(false);
+          return;
         }
       }
-      const dateParts = values.stationInfo.date.split("-").map(Number)
-      const [year, month, day] = dateParts
-      const dateOnly = new Date(Date.UTC(year, month - 1, day))
+      const dateParts = values.stationInfo.date.split("-").map(Number);
+      const [year, month, day] = dateParts;
+      const dateOnly = new Date(Date.UTC(year, month - 1, day));
 
-      const st = (session?.user as any)?.station
+      const st = (session?.user as any)?.station;
 
       const submissionData = {
         ...values,
@@ -352,102 +393,102 @@ export function AgroclimatologicalForm() {
         utcTime: values.stationInfo.utcHour.toString().padStart(2, "0"),
         userId: (session?.user as any)?.id,
         stationId: st?.id,
-      }
+      };
 
       const response = await fetch("/api/agroclimatological-data", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(submissionData),
-      })
+      });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.message || "Failed to submit data")
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to submit data");
       }
 
-      const result = await response.json()
+      const result = await response.json();
 
       if (!result.success) {
         throw new Error(
-          result.message || "Server returned unsuccessful response"
-        )
+          result.message || "Server returned unsuccessful response",
+        );
       }
 
-      toast.success(result.message || "Data submitted successfully!")
-      formik.resetForm()
-      setActiveTab("station")
+      toast.success(result.message || "Data submitted successfully!");
+      formik.resetForm();
+      setActiveTab("station");
     } catch (error) {
-      console.error("Submission error:", error)
+      console.error("Submission error:", error);
       toast.error(
-        error instanceof Error ? error.message : "An unexpected error occurred"
-      )
+        error instanceof Error ? error.message : "An unexpected error occurred",
+      );
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
   }
 
   const handleNumericInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    if (!/^\d*\.?\d*$/.test(value)) return
-    formik.setFieldValue(name, value)
-  }
+    const { name, value } = e.target;
+    if (!/^\d*\.?\d*$/.test(value)) return;
+    formik.setFieldValue(name, value);
+  };
 
   const handleThreeDigitInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    const digitsOnly = value.replace(/\D/g, "").slice(0, 3)
-    formik.setFieldValue(name, digitsOnly)
-  }
+    const { name, value } = e.target;
+    const digitsOnly = value.replace(/\D/g, "").slice(0, 3);
+    formik.setFieldValue(name, digitsOnly);
+  };
 
   const handleTwoDigitInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    const digitsOnly = value.replace(/\D/g, "").slice(0, 2)
-    formik.setFieldValue(name, digitsOnly)
-  }
+    const { name, value } = e.target;
+    const digitsOnly = value.replace(/\D/g, "").slice(0, 2);
+    formik.setFieldValue(name, digitsOnly);
+  };
 
   const nextTab = () => {
-    const currentIndex = tabOrder.indexOf(activeTab)
+    const currentIndex = tabOrder.indexOf(activeTab);
     if (currentIndex < tabOrder.length - 1) {
-      setActiveTab(tabOrder[currentIndex + 1])
+      setActiveTab(tabOrder[currentIndex + 1]);
     }
-  }
+  };
 
   const prevTab = () => {
-    const currentIndex = tabOrder.indexOf(activeTab)
+    const currentIndex = tabOrder.indexOf(activeTab);
     if (currentIndex > 0) {
-      setActiveTab(tabOrder[currentIndex - 1])
+      setActiveTab(tabOrder[currentIndex - 1]);
     }
-  }
+  };
 
   useEffect(() => {
     const checkForDuplicateLocal = async () => {
-      const { date, utcHour } = formik.values.stationInfo
-      if (!date || !utcHour) return
+      const { date, utcHour } = formik.values.stationInfo;
+      if (!date || utcHour === "") return;
 
-      const formattedDate = new Date(date).toISOString().split("T")[0]
+      const formattedDate = new Date(date).toISOString().split("T")[0];
 
       try {
         const res = await fetch(
-          `/api/agroclimatological-data/check-duplicate?date=${formattedDate}&utcHour=${utcHour}`
-        )
-        const json = await res.json()
+          `/api/agroclimatological-data/check-duplicate?date=${formattedDate}&utcHour=${utcHour}`,
+        );
+        const json = await res.json();
 
         if (json.success && json.exists) {
-          setShowDuplicateModal(true)
+          setShowDuplicateModal(true);
           setDuplicateMessage(
-            `Data for UTC ${utcHour} already exists on ${formattedDate}`
-          )
-          formik.setFieldValue("stationInfo.utcHour", "")
+            `Data for UTC ${utcHour} already exists on ${formattedDate}`,
+          );
+          formik.setFieldValue("stationInfo.utcHour", "");
         } else {
-          setShowDuplicateModal(false)
-          setDuplicateMessage("")
+          setShowDuplicateModal(false);
+          setDuplicateMessage("");
         }
       } catch (err) {
-        console.error("Error checking duplicate:", err)
+        console.error("Error checking duplicate:", err);
       }
-    }
+    };
 
-    checkForDuplicateLocal()
-  }, [formik.values.stationInfo.date, formik.values.stationInfo.utcHour])
+    checkForDuplicateLocal();
+  }, [formik.values.stationInfo.date, formik.values.stationInfo.utcHour]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100 p-4">
@@ -469,7 +510,7 @@ export function AgroclimatologicalForm() {
               <div className="relative p-1 bg-white/80 backdrop-blur-sm rounded-full shadow-lg border border-gray-200/50 max-w-max mx-auto">
                 <div className="relative flex flex-wrap justify-center items-center gap-1 p-1.5 rounded-full bg-gray-100/50">
                   {Object.entries(tabStyles).map(([key, style], index) => {
-                    const isActive = activeTab === key
+                    const isActive = activeTab === key;
                     return (
                       <motion.button
                         key={key}
@@ -480,7 +521,7 @@ export function AgroclimatologicalForm() {
                           "focus:outline-none min-w-[80px]",
                           isActive
                             ? "bg-white shadow shadow-blue-300 text-gray-900 font-semibold"
-                            : "text-gray-600 hover:text-gray-800 hover:bg-white/50"
+                            : "text-gray-600 hover:text-gray-800 hover:bg-white/50",
                         )}
                         initial={{ opacity: 0, x: -10 }}
                         animate={{
@@ -519,7 +560,7 @@ export function AgroclimatologicalForm() {
                           />
                         )}
                       </motion.button>
-                    )
+                    );
                   })}
                 </div>
               </div>
@@ -530,7 +571,7 @@ export function AgroclimatologicalForm() {
               <Card
                 className={cn(
                   "overflow-hidden rounded-2xl border-0",
-                  tabStyles.station.card
+                  tabStyles.station.card,
                 )}
               >
                 <div className={cn("p-6", tabStyles.station.header)}>
@@ -565,16 +606,16 @@ export function AgroclimatologicalForm() {
                       Latitude (°) *
                     </Label>
                     <Input
-  id="latitude"
-  name="stationInfo.latitude"
-  type="number"
-  step="0.0001"
-  value={formik.values.stationInfo.latitude}   // ✅ session নয়, formik
-  onChange={formik.handleChange}
-  className="border border-slate-300 h-12 rounded-xl font-semibold"
-  placeholder="e.g., 23.7104"
-  readOnly
-/>
+                      id="latitude"
+                      name="stationInfo.latitude"
+                      type="number"
+                      step="0.0001"
+                      value={formik.values.stationInfo.latitude} // ✅ session নয়, formik
+                      onChange={formik.handleChange}
+                      className="border border-slate-300 h-12 rounded-xl font-semibold"
+                      placeholder="e.g., 23.7104"
+                      readOnly
+                    />
                   </div>
 
                   <div className="space-y-3">
@@ -585,16 +626,16 @@ export function AgroclimatologicalForm() {
                       Longitude (°) *
                     </Label>
                     <Input
-  id="longitude"
-  name="stationInfo.longitude"
-  type="number"
-  step="0.0001"
-  value={formik.values.stationInfo.longitude} // ✅ session নয়, formik
-  onChange={formik.handleChange}
-  className="border border-slate-300 h-12 rounded-xl font-semibold"
-  placeholder="e.g., 90.4074"
-  readOnly
-/>
+                      id="longitude"
+                      name="stationInfo.longitude"
+                      type="number"
+                      step="0.0001"
+                      value={formik.values.stationInfo.longitude} // ✅ session নয়, formik
+                      onChange={formik.handleChange}
+                      className="border border-slate-300 h-12 rounded-xl font-semibold"
+                      placeholder="e.g., 90.4074"
+                      readOnly
+                    />
                   </div>
 
                   <div className="space-y-3">
@@ -646,7 +687,7 @@ export function AgroclimatologicalForm() {
                       id="utcHour"
                       name="stationInfo.utcHour"
                       value={formik.values.stationInfo.utcHour}
-                      onChange={formik.handleChange}
+                      onChange={handleUtcChange}
                       className="border border-slate-300 h-12 rounded-xl font-semibold px-3 w-full"
                       required
                     >
@@ -654,13 +695,22 @@ export function AgroclimatologicalForm() {
                       <option value={0}>00 UTC</option>
                       <option value={12}>12 UTC</option>
                     </select>
+                    {formik.values.stationInfo.utcHour === "" &&
+                      activeTab === "station"}
                   </div>
                 </CardContent>
                 <CardFooter className="flex justify-end px-8 pb-8">
                   <Button
                     type="button"
                     onClick={nextTab}
-                    className="bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white px-8 py-3 rounded-xl font-semibold"
+                    disabled={formik.values.stationInfo.utcHour === ""}
+                    className={cn(
+                      "bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white px-8 py-3 rounded-xl font-semibold",
+                      {
+                        "opacity-50 cursor-not-allowed":
+                          formik.values.stationInfo.utcHour === "",
+                      },
+                    )}
                   >
                     Next <ChevronRight className="ml-2 h-5 w-5" />
                   </Button>
@@ -673,7 +723,7 @@ export function AgroclimatologicalForm() {
               <Card
                 className={cn(
                   "overflow-hidden rounded-2xl border-0",
-                  tabStyles.solar.card
+                  tabStyles.solar.card,
                 )}
               >
                 <div className={cn("p-6", tabStyles.solar.header)}>
@@ -740,12 +790,13 @@ export function AgroclimatologicalForm() {
               <Card
                 className={cn(
                   "overflow-hidden rounded-2xl border-0",
-                  tabStyles.temperature.card
+                  tabStyles.temperature.card,
                 )}
               >
                 <div className={cn("p-6", tabStyles.temperature.header)}>
                   <h3 className="text-xl font-bold flex items-center">
-                    <Thermometer className="mr-3 w-6 h-6" /> Air Temperature Data
+                    <Thermometer className="mr-3 w-6 h-6" /> Air Temperature
+                    Data
                   </h3>
                 </div>
                 <CardContent className="pt-8 pb-6 px-8">
@@ -903,7 +954,7 @@ export function AgroclimatologicalForm() {
               <Card
                 className={cn(
                   "overflow-hidden rounded-2xl border-0",
-                  tabStyles.soil.card
+                  tabStyles.soil.card,
                 )}
               >
                 <div className={cn("p-6", tabStyles.soil.header)}>
@@ -1017,7 +1068,7 @@ export function AgroclimatologicalForm() {
               <Card
                 className={cn(
                   "overflow-hidden rounded-2xl border-0",
-                  tabStyles.humidity.card
+                  tabStyles.humidity.card,
                 )}
               >
                 <div className={cn("p-6", tabStyles.humidity.header)}>
@@ -1102,7 +1153,7 @@ export function AgroclimatologicalForm() {
               <Card
                 className={cn(
                   "overflow-hidden rounded-2xl border-0",
-                  tabStyles.weather.card
+                  tabStyles.weather.card,
                 )}
               >
                 <div className={cn("p-6", tabStyles.weather.header)}>
@@ -1195,7 +1246,7 @@ export function AgroclimatologicalForm() {
               <Card
                 className={cn(
                   "overflow-hidden rounded-2xl border-0",
-                  tabStyles.summary.card
+                  tabStyles.summary.card,
                 )}
               >
                 <div className={cn("p-6", tabStyles.summary.header)}>
@@ -1222,7 +1273,7 @@ export function AgroclimatologicalForm() {
                       </h4>
                       <p className="text-lg font-bold text-green-800">
                         {new Date(
-                          formik.values.stationInfo.date
+                          formik.values.stationInfo.date,
                         ).toLocaleString("default", { month: "long" })}{" "}
                         {formik.values.stationInfo.date}
                       </p>
@@ -1260,9 +1311,7 @@ export function AgroclimatologicalForm() {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                       <div className="flex items-center p-3 bg-white rounded-lg">
                         <div className="w-4 h-4 rounded-full bg-emerald-500 mr-3"></div>
-                        <span className="font-medium">
-                          Station: Complete
-                        </span>
+                        <span className="font-medium">Station: Complete</span>
                       </div>
 
                       <div className="flex items-center p-3 bg-white rounded-lg">
@@ -1271,7 +1320,7 @@ export function AgroclimatologicalForm() {
                             "w-4 h-4 rounded-full mr-3",
                             formik.values.solarRadiation
                               ? "bg-emerald-500"
-                              : "bg-gray-300"
+                              : "bg-gray-300",
                           )}
                         ></div>
                         <span className="font-medium">
@@ -1288,7 +1337,7 @@ export function AgroclimatologicalForm() {
                             "w-4 h-4 rounded-full mr-3",
                             formik.values.minTemp
                               ? "bg-emerald-500"
-                              : "bg-gray-300"
+                              : "bg-gray-300",
                           )}
                         ></div>
                         <span className="font-medium">
@@ -1303,7 +1352,7 @@ export function AgroclimatologicalForm() {
                             "w-4 h-4 rounded-full mr-3",
                             formik.values.soilTemperature.depth5cm
                               ? "bg-emerald-500"
-                              : "bg-gray-300"
+                              : "bg-gray-300",
                           )}
                         ></div>
                         <span className="font-medium">
@@ -1320,14 +1369,12 @@ export function AgroclimatologicalForm() {
                             "w-4 h-4 rounded-full mr-3",
                             formik.values.evaporation
                               ? "bg-emerald-500"
-                              : "bg-gray-300"
+                              : "bg-gray-300",
                           )}
                         ></div>
                         <span className="font-medium">
                           Humidity:{" "}
-                          {formik.values.evaporation
-                            ? "Complete"
-                            : "Pending"}
+                          {formik.values.evaporation ? "Complete" : "Pending"}
                         </span>
                       </div>
 
@@ -1337,7 +1384,7 @@ export function AgroclimatologicalForm() {
                             "w-4 h-4 rounded-full mr-3",
                             formik.values.windSpeed
                               ? "bg-emerald-500"
-                              : "bg-gray-300"
+                              : "bg-gray-300",
                           )}
                         ></div>
                         <span className="font-medium">
@@ -1363,9 +1410,9 @@ export function AgroclimatologicalForm() {
                       type="button"
                       variant="outline"
                       onClick={() => {
-                        formik.resetForm()
-                        setActiveTab("station")
-                        toast.info("Form has been reset")
+                        formik.resetForm();
+                        setActiveTab("station");
+                        toast.info("Form has been reset");
                       }}
                       className="px-8 py-3 rounded-xl"
                     >
@@ -1403,5 +1450,5 @@ export function AgroclimatologicalForm() {
         )}
       </div>
     </div>
-  )
+  );
 }

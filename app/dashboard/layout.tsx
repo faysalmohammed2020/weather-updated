@@ -9,7 +9,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     <div className="flex fixed size-full bg-gray-50">
       <Sidebar />
       <div className="flex w-full flex-col overflow-hidden">
-        <div className="bg-blue-400 flex flex-col p-2 items-end">
+        <div className="bg-blue-400 flex items-center justify-between gap-4 py-2">
+          <div className="w-full max-w-5xl mx-auto rounded-md p-2"></div>
           <Profile />
         </div>
 
