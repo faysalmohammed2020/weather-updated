@@ -98,6 +98,34 @@ export async function POST(req: Request) {
       );
     }
 
+    const pendingSecondSlotBeforeTarget = await prisma.observingTime.findFirst({
+      where: {
+        stationId: stationRecord.id,
+        utcTime: { lt: targetUtcTime },
+        MeteorologicalEntry: { some: {} },
+        WeatherObservation: { none: {} },
+      },
+      select: {
+        utcTime: true,
+      },
+      orderBy: {
+        utcTime: "desc",
+      },
+    });
+
+    if (pendingSecondSlotBeforeTarget) {
+      return NextResponse.json(
+        {
+          error: true,
+          message: `Second card pending for ${formatUtcSlot(
+            pendingSecondSlotBeforeTarget.utcTime
+          )}. Submit it before entering a newer slot.`,
+          pendingSecondUtc: pendingSecondSlotBeforeTarget.utcTime,
+        },
+        { status: 409 }
+      );
+    }
+
     const pendingSynopticSlot = await prisma.observingTime.findFirst({
       where: {
         stationId: stationRecord.id,

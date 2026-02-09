@@ -56,8 +56,13 @@ export async function POST(request: NextRequest) {
       .subtract(1, "day")
       .toDate();
 
-    // Get selected slot, yesterday slot, and latest completed slot with pending synoptic
-    const [observingTime, yesterdayObservingTime, pendingSynopticSlot] =
+    // Get selected slot, yesterday slot, pending second before target, and pending synoptic
+    const [
+      observingTime,
+      yesterdayObservingTime,
+      pendingSecondSlotBeforeTarget,
+      pendingSynopticSlot,
+    ] =
       await prisma.$transaction([
       prisma.observingTime.findFirst({
         where: {
@@ -105,6 +110,20 @@ export async function POST(request: NextRequest) {
       prisma.observingTime.findFirst({
         where: {
           stationId: session.user.station?.id,
+          utcTime: { lt: targetUtcTime },
+          MeteorologicalEntry: { some: {} },
+          WeatherObservation: { none: {} },
+        },
+        select: {
+          utcTime: true,
+        },
+        orderBy: {
+          utcTime: "desc",
+        },
+      }),
+      prisma.observingTime.findFirst({
+        where: {
+          stationId: session.user.station?.id,
           MeteorologicalEntry: { some: {} },
           WeatherObservation: { some: {} },
           SynopticCode: { none: {} },
@@ -117,6 +136,25 @@ export async function POST(request: NextRequest) {
         },
       }),
       ]);
+
+    if (pendingSecondSlotBeforeTarget) {
+      return NextResponse.json(
+        {
+          allowFirstCard: false,
+          allowSecondCard: false,
+          message: `Second card pending for ${formatUtcSlot(
+            pendingSecondSlotBeforeTarget.utcTime
+          )}. Submit it before entering a newer slot.`,
+          pendingSecondUtc: pendingSecondSlotBeforeTarget.utcTime,
+          yesterday: {
+            meteorologicalEntry: yesterdayObservingTime
+              ? yesterdayObservingTime.MeteorologicalEntry
+              : [],
+          },
+        },
+        { status: 409 }
+      );
+    }
 
     if (
       pendingSynopticSlot &&
