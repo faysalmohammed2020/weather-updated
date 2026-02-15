@@ -83,7 +83,7 @@ export default function WeatherDashboard({ selectedStation }: { selectedStation:
         let stationToQuery: string | null = null;
         let nameToDisplay = "Your Station";
 
-        if (session?.user?.role === "super_admin") {
+        if (session?.user?.role === "super_admin" || session?.user?.role === "root_admin") {
           stationToQuery = selectedStation?.id || session?.user?.station?.id || "";
           nameToDisplay = selectedStation?.name || "No Station";
         } else {

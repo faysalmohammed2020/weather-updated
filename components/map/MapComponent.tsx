@@ -696,7 +696,7 @@ export default function MapComponent({
       try {
         let stationToQuery: string | null = null;
 
-        if (session?.user?.role === "super_admin") {
+        if (session?.user?.role === "super_admin" || session?.user?.role === "root_admin") {
           stationToQuery =
             selectedStation?.id || session?.user?.station?.id || "";
         } else {
@@ -905,8 +905,8 @@ export default function MapComponent({
       {/* User role indicator */}
       <div className="absolute top-4 right-4 bg-white p-2 rounded-lg shadow-lg z-[1000]">
         <div className="text-sm font-medium">
-          {session?.user?.role === "super_admin"
-            ? "Super Admin"
+          {session?.user?.role === "super_admin" || session?.user?.role === "root_admin"
+            ? "Admin"
             : session?.user?.role === "station_admin"
               ? "Station Admin"
               : session?.user?.role === "observer"
@@ -914,7 +914,7 @@ export default function MapComponent({
                 : "Guest"}
         </div>
         <div className="text-xs text-gray-500">
-          {session?.user?.role === "super_admin"
+          {session?.user?.role === "super_admin" || session?.user?.role === "root_admin"
             ? "Viewing all stations"
             : session?.user?.role === "station_admin" ||
                 session?.user?.role === "observer"
