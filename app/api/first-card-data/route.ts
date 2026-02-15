@@ -51,6 +51,17 @@ export async function POST(req: Request) {
 
     const formattedObservingTime = hourToUtc(data.observingTimeId);
     const targetUtcTime = new Date(formattedObservingTime);
+    const targetDayStart = new Date(
+      Date.UTC(
+        targetUtcTime.getUTCFullYear(),
+        targetUtcTime.getUTCMonth(),
+        targetUtcTime.getUTCDate(),
+        0,
+        0,
+        0,
+        0
+      )
+    );
     if (!SLOT_HOURS.includes(targetUtcTime.getUTCHours() as (typeof SLOT_HOURS)[number])) {
       return NextResponse.json(
         {
@@ -101,7 +112,7 @@ export async function POST(req: Request) {
     const pendingSecondSlotBeforeTarget = await prisma.observingTime.findFirst({
       where: {
         stationId: stationRecord.id,
-        utcTime: { lt: targetUtcTime },
+        utcTime: { gte: targetDayStart, lt: targetUtcTime },
         MeteorologicalEntry: { some: {} },
         WeatherObservation: { none: {} },
       },
@@ -129,6 +140,7 @@ export async function POST(req: Request) {
     const pendingSynopticSlot = await prisma.observingTime.findFirst({
       where: {
         stationId: stationRecord.id,
+        utcTime: { gte: targetDayStart, lt: targetUtcTime },
         MeteorologicalEntry: { some: {} },
         WeatherObservation: { some: {} },
         SynopticCode: { none: {} },
@@ -141,10 +153,7 @@ export async function POST(req: Request) {
       },
     });
 
-    if (
-      pendingSynopticSlot &&
-      pendingSynopticSlot.utcTime.getTime() < targetUtcTime.getTime()
-    ) {
+    if (pendingSynopticSlot) {
       return NextResponse.json(
         {
           error: true,

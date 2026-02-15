@@ -37,10 +37,22 @@ export async function POST(request: Request) {
 
     const formattedObservingTime = hourToUtc(data.observingTimeId);
     const targetUtcTime = new Date(formattedObservingTime);
+    const targetDayStart = new Date(
+      Date.UTC(
+        targetUtcTime.getUTCFullYear(),
+        targetUtcTime.getUTCMonth(),
+        targetUtcTime.getUTCDate(),
+        0,
+        0,
+        0,
+        0
+      )
+    );
 
     const pendingSynopticSlot = await prisma.observingTime.findFirst({
       where: {
         stationId: session.user.station?.id,
+        utcTime: { gte: targetDayStart, lt: targetUtcTime },
         MeteorologicalEntry: { some: {} },
         WeatherObservation: { some: {} },
         SynopticCode: { none: {} },
@@ -53,10 +65,7 @@ export async function POST(request: Request) {
       },
     });
 
-    if (
-      pendingSynopticSlot &&
-      pendingSynopticSlot.utcTime.getTime() < targetUtcTime.getTime()
-    ) {
+    if (pendingSynopticSlot) {
       return NextResponse.json(
         {
           error: true,

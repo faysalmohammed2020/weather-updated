@@ -41,6 +41,17 @@ export async function POST(request: NextRequest) {
   try {
     const formattedUtcTime = hourToUtc(hour);
     const targetUtcTime = new Date(formattedUtcTime);
+    const targetDayStart = new Date(
+      Date.UTC(
+        targetUtcTime.getUTCFullYear(),
+        targetUtcTime.getUTCMonth(),
+        targetUtcTime.getUTCDate(),
+        0,
+        0,
+        0,
+        0
+      )
+    );
     if (!SLOT_HOURS.includes(targetUtcTime.getUTCHours() as (typeof SLOT_HOURS)[number])) {
       return NextResponse.json(
         {
@@ -110,7 +121,7 @@ export async function POST(request: NextRequest) {
       prisma.observingTime.findFirst({
         where: {
           stationId: session.user.station?.id,
-          utcTime: { lt: targetUtcTime },
+          utcTime: { gte: targetDayStart, lt: targetUtcTime },
           MeteorologicalEntry: { some: {} },
           WeatherObservation: { none: {} },
         },
@@ -124,6 +135,7 @@ export async function POST(request: NextRequest) {
       prisma.observingTime.findFirst({
         where: {
           stationId: session.user.station?.id,
+          utcTime: { gte: targetDayStart, lt: targetUtcTime },
           MeteorologicalEntry: { some: {} },
           WeatherObservation: { some: {} },
           SynopticCode: { none: {} },
@@ -156,10 +168,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (
-      pendingSynopticSlot &&
-      pendingSynopticSlot.utcTime.getTime() < targetUtcTime.getTime()
-    ) {
+    if (pendingSynopticSlot) {
       return NextResponse.json(
         {
           allowFirstCard: false,
