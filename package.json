@@ -14,8 +14,12 @@
   },
   "overrides": {
     "@loaders.gl/xml": {
-      "fast-xml-parser": "5.3.4"
-    }
+      "fast-xml-parser": "5.3.6"
+    },
+    "fast-xml-parser": "5.3.6",
+    "minimatch": "10.2.2",
+    "glob": "10.5.0",
+    "ajv": "8.18.0"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",
@@ -24,8 +28,8 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@hookform/resolvers": "^5.0.1",
-    "@loaders.gl/wms": "^4.3.4",
-    "@loaders.gl/xml": "^4.3.4",
+    "@loaders.gl/wms": "^3.3.5",
+    "@loaders.gl/xml": "^3.3.5",
     "@mantine/core": "^6.0.20",
     "@mantine/dates": "^6.0.21",
     "@mantine/hooks": "^6.0.20",
@@ -113,7 +117,7 @@
     "zustand": "^5.0.4"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3",
+    "@eslint/eslintrc": "^0.1.0",
     "@tailwindcss/postcss": "^4",
     "@types/d3": "^7.4.3",
     "@types/file-saver": "^2.0.7",
@@ -122,8 +126,8 @@
     "@types/react": "^19.2.6",
     "@types/react-dom": "^19.2.3",
     "@types/react-plotly.js": "^2.6.3",
-    "eslint": "^9",
-    "eslint-config-next": "15.5.7",
+    "eslint": "^10.0.0",
+    "eslint-config-next": "15.5.9",
     "prisma": "^5.15.1",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
