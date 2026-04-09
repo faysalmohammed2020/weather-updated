@@ -380,7 +380,6 @@ export async function GET(req: Request) {
         MeteorologicalEntry: true,
       },
       orderBy: { utcTime: "desc" },
-      take: 480,
     });
 
     return NextResponse.json({ entries }, { status: 200 });

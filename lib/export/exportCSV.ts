@@ -2,7 +2,7 @@ import { triggerDownload } from "@/lib/export/download";
 import type { SynopticHeaderInfo, SynopticRecord } from "@/lib/types/synoptic";
 
 const CSV_HEADERS =
-  "Time,C1,Iliii,iRiXhvv,Nddff,1SnTTT,2SnTdTdTd,3PPP/4PPP,6RRRtR,7wwW1W2,8NhClCmCh,2SnTnTnTn/InInInIn,56DlDmDh,57CDaEc,C2,GG,58P24P24P24/59P24P24P24,(6RRRtR),8N5Ch5h5,90dqqqt,91fqfqfq,Weather Remarks\n";
+  "Date,Time,C1,Iliii,iRiXhvv,Nddff,1SnTTT,2SnTdTdTd,3PPP/4PPP,6RRRtR,7wwW1W2,8NhClCmCh,2SnTnTnTn/InInInIn,56DlDmDh,57CDaEc,C2,GG,58P24P24P24/59P24P24P24,(6RRRtR),8N5Ch5h5,90dqqqt,91fqfqfq,Weather Remarks\n";
 
 export const exportSynopticCSV = (
   records: SynopticRecord[],
@@ -19,9 +19,11 @@ export const exportSynopticCSV = (
       ? new Date(entry.ObservingTime.utcTime)
       : new Date();
     const timeSlot = observingTime.getUTCHours().toString().padStart(2, "0");
+    const dateStr = observingTime.toISOString().split('T')[0]; // Format: YYYY-MM-DD
     const remark = (entry.weatherRemark || "").replace(/"/g, '""');
 
     const row = [
+      dateStr,
       timeSlot,
       entry.C1 || "",
       entry.Iliii || "",

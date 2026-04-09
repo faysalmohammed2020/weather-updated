@@ -20,7 +20,7 @@ export default function DroughtDashboard() {
   const [selectedRegion, setSelectedRegion] = useState("Bangladesh");
   const [selectedPeriod, setSelectedPeriod] = useState("1 Month");
   const [selectedIndex, setSelectedIndex] = useState("Rainfall");
-  const [currentDate, setCurrentDate] = useState("18-Oct");
+  const [currentDate, setCurrentDate] = useState();
   const [isPlaying, setIsPlaying] = useState(false);
   const [selectedStation, setSelectedStation] = useState<Station | null>(null);
 
