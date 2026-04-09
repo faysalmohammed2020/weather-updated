@@ -659,6 +659,23 @@ ${"=".repeat(60)}`;
       setMergedData(merged);
     };
 
+    // Fetch stations separately
+    const fetchStations = async () => {
+      if (isSuperAdmin || isRootAdmin) {
+        try {
+          const stationsResponse = await fetch("/api/stations");
+          if (stationsResponse.ok) {
+            const stationsResult = await stationsResponse.json();
+            setStations(stationsResult);
+          } else {
+            console.error("Failed to fetch stations:", stationsResponse.statusText);
+          }
+        } catch (error) {
+          console.error("Error fetching stations:", error);
+        }
+      }
+    };
+
     // Fetch all data
     const fetchAllData = async () => {
       try {
@@ -672,15 +689,6 @@ ${"=".repeat(60)}`;
 
         // Merge the data
         mergeData(firstData, secondData);
-
-        // Fetch stations if super admin and not already loaded
-        if ((isSuperAdmin || isRootAdmin) && stations.length === 0) {
-          const stationsResponse = await fetch("/api/stations");
-          if (stationsResponse.ok) {
-            const stationsResult = await stationsResponse.json();
-            setStations(stationsResult);
-          }
-        }
       } catch (error) {
         console.error("Error fetching data:", error);
         toast.error("Failed to fetch data");
@@ -688,6 +696,11 @@ ${"=".repeat(60)}`;
         setLoading(false);
       }
     };
+
+    // Fetch stations when session changes
+    useEffect(() => {
+      fetchStations();
+    }, [isSuperAdmin, isRootAdmin]);
 
     useEffect(() => {
       fetchAllData();

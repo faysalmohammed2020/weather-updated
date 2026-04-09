@@ -448,7 +448,7 @@ export async function GET(request: Request) {
         WeatherObservation: true,
       },
       orderBy: { utcTime: "desc" },
-      take: 100,
+      take: 480,
     });
 
     return NextResponse.json({ success: true, data: entries });
