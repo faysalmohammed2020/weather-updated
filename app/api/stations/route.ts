@@ -12,14 +12,22 @@ export async function GET() {
 
     if (!session?.user) {
       // If no session, return all stations (public access)
-      stations = await prisma.station.findMany();
+      stations = await prisma.station.findMany({
+        orderBy: {
+          name: 'asc'
+        }
+      });
       return NextResponse.json(stations);
     }
 
     // Filter stations based on user role
     if (session.user.role === "super_admin" || session.user.role === "root_admin") {
       // Super admin can see all stations
-      stations = await prisma.station.findMany();
+      stations = await prisma.station.findMany({
+        orderBy: {
+          name: 'asc'
+        }
+      });
     } else if (
       session.user.role === "station_admin" ||
       session.user.role === "observer"
@@ -36,6 +44,9 @@ export async function GET() {
         where: {
           id: session.user.stationId,
         },
+        orderBy: {
+          name: 'asc'
+        }
       });
     } else {
       return NextResponse.json({ error: "Invalid role" }, { status: 403 });
