@@ -134,8 +134,6 @@ export default function AllViewAndManagePage() {
     const excludedKeys = [
       "id",
       "stationId",
-      "stationCode",
-      "stationName",
       "submittedAt",
       "createdAt",
       "updatedAt",
@@ -146,21 +144,47 @@ export default function AllViewAndManagePage() {
       "c2Indicator",
     ];
 
-    const cleanFirst = firstCardData.map((item: WeatherObservationRecord) => {
-      const cleaned: any = {};
-      Object.keys(item).forEach((key: string) => {
-        if (!excludedKeys.includes(key)) {
-          cleaned[key] = (item as any)[key];
-        }
+    // Helper function to add station info to data
+    const addStationInfo = (data: any[]) => {
+      return data.map((item: any) => {
+        // Handle different data structures:
+        // 1. FlattenedWeatherObservation (direct stationName, stationId)
+        // 2. WeatherObservationRecord (nested station object)
+        // 3. SynopticRecord & DailySummaryRecord (nested ObservingTime.station)
+        const stationInfo = {
+          stationName: 
+            item.stationName || 
+            item.station?.name || 
+            item.ObservingTime?.station?.name || 
+            "",
+          stationCode: 
+            item.stationId || 
+            item.station?.stationId || 
+            item.ObservingTime?.station?.stationId || 
+            "",
+        };
+        
+        const cleaned: any = { ...stationInfo };
+        Object.keys(item).forEach((key: string) => {
+          if (!excludedKeys.includes(key) && 
+              key !== "station" && 
+              key !== "user" && 
+              key !== "stationName" && 
+              key !== "stationId" &&
+              key !== "ObservingTime") {
+            cleaned[key] = item[key];
+          }
+        });
+        return cleaned;
       });
-      return cleaned;
-    });
+    };
 
-    const cleanSecond = secondCardData.map((item: WeatherObservationRecord) => {
+    const cleanFirst = addStationInfo(firstCardData);
+    const cleanSecond = secondCardData.map((item: any) => {
       const cleaned: any = {};
       Object.keys(item).forEach((key: string) => {
-        if (!excludedKeys.includes(key)) {
-          cleaned[key] = (item as any)[key];
+        if (!excludedKeys.includes(key) && key !== "station" && key !== "user" && key !== "stationName" && key !== "stationId") {
+          cleaned[key] = item[key];
         }
       });
       return cleaned;
@@ -169,11 +193,15 @@ export default function AllViewAndManagePage() {
     const firstKeys = Object.keys(cleanFirst[0] || {});
     const secondKeys = Object.keys(cleanSecond[0] || {});
 
-    const firstHeader = Array(firstKeys.length).fill("First Card");
-    const secondHeader = Array(secondKeys.length).fill("Second Card");
+    // Ensure station columns are first only for First Card
+    const orderedFirstKeys = ["stationName", "stationCode", ...firstKeys.filter(k => k !== "stationName" && k !== "stationCode")];
+    const orderedSecondKeys = secondKeys; // No station columns for Second Card
+
+    const firstHeader = Array(orderedFirstKeys.length).fill("First Card");
+    const secondHeader = Array(orderedSecondKeys.length).fill("Second Card");
 
     const fullHeaderRow = [...firstHeader, ...secondHeader];
-    const subHeaderRow = [...firstKeys, ...secondKeys];
+    const subHeaderRow = [...orderedFirstKeys, ...orderedSecondKeys];
 
     const maxLength = Math.max(cleanFirst.length, cleanSecond.length);
     const mergedRows: any[] = [];
@@ -183,8 +211,8 @@ export default function AllViewAndManagePage() {
       const secondRow = cleanSecond[i] || {};
 
       mergedRows.push([
-        ...firstKeys.map((k) => firstRow[k] || ""),
-        ...secondKeys.map((k) => secondRow[k] || ""),
+        ...orderedFirstKeys.map((k) => firstRow[k] || ""),
+        ...orderedSecondKeys.map((k) => secondRow[k] || ""),
       ]);
     }
 
@@ -195,46 +223,32 @@ export default function AllViewAndManagePage() {
     mergedRows.forEach((row) => mergedSheet.addRow(row));
 
     // Merge header cells
-    const firstColEnd = firstKeys.length;
-    const secondColEnd = firstKeys.length + secondKeys.length;
+    const firstColEnd = orderedFirstKeys.length;
+    const secondColEnd = orderedFirstKeys.length + orderedSecondKeys.length;
     mergedSheet.mergeCells(1, 1, 1, firstColEnd);
     mergedSheet.mergeCells(1, firstColEnd + 1, 1, secondColEnd);
 
     // Synoptic
-    const cleanSynoptic = synopticData.map((item: SynopticRecord) => {
-      const cleaned: any = {};
-      Object.keys(item).forEach((key: string) => {
-        if (!excludedKeys.includes(key)) {
-          cleaned[key] = (item as any)[key];
-        }
-      });
-      return cleaned;
-    });
+    const cleanSynoptic = addStationInfo(synopticData);
     const synopticSheet = wb.addWorksheet("Synoptic");
     if (cleanSynoptic.length > 0) {
       const synopticKeys = Object.keys(cleanSynoptic[0]);
-      synopticSheet.addRow(synopticKeys);
+      const orderedSynopticKeys = ["stationName", "stationCode", ...synopticKeys.filter(k => k !== "stationName" && k !== "stationCode")];
+      synopticSheet.addRow(orderedSynopticKeys);
       cleanSynoptic.forEach((item: any) => {
-        synopticSheet.addRow(synopticKeys.map((k) => item[k]));
+        synopticSheet.addRow(orderedSynopticKeys.map((k) => item[k]));
       });
     }
 
     // Daily Summary
-    const cleanSummary = dailySummaryData.map((item: DailySummaryRecord) => {
-      const cleaned: any = {};
-      Object.keys(item).forEach((key: string) => {
-        if (!excludedKeys.includes(key)) {
-          cleaned[key] = item[key as keyof DailySummaryRecord];
-        }
-      });
-      return cleaned;
-    });
+    const cleanSummary = addStationInfo(dailySummaryData);
     const summarySheet = wb.addWorksheet("Daily Summary");
     if (cleanSummary.length > 0) {
       const summaryKeys = Object.keys(cleanSummary[0]);
-      summarySheet.addRow(summaryKeys);
+      const orderedSummaryKeys = ["stationName", "stationCode", ...summaryKeys.filter(k => k !== "stationName" && k !== "stationCode")];
+      summarySheet.addRow(orderedSummaryKeys);
       cleanSummary.forEach((item: any) => {
-        summarySheet.addRow(summaryKeys.map((k) => item[k]));
+        summarySheet.addRow(orderedSummaryKeys.map((k) => item[k]));
       });
     }
 
@@ -258,6 +272,7 @@ export default function AllViewAndManagePage() {
   const stationInfo = {
     stationId: session?.user?.station?.stationId || "41953",
     stationName: session?.user?.station?.name || "Weather Station",
+    stationCode: session?.user?.station?.stationCode || "41953",
     date: new Date().toLocaleDateString(),
   };
 
