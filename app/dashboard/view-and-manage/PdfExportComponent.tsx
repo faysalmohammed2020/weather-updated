@@ -11,9 +11,17 @@ import {
   Image,
 } from "@react-pdf/renderer";
 import { Button } from "@/components/ui/button";
-import { FileText } from "lucide-react";
+import { Download, FileText, Loader2 } from "lucide-react";
 import moment from "moment";
-import { useSession } from "next-auth/react"; // ✅ NextAuth hook
+import { useSession } from "next-auth/react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 // Compact PDF Styles for single A3 page
 const styles = StyleSheet.create({
@@ -830,79 +838,82 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
                 </Text>
               </View>
 
-              {synopticData.slice(0, 8).map((record, index) => (
-                <View key={index} style={styles.tableRow}>
-                  <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
-                    {formatTime(record.GG)}
-                  </Text>
-                  <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
-                    {formatDate(record.date)}
-                  </Text>
-                  <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
-                    {formatValue(record.C1)}
-                  </Text>
-                  <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
-                    {formatValue(record.Iliii)}
-                  </Text>
-                  <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
-                    {formatValue(record.iRiXhvv)}
-                  </Text>
-                  <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
-                    {formatValue(record.Nddff)}
-                  </Text>
-                  <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
-                    {formatValue(record.S1nTTT)}
-                  </Text>
-                  <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
-                    {formatValue(record.S2nTddTddTdd)}
-                  </Text>
-                  <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
-                    {formatValue(record.P3PPP4PPPP)}
-                  </Text>
-                  <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
-                    {formatValue(record.RRRtR6)}
-                  </Text>
-                  <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
-                    {formatValue(record.wwW1W2)}
-                  </Text>
-                  <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
-                    {formatValue(record.NhClCmCh)}
-                  </Text>
-                  <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
-                    {formatValue(record.S2nTnTnTnInInInIn)}
-                  </Text>
-                  <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
-                    {formatValue(record.D56DLDMDH)}
-                  </Text>
-                  <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
-                    {formatValue(record.CD57DaEc)}
-                  </Text>
-                  <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
-                    {formatValue(record.C2)}
-                  </Text>
-                  <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
-                    {formatValue(record.GG)}
-                  </Text>
-                  <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
-                    {formatValue(record.P24Group58_59)}
-                  </Text>
-                  <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
-                    {formatValue(record.R24Group6_7)}
-                  </Text>
-                  <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
-                    {formatValue(record.NsChshs)}
-                  </Text>
-                  <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
-                    {formatValue(record.dqqqt90)}
-                  </Text>
-                  <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
-                    {formatValue(record.fqfqfq91)}
-                  </Text>
-                  <View style={[styles.tableCellSynoptic, { width: "12%" }]}>
-                    {renderRemark(record)}
+              {synopticData.slice(0, 8).map((record, index) => {
+                const utcTime = record.ObservingTime?.utcTime;
+                return (
+                  <View key={index} style={styles.tableRow}>
+                    <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
+                      {formatTime(record.GG)}
+                    </Text>
+                    <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
+                      {formatDate(utcTime)}
+                    </Text>
+                    <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
+                      {formatValue(record.C1)}
+                    </Text>
+                    <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
+                      {formatValue(record.Iliii)}
+                    </Text>
+                    <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
+                      {formatValue(record.iRiXhvv)}
+                    </Text>
+                    <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
+                      {formatValue(record.Nddff)}
+                    </Text>
+                    <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
+                      {formatValue(record.S1nTTT)}
+                    </Text>
+                    <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
+                      {formatValue(record.S2nTddTddTdd)}
+                    </Text>
+                    <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
+                      {formatValue(record.P3PPP4PPPP)}
+                    </Text>
+                    <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
+                      {formatValue(record.RRRtR6)}
+                    </Text>
+                    <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
+                      {formatValue(record.wwW1W2)}
+                    </Text>
+                    <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
+                      {formatValue(record.NhClCmCh)}
+                    </Text>
+                    <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
+                      {formatValue(record.S2nTnTnTnInInInIn)}
+                    </Text>
+                    <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
+                      {formatValue(record.D56DLDMDH)}
+                    </Text>
+                    <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
+                      {formatValue(record.CD57DaEc)}
+                    </Text>
+                    <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
+                      {formatValue(record.C2)}
+                    </Text>
+                    <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
+                      {formatValue(record.GG)}
+                    </Text>
+                    <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
+                      {formatValue(record.P24Group58_59)}
+                    </Text>
+                    <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
+                      {formatValue(record.R24Group6_7)}
+                    </Text>
+                    <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
+                      {formatValue(record.NsChshs)}
+                    </Text>
+                    <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
+                      {formatValue(record.dqqqt90)}
+                    </Text>
+                    <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
+                      {formatValue(record.fqfqfq91)}
+                    </Text>
+                    <View style={[styles.tableCellSynoptic, { width: "12%" }]}>
+                      {renderRemark(record)}
+                    </View>
                   </View>
-                </View>
-              ))}
+                );
+              })}
             </View>
           </View>
         )}
@@ -1117,7 +1128,7 @@ export const CompactPDFExportButton: React.FC<CompactPDFExportButtonProps> = ({
     stationInfo: { stationId: string; stationName: string; date: string };
   } | null>(null);
 
-  const [showDownload, setShowDownload] = React.useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = React.useState(false);
 
   const generatePDFData = React.useCallback(() => {
     const firstCardData = firstCardRef.current?.getData?.() || [];
@@ -1148,8 +1159,8 @@ export const CompactPDFExportButton: React.FC<CompactPDFExportButtonProps> = ({
 
   // Important: don't continuously regenerate PDF when global filters change.
   // Snapshot the data on button click, then render the PDFDownloadLink with stable props.
-  if (!showDownload || !pdfData) {
-    return (
+  return (
+    <>
       <Button
         disabled={isGenerating}
         className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white w-full sm:w-auto"
@@ -1158,7 +1169,7 @@ export const CompactPDFExportButton: React.FC<CompactPDFExportButtonProps> = ({
             setIsGenerating(true);
             const snapshot = generatePDFData();
             setPdfData(snapshot);
-            setShowDownload(true);
+            setShowConfirmDialog(true);
           } catch (err) {
             console.error("Error generating PDF data:", err);
           } finally {
@@ -1178,37 +1189,97 @@ export const CompactPDFExportButton: React.FC<CompactPDFExportButtonProps> = ({
           </>
         )}
       </Button>
-    );
-  }
 
-  return (
-    <PDFDownloadLink
-      key={`${pdfData.stationInfo.stationId}-${pdfData.stationInfo.date}`}
-      document={<CompactWeatherPDFDocument {...pdfData} session={session} />}
-      fileName={fileName}
-    >
-      {({ loading, error: pdfError }) => (
-        <Button
-          disabled={loading}
-          className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white w-full sm:w-auto"
-          onClick={() => {
-            if (pdfError) console.error("PDF generation error:", pdfError);
-          }}
-        >
-          {loading ? (
-            <>
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              Generating PDF...
-            </>
-          ) : (
-            <>
-              <FileText className="h-4 w-4" />
+      <Dialog
+        open={showConfirmDialog}
+        onOpenChange={(open) => {
+          setShowConfirmDialog(open);
+          if (!open) setPdfData(null);
+        }}
+      >
+        <DialogContent className="max-w-md overflow-hidden rounded-2xl border border-sky-100 bg-white p-0 shadow-2xl">
+          <DialogHeader className="border-b border-sky-100 bg-sky-700 px-6 py-5 text-white">
+            <DialogTitle className="flex items-center gap-3 text-xl font-bold">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15">
+                <FileText className="h-5 w-5 text-white" />
+              </span>
               Download PDF
-            </>
-          )}
-        </Button>
-      )}
-    </PDFDownloadLink>
+            </DialogTitle>
+
+            <DialogDescription className="pt-1 text-sm text-sky-100">
+              Your PDF report is ready. Please download it below.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="px-6 py-6">
+            <div className="rounded-2xl border border-sky-100 bg-sky-50/70 p-5 text-center">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-sky-100">
+                <FileText className="h-8 w-8 text-sky-700" />
+              </div>
+
+              <h3 className="text-base font-semibold text-slate-900">
+                Single Day Weather Report
+              </h3>
+
+              <p className="mt-1 text-sm leading-6 text-slate-500">
+                This PDF will include weather observation data for only one
+                selected day. Please choose a specific date before downloading
+                the report.
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter className="border-t border-sky-100 bg-slate-50 px-6 py-4">
+            {pdfData && (
+              <PDFDownloadLink
+                key={`${pdfData.stationInfo.stationId}-${pdfData.stationInfo.date}`}
+                document={
+                  <CompactWeatherPDFDocument {...pdfData} session={session} />
+                }
+                fileName={fileName}
+                className="w-full"
+              >
+                {({ loading, error: pdfError }) => {
+                  if (pdfError) {
+                    console.error("PDF Error:", pdfError);
+
+                    return (
+                      <Button
+                        disabled
+                        className="h-11 w-full rounded-xl bg-red-600 text-white"
+                      >
+                        PDF generation failed
+                      </Button>
+                    );
+                  }
+
+                  return (
+                    <Button
+                      disabled={loading}
+                      className="h-11 w-full rounded-xl bg-sky-700 font-semibold text-white shadow-md shadow-sky-900/20 transition-all hover:bg-sky-800 disabled:cursor-not-allowed disabled:opacity-90"
+                    >
+                      {loading ? (
+                        <span className="flex items-center justify-center gap-2">
+                          <span className="relative flex h-5 w-5">
+                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white/70 opacity-75" />
+                            <span className="relative inline-flex h-5 w-5 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                          </span>
+                          Preparing PDF...
+                        </span>
+                      ) : (
+                        <span className="flex items-center justify-center gap-2">
+                          <Download className="h-5 w-5" />
+                          Download PDF
+                        </span>
+                      )}
+                    </Button>
+                  );
+                }}
+              </PDFDownloadLink>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
