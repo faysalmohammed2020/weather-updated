@@ -31,6 +31,7 @@ import {
   todayISO,
   validateDateChange,
 } from "@/lib/utils/date-utils";
+import { exportAllToTXT } from "@/lib/export/exportAllTXT";
 
 // ✅ CHANGED: keep only one dynamic import (no redeclare inside component)
 const CompactPDFExportButton = dynamic(() => import("../PdfExportComponent"), {
@@ -266,6 +267,21 @@ export default function AllViewAndManagePage() {
     URL.revokeObjectURL(url);
   };
 
+  const exportToTXT = () => {
+    const firstCardData = firstCardRef.current?.getData?.() || [];
+    const secondCardData = secondCardRef.current?.getData?.() || [];
+    const synopticData = synopticRef.current?.getData?.() || [];
+    const dailySummaryData = dailySummeryRef.current?.getData?.() || [];
+
+    exportAllToTXT({
+      firstCardData,
+      secondCardData,
+      synopticData,
+      dailySummaryData,
+      stationInfo,
+    });
+  };
+
   const MargeTableRef = useRef<any>(null);
 
   // Prepare station info for PDF
@@ -292,14 +308,23 @@ export default function AllViewAndManagePage() {
             {/* Excel Export Button */}
             <Button
               onClick={() => exportToExcel()}
-              className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 w-1/2 sm:w-auto text-sm sm:text-base px-3 py-2"
+              className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 w-1/3 sm:w-auto text-sm sm:text-base px-3 py-2"
             >
               <Download className="h-4 w-4 flex-shrink-0" />
               <span className="truncate">Export All to Excel</span>
             </Button>
 
+            {/* TXT Export Button */}
+            <Button
+              onClick={() => exportToTXT()}
+              className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 w-1/3 sm:w-auto text-sm sm:text-base px-3 py-2"
+            >
+              <Download className="h-4 w-4 flex-shrink-0" />
+              <span className="truncate">Export All to TXT</span>
+            </Button>
+
             {/* Compact PDF Export Button */}
-            <div className="w-1/2 sm:w-auto">
+            <div className="w-1/3 sm:w-auto">
               <CompactPDFExportButton
                 firstCardRef={firstCardRef}
                 secondCardRef={secondCardRef}
