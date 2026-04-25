@@ -120,7 +120,7 @@ const Sidebar = () => {
     {
       icon: <PencilIcon className="w-5 h-5" />,
       label: "Data Entry",
-      roles: ["root_admin","observer", "station_admin", "super_admin"],
+      roles: ["root_admin", "observer", "station_admin", "super_admin"],
       subMenu: [
         {
           icon: <CloudHail className="w-5 h-5" />,
@@ -152,7 +152,7 @@ const Sidebar = () => {
     {
       icon: <Eye className="w-5 h-5" />,
       label: "View & Manage",
-      roles: ["root_admin","observer", "station_admin", "super_admin"],
+      roles: ["root_admin", "observer", "station_admin", "super_admin"],
       subMenu: [
         {
           icon: <CloudHail className="w-5 h-5" />,
@@ -191,38 +191,38 @@ const Sidebar = () => {
       href: "/dashboard/netcdf-visualizer",
       icon: <Monitor className="w-5 h-5" />,
       label: "NetCDF Visualizer",
-      roles: ["root_admin","super_admin", "station_admin"],
+      roles: ["root_admin", "super_admin", "station_admin"],
     },
     {
       href: "/dashboard/radio-sond-analyzer",
       icon: <BarChart2 className="w-5 h-5" />,
       label: "Radiosonde Analyzer",
-      roles: ["root_admin","super_admin", "station_admin"],
+      roles: ["root_admin", "super_admin", "station_admin"],
     },
     {
       href: "/dashboard/user",
       icon: <Users className="w-5 h-5" />,
       label: "User Management",
-      roles: ["root_admin","super_admin", "station_admin"],
+      roles: ["root_admin", "super_admin", "station_admin"],
     },
     {
       href: "/dashboard/activity-logs",
       icon: <Eye className="w-5 h-5" />,
       label: "Activity Logs",
-      roles: ["root_admin","super_admin", "station_admin"],
+      roles: ["root_admin", "super_admin", "station_admin"],
     },
     {
       href: "/dashboard/stations",
       icon: <CloudFog className="w-5 h-5" />,
       label: "Station Management",
-      roles: ["root_admin","super_admin"],
+      roles: ["root_admin", "super_admin"],
     },
 
     {
       href: "/dashboard/settings",
       icon: <Settings className="w-5 h-5" />,
       label: "Settings",
-      roles: ["root_admin","super_admin"],
+      roles: ["root_admin", "super_admin"],
     },
   ];
 
@@ -253,7 +253,7 @@ const Sidebar = () => {
           isCollapsed ? "w-16" : "w-64",
           isMobileOpen
             ? "translate-x-0 shadow-xl"
-            : "-translate-x-full md:translate-x-0"
+            : "-translate-x-full md:translate-x-0",
         )}
         style={{ height: "100vh", top: 0, left: 0 }}
       >
@@ -284,7 +284,9 @@ const Sidebar = () => {
         <nav className="flex-1 flex flex-col gap-1 px-2 py-4 overflow-y-auto overflow-x-hidden z-30">
           {sidebarLinks.map((link) => {
             // Only apply role-based filtering after mount to keep SSR and first client paint identical
-            const canShow = mounted ? link.roles.includes(role as string) : true;
+            const canShow = mounted
+              ? link.roles.includes(role as string)
+              : true;
             if (!canShow) return null;
 
             return (
@@ -369,7 +371,7 @@ const SidebarLink = ({
               "w-full flex items-center justify-between text-white",
               "hover:bg-white hover:text-sky-800 transition-colors",
               "rounded-md px-3 py-2",
-              isActive && "bg-sky-600 text-white"
+              isActive && "bg-sky-600 text-white",
             )}
           >
             <div className="flex items-center gap-3">
@@ -395,7 +397,7 @@ const SidebarLink = ({
                 <ChevronDown
                   className={cn(
                     "h-4 w-4",
-                    isActive ? "text-white" : "text-sky-200"
+                    isActive ? "text-white" : "text-sky-200",
                   )}
                 />
               </motion.div>
@@ -447,14 +449,14 @@ const SidebarLink = ({
                               "w-full flex items-center gap-3 justify-start",
                               "py-1.5 pl-9 pr-3 rounded-md",
                               "text-white hover:bg-white hover:text-sky-800",
-                              isItemActive && "bg-sky-600 text-white"
+                              isItemActive && "bg-sky-600 text-white",
                             )}
                           >
                             {item.icon && (
                               <span
                                 className={cn(
                                   "text-current",
-                                  isItemActive ? "text-white" : "text-sky-200"
+                                  isItemActive ? "text-white" : "text-sky-200",
                                 )}
                               >
                                 {item.icon}
@@ -487,7 +489,7 @@ const SidebarLink = ({
           "w-full flex items-center gap-3 justify-start",
           "px-3 py-2 rounded-md",
           "text-white hover:bg-white hover:text-sky-800",
-          isActive && "bg-sky-600 text-white"
+          isActive && "bg-sky-600 text-white",
         )}
       >
         <span className={cn(isActive ? "text-white" : "text-sky-200")}>
