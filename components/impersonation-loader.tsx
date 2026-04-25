@@ -63,7 +63,7 @@ export const ImpersonationLoader = ({
         </div>
 
         {/* User Information */}
-        <div className="bg-gradient-to-r from-slate-50 to-blue-50 rounded-lg p-4 mb-6 border border-slate-200">
+        <div className="bg-linear-to-r from-slate-50 to-blue-50 rounded-lg p-4 mb-6 border border-slate-200">
           <div className="space-y-3">
             <div>
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
@@ -96,7 +96,7 @@ export const ImpersonationLoader = ({
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
             <div
-              className="bg-gradient-to-r from-blue-500 to-blue-600 h-full rounded-full transition-all duration-300 ease-out"
+              className="bg-linear-to-r from-blue-500 to-blue-600 h-full rounded-full transition-all duration-300 ease-out"
               style={{ width: `${progress}%` }}
             />
           </div>

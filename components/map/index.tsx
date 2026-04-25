@@ -141,7 +141,7 @@ function CustomZoomControl() {
   };
 
   return (
-    <div className="absolute top-2 left-2 flex flex-col gap-1 z-[1000]">
+    <div className="absolute top-2 left-2 flex flex-col gap-1 z-1000">
       <Button
         size="icon"
         variant="secondary"
@@ -346,7 +346,7 @@ function DynamicWeatherMap({ currentDate }: { currentDate: string }) {
 // Weather legend component
 function WeatherLegend() {
   return (
-    <div className="absolute bottom-16 right-2 bg-white p-2 rounded shadow z-[1000] w-48">
+    <div className="absolute bottom-16 right-2 bg-white p-2 rounded shadow z-1000 w-48">
       <h4 className="font-bold mb-1 text-center">Weather Conditions</h4>
       {Object.entries(weatherIcons).map(([condition, icon]) => (
         <div key={condition} className="flex items-center gap-2 text-xs mb-1">
@@ -455,7 +455,7 @@ function ResetViewButton() {
   };
 
   return (
-    <div className="absolute top-12 left-2 z-[1000]">
+    <div className="absolute top-12 left-2 z-1000">
       <Button
         size="sm"
         variant="secondary"
@@ -706,7 +706,7 @@ export default function MapComponent() {
   return (
     <div className="relative h-[600px] bg-gray-100 rounded-lg overflow-hidden">
       {/* BBC-style header */}
-      <div className="absolute top-0 left-0 right-0 bg-[#0f0f0f] text-white z-[1001] flex items-center justify-between px-4 py-2">
+      <div className="absolute top-0 left-0 right-0 bg-[#0f0f0f] text-white z-1000 flex items-center justify-between px-4 py-2">
         <div className="flex items-center gap-2">
           <div className="font-bold text-lg">Bangladesh Weather</div>
           <div className="text-sm text-gray-300 flex items-center gap-1">
@@ -732,6 +732,7 @@ export default function MapComponent() {
 
       <div className={cn("relative")}>
         <MapContainer
+          key="admin-map-container"
           center={mapCenter}
           zoom={8}
           style={{ height: "600px", width: "100%" }}
@@ -816,7 +817,7 @@ export default function MapComponent() {
       </div>
 
       {/* Weather summary panel */}
-      <div className="absolute top-14 right-2 bg-white p-3 rounded shadow z-[1000] w-64">
+      <div className="absolute top-14 right-2 bg-white p-3 rounded shadow z-1000 w-64">
         <h3 className="font-bold text-lg mb-2">Weather Summary</h3>
         <div className="flex items-center justify-between mb-3">
           <div className="text-4xl">{weatherSummary.icon}</div>
@@ -849,7 +850,7 @@ export default function MapComponent() {
       <WeatherLegend />
 
       {/* Timeline controls */}
-      <div className="absolute bottom-2 left-2 right-2 flex items-center gap-2 bg-white p-2 rounded shadow z-[1000]">
+      <div className="absolute bottom-2 left-2 right-2 flex items-center gap-2 bg-white p-2 rounded shadow z-1000">
         <div className="w-16">{dates[0]}</div>
         <Button
           size="icon"
@@ -876,7 +877,7 @@ export default function MapComponent() {
       </div>
 
       {/* BBC-style footer */}
-      <div className="absolute bottom-14 left-2 right-2 max-w-sm mx-auto bg-amber-100/90 font-semibold p-2 rounded shadow z-[1000] text-xs text-center">
+      <div className="absolute bottom-14 left-2 right-2 max-w-sm mx-auto bg-amber-100/90 font-semibold p-2 rounded shadow z-1000 text-xs text-center">
         Weather data is simulated for demonstration purposes. Click on districts
         to zoom in and see detailed weather information.
       </div>

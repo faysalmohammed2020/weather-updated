@@ -188,13 +188,13 @@ export default function SignUpForm() {
       >
         <div className="flex justify-center mb-4">
           <div className="relative h-12 w-12">
-            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 animate-pulse" />
+            <div className="absolute inset-0 rounded-full bg-linear-to-r from-cyan-500 to-blue-500 animate-pulse" />
             <Cloud className="h-12 w-12 text-white absolute inset-0" />
           </div>
         </div>
 
         <motion.h1
-          className="text-4xl text-center font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-cyan-700 to-blue-700"
+          className="text-4xl text-center font-bold tracking-tighter bg-clip-text text-transparent bg-linear-to-r from-cyan-700 to-blue-700"
           variants={fadeIn}
         >
           Create Account
@@ -316,7 +316,7 @@ export default function SignUpForm() {
 
         <Button
           type="submit"
-          className="w-full bg-gradient-to-r from-cyan-700 to-blue-700 text-white shadow-md flex items-center justify-center gap-2"
+          className="w-full bg-linear-to-r from-cyan-700 to-blue-700 text-white shadow-md flex items-center justify-center gap-2"
           disabled={loading}
         >
           {loading && (

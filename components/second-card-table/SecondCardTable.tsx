@@ -392,7 +392,7 @@ const SecondCardTable = forwardRef<SecondCardTableHandle, SecondCardTableProps>(
                         className="flex items-center justify-center gap-2 hover:bg-green-50 border-green-200 text-green-700 bg-transparent"
                         disabled={flattenedObservations.length === 0}
                       >
-                        <Download className="h-4 w-4 flex-shrink-0" />
+                        <Download className="h-4 w-4 shrink-0" />
                         <span className="whitespace-nowrap">Export CSV</span>
                       </Button>
                       <Button
@@ -402,7 +402,7 @@ const SecondCardTable = forwardRef<SecondCardTableHandle, SecondCardTableProps>(
                         className="flex items-center justify-center gap-2 hover:bg-blue-50 border-blue-200 text-blue-700 bg-transparent"
                         disabled={flattenedObservations.length === 0}
                       >
-                        <Download className="h-4 w-4 flex-shrink-0" />
+                        <Download className="h-4 w-4 shrink-0" />
                         <span className="whitespace-nowrap">Export TXT</span>
                       </Button>
                     </div>
@@ -420,7 +420,7 @@ const SecondCardTable = forwardRef<SecondCardTableHandle, SecondCardTableProps>(
             )}
 
             <div className="bg-white rounded-lg shadow-lg border border-slate-200 overflow-hidden">
-              <div className="p-3 md:p-4 bg-gradient-to-r from-slate-100 to-slate-200 border-b border-slate-300">
+              <div className="p-3 md:p-4 bg-linear-to-r from-slate-100 to-slate-200 border-b border-slate-300">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                   <div className="flex flex-col items-center">
                     <span className="text-xs md:text-sm font-medium text-slate-900 mb-1 md:mb-2">

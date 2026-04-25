@@ -28,7 +28,7 @@ const RainfallTabSection = memo(function RainfallTabSection({
     <Card className={cn("overflow-hidden", tabStyle)}>
       
       {/* Header */}
-      <div className="p-4 bg-gradient-to-r from-cyan-200 to-cyan-300 text-cyan-800">
+      <div className="p-4 bg-linear-to-r from-cyan-200 to-cyan-300 text-cyan-800">
         <h3 className="text-lg font-semibold flex items-center">
           <CloudRainIcon className="mr-2 h-5 w-5" /> Rainfall
         </h3>

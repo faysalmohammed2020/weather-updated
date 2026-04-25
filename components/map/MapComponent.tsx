@@ -204,7 +204,7 @@ function CustomZoomControl() {
   const map = useMap();
 
   return (
-    <div className="absolute top-2 left-2 flex flex-col gap-1 z-[1000]">
+    <div className="absolute top-2 left-2 flex flex-col gap-1 z-1000">
       <Button
         size="icon"
         variant="secondary"
@@ -791,6 +791,7 @@ export default function MapComponent({
       {/* Map Container */}
       <div className="relative h-[500px] w-full rounded-lg overflow-hidden border-2 border-gray-200">
         <MapContainer
+          key="weather-map-container"
           center={[23.685, 90.3563]}
           zoom={7}
           style={{ height: "100%", width: "100%" }}
@@ -832,7 +833,7 @@ export default function MapComponent({
 
       {/* Loading indicator */}
       {loading && (
-        <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-30 z-[1000]">
+        <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-30 z-1000">
           <div className="bg-white p-4 rounded-lg shadow-lg">
             Loading stations...
           </div>
@@ -840,7 +841,7 @@ export default function MapComponent({
       )}
 
       {/* Weather Parameter Buttons */}
-      <div className="absolute top-4 md:left-14 left-4 bg-white p-3 rounded-lg shadow-lg z-[1000] max-w-xs">
+      <div className="absolute top-4 md:left-14 left-4 bg-white p-3 rounded-lg shadow-lg z-1000 max-w-xs">
         <div className="grid grid-cols-8 gap-2">
           {weatherParameters.map((param) => {
             const Icon = param.icon;
@@ -873,7 +874,7 @@ export default function MapComponent({
       </div>
 
       {/* Timeline Controls */}
-      <div className="absolute bottom-4 left-4 right-4 bg-white p-3 rounded-lg shadow-lg z-[1000]">
+      <div className="absolute bottom-4 left-4 right-4 bg-white p-3 rounded-lg shadow-lg z-1000">
         <div className="flex items-center gap-3">
           <Button
             size="icon"
@@ -903,7 +904,7 @@ export default function MapComponent({
       </div>
 
       {/* User role indicator */}
-      <div className="absolute top-4 right-4 bg-white p-2 rounded-lg shadow-lg z-[1000]">
+      <div className="absolute top-4 right-4 bg-white p-2 rounded-lg shadow-lg z-1000">
         <div className="text-sm font-medium">
           {session?.user?.role === "super_admin" || session?.user?.role === "root_admin"
             ? "Admin"
@@ -925,7 +926,7 @@ export default function MapComponent({
 
       {/* Weather summary panel */}
       {selectedStation && (
-        <div className="absolute bottom-20 right-4 bg-white p-3 rounded-lg shadow-lg z-[1000] w-64">
+        <div className="absolute bottom-20 right-4 bg-white p-3 rounded-lg shadow-lg z-1000 w-64">
           <div className="text-sm font-medium mb-2">Weather Summary</div>
           {loading ? (
             <div className="text-xs">Loading weather data...</div>

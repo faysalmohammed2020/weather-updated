@@ -309,7 +309,7 @@ const MeteorologicalForm = ({
             <Button
               type="submit"
               disabled={isSaving}
-              className="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white shadow-md transition-all"
+              className="bg-linear-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white shadow-md transition-all"
             >
               {isSaving ? (
                 <>

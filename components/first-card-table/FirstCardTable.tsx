@@ -306,7 +306,7 @@ const FirstCardTable = forwardRef<FirstCardTableHandle, FirstCardTableProps>(
             )}
 
             <div className="bg-white rounded-lg shadow-lg border border-slate-200 overflow-hidden">
-              <div className="flex flex-col md:flex-row md:justify-between p-3 sm:p-4 bg-gradient-to-r from-slate-100 to-slate-200 border-b border-slate-300 gap-3 sm:gap-4">
+              <div className="flex flex-col md:flex-row md:justify-between p-3 sm:p-4 bg-linear-to-r from-slate-100 to-slate-200 border-b border-slate-300 gap-3 sm:gap-4">
                 <div className="flex flex-wrap justify-center gap-3 sm:gap-6">
                   <div className="flex flex-col items-center min-w-[100px]">
                     <label className="text-xs sm:text-sm font-medium text-slate-900 mb-1 sm:mb-2 text-center">

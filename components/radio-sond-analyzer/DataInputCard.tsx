@@ -53,7 +53,7 @@ export function DataInputCard({
 }: DataInputCardProps) {
   return (
     <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
-      <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg">
+      <CardHeader className="bg-linear-to-r from-blue-500 to-purple-600 text-white rounded-t-lg">
         <CardTitle className="flex items-center gap-3 text-xl">
           <Upload className="h-6 w-6" />
           Data Input
@@ -162,7 +162,7 @@ export function DataInputCard({
         <div className="flex gap-3">
           <Button
             onClick={analyzeData}
-            className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3"
+            className="flex-1 bg-linear-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3"
             disabled={isLoading}
           >
             {isLoading ? (

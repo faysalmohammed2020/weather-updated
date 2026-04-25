@@ -41,7 +41,7 @@ export function SignificantSection({
 
   return (
     <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm">
-      <CardHeader className="bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-t-lg flex justify-between items-center p-4">
+      <CardHeader className="bg-linear-to-r from-orange-500 to-red-600 text-white rounded-t-lg flex justify-between items-center p-4">
         <div>
           <CardTitle className="text-xl">Significant Pressure Levels</CardTitle>
           <CardDescription className="text-orange-100">
@@ -98,14 +98,14 @@ export function SignificantSection({
             <TabsList className="grid w-full grid-cols-2 bg-orange-50 border border-orange-200">
               <TabsTrigger
                 value="temperature"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-orange-600 data-[state=active]:text-white"
+                className="data-[state=active]:bg-linear-to-r data-[state=active]:from-red-500 data-[state=active]:to-orange-600 data-[state=active]:text-white"
               >
                 <Thermometer className="h-4 w-4 mr-2" />
                 Temperature Data
               </TabsTrigger>
               <TabsTrigger
                 value="wind"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-600 data-[state=active]:text-white"
+                className="data-[state=active]:bg-linear-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-600 data-[state=active]:text-white"
               >
                 <Wind className="h-4 w-4 mr-2" />
                 Wind Data
@@ -114,7 +114,7 @@ export function SignificantSection({
 
             {/* Temperature Tab */}
             <TabsContent value="temperature" className="space-y-4">
-              <div className="bg-gradient-to-r from-red-50 to-orange-50 p-4 rounded-lg border border-red-200">
+              <div className="bg-linear-to-r from-red-50 to-orange-50 p-4 rounded-lg border border-red-200">
                 <h3 className="text-lg font-semibold text-red-800 mb-3 flex items-center gap-2">
                   <Thermometer className="h-5 w-5" />
                   Temperature & Humidity Levels
@@ -122,7 +122,7 @@ export function SignificantSection({
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b-2 border-red-200 bg-gradient-to-r from-red-100 to-orange-100">
+                      <tr className="border-b-2 border-red-200 bg-linear-to-r from-red-100 to-orange-100">
                         <th className="text-left p-3 font-semibold text-red-800">Pressure (mb)</th>
                         <th className="text-left p-3 font-semibold text-red-800">Temperature (°C)</th>
                         <th className="text-left p-3 font-semibold text-red-800">Dewpoint (°C)</th>
@@ -204,7 +204,7 @@ export function SignificantSection({
 
             {/* Wind Tab */}
             <TabsContent value="wind" className="space-y-4">
-              <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-4 rounded-lg border border-blue-200">
+              <div className="bg-linear-to-r from-blue-50 to-cyan-50 p-4 rounded-lg border border-blue-200">
                 <h3 className="text-lg font-semibold text-blue-800 mb-3 flex items-center gap-2">
                   <Wind className="h-5 w-5" />
                   Wind Data Levels
@@ -212,7 +212,7 @@ export function SignificantSection({
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b-2 border-blue-200 bg-gradient-to-r from-blue-100 to-cyan-100">
+                      <tr className="border-b-2 border-blue-200 bg-linear-to-r from-blue-100 to-cyan-100">
                         <th className="text-left p-3 font-semibold text-blue-800">Pressure (mb)</th>
                         <th className="text-left p-3 font-semibold text-blue-800">
                           Wind Direction (°)

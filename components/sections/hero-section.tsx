@@ -314,7 +314,7 @@ export default function HeroSection() {
 
             <div className="space-y-2">
               <motion.h1
-                className="pb-6 text-4xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none bg-clip-text text-transparent bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400"
+                className="pb-6 text-4xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none bg-clip-text text-transparent bg-linear-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400"
                 variants={fadeIn}
               >
                 Bangladesh Weather Dashboard
@@ -336,7 +336,7 @@ export default function HeroSection() {
               <Link href="/dashboard">
                 <Button
                   size="lg"
-                  className="px-8 bg-gradient-to-r from-cyan-700 to-blue-700 hover:from-cyan-600 hover:to-blue-600 shadow-lg hover:shadow-blue-500/25 transition-all duration-300"
+                  className="px-8 bg-linear-to-r from-cyan-700 to-blue-700 hover:from-cyan-600 hover:to-blue-600 shadow-lg hover:shadow-blue-500/25 transition-all duration-300"
                 >
                   Launch Dashboard
                   <ArrowRight className="ml-2 h-4 w-4" />

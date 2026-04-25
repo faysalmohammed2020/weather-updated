@@ -32,7 +32,7 @@ const SignificantCloudTab = memo(function SignificantCloudTab({
   return (
     <Card className={cn("overflow-hidden", tabStyle)}>
       {/* Header */}
-      <div className="p-4 bg-gradient-to-r from-purple-200 to-purple-300 text-purple-800">
+      <div className="p-4 bg-linear-to-r from-purple-200 to-purple-300 text-purple-800">
         <h3 className="text-lg font-semibold flex items-center">
           <CloudIcon className="mr-2 h-5 w-5" /> Significant Cloud
         </h3>

@@ -78,7 +78,7 @@ const WeatherForm = ({ onSubmit, onCancel, isSaving }: WeatherFormProps) => (
       <Button
         type="submit"
         disabled={isSaving}
-        className="bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-700 hover:to-blue-700 text-white shadow-md transition-all"
+        className="bg-linear-to-r from-sky-600 to-blue-600 hover:from-sky-700 hover:to-blue-700 text-white shadow-md transition-all"
       >
         {isSaving ? (
           <>

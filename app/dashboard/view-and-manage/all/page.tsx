@@ -310,7 +310,7 @@ export default function AllViewAndManagePage() {
               onClick={() => exportToExcel()}
               className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 w-1/3 sm:w-auto text-sm sm:text-base px-3 py-2"
             >
-              <Download className="h-4 w-4 flex-shrink-0" />
+              <Download className="h-4 w-4 shrink-0" />
               <span className="truncate">Export All to Excel</span>
             </Button>
 
@@ -319,7 +319,7 @@ export default function AllViewAndManagePage() {
               onClick={() => exportToTXT()}
               className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 w-1/3 sm:w-auto text-sm sm:text-base px-3 py-2"
             >
-              <Download className="h-4 w-4 flex-shrink-0" />
+              <Download className="h-4 w-4 shrink-0" />
               <span className="truncate">Export All to TXT</span>
             </Button>
 
@@ -344,7 +344,7 @@ export default function AllViewAndManagePage() {
               variant="outline"
               size="icon"
               onClick={handlePreviousRange}
-              className="hover:bg-slate-200 flex-shrink-0 bg-transparent"
+              className="hover:bg-slate-200 shrink-0 bg-transparent"
               aria-label="Go to previous range"
             >
               <ChevronLeft className="h-4 w-4" />
@@ -377,7 +377,7 @@ export default function AllViewAndManagePage() {
               variant="outline"
               size="icon"
               onClick={handleNextRange}
-              className="hover:bg-slate-200 flex-shrink-0 bg-transparent"
+              className="hover:bg-slate-200 shrink-0 bg-transparent"
               aria-label="Go to next range"
             >
               <ChevronRight className="h-4 w-4" />
@@ -389,7 +389,7 @@ export default function AllViewAndManagePage() {
         {isGlobalStationFilterVisible && (
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
             <div className="flex items-center gap-2">
-              <Filter size={16} className="text-purple-500 flex-shrink-0" />
+              <Filter size={16} className="text-purple-500 shrink-0" />
               <Label
                 htmlFor="globalStationFilter"
                 className="whitespace-nowrap font-medium text-slate-700 text-sm"

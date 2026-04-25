@@ -283,10 +283,10 @@ export default function LandingPageDailySummaryChart() {
 
   return (
     <Card className="border-0 shadow-none rounded-none bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm">
-      <CardHeader className="border-b border-cyan-200/50 dark:border-cyan-800/50 bg-gradient-to-r from-cyan-50/50 to-blue-50/50 dark:from-gray-800/50 dark:to-blue-950/50">
+      <CardHeader className="border-b border-cyan-200/50 dark:border-cyan-800/50 bg-linear-to-r from-cyan-50/50 to-blue-50/50 dark:from-gray-800/50 dark:to-blue-950/50">
         <div className="flex flex-col gap-4">
           <div>
-            <CardTitle className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400 bg-clip-text text-transparent">
+            <CardTitle className="text-xl sm:text-2xl font-bold bg-linear-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400 bg-clip-text text-transparent">
               Weather Data Analytics
             </CardTitle>
             <CardDescription className="text-sm sm:text-base text-gray-700 dark:text-gray-300 mt-1">
@@ -363,9 +363,9 @@ export default function LandingPageDailySummaryChart() {
             <div className="relative h-full overflow-hidden rounded-xl bg-gradient-to-br from-sky-50 via-blue-50 to-cyan-50 border border-sky-100/50">
               {/* Animated background elements */}
               <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute -top-24 -left-24 w-64 h-64 bg-gradient-to-r from-blue-200/20 to-cyan-200/20 rounded-full blur-3xl animate-pulse"></div>
-                <div className="absolute -bottom-24 -right-24 w-72 h-72 bg-gradient-to-r from-sky-200/20 to-indigo-200/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-                <div className="absolute top-1/2 left-1/4 w-48 h-48 bg-gradient-to-r from-blue-100/10 to-cyan-100/10 rounded-full blur-2xl animate-pulse delay-500"></div>
+                <div className="absolute -top-24 -left-24 w-64 h-64 bg-linear-to-r from-blue-200/20 to-cyan-200/20 rounded-full blur-3xl animate-pulse"></div>
+                <div className="absolute -bottom-24 -right-24 w-72 h-72 bg-linear-to-r from-sky-200/20 to-indigo-200/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+                <div className="absolute top-1/2 left-1/4 w-48 h-48 bg-linear-to-r from-blue-100/10 to-cyan-100/10 rounded-full blur-2xl animate-pulse delay-500"></div>
               </div>
 
               {/* Floating weather icons */}
@@ -382,7 +382,7 @@ export default function LandingPageDailySummaryChart() {
               <div className="relative z-10 flex flex-col items-center justify-center h-full p-4 sm:p-6 md:p-8 text-center">
                 {/* Animated icon container */}
                 <div className="relative mb-6">
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full blur-lg opacity-30 animate-pulse"></div>
+                  <div className="absolute inset-0 bg-linear-to-r from-blue-400 to-cyan-400 rounded-full blur-lg opacity-30 animate-pulse"></div>
                   <div className="relative flex items-center justify-center w-24 h-24 bg-gradient-to-br from-white to-blue-50 rounded-2xl shadow-lg border border-blue-100 transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
                     <div className="text-5xl animate-bounce-subtle">📡</div>
                     <div className="absolute -top-2 -right-2 flex items-center justify-center w-8 h-8 bg-amber-400 rounded-full shadow-md animate-ping-slow">
@@ -393,7 +393,7 @@ export default function LandingPageDailySummaryChart() {
 
                 {/* Main message */}
                 <div className="max-w-xs sm:max-w-md">
-                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mb-2 sm:mb-3">
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold bg-linear-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mb-2 sm:mb-3">
                     {stationSelection?.name || "Welcome to Weather Insights"}
                   </h3>
 
@@ -406,7 +406,7 @@ export default function LandingPageDailySummaryChart() {
                   {/* Interactive elements */}
                   <div className="flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-3">
                     <div className="relative group w-full sm:w-auto">
-                      <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-xl blur opacity-30 group-hover:opacity-50 transition duration-300"></div>
+                      <div className="absolute -inset-0.5 bg-linear-to-r from-blue-400 to-cyan-400 rounded-xl blur opacity-30 group-hover:opacity-50 transition duration-300"></div>
                       <div className="relative px-4 sm:px-6 py-2.5 sm:py-3 bg-white rounded-xl shadow-sm border border-gray-100 group-hover:shadow-md transition-all duration-300 w-full sm:w-auto">
                         <div className="flex items-center justify-center gap-2">
                           <div className="text-blue-500">
@@ -440,7 +440,7 @@ export default function LandingPageDailySummaryChart() {
                           setStationSelection(st);
                         }
                       }}
-                      className="px-4 py-2.5 sm:px-4 sm:py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 active:scale-95 w-full sm:w-auto text-sm sm:text-base"
+                      className="px-4 py-2.5 sm:px-4 sm:py-3 bg-linear-to-r from-blue-500 to-cyan-500 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 active:scale-95 w-full sm:w-auto text-sm sm:text-base"
                     >
                       <div className="flex items-center justify-center gap-2">
                         <svg
@@ -486,7 +486,7 @@ export default function LandingPageDailySummaryChart() {
                     {[0, 1, 2].map((i) => (
                       <div
                         key={i}
-                        className="w-2 h-2 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full animate-pulse"
+                        className="w-2 h-2 bg-linear-to-r from-blue-400 to-cyan-400 rounded-full animate-pulse"
                         style={{ animationDelay: `${i * 200}ms` }}
                       />
                     ))}

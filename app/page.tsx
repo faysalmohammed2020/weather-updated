@@ -50,10 +50,10 @@ export default function LandingPage() {
         <div className="container flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <div className="relative h-8 w-8">
-              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 animate-pulse"></div>
+              <div className="absolute inset-0 rounded-full bg-linear-to-r from-cyan-500 to-blue-500 animate-pulse"></div>
               <Cloud className="h-8 w-8 text-white absolute inset-0" />
             </div>
-            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-cyan-400 dark:to-blue-400">
+            <span className="text-xl font-bold bg-clip-text text-transparent bg-linear-to-r from-cyan-600 to-blue-600 dark:from-cyan-400 dark:to-blue-400">
               BD Weather
             </span>
           </Link>
@@ -114,7 +114,7 @@ export default function LandingPage() {
 
           <div className="flex items-center gap-4">
             <Link href="/sign-in" className="hidden md:block">
-              <Button className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-lg hover:shadow-blue-500/25 transition-all duration-300 flex items-center gap-2">
+              <Button className="bg-linear-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-lg hover:shadow-blue-500/25 transition-all duration-300 flex items-center gap-2">
                 Sign In
                 <ArrowRight className="w-4 h-4" />
               </Button>
@@ -208,7 +208,7 @@ export default function LandingPage() {
                     className="mt-2"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    <Button className="w-full bg-gradient-to-r from-cyan-600 to-blue-600">
+                    <Button className="w-full bg-linear-to-r from-cyan-600 to-blue-600">
                       Access Dashboard
                     </Button>
                   </Link>

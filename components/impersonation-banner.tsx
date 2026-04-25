@@ -62,7 +62,7 @@ export const ImpersonationBanner = () => {
       <div className="bg-slate-700 p-4 mb-4 shadow-xl">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               {/* ✨ ENHANCEMENT 2: White icon, slightly larger */}
               <svg
                 className="h-6 w-6 text-white"
@@ -107,7 +107,7 @@ export const ImpersonationBanner = () => {
               </p>
             </div>
           </div>
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             {/* ✨ ENHANCEMENT 4: High-contrast white button */}
             <Button
               variant="default"

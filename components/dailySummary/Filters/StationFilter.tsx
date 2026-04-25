@@ -22,7 +22,7 @@ export const StationFilter = ({
 }: StationFilterProps) => (
   <div className="flex flex-col md:flex-row items-start md:items-center gap-2 w-full md:w-auto">
     <div className="flex items-center gap-2">
-      <Filter size={16} className="text-purple-500 flex-shrink-0" />
+      <Filter size={16} className="text-purple-500 shrink-0" />
       <Label
         htmlFor="stationFilter"
         className="whitespace-nowrap font-medium text-slate-700 text-xs md:text-sm"

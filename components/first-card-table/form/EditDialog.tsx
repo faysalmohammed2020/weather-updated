@@ -68,7 +68,7 @@ const EditDialog = ({
               ? format(new Date(observingTime.utcTime), "MMMM d, yyyy")
               : "Unknown Date"}
           </DialogDescription>
-          <div className="h-1 w-20 rounded-full bg-gradient-to-r from-indigo-400 to-blue-400 mt-2" />
+          <div className="h-1 w-20 rounded-full bg-linear-to-r from-indigo-400 to-blue-400 mt-2" />
         </DialogHeader>
 
         {record && observingTime ? (

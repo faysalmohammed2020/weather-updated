@@ -33,7 +33,7 @@ const ObserverTab = memo(function ObserverTab({
   return (
     <Card className={cn("overflow-hidden", tabStyle)}>
       {/* Header */}
-      <div className="p-4 bg-gradient-to-r from-orange-200 to-orange-300 text-orange-800">
+      <div className="p-4 bg-linear-to-r from-orange-200 to-orange-300 text-orange-800">
         <h3 className="text-lg font-semibold flex items-center">
           <User className="mr-2 h-5 w-5" /> Observer Information
         </h3>

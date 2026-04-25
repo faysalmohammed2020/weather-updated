@@ -344,7 +344,7 @@ const DailySummaryViewComponent = (
   return (
     <div className="space-y-6 print:space-y-0 m-2">
       <h2 className="text-2xl font-bold text-gray-800 flex items-center">
-        <span className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 flex items-center justify-center text-white shadow-sm mr-3">
+        <span className="w-10 h-10 rounded-full bg-linear-to-r from-blue-500 to-cyan-400 flex items-center justify-center text-white shadow-sm mr-3">
           <LineChart size={20} />
         </span>
         Daily Summary Data

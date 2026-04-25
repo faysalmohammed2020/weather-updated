@@ -32,7 +32,7 @@ const SummaryTab: React.FC<Props> = ({
 }) => {
   return (
     <Card className={cn("overflow-hidden", cardClassName)}>
-      <div className="p-4 bg-gradient-to-r from-slate-200 to-slate-300 text-slate-800">
+      <div className="p-4 bg-linear-to-r from-slate-200 to-slate-300 text-slate-800">
         <h3 className="text-lg font-semibold flex items-center">
           <BarChart3 className="mr-2" /> Review & Submit
         </h3>
@@ -387,7 +387,7 @@ const SummaryTab: React.FC<Props> = ({
           </Button>
           <Button
             type="submit"
-            className="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 shadow-sm"
+            className="w-full sm:w-auto bg-linear-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 shadow-sm"
             disabled={isSubmitting}
           >
             {isSubmitting ? "Saving..." : "Submit Data"}

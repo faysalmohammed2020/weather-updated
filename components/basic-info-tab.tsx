@@ -21,7 +21,7 @@ type ValuesState = {
 };
 
 // ✅ stable refs creator (no re-create per render)
-const makeRefs = (len: number): React.RefObject<HTMLInputElement | null>[] =>
+const makeRefs = (len: number): React.RefObject<HTMLInputElement>[] =>
   Array.from({ length: len }, () => React.createRef<HTMLInputElement>());
 
 export default function BasicInfoTab({
@@ -84,7 +84,7 @@ export default function BasicInfoTab({
       name: keyof ValuesState,
       value: string,
       index?: number,
-      refs?: React.RefObject<HTMLInputElement | null>[]
+      refs?: React.RefObject<HTMLInputElement>[]
     ) => {
       setValues((prev) => ({ ...prev, [name]: value }));
       pushUpdates({ [name]: value });
@@ -105,7 +105,7 @@ export default function BasicInfoTab({
     (
       e: React.ChangeEvent<HTMLInputElement>,
       index: number,
-      refs: React.RefObject<HTMLInputElement | null>[],
+      refs: React.RefObject<HTMLInputElement>[],
       fieldName: keyof ValuesState
     ) => {
       const val = e.target.value.slice(0, 1);

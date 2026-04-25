@@ -20,7 +20,7 @@ const WeekNavigation = ({
       variant="outline"
       size="icon"
       onClick={onPrevious}
-      className="hover:bg-slate-200 flex-shrink-0 bg-transparent"
+      className="hover:bg-slate-200 shrink-0 bg-transparent"
       aria-label="Show previous range"
     >
       <ChevronLeft className="h-4 w-4" />
@@ -32,7 +32,7 @@ const WeekNavigation = ({
       variant="outline"
       size="icon"
       onClick={onNext}
-      className="hover:bg-slate-200 flex-shrink-0 bg-transparent"
+      className="hover:bg-slate-200 shrink-0 bg-transparent"
       aria-label="Show next range"
     >
       <ChevronRight className="h-4 w-4" />

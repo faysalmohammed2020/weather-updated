@@ -80,7 +80,7 @@ export default function FeaturesPage() {
                 <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
                 <span className="text-xs font-medium">Features</span>
               </div>
-              <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400">
+              <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl bg-clip-text text-transparent bg-linear-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400">
                 Comprehensive Weather Monitoring Tools
               </h1>
               <p className="max-w-[700px] text-gray-700 dark:text-gray-300 md:text-xl">
@@ -431,7 +431,7 @@ export default function FeaturesPage() {
               transition={{ duration: 0.5 }}
               viewport={{ once: true }}
             >
-              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl bg-clip-text text-transparent bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400">
+              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl bg-clip-text text-transparent bg-linear-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400">
                 Ready to experience these features?
               </h2>
               <p className="text-gray-700 dark:text-gray-300 md:text-xl">
@@ -440,7 +440,7 @@ export default function FeaturesPage() {
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4">
                 <Link href="/dashboard">
-                  <Button size="lg" className="w-full sm:w-auto px-8 bg-gradient-to-r from-cyan-700 to-blue-700 hover:from-cyan-600 hover:to-blue-600 shadow-lg hover:shadow-blue-500/25 transition-all duration-300">
+                  <Button size="lg" className="w-full sm:w-auto px-8 bg-linear-to-r from-cyan-700 to-blue-700 hover:from-cyan-600 hover:to-blue-600 shadow-lg hover:shadow-blue-500/25 transition-all duration-300">
                     Launch Dashboard
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>

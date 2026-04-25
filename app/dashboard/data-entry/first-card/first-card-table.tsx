@@ -415,7 +415,7 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
         </div>
 
         <div className="bg-white rounded-lg shadow-lg border border-slate-200 overflow-hidden">
-          <div className="p-4 bg-gradient-to-r from-slate-100 to-slate-200 border-b border-slate-300">
+          <div className="p-4 bg-linear-to-r from-slate-100 to-slate-200 border-b border-slate-300">
             <div className="flex justify-around gap-4">
               <div className="flex flex-col">
                 <Label className="text-sm font-medium text-slate-900 mb-2">
@@ -911,7 +911,7 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                     )
                   : "Unknown Date"}
               </DialogDescription>
-              <div className="h-1 w-20 rounded-full bg-gradient-to-r from-indigo-400 to-blue-400 mt-2"></div>
+              <div className="h-1 w-20 rounded-full bg-linear-to-r from-indigo-400 to-blue-400 mt-2"></div>
             </DialogHeader>
 
             {selectedRecord && (
@@ -1119,7 +1119,7 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
               <Button
                 onClick={handleSaveEdit}
                 disabled={isSaving}
-                className="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white shadow-md transition-all"
+                className="bg-linear-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white shadow-md transition-all"
               >
                 {isSaving ? (
                   <>

@@ -21,7 +21,7 @@ export const ExportButtons = ({
       onClick={onExportCSV}
       disabled={disabled}
     >
-      <Download size={18} className="flex-shrink-0" />
+      <Download size={18} className="shrink-0" />
       <span className="text-sm sm:text-base whitespace-nowrap">Export CSV</span>
     </Button>
     <Button
@@ -30,7 +30,7 @@ export const ExportButtons = ({
       onClick={onExportTXT}
       disabled={disabled}
     >
-      <Download size={18} className="flex-shrink-0" />
+      <Download size={18} className="shrink-0" />
       <span className="text-sm sm:text-base whitespace-nowrap">Export TXT</span>
     </Button>
     <Button
@@ -39,7 +39,7 @@ export const ExportButtons = ({
       onClick={onExportTAC}
       disabled={disabled}
     >
-      <Radio size={18} className="flex-shrink-0" />
+      <Radio size={18} className="shrink-0" />
       <span className="text-sm sm:text-base whitespace-nowrap">Export TAC</span>
     </Button>
   </div>

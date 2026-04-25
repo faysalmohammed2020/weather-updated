@@ -826,7 +826,7 @@ ${"=".repeat(60)}`;
                     variant="outline"
                     size="icon"
                     onClick={goToPreviousWeek}
-                    className="hover:bg-slate-200 flex-shrink-0"
+                    className="hover:bg-slate-200 shrink-0"
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
@@ -858,7 +858,7 @@ ${"=".repeat(60)}`;
                     variant="outline"
                     size="icon"
                     onClick={goToNextWeek}
-                    className="hover:bg-slate-200 flex-shrink-0"
+                    className="hover:bg-slate-200 shrink-0"
                   >
                     <ChevronRight className="h-4 w-4" />
                   </Button>
@@ -878,7 +878,7 @@ ${"=".repeat(60)}`;
                     className="flex items-center gap-2 hover:bg-green-50 border-green-200 text-green-700 w-full sm:w-auto justify-center sm:justify-start"
                     disabled={mergedData.length === 0}
                   >
-                    <Download className="h-4 w-4 flex-shrink-0" />
+                    <Download className="h-4 w-4 shrink-0" />
                     <span className="whitespace-nowrap">Export CSV</span>
                   </Button>
                   <Button
@@ -888,7 +888,7 @@ ${"=".repeat(60)}`;
                     className="flex items-center gap-2 hover:bg-blue-50 border-blue-200 text-blue-700 w-full sm:w-auto justify-center sm:justify-start"
                     disabled={mergedData.length === 0}
                   >
-                    <Download className="h-4 w-4 flex-shrink-0" />
+                    <Download className="h-4 w-4 shrink-0" />
                     <span className="whitespace-nowrap">Export TXT</span>
                   </Button>
                 </div>
@@ -900,7 +900,7 @@ ${"=".repeat(60)}`;
                   <div className="flex items-center gap-2">
                     <Filter
                       size={16}
-                      className="text-purple-500 flex-shrink-0"
+                      className="text-purple-500 shrink-0"
                     />
                     <Label
                       htmlFor="stationFilter"
@@ -934,7 +934,7 @@ ${"=".repeat(60)}`;
           )}
 
           <div className="bg-white rounded-lg shadow-lg border border-slate-200 overflow-hidden">
-            <div className="flex flex-col md:flex-row md:justify-between p-3 sm:p-4 bg-gradient-to-r from-slate-100 to-slate-200 border-b border-slate-300 gap-3 sm:gap-4">
+            <div className="flex flex-col md:flex-row md:justify-between p-3 sm:p-4 bg-linear-to-r from-slate-100 to-slate-200 border-b border-slate-300 gap-3 sm:gap-4">
               <div className="flex flex-wrap justify-center gap-3 sm:gap-6">
                 <div className="flex flex-col items-center min-w-[100px]">
                   <Label className="text-xs sm:text-sm font-medium text-slate-900 mb-1 sm:mb-2 text-center">

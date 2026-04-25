@@ -31,7 +31,7 @@ const WeatherTab: React.FC<Props> = ({
 }) => {
   return (
     <Card className={cn("overflow-hidden", cardClassName)}>
-      <div className="p-4 bg-gradient-to-r from-cyan-200 to-cyan-300 text-cyan-800">
+      <div className="p-4 bg-linear-to-r from-cyan-200 to-cyan-300 text-cyan-800">
         <h3 className="text-lg font-semibold flex items-center">
           <Cloud className="mr-2" /> Weather Conditions
         </h3>
@@ -60,7 +60,7 @@ const WeatherTab: React.FC<Props> = ({
             if (!error) return null;
             return (
               <div className="text-red-500 text-sm mt-1 flex items-start">
-                <AlertCircle className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
+                <AlertCircle className="h-4 w-4 mr-1 mt-0.5 shrink-0" />
                 <span>{error}</span>
               </div>
             );
@@ -92,7 +92,7 @@ const WeatherTab: React.FC<Props> = ({
             if (!error) return null;
             return (
               <div className="text-red-500 text-sm mt-1 flex items-start">
-                <AlertCircle className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
+                <AlertCircle className="h-4 w-4 mr-1 mt-0.5 shrink-0" />
                 <span>{error}</span>
               </div>
             );
@@ -122,7 +122,7 @@ const WeatherTab: React.FC<Props> = ({
             if (!error) return null;
             return (
               <div className="text-red-500 text-sm mt-1 flex items-start">
-                <AlertCircle className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
+                <AlertCircle className="h-4 w-4 mr-1 mt-0.5 shrink-0" />
                 <span>{error}</span>
               </div>
             );

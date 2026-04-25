@@ -135,7 +135,7 @@ export default function HowItWorksSection() {
           >
             How It Works
           </motion.div>
-          <h2 className="text-4xl font-bold tracking-tighter md:text-5xl/tight bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-cyan-700 dark:from-blue-400 dark:to-cyan-400">
+          <h2 className="text-4xl font-bold tracking-tighter md:text-5xl/tight bg-clip-text text-transparent bg-linear-to-r from-blue-700 to-cyan-700 dark:from-blue-400 dark:to-cyan-400">
             Advanced Weather Analytics Platform
           </h2>
           <p className="max-w-[900px] text-gray-700 dark:text-gray-300 md:text-xl/relaxed lg:text-xl/relaxed">
@@ -333,13 +333,13 @@ export default function HowItWorksSection() {
           <Link href="/dashboard">
             <Button
               size="lg"
-              className="relative overflow-hidden group bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 shadow-xl hover:shadow-blue-500/30 transition-all duration-300 px-8"
+              className="relative overflow-hidden group bg-linear-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 shadow-xl hover:shadow-blue-500/30 transition-all duration-300 px-8"
             >
               <span className="relative z-10 flex items-center">
                 Explore Dashboard
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
               </span>
-              <span className="absolute inset-0 bg-gradient-to-r from-blue-700 to-cyan-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+              <span className="absolute inset-0 bg-linear-to-r from-blue-700 to-cyan-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
             </Button>
           </Link>
         </motion.div>

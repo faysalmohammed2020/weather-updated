@@ -668,7 +668,7 @@ function App() {
         {/* Header */}
         <div className="mb-8">
           <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 p-8">
+            <div className="bg-linear-to-r from-blue-600 via-purple-600 to-indigo-600 p-8">
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
                   <Zap className="h-8 w-8 text-white" />
@@ -770,7 +770,7 @@ function App() {
               <Button
                 type="submit"
                 disabled={!file || isProcessing}
-                className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
+                className="w-full h-12 bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
               >
                 {isProcessing ? (
                   <div className="flex items-center gap-2">
@@ -995,7 +995,7 @@ function App() {
                         <Button
                           onClick={exportToCSV}
                           disabled={!selectedVariable}
-                          className="flex items-center gap-2 h-12 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg hover:shadow-xl transition-all"
+                          className="flex items-center gap-2 h-12 bg-linear-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg hover:shadow-xl transition-all"
                         >
                           <FileText className="h-4 w-4" />
                           Export to CSV
@@ -1003,7 +1003,7 @@ function App() {
                         <Button
                           onClick={exportToJSON}
                           disabled={!selectedVariable}
-                          className="flex items-center gap-2 h-12 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white shadow-lg hover:shadow-xl transition-all"
+                          className="flex items-center gap-2 h-12 bg-linear-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white shadow-lg hover:shadow-xl transition-all"
                         >
                           <FileText className="h-4 w-4" />
                           Export to JSON
@@ -1027,7 +1027,7 @@ function App() {
                         <Button
                           onClick={handleServerCsvConversion}
                           disabled={!file || serverCsvLoading}
-                          className="w-full h-12 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg hover:shadow-xl transition-all"
+                          className="w-full h-12 bg-linear-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg hover:shadow-xl transition-all"
                         >
                           {serverCsvLoading ? (
                             <div className="flex items-center gap-2">

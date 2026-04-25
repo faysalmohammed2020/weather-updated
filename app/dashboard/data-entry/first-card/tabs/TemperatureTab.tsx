@@ -48,7 +48,7 @@ const TemperatureTab: React.FC<Props> = ({
 }) => {
   return (
     <Card className={cn("overflow-hidden", cardClassName)}>
-      <div className="p-4 bg-gradient-to-r from-blue-200 to-blue-300 text-blue-800">
+      <div className="p-4 bg-linear-to-r from-blue-200 to-blue-300 text-blue-800">
         <h3 className="text-lg font-semibold flex items-center">
           <Thermometer className="mr-2" /> Temperature
         </h3>
@@ -97,7 +97,7 @@ const TemperatureTab: React.FC<Props> = ({
   if (!error) return null;
   return (
     <div className="text-red-500 text-sm mt-1 flex items-start">
-      <AlertCircle className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
+      <AlertCircle className="h-4 w-4 mr-1 mt-0.5 shrink-0" />
       <span>{error}</span>
     </div>
   );
@@ -126,7 +126,7 @@ const TemperatureTab: React.FC<Props> = ({
   if (!error) return null;
   return (
     <div className="text-red-500 text-sm mt-1 flex items-start">
-      <AlertCircle className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
+      <AlertCircle className="h-4 w-4 mr-1 mt-0.5 shrink-0" />
       <span>{error}</span>
     </div>
   );
@@ -158,7 +158,7 @@ const TemperatureTab: React.FC<Props> = ({
   if (!error) return null;
   return (
     <div className="text-red-500 text-sm mt-1 flex items-start">
-      <AlertCircle className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
+      <AlertCircle className="h-4 w-4 mr-1 mt-0.5 shrink-0" />
       <span>{error}</span>
     </div>
   );
@@ -212,7 +212,7 @@ const TemperatureTab: React.FC<Props> = ({
             </Tabs>
 
             <div className="mt-6 space-y-4">
-              <div className="p-4 bg-gradient-to-r from-blue-200 to-blue-300 text-blue-800">
+              <div className="p-4 bg-linear-to-r from-blue-200 to-blue-300 text-blue-800">
                 <h3 className="text-lg font-semibold flex items-center">
                   <Thermometer className="mr-2" /> Dew-Point & Humidity
                 </h3>

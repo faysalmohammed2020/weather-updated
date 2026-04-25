@@ -243,49 +243,49 @@ export function AgroclimatologicalForm() {
       tab: "relative overflow-hidden",
       card: "bg-gradient-to-br from-violet-50 via-white to-purple-50 border-l-4 border-violet-400 shadow-xl shadow-violet-500/10",
       icon: <MapPin className="size-5 mr-2 text-violet-600" />,
-      header: "bg-gradient-to-r from-violet-500 to-purple-600 text-white",
+      header: "bg-linear-to-r from-violet-500 to-purple-600 text-white",
       color: "violet",
     },
     solar: {
       tab: "relative overflow-hidden",
       card: "bg-gradient-to-br from-amber-50 via-white to-orange-50 border-l-4 border-amber-400 shadow-xl shadow-amber-500/10",
       icon: <Sun className="size-5 mr-2 text-amber-600" />,
-      header: "bg-gradient-to-r from-amber-500 to-orange-500 text-white",
+      header: "bg-linear-to-r from-amber-500 to-orange-500 text-white",
       color: "amber",
     },
     temperature: {
       tab: "relative overflow-hidden",
       card: "bg-gradient-to-br from-rose-50 via-white to-pink-50 border-l-4 border-rose-400 shadow-xl shadow-rose-500/10",
       icon: <Thermometer className="size-5 mr-2 text-rose-600" />,
-      header: "bg-gradient-to-r from-rose-500 to-pink-500 text-white",
+      header: "bg-linear-to-r from-rose-500 to-pink-500 text-white",
       color: "rose",
     },
     soil: {
       tab: "relative overflow-hidden",
       card: "bg-gradient-to-br from-emerald-50 via-white to-teal-50 border-l-4 border-emerald-400 shadow-xl shadow-emerald-500/10",
       icon: <BarChart3 className="size-5 mr-2 text-emerald-600" />,
-      header: "bg-gradient-to-r from-emerald-500 to-teal-500 text-white",
+      header: "bg-linear-to-r from-emerald-500 to-teal-500 text-white",
       color: "emerald",
     },
     humidity: {
       tab: "relative overflow-hidden",
       card: "bg-gradient-to-br from-cyan-50 via-white to-blue-50 border-l-4 border-cyan-400 shadow-xl shadow-cyan-500/10",
       icon: <Droplets className="size-5 mr-2 text-cyan-600" />,
-      header: "bg-gradient-to-r from-cyan-500 to-blue-500 text-white",
+      header: "bg-linear-to-r from-cyan-500 to-blue-500 text-white",
       color: "cyan",
     },
     weather: {
       tab: "relative overflow-hidden",
       card: "bg-gradient-to-br from-sky-50 via-white to-indigo-50 border-l-4 border-sky-400 shadow-xl shadow-sky-500/10",
       icon: <Wind className="size-5 mr-2 text-sky-600" />,
-      header: "bg-gradient-to-r from-sky-500 to-indigo-500 text-white",
+      header: "bg-linear-to-r from-sky-500 to-indigo-500 text-white",
       color: "sky",
     },
     summary: {
       tab: "relative overflow-hidden",
       card: "bg-gradient-to-br from-green-50 via-white to-lime-50 border-l-4 border-green-400 shadow-xl shadow-green-500/10",
       icon: <Calendar className="size-5 mr-2 text-green-600" />,
-      header: "bg-gradient-to-r from-green-500 to-lime-500 text-white",
+      header: "bg-linear-to-r from-green-500 to-lime-500 text-white",
       color: "green",
     },
   };
@@ -705,7 +705,7 @@ export function AgroclimatologicalForm() {
                     onClick={nextTab}
                     disabled={formik.values.stationInfo.utcHour === ""}
                     className={cn(
-                      "bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white px-8 py-3 rounded-xl font-semibold",
+                      "bg-linear-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white px-8 py-3 rounded-xl font-semibold",
                       {
                         "opacity-50 cursor-not-allowed":
                           formik.values.stationInfo.utcHour === "",
@@ -777,7 +777,7 @@ export function AgroclimatologicalForm() {
                   <Button
                     type="button"
                     onClick={nextTab}
-                    className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-8 py-3 rounded-xl"
+                    className="bg-linear-to-r from-amber-500 to-orange-500 text-white px-8 py-3 rounded-xl"
                   >
                     Next <ChevronRight className="ml-2 h-5 w-5" />
                   </Button>
@@ -941,7 +941,7 @@ export function AgroclimatologicalForm() {
                   <Button
                     type="button"
                     onClick={nextTab}
-                    className="bg-gradient-to-r from-rose-500 to-pink-500 text-white px-8 py-3 rounded-xl"
+                    className="bg-linear-to-r from-rose-500 to-pink-500 text-white px-8 py-3 rounded-xl"
                   >
                     Next <ChevronRight className="ml-2 h-5 w-5" />
                   </Button>
@@ -1055,7 +1055,7 @@ export function AgroclimatologicalForm() {
                   <Button
                     type="button"
                     onClick={nextTab}
-                    className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-8 py-3 rounded-xl"
+                    className="bg-linear-to-r from-emerald-500 to-teal-500 text-white px-8 py-3 rounded-xl"
                   >
                     Next <ChevronRight className="ml-2 h-5 w-5" />
                   </Button>
@@ -1140,7 +1140,7 @@ export function AgroclimatologicalForm() {
                   <Button
                     type="button"
                     onClick={nextTab}
-                    className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-8 py-3 rounded-xl"
+                    className="bg-linear-to-r from-cyan-500 to-blue-500 text-white px-8 py-3 rounded-xl"
                   >
                     Next <ChevronRight className="ml-2 h-5 w-5" />
                   </Button>
@@ -1233,7 +1233,7 @@ export function AgroclimatologicalForm() {
                   <Button
                     type="button"
                     onClick={nextTab}
-                    className="bg-gradient-to-r from-sky-500 to-indigo-500 text-white px-8 py-3 rounded-xl"
+                    className="bg-linear-to-r from-sky-500 to-indigo-500 text-white px-8 py-3 rounded-xl"
                   >
                     Next <ChevronRight className="ml-2 h-5 w-5" />
                   </Button>
@@ -1303,7 +1303,7 @@ export function AgroclimatologicalForm() {
                     </div>
                   </div>
 
-                  <div className="p-6 bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-xl">
+                  <div className="p-6 bg-linear-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-xl">
                     <h4 className="font-bold text-amber-800 mb-4 text-lg">
                       Data Completion Status
                     </h4>
@@ -1421,7 +1421,7 @@ export function AgroclimatologicalForm() {
                     <Button
                       type="submit"
                       disabled={isSubmitting}
-                      className="bg-gradient-to-r from-green-500 to-lime-500 hover:from-green-600 hover:to-lime-600 text-white px-8 py-3 rounded-xl font-semibold"
+                      className="bg-linear-to-r from-green-500 to-lime-500 hover:from-green-600 hover:to-lime-600 text-white px-8 py-3 rounded-xl font-semibold"
                     >
                       {isSubmitting ? "Submitting..." : "Submit Data"}
                     </Button>

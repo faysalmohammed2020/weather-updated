@@ -140,7 +140,7 @@ const CloudLevelSection = memo(function CloudLevelSection({
   ];
 
   return (
-    <div className="bg-gradient-to-r from-white to-gray-50 p-4 rounded-lg border border-gray-200">
+    <div className="bg-linear-to-r from-white to-gray-50 p-4 rounded-lg border border-gray-200">
       <h3 className={`text-lg font-semibold mb-4 text-${color}-600`}>
         {title}
       </h3>

@@ -363,13 +363,13 @@ export default function SignInForm() {
     <>
       <div className="flex justify-center mb-4">
         <div className="relative h-12 w-12">
-          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 animate-pulse"></div>
+          <div className="absolute inset-0 rounded-full bg-linear-to-r from-cyan-500 to-blue-500 animate-pulse"></div>
           <Cloud className="h-12 w-12 text-white absolute inset-0" />
         </div>
       </div>
 
       <motion.h1
-        className="text-4xl text-center font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400"
+        className="text-4xl text-center font-bold tracking-tighter bg-clip-text text-transparent bg-linear-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400"
         variants={fadeIn}
       >
         BD Weather
@@ -439,7 +439,7 @@ export default function SignInForm() {
 
           <Button
             type="submit"
-            className="w-full bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400 text-white shadow-md flex items-center justify-center gap-2"
+            className="w-full bg-linear-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400 text-white shadow-md flex items-center justify-center gap-2"
           >
             Continue
             <ChevronRight className="h-4 w-4" />
@@ -503,7 +503,7 @@ export default function SignInForm() {
           <div className="flex flex-col space-y-3">
             <Button
               type="submit"
-              className="w-full bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400 text-white shadow-md flex items-center justify-center gap-2"
+              className="w-full bg-linear-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400 text-white shadow-md flex items-center justify-center gap-2"
               disabled={loading}
             >
               {loading ? (
@@ -675,7 +675,7 @@ export default function SignInForm() {
         <div className="flex flex-col space-y-3">
           <Button
             type="submit"
-            className="w-full bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400 text-white shadow-md flex items-center justify-center gap-2"
+            className="w-full bg-linear-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400 text-white shadow-md flex items-center justify-center gap-2"
             disabled={loading}
           >
             {loading && (

@@ -217,7 +217,7 @@ export default function SunshineTracker() {
         <div className="text-center space-y-2">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Sun className="h-8 w-8 text-orange-500" />
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-600 to-yellow-600 bg-clip-text text-transparent">
+            <h1 className="text-4xl font-bold bg-linear-to-r from-orange-600 to-yellow-600 bg-clip-text text-transparent">
               Sunshine Data Tracker
             </h1>
           </div>
@@ -245,7 +245,7 @@ export default function SunshineTracker() {
           {/* Data Input Tab */}
           <TabsContent value="input">
             <Card className="shadow-lg border-0 bg-white/80 backdrop-blur">
-              <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg p-3">
+              <CardHeader className="bg-linear-to-r from-blue-500 to-purple-600 text-white rounded-t-lg p-3">
                 <CardTitle className="flex items-center gap-2">
                   <Sun className="h-5 w-5" />
                   Daily Sunshine Data Entry
@@ -271,7 +271,7 @@ export default function SunshineTracker() {
                     />
                     <Badge
                       variant="secondary"
-                      className="ml-auto text-lg px-4 py-2 bg-gradient-to-r from-green-500 to-blue-500 text-white"
+                      className="ml-auto text-lg px-4 py-2 bg-linear-to-r from-green-500 to-blue-500 text-white"
                     >
                       Daily Total: {currentTotal.toFixed(2)} hours
                     </Badge>
@@ -282,7 +282,7 @@ export default function SunshineTracker() {
                       <div key={index} className="space-y-2">
                         <Label
                           htmlFor={`hour-${index}`}
-                          className="text-sm font-medium text-center block bg-gradient-to-r from-orange-400 to-yellow-400 text-white py-1 px-2 rounded-md"
+                          className="text-sm font-medium text-center block bg-linear-to-r from-orange-400 to-yellow-400 text-white py-1 px-2 rounded-md"
                         >
                           {slot}:00
                         </Label>
@@ -316,7 +316,7 @@ export default function SunshineTracker() {
                   <Button
                     type="submit"
                     disabled={hasEntryForSelectedDate}
-                    className="w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-semibold py-3 text-lg"
+                    className="w-full bg-linear-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-semibold py-3 text-lg"
                   >
                     {hasEntryForSelectedDate ? "Entry exists for this date" : "Save Daily Data"}
                   </Button>
@@ -328,7 +328,7 @@ export default function SunshineTracker() {
           {/* Daily Records Tab */}
           <TabsContent value="records">
             <Card className="shadow-lg border-0 bg-white/80 backdrop-blur">
-              <CardHeader className="bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-t-lg p-3">
+              <CardHeader className="bg-linear-to-r from-green-500 to-teal-600 text-white rounded-t-lg p-3">
                 <CardTitle className="flex items-center gap-2">
                   <TrendingUp className="h-5 w-5" />
                   Daily Records & Weekly Averages
@@ -348,7 +348,7 @@ export default function SunshineTracker() {
                   <div className="overflow-x-auto">
                     <table className="w-full border-collapse">
                       <thead>
-                        <tr className="bg-gradient-to-r from-blue-100 to-purple-100">
+                        <tr className="bg-linear-to-r from-blue-100 to-purple-100">
                           <th className="border border-gray-300 p-3 text-left font-semibold">
                             Date
                           </th>
@@ -411,7 +411,7 @@ export default function SunshineTracker() {
                           ))}
 
                         {/* Weekly Averages Row */}
-                        <tr className="bg-gradient-to-r from-purple-200 to-blue-200 font-bold">
+                        <tr className="bg-linear-to-r from-purple-200 to-blue-200 font-bold">
                           <td className="border border-gray-300 p-3">
                             <Badge className="bg-purple-600">
                               Weekly Average
@@ -444,7 +444,7 @@ export default function SunshineTracker() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Monthly Statistics */}
               <Card className="shadow-lg border-0 bg-white/80 backdrop-blur">
-                <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-t-lg p-3">
+                <CardHeader className="bg-linear-to-r from-purple-500 to-pink-600 text-white rounded-t-lg p-3">
                   <CardTitle className="flex items-center gap-2">
                     <Target className="h-5 w-5" />
                     Monthly Statistics
@@ -490,7 +490,7 @@ export default function SunshineTracker() {
 
               {/* Threshold Analysis */}
               <Card className="shadow-lg border-0 bg-white/80 backdrop-blur">
-                <CardHeader className="bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-t-lg p-3">
+                <CardHeader className="bg-linear-to-r from-orange-500 to-red-600 text-white rounded-t-lg p-3">
                   <CardTitle className="flex items-center gap-2">
                     <Sun className="h-5 w-5" />
                     Threshold Analysis
@@ -513,7 +513,7 @@ export default function SunshineTracker() {
                     />
                   </div>
 
-                  <div className="bg-gradient-to-r from-orange-50 to-red-50 p-4 rounded-lg">
+                  <div className="bg-linear-to-r from-orange-50 to-red-50 p-4 rounded-lg">
                     <h4 className="font-semibold text-orange-800 mb-2">
                       Days Exceeding Threshold
                     </h4>

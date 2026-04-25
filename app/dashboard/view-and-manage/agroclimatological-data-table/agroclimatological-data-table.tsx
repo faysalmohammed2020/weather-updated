@@ -419,7 +419,7 @@ ${"=".repeat(60)}`;
   const tableHeaders = useMemo(
     () => (
       <>
-        <tr className="bg-gradient-to-r from-slate-100 to-slate-200">
+        <tr className="bg-linear-to-r from-slate-100 to-slate-200">
           <th
             rowSpan={2}
             className="border border-slate-400 p-2 bg-blue-50 text-blue-800 font-semibold min-w-[80px]"
@@ -511,7 +511,7 @@ ${"=".repeat(60)}`;
             Rain Amount (mm)
           </th>
         </tr>
-        <tr className="bg-gradient-to-r from-slate-50 to-slate-100">
+        <tr className="bg-linear-to-r from-slate-50 to-slate-100">
           <th className="border border-slate-400 p-1 bg-red-100 text-red-700 text-xs">
             0.5m Dry
           </th>
@@ -572,7 +572,7 @@ ${"=".repeat(60)}`;
   return (
     <div className="w-full space-y-6">
       {/* Header Card */}
-      <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+      <Card className="bg-linear-to-r from-blue-50 to-indigo-50 border-blue-200">
         <CardHeader>
           <CardTitle className="text-center text-2xl font-bold text-blue-800">
             AGROCLIMATOLOGICAL DATA
@@ -633,7 +633,7 @@ ${"=".repeat(60)}`;
                   className="flex items-center gap-2 hover:bg-green-50 border-green-200 text-green-700 w-full sm:w-auto justify-center sm:justify-start"
                   disabled={data.length === 0}
                 >
-                  <Download className="h-4 w-4 flex-shrink-0" />
+                  <Download className="h-4 w-4 shrink-0" />
                   <span className="whitespace-nowrap">Export CSV</span>
                 </Button>
                 <Button
@@ -643,7 +643,7 @@ ${"=".repeat(60)}`;
                   className="flex items-center gap-2 hover:bg-blue-50 border-blue-200 text-blue-700 w-full sm:w-auto justify-center sm:justify-start"
                   disabled={data.length === 0}
                 >
-                  <Download className="h-4 w-4 flex-shrink-0" />
+                  <Download className="h-4 w-4 shrink-0" />
                   <span className="whitespace-nowrap">Export TXT</span>
                 </Button>
               </div>
@@ -884,7 +884,7 @@ ${"=".repeat(60)}`;
       </Card>
 
       {/* Summary Card */}
-      <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+      <Card className="bg-linear-to-r from-green-50 to-emerald-50 border-green-200">
         <CardContent className="p-4">
           <div className="flex flex-wrap justify-between items-center gap-4">
             <div className="flex items-center gap-2">

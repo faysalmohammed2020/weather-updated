@@ -772,7 +772,7 @@ const updatePageInUrl = useCallback(
       </div>
 
       {/* Search and Filters Section */}
-      <div className="bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl border border-slate-200 p-6 mb-6 shadow-sm">
+      <div className="bg-linear-to-r from-slate-50 to-gray-50 rounded-xl border border-slate-200 p-6 mb-6 shadow-sm">
         <div className="flex flex-wrap items-center gap-4 justify-between">
           <div className="flex flex-wrap gap-4">
             {/* Role Filter */}

@@ -64,7 +64,7 @@ export default function DataSourcesPage() {
                 <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
                 <span className="text-xs font-medium">Data Sources</span>
               </div>
-              <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400">
+              <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl bg-clip-text text-transparent bg-linear-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400">
                 Reliable Weather Information
               </h1>
               <p className="max-w-[700px] text-gray-700 dark:text-gray-300 md:text-xl">
@@ -84,7 +84,7 @@ export default function DataSourcesPage() {
               transition={{ duration: 0.5 }}
               viewport={{ once: true }}
             >
-              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl bg-clip-text text-transparent bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400">
+              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl bg-clip-text text-transparent bg-linear-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400">
                 Our Data Collection Network
               </h2>
               <p className="max-w-[700px] mx-auto text-muted-foreground md:text-lg">
@@ -248,7 +248,7 @@ export default function DataSourcesPage() {
                 transition={{ duration: 0.5 }}
                 viewport={{ once: true }}
               >
-                <h2 className="text-3xl font-bold tracking-tighter md:text-4xl bg-clip-text text-transparent bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400">
+                <h2 className="text-3xl font-bold tracking-tighter md:text-4xl bg-clip-text text-transparent bg-linear-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400">
                   Data Processing Methodology
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400 md:text-lg">
@@ -340,7 +340,7 @@ export default function DataSourcesPage() {
               transition={{ duration: 0.5 }}
               viewport={{ once: true }}
             >
-              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl bg-clip-text text-transparent bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400">
+              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl bg-clip-text text-transparent bg-linear-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400">
                 Data Quality Assurance
               </h2>
               <p className="max-w-[700px] mx-auto text-gray-700 dark:text-gray-300 md:text-lg">
@@ -435,7 +435,7 @@ export default function DataSourcesPage() {
           </div>
         </section>
 
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-r from-cyan-700 to-blue-700 text-white relative overflow-hidden">
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-linear-to-r from-cyan-700 to-blue-700 text-white relative overflow-hidden">
           {/* Animated background elements */}
           <div className="absolute inset-0 overflow-hidden -z-10">
             <motion.div

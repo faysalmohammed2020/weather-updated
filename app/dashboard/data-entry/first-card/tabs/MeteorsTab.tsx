@@ -25,7 +25,7 @@ const MeteorsTab: React.FC<Props> = ({
 }) => {
   return (
     <Card className={cn("overflow-hidden", cardClassName)}>
-      <div className="p-4 bg-gradient-to-r from-emerald-100 to-emerald-200 text-blue-800">
+      <div className="p-4 bg-linear-to-r from-emerald-100 to-emerald-200 text-blue-800">
         <h3 className="text-lg font-semibold flex items-center">
           <Thermometer className="mr-2" /> Mise Meteors(Code)
         </h3>

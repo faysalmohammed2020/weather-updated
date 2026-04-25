@@ -42,7 +42,7 @@ export function MandatorySection({
   return (
     <div>
       <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm mb-8">
-        <CardHeader className="bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-t-lg flex justify-between items-center p-4">
+        <CardHeader className="bg-linear-to-r from-green-500 to-teal-600 text-white rounded-t-lg flex justify-between items-center p-4">
           <div>
             <CardTitle className="text-xl">Mandatory Pressure Levels</CardTitle>
             <CardDescription className="text-green-100">
@@ -97,7 +97,7 @@ export function MandatorySection({
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b-2 border-green-200 bg-gradient-to-r from-green-50 to-teal-50">
+                <tr className="border-b-2 border-green-200 bg-linear-to-r from-green-50 to-teal-50">
                   <th className="text-left p-3 font-semibold text-green-800">Pressure (mb)</th>
                   <th className="text-left p-3 font-semibold text-green-800">Height (m)</th>
                   <th className="text-left p-3 font-semibold text-green-800">Temperature (°C)</th>
@@ -148,7 +148,7 @@ export function MandatorySection({
       <div className="grid gap-6 md:grid-cols-2">
         {/* Tropopause Card */}
         <Card className="border-0 shadow-xl bg-gradient-to-br from-emerald-50 to-teal-100 border-l-4 border-l-emerald-500">
-          <CardHeader className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-t-lg">
+          <CardHeader className="bg-linear-to-r from-emerald-500 to-teal-600 text-white rounded-t-lg">
             <CardTitle className="flex items-center gap-2 text-xl">
               <Cloud className="h-6 w-6" />
               Tropopause Level
@@ -258,7 +258,7 @@ export function MandatorySection({
 
         {/* Max Wind Card */}
         <Card className="border-0 shadow-xl bg-gradient-to-br from-blue-50 to-indigo-100 border-l-4 border-l-blue-500">
-          <CardHeader className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-t-lg">
+          <CardHeader className="bg-linear-to-r from-blue-500 to-indigo-600 text-white rounded-t-lg">
             <CardTitle className="flex items-center gap-2 text-xl">
               <Wind className="h-6 w-6" />
               Maximum Wind Level
@@ -332,7 +332,7 @@ export function MandatorySection({
                   </div>
                 </div>
                 <Separator className="my-4" />
-                <div className="bg-gradient-to-r from-slate-100 to-gray-200 p-4 rounded-lg border border-slate-300">
+                <div className="bg-linear-to-r from-slate-100 to-gray-200 p-4 rounded-lg border border-slate-300">
                   <h4 className="font-semibold text-slate-700 mb-3 flex items-center gap-2">
                     <div className="w-2 h-2 bg-slate-500 rounded-full"></div>
                     Decoding Details

@@ -130,7 +130,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.25 }}
-          className="absolute inset-0 flex items-center justify-center bg-white backdrop-blur-sm z-[5] px-6"
+          className="absolute inset-0 flex items-center justify-center bg-white backdrop-blur-sm z-5 px-6"
         >
           <HourSelector type="first" timeInfo={timeInfo} />
         </motion.div>
@@ -183,7 +183,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                               : "bg-transparent",
                             !isTabValid(key) &&
                               formik.submitCount > 0 &&
-                              "!border-2 !border-red-400 !bg-red-50 !text-red-700"
+                              "border-2! border-red-400! bg-red-50! text-red-700!"
                           )}
                           initial={{ opacity: 0, x: -10 }}
                           animate={{

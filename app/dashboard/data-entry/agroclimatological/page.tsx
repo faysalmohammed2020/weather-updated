@@ -18,21 +18,21 @@ const AgroclimatologicalPage = () => {
       tab: "relative overflow-hidden",
       card: "bg-gradient-to-br from-amber-50 via-white to-orange-50 border-l-4 border-amber-400 shadow-xl shadow-amber-500/10",
       icon: <Sun className="size-5 mr-2 text-amber-600" />,
-      header: "bg-gradient-to-r from-amber-500 to-orange-500 text-white",
+      header: "bg-linear-to-r from-amber-500 to-orange-500 text-white",
       color: "amber",
     },
     soil: {
       tab: "relative overflow-hidden",
       card: "bg-gradient-to-br from-emerald-50 via-white to-teal-50 border-l-4 border-emerald-400 shadow-xl shadow-emerald-500/10",
       icon: <Thermometer className="size-5 mr-2 text-emerald-600" />,
-      header: "bg-gradient-to-r from-emerald-500 to-teal-500 text-white",
+      header: "bg-linear-to-r from-emerald-500 to-teal-500 text-white",
       color: "emerald",
     },
     agro: {
       tab: "relative overflow-hidden",
       card: "bg-gradient-to-br from-violet-50 via-white to-purple-50 border-l-4 border-violet-400 shadow-xl shadow-violet-500/10",
       icon: <Droplets className="size-5 mr-2 text-violet-600" />,
-      header: "bg-gradient-to-r from-violet-500 to-purple-600 text-white",
+      header: "bg-linear-to-r from-violet-500 to-purple-600 text-white",
       color: "violet",
     },
   };
@@ -44,13 +44,13 @@ const AgroclimatologicalPage = () => {
   return (
     <div className="min-h-screen p-4">
         <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-violet-500 to-purple-600 rounded-full mb-4 shadow-lg">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-linear-to-r from-violet-500 to-purple-600 rounded-full mb-4 shadow-lg">
             <Thermometer className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent mb-2">
+          <h1 className="text-4xl font-bold bg-linear-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent mb-2">
             Agroclimatological Data Collection
           </h1>
-          <div className="w-24 h-1 bg-gradient-to-r from-violet-500 to-purple-600 mx-auto mt-4 rounded-full"></div>
+          <div className="w-24 h-1 bg-linear-to-r from-violet-500 to-purple-600 mx-auto mt-4 rounded-full"></div>
         </div>
 
         <motion.div

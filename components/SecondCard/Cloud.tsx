@@ -34,7 +34,7 @@ const CloudTab = memo(function CloudTab({
   return (
     <Card className={cn("overflow-hidden", tabStyle)}>
       {/* Header */}
-      <div className="p-4 bg-gradient-to-r from-blue-200 to-blue-300 text-blue-800">
+      <div className="p-4 bg-linear-to-r from-blue-200 to-blue-300 text-blue-800">
         <h3 className="text-lg font-semibold flex items-center">
           <CloudIcon className="mr-2 h-5 w-5" /> Cloud Observation
         </h3>

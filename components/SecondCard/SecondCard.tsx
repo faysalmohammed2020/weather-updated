@@ -735,7 +735,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
 
     return touched && error ? (
       <span className="text-red-500 text-sm mt-1 inline-flex items-start">
-        <AlertCircle className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
+        <AlertCircle className="h-4 w-4 mr-1 mt-0.5 shrink-0" />
         {error}
       </span>
     ) : null;

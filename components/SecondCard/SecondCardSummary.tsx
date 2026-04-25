@@ -392,7 +392,7 @@ const SecondCardSummary = memo(function SecondCardSummary({
 
           <Button
             type="submit"
-            className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:to-emerald-700 transition-all duration-300 shadow-sm text-xs sm:text-sm w-full sm:w-auto flex justify-center items-center"
+            className="bg-linear-to-r from-emerald-500 to-emerald-600 hover:to-emerald-700 transition-all duration-300 shadow-sm text-xs sm:text-sm w-full sm:w-auto flex justify-center items-center"
             disabled={isSubmitting}
           >
             {isSubmitting ? (

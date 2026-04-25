@@ -33,7 +33,7 @@ export default function Header() {
       <div className="container flex h-16 items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           <Cloud className="h-6 w-6 text-cyan-600 dark:text-cyan-400" />
-          <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400">BD Weather</span>
+          <span className="text-xl font-bold bg-clip-text text-transparent bg-linear-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400">BD Weather</span>
         </Link>
 
         {/* Desktop Navigation */}
@@ -48,7 +48,7 @@ export default function Header() {
           >
             {isActive("/") && (
               <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-md"
+                className="absolute inset-0 bg-linear-to-r from-cyan-500/10 to-blue-500/10 rounded-md"
                 layoutId="activeTab"
                 transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
               />
@@ -65,7 +65,7 @@ export default function Header() {
           >
             {isActive("/features") && (
               <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-md"
+                className="absolute inset-0 bg-linear-to-r from-cyan-500/10 to-blue-500/10 rounded-md"
                 layoutId="activeTab"
                 transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
               />
@@ -82,7 +82,7 @@ export default function Header() {
           >
             {isActive("/about") && (
               <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-md"
+                className="absolute inset-0 bg-linear-to-r from-cyan-500/10 to-blue-500/10 rounded-md"
                 layoutId="activeTab"
                 transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
               />
@@ -99,7 +99,7 @@ export default function Header() {
           >
             {isActive("/data-sources") && (
               <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-md"
+                className="absolute inset-0 bg-linear-to-r from-cyan-500/10 to-blue-500/10 rounded-md"
                 layoutId="activeTab"
                 transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
               />
@@ -116,7 +116,7 @@ export default function Header() {
           >
             {isActive("/contact") && (
               <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-md"
+                className="absolute inset-0 bg-linear-to-r from-cyan-500/10 to-blue-500/10 rounded-md"
                 layoutId="activeTab"
                 transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
               />
@@ -127,7 +127,7 @@ export default function Header() {
 
         <div className="flex items-center gap-4">
           <Link href="/dashboard" className="hidden md:block">
-            <Button className="bg-gradient-to-r from-cyan-700 to-blue-700 hover:from-cyan-600 hover:to-blue-600 shadow-lg hover:shadow-blue-500/25 transition-all duration-300">
+            <Button className="bg-linear-to-r from-cyan-700 to-blue-700 hover:from-cyan-600 hover:to-blue-600 shadow-lg hover:shadow-blue-500/25 transition-all duration-300">
               Access Dashboard
             </Button>
           </Link>
@@ -164,7 +164,7 @@ export default function Header() {
                   href="/"
                   className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-300 ${
                     isActive("/")
-                      ? "text-cyan-700 dark:text-cyan-400 bg-gradient-to-r from-cyan-100 to-blue-100 dark:from-cyan-900/30 dark:to-blue-900/30 shadow-sm border border-cyan-300 dark:border-cyan-700"
+                      ? "text-cyan-700 dark:text-cyan-400 bg-linear-to-r from-cyan-100 to-blue-100 dark:from-cyan-900/30 dark:to-blue-900/30 shadow-sm border border-cyan-300 dark:border-cyan-700"
                       : "text-gray-700 dark:text-gray-300 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 hover:text-cyan-700 dark:hover:text-cyan-400"
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
@@ -180,7 +180,7 @@ export default function Header() {
                   href="/features"
                   className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-300 ${
                     isActive("/features")
-                      ? "text-cyan-700 dark:text-cyan-400 bg-gradient-to-r from-cyan-100 to-blue-100 dark:from-cyan-900/30 dark:to-blue-900/30 shadow-sm border border-cyan-300 dark:border-cyan-700"
+                      ? "text-cyan-700 dark:text-cyan-400 bg-linear-to-r from-cyan-100 to-blue-100 dark:from-cyan-900/30 dark:to-blue-900/30 shadow-sm border border-cyan-300 dark:border-cyan-700"
                       : "text-gray-700 dark:text-gray-300 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 hover:text-cyan-700 dark:hover:text-cyan-400"
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
@@ -196,7 +196,7 @@ export default function Header() {
                   href="/about"
                   className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-300 ${
                     isActive("/about")
-                      ? "text-cyan-700 dark:text-cyan-400 bg-gradient-to-r from-cyan-100 to-blue-100 dark:from-cyan-900/30 dark:to-blue-900/30 shadow-sm border border-cyan-300 dark:border-cyan-700"
+                      ? "text-cyan-700 dark:text-cyan-400 bg-linear-to-r from-cyan-100 to-blue-100 dark:from-cyan-900/30 dark:to-blue-900/30 shadow-sm border border-cyan-300 dark:border-cyan-700"
                       : "text-gray-700 dark:text-gray-300 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 hover:text-cyan-700 dark:hover:text-cyan-400"
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
@@ -212,7 +212,7 @@ export default function Header() {
                   href="/data-sources"
                   className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-300 ${
                     isActive("/data-sources")
-                      ? "text-cyan-700 dark:text-cyan-400 bg-gradient-to-r from-cyan-100 to-blue-100 dark:from-cyan-900/30 dark:to-blue-900/30 shadow-sm border border-cyan-300 dark:border-cyan-700"
+                      ? "text-cyan-700 dark:text-cyan-400 bg-linear-to-r from-cyan-100 to-blue-100 dark:from-cyan-900/30 dark:to-blue-900/30 shadow-sm border border-cyan-300 dark:border-cyan-700"
                       : "text-gray-700 dark:text-gray-300 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 hover:text-cyan-700 dark:hover:text-cyan-400"
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
@@ -228,7 +228,7 @@ export default function Header() {
                   href="/contact"
                   className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-300 ${
                     isActive("/contact")
-                      ? "text-cyan-700 dark:text-cyan-400 bg-gradient-to-r from-cyan-100 to-blue-100 dark:from-cyan-900/30 dark:to-blue-900/30 shadow-sm border border-cyan-300 dark:border-cyan-700"
+                      ? "text-cyan-700 dark:text-cyan-400 bg-linear-to-r from-cyan-100 to-blue-100 dark:from-cyan-900/30 dark:to-blue-900/30 shadow-sm border border-cyan-300 dark:border-cyan-700"
                       : "text-gray-700 dark:text-gray-300 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 hover:text-cyan-700 dark:hover:text-cyan-400"
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
@@ -245,7 +245,7 @@ export default function Header() {
                   className="mt-2"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  <Button className="w-full bg-gradient-to-r from-cyan-700 to-blue-700 hover:from-cyan-600 hover:to-blue-600 shadow-lg hover:shadow-blue-500/25 transition-all duration-300">Access Dashboard</Button>
+                  <Button className="w-full bg-linear-to-r from-cyan-700 to-blue-700 hover:from-cyan-600 hover:to-blue-600 shadow-lg hover:shadow-blue-500/25 transition-all duration-300">Access Dashboard</Button>
                 </Link>
               </nav>
             </div>

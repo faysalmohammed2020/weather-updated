@@ -43,7 +43,7 @@ const EditDialog = ({
             {record.utcTime ? formatUtcLong(record.utcTime) : "Unknown Date"}
           </DialogDescription>
         )}
-        <div className="h-1 w-20 rounded-full bg-gradient-to-r from-sky-400 to-blue-400 mt-2" />
+        <div className="h-1 w-20 rounded-full bg-linear-to-r from-sky-400 to-blue-400 mt-2" />
       </DialogHeader>
 
       {record && (

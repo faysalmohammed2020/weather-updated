@@ -25,7 +25,7 @@ export const DateFilters = ({
           variant="outline"
           size="icon"
           onClick={() => onNavigate("previous")}
-          className="hover:bg-slate-200 flex-shrink-0 bg-transparent"
+          className="hover:bg-slate-200 shrink-0 bg-transparent"
           aria-label="Go to previous range"
         >
           <ChevronLeft className="h-4 w-4" />
@@ -54,7 +54,7 @@ export const DateFilters = ({
           variant="outline"
           size="icon"
           onClick={() => onNavigate("next")}
-          className="hover:bg-slate-200 flex-shrink-0 bg-transparent"
+          className="hover:bg-slate-200 shrink-0 bg-transparent"
           aria-label="Go to next range"
         >
           <ChevronRight className="h-4 w-4" />

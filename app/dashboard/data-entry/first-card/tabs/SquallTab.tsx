@@ -27,7 +27,7 @@ const SquallTab: React.FC<Props> = ({
 }) => {
   return (
     <Card className={cn("overflow-hidden", cardClassName)}>
-      <div className="p-4 bg-gradient-to-r from-amber-200 to-amber-300 text-amber-800">
+      <div className="p-4 bg-linear-to-r from-amber-200 to-amber-300 text-amber-800">
         <h3 className="text-lg font-semibold flex items-center">
           <Wind className="mr-2" /> Squall Measurements
         </h3>
@@ -87,7 +87,7 @@ const SquallTab: React.FC<Props> = ({
   if (!error) return null;
   return (
     <div className="text-red-500 text-sm mt-1 flex items-start">
-      <AlertCircle className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
+      <AlertCircle className="h-4 w-4 mr-1 mt-0.5 shrink-0" />
       <span>{error}</span>
     </div>
   );
@@ -119,7 +119,7 @@ const SquallTab: React.FC<Props> = ({
   if (!error) return null;
   return (
     <div className="text-red-500 text-sm mt-1 flex items-start">
-      <AlertCircle className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
+      <AlertCircle className="h-4 w-4 mr-1 mt-0.5 shrink-0" />
       <span>{error}</span>
     </div>
   );
@@ -181,7 +181,7 @@ const SquallTab: React.FC<Props> = ({
   if (!error) return null;
   return (
     <div className="text-red-500 text-sm mt-1 flex items-start">
-      <AlertCircle className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
+      <AlertCircle className="h-4 w-4 mr-1 mt-0.5 shrink-0" />
       <span>{error}</span>
     </div>
   );

@@ -30,7 +30,7 @@ export default function DroughtDashboard() {
     <div className="min-h-screen bg-[#f6f8fb] text-slate-900">
       <div className="w-full px-4 py-6 lg:py-8 space-y-6">
         {/* Dashboard header */}
-        <div className="rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 shadow-lg">
+        <div className="rounded-2xl bg-linear-to-r from-blue-600 to-indigo-600 text-white p-6 shadow-lg">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <p className="text-sm uppercase tracking-wide opacity-80">

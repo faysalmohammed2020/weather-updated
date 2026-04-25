@@ -62,7 +62,7 @@ const WindTab = memo(function WindTab({
   return (
     <Card className={cn("overflow-hidden", tabStyle)}>
       {/* Header */}
-      <div className="p-4 bg-gradient-to-r from-green-200 to-green-300 text-green-800">
+      <div className="p-4 bg-linear-to-r from-green-200 to-green-300 text-green-800">
         <h3 className="text-lg font-semibold flex items-center">
           <Wind className="mr-2 h-5 w-5" /> Wind Measurement
         </h3>

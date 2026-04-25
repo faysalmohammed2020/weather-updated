@@ -71,7 +71,7 @@ export default function WeatherAlertsSection() {
   };
 
   return (
-    <section className="relative w-full py-16 bg-gradient-to-r from-amber-50 to-red-50 dark:from-gray-900 dark:to-red-950/20 overflow-hidden">
+    <section className="relative w-full py-16 bg-linear-to-r from-amber-50 to-red-50 dark:from-gray-900 dark:to-red-950/20 overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden -z-10">
         <motion.div
@@ -133,7 +133,7 @@ export default function WeatherAlertsSection() {
             </motion.div>
 
             <motion.h2
-              className="text-3xl font-bold tracking-tighter md:text-4xl bg-clip-text text-transparent bg-gradient-to-r from-amber-700 to-red-700 dark:from-amber-400 dark:to-red-400"
+              className="text-3xl font-bold tracking-tighter md:text-4xl bg-clip-text text-transparent bg-linear-to-r from-amber-700 to-red-700 dark:from-amber-400 dark:to-red-400"
               variants={item}
             >
               Stay Ahead of Extreme Weather
@@ -209,7 +209,7 @@ export default function WeatherAlertsSection() {
 
             <motion.div className="pt-6" variants={item}>
               <Link href="/features">
-                <Button className="bg-gradient-to-r from-amber-600 to-red-600 hover:from-amber-500 hover:to-red-500 text-white shadow-lg hover:shadow-amber-500/25 transition-all duration-300 group">
+                <Button className="bg-linear-to-r from-amber-600 to-red-600 hover:from-amber-500 hover:to-red-500 text-white shadow-lg hover:shadow-amber-500/25 transition-all duration-300 group">
                   Learn About Alert System
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                 </Button>

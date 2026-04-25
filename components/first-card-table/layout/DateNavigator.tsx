@@ -29,7 +29,7 @@ const DateNavigator = ({
           variant="outline"
           size="icon"
           onClick={onPrevious}
-          className="hover:bg-slate-200 flex-shrink-0"
+          className="hover:bg-slate-200 shrink-0"
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
@@ -55,7 +55,7 @@ const DateNavigator = ({
           variant="outline"
           size="icon"
           onClick={onNext}
-          className="hover:bg-slate-200 flex-shrink-0"
+          className="hover:bg-slate-200 shrink-0"
         >
           <ChevronRight className="h-4 w-4" />
         </Button>

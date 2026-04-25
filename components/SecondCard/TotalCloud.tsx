@@ -56,7 +56,7 @@ const TotalCloudTab = memo(function TotalCloudTab({
   return (
     <Card className={cn("overflow-hidden", tabStyle)}>
       {/* Header */}
-      <div className="p-4 bg-gradient-to-r from-yellow-200 to-yellow-300 text-yellow-800">
+      <div className="p-4 bg-linear-to-r from-yellow-200 to-yellow-300 text-yellow-800">
         <h3 className="text-lg font-semibold flex items-center">
           <Sun className="mr-2 h-5 w-5" /> Total Cloud Amount
         </h3>

@@ -23,7 +23,7 @@ export default function TestimonialsSection() {
           <div className="inline-block rounded-lg bg-cyan-100 dark:bg-cyan-900/30 px-3 py-1 text-sm text-cyan-600 dark:text-cyan-400">
             Testimonials
           </div>
-          <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight bg-clip-text text-transparent bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400">
+          <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight bg-clip-text text-transparent bg-linear-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400">
             Trusted by Professionals Across Bangladesh
           </h2>
           <p className="max-w-[900px] text-gray-600 dark:text-gray-300 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
@@ -170,7 +170,7 @@ export default function TestimonialsSection() {
       </div>
 
       {/* Decorative wave divider */}
-      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-cyan-800 dark:to-blue-800 -z-10">
+      <div className="absolute bottom-0 left-0 right-0 h-16 bg-linear-to-r from-cyan-600 to-blue-600 dark:from-cyan-800 dark:to-blue-800 -z-10">
         <svg
           className="absolute -top-16 w-full h-16 text-gradient-to-r from-cyan-600 to-blue-600 dark:from-cyan-800 dark:to-blue-800 fill-current"
           viewBox="0 0 1440 54"

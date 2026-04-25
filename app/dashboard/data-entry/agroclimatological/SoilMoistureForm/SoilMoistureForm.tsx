@@ -73,35 +73,35 @@ export function SoilMoistureForm() {
       tab: "relative overflow-hidden",
       card: "bg-gradient-to-br from-violet-50 via-white to-purple-50 border-l-4 border-violet-400 shadow-xl shadow-violet-500/10",
       icon: <Layers className="size-5 mr-2 text-violet-600" />,
-      header: "bg-gradient-to-r from-violet-500 to-purple-600 text-white",
+      header: "bg-linear-to-r from-violet-500 to-purple-600 text-white",
       color: "violet",
     },
     "10": {
       tab: "relative overflow-hidden",
       card: "bg-gradient-to-br from-amber-50 via-white to-orange-50 border-l-4 border-amber-400 shadow-xl shadow-amber-500/10",
       icon: <Layers className="size-5 mr-2 text-amber-600" />,
-      header: "bg-gradient-to-r from-amber-500 to-orange-500 text-white",
+      header: "bg-linear-to-r from-amber-500 to-orange-500 text-white",
       color: "amber",
     },
     "20": {
       tab: "relative overflow-hidden",
       card: "bg-gradient-to-br from-rose-50 via-white to-pink-50 border-l-4 border-rose-400 shadow-xl shadow-rose-500/10",
       icon: <Layers className="size-5 mr-2 text-rose-600" />,
-      header: "bg-gradient-to-r from-rose-500 to-pink-500 text-white",
+      header: "bg-linear-to-r from-rose-500 to-pink-500 text-white",
       color: "rose",
     },
     "30": {
       tab: "relative overflow-hidden",
       card: "bg-gradient-to-br from-emerald-50 via-white to-teal-50 border-l-4 border-emerald-400 shadow-xl shadow-emerald-500/10",
       icon: <Layers className="size-5 mr-2 text-emerald-600" />,
-      header: "bg-gradient-to-r from-emerald-500 to-teal-500 text-white",
+      header: "bg-linear-to-r from-emerald-500 to-teal-500 text-white",
       color: "emerald",
     },
     "50": {
       tab: "relative overflow-hidden",
       card: "bg-gradient-to-br from-cyan-50 via-white to-blue-50 border-l-4 border-cyan-400 shadow-xl shadow-cyan-500/10",
       icon: <Layers className="size-5 mr-2 text-cyan-600" />,
-      header: "bg-gradient-to-r from-cyan-500 to-blue-500 text-white",
+      header: "bg-linear-to-r from-cyan-500 to-blue-500 text-white",
       color: "cyan",
     },
   };
@@ -393,7 +393,7 @@ export function SoilMoistureForm() {
                         </div>
                         {formik.touched.date && formik.errors.date && (
                           <div className="text-red-500 text-sm mt-1 flex items-start">
-                            <AlertCircle className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
+                            <AlertCircle className="h-4 w-4 mr-1 mt-0.5 shrink-0" />
                             <span>{formik.errors.date}</span>
                           </div>
                         )}
@@ -416,7 +416,7 @@ export function SoilMoistureForm() {
                         />
                         {formik.touched.w1 && formik.errors.w1 && (
                           <div className="text-red-500 text-sm mt-1 flex items-start">
-                            <AlertCircle className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
+                            <AlertCircle className="h-4 w-4 mr-1 mt-0.5 shrink-0" />
                             <span>{formik.errors.w1}</span>
                           </div>
                         )}
@@ -436,7 +436,7 @@ export function SoilMoistureForm() {
                         />
                         {formik.touched.w2 && formik.errors.w2 && (
                           <div className="text-red-500 text-sm mt-1 flex items-start">
-                            <AlertCircle className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
+                            <AlertCircle className="h-4 w-4 mr-1 mt-0.5 shrink-0" />
                             <span>{formik.errors.w2}</span>
                           </div>
                         )}
@@ -456,7 +456,7 @@ export function SoilMoistureForm() {
                         />
                         {formik.touched.w3 && formik.errors.w3 && (
                           <div className="text-red-500 text-sm mt-1 flex items-start">
-                            <AlertCircle className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
+                            <AlertCircle className="h-4 w-4 mr-1 mt-0.5 shrink-0" />
                             <span>{formik.errors.w3}</span>
                           </div>
                         )}
@@ -528,7 +528,7 @@ export function SoilMoistureForm() {
                         disabled={isSubmitting || !formik.isValid}
                         className={cn(
                           "px-8 py-3 rounded-xl font-semibold",
-                          `bg-gradient-to-r from-${tabStyles[depth as keyof typeof tabStyles].color}-500 to-${tabStyles[depth as keyof typeof tabStyles].color}-600 text-white`
+                          `bg-linear-to-r from-${tabStyles[depth as keyof typeof tabStyles].color}-500 to-${tabStyles[depth as keyof typeof tabStyles].color}-600 text-white`
                         )}
                       >
                         {isSubmitting ? 'Submitting...' : activeTab === depths[depths.length - 1] ? 'Submit All Data' : 'Submit & Next Depth'}

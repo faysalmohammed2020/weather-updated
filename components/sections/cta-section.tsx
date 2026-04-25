@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 
 export default function CtaSection() {
   return (
-    <section className="relative w-full py-24 bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-cyan-800 dark:to-blue-800 text-white overflow-hidden">
+    <section className="relative w-full py-24 bg-linear-to-r from-cyan-600 to-blue-600 dark:from-cyan-800 dark:to-blue-800 text-white overflow-hidden">
       {/* Blurred Background Lights */}
       <div className="absolute inset-0 -z-10">
         <motion.div
