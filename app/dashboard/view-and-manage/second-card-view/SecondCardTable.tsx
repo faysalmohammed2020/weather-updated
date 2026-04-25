@@ -4,10 +4,12 @@ import { forwardRef } from "react";
 import SecondCardTable from "@/components/second-card-table/SecondCardTable";
 import type { SecondCardTableHandle } from "@/components/second-card-table/SecondCardTable";
 
-const SecondCardTableWrapper = forwardRef<SecondCardTableHandle, {}>((props: {}, ref: React.Ref<SecondCardTableHandle>) => {
+type SecondCardTableWrapperProps = React.ComponentProps<typeof SecondCardTable>;
+
+const SecondCardTableWrapper = forwardRef<SecondCardTableHandle, SecondCardTableWrapperProps>((props, ref) => {
   return (
     <div className="py-6">
-      <SecondCardTable ref={ref} />
+      <SecondCardTable ref={ref} {...props} />
     </div>
   );
 });

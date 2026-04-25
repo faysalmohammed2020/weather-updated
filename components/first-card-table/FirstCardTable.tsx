@@ -31,6 +31,12 @@ import { CloudSun } from "lucide-react";
 
 interface FirstCardTableProps {
   refreshTrigger?: number;
+  filters?: {
+    startDate: string;
+    endDate: string;
+    stationFilter: string;
+  };
+  hideFilters?: boolean;
 }
 
 export interface FirstCardTableHandle {
@@ -45,12 +51,12 @@ export interface FirstCardTableHandle {
 }
 
 const FirstCardTable = forwardRef<FirstCardTableHandle, FirstCardTableProps>(
-  ({ refreshTrigger = 0 }, ref) => {
+  ({ refreshTrigger = 0, filters, hideFilters = false }, ref) => {
     const today = format(new Date(), "yyyy-MM-dd");
-    const [startDate, setStartDate] = useState(today);
-    const [endDate, setEndDate] = useState(today);
+    const [localStartDate, setLocalStartDate] = useState(today);
+    const [localEndDate, setLocalEndDate] = useState(today);
     const [dateError, setDateError] = useState<string | null>(null);
-    const [stationFilter, setStationFilter] = useState("all");
+    const [localStationFilter, setLocalStationFilter] = useState("all");
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [selectedRecord, setSelectedRecord] =
       useState<MeteorologicalEntry | null>(null);
@@ -63,6 +69,9 @@ const FirstCardTable = forwardRef<FirstCardTableHandle, FirstCardTableProps>(
     const isSuperAdmin =
       user?.role === "super_admin" || user?.role === "root_admin";
     const isStationAdmin = user?.role === "station_admin";
+    const startDate = filters?.startDate ?? localStartDate;
+    const endDate = filters?.endDate ?? localEndDate;
+    const stationFilter = filters?.stationFilter ?? localStationFilter;
 
     const { entries, flattenedData, isLoading, error, mutate } =
       useMeteorologicalEntries({
@@ -111,13 +120,13 @@ const FirstCardTable = forwardRef<FirstCardTableHandle, FirstCardTableProps>(
           setDateError("Start date cannot be after end date");
           return;
         }
-        setStartDate(newValue);
+        setLocalStartDate(newValue);
       } else {
         if (date < otherDate) {
           setDateError("End date cannot be before start date");
           return;
         }
-        setEndDate(newValue);
+        setLocalEndDate(newValue);
       }
     };
 
@@ -126,8 +135,8 @@ const FirstCardTable = forwardRef<FirstCardTableHandle, FirstCardTableProps>(
     ) => {
       const range = getRange();
       if (!range) return;
-      setStartDate(range.startDate);
-      setEndDate(range.endDate);
+      setLocalStartDate(range.startDate);
+      setLocalEndDate(range.endDate);
       setDateError(null);
     };
 
@@ -276,23 +285,25 @@ const FirstCardTable = forwardRef<FirstCardTableHandle, FirstCardTableProps>(
             First Card Data Table
           </div>
           <CardContent className="p-6">
-            <Filters
-              startDate={startDate}
-              endDate={endDate}
-              onDateChange={handleDateChange}
-              onPrevious={goToPreviousWeek}
-              onNext={goToNextWeek}
-              dateError={dateError}
-              allowExport={Boolean(isSuperAdmin || isStationAdmin)}
-              onExportCsv={exportCsv}
-              onExportTxt={exportTxt}
-              exportDisabled={flattenedData.length === 0}
-              showStationFilter={Boolean(isSuperAdmin)}
-              stations={stations}
-              stationFilter={stationFilter}
-              onStationFilterChange={setStationFilter}
-              maxDate={today}
-            />
+            {!hideFilters && (
+              <Filters
+                startDate={startDate}
+                endDate={endDate}
+                onDateChange={handleDateChange}
+                onPrevious={goToPreviousWeek}
+                onNext={goToNextWeek}
+                dateError={dateError}
+                allowExport={Boolean(isSuperAdmin || isStationAdmin)}
+                onExportCsv={exportCsv}
+                onExportTxt={exportTxt}
+                exportDisabled={flattenedData.length === 0}
+                showStationFilter={Boolean(isSuperAdmin)}
+                stations={stations}
+                stationFilter={stationFilter}
+                onStationFilterChange={setLocalStationFilter}
+                maxDate={today}
+              />
+            )}
 
             <div className="bg-white rounded-lg shadow-lg border border-slate-200 overflow-hidden">
               <div className="flex flex-col md:flex-row md:justify-between p-3 sm:p-4 bg-gradient-to-r from-slate-100 to-slate-200 border-b border-slate-300 gap-3 sm:gap-4">

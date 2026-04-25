@@ -171,6 +171,12 @@ interface ObservationData {
 
 interface MargeTableProps {
   refreshTrigger?: number;
+  filters?: {
+    startDate: string;
+    endDate: string;
+    stationFilter: string;
+  };
+  hideFilters?: boolean;
 }
 
 // Combined data structure for merged display
@@ -184,7 +190,7 @@ interface MergedDataEntry {
 }
 
 const MargeTable = forwardRef(
-  ({ refreshTrigger = 0 }: MargeTableProps, ref) => {
+  ({ refreshTrigger = 0, filters, hideFilters = false }: MargeTableProps, ref) => {
     const [firstCardData, setFirstCardData] = useState<ObservingTimeEntry[]>(
       [],
     );
@@ -192,16 +198,19 @@ const MargeTable = forwardRef(
     const [mergedData, setMergedData] = useState<MergedDataEntry[]>([]);
     const [loading, setLoading] = useState(true);
     const today = format(new Date(), "yyyy-MM-dd");
-    const [startDate, setStartDate] = useState(today);
-    const [endDate, setEndDate] = useState(today);
+    const [localStartDate, setLocalStartDate] = useState(today);
+    const [localEndDate, setLocalEndDate] = useState(today);
     const [dateError, setDateError] = useState<string | null>(null);
-    const [stationFilter, setStationFilter] = useState("all");
+    const [localStationFilter, setLocalStationFilter] = useState("all");
     const [stations, setStations] = useState<Station[]>([]);
     const { data: session } = useSession();
     const user = session?.user;
     const isSuperAdmin = user?.role === "super_admin";
     const isStationAdmin = user?.role === "station_admin";
     const isRootAdmin = user?.role === "root_admin";
+    const startDate = filters?.startDate ?? localStartDate;
+    const endDate = filters?.endDate ?? localEndDate;
+    const stationFilter = filters?.stationFilter ?? localStationFilter;
 
     // Expose getData method via ref
     useImperativeHandle(ref, () => ({
@@ -717,8 +726,8 @@ ${"=".repeat(60)}`;
       const newEnd = new Date(start);
       newEnd.setDate(start.getDate() - 1);
 
-      setStartDate(format(newStart, "yyyy-MM-dd"));
-      setEndDate(format(newEnd, "yyyy-MM-dd"));
+      setLocalStartDate(format(newStart, "yyyy-MM-dd"));
+      setLocalEndDate(format(newEnd, "yyyy-MM-dd"));
       setDateError(null);
     };
 
@@ -744,11 +753,11 @@ ${"=".repeat(60)}`;
         const adjustedStart = new Date(adjustedEnd);
         adjustedStart.setDate(adjustedEnd.getDate() - daysInRange);
 
-        setStartDate(format(adjustedStart, "yyyy-MM-dd"));
-        setEndDate(format(adjustedEnd, "yyyy-MM-dd"));
+        setLocalStartDate(format(adjustedStart, "yyyy-MM-dd"));
+        setLocalEndDate(format(adjustedEnd, "yyyy-MM-dd"));
       } else {
-        setStartDate(format(newStart, "yyyy-MM-dd"));
-        setEndDate(format(newEnd, "yyyy-MM-dd"));
+        setLocalStartDate(format(newStart, "yyyy-MM-dd"));
+        setLocalEndDate(format(newEnd, "yyyy-MM-dd"));
       }
 
       setDateError(null);
@@ -791,13 +800,13 @@ ${"=".repeat(60)}`;
           setDateError("Start date cannot be after end date");
           return;
         }
-        setStartDate(newDate);
+        setLocalStartDate(newDate);
       } else {
         if (date < otherDate) {
           setDateError("End date cannot be before start date");
           return;
         }
-        setEndDate(newDate);
+        setLocalEndDate(newDate);
       }
     };
 
@@ -807,6 +816,7 @@ ${"=".repeat(60)}`;
           Merged Meteorological Data Table
         </div>
         <CardContent className="p-6">
+          {!hideFilters && (
           <div className="flex flex-col md:flex-row md:justify-between mb-6 gap-4 bg-slate-100 p-3 sm:p-4 rounded-lg">
             {/* Date Navigation Section */}
             <div className="flex flex-col md:flex-row items-start md:items-center gap-3 md:gap-4">
@@ -901,7 +911,7 @@ ${"=".repeat(60)}`;
                   </div>
                   <Select
                     value={stationFilter}
-                    onValueChange={setStationFilter}
+                    onValueChange={setLocalStationFilter}
                   >
                     <SelectTrigger className="w-full xs:w-[180px] sm:w-[200px] border-slate-300 focus:ring-purple-500 text-sm">
                       <SelectValue placeholder="All Stations" />
@@ -921,6 +931,7 @@ ${"=".repeat(60)}`;
               )}
             </div>
           </div>
+          )}
 
           <div className="bg-white rounded-lg shadow-lg border border-slate-200 overflow-hidden">
             <div className="flex flex-col md:flex-row md:justify-between p-3 sm:p-4 bg-gradient-to-r from-slate-100 to-slate-200 border-b border-slate-300 gap-3 sm:gap-4">

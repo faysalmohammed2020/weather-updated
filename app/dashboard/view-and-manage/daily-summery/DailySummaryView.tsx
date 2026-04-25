@@ -37,6 +37,12 @@ export interface DailySummaryViewHandle {
 interface DailySummaryViewProps {
   initialRecords?: DailySummaryRecord[];
   initialStations?: Station[];
+  filters?: {
+    startDate: string;
+    endDate: string;
+    stationFilter: string;
+  };
+  hideFilters?: boolean;
 }
 
 const buildDefaultHeaderInfo = (
@@ -78,7 +84,12 @@ const deriveHeaderInfo = (
 };
 
 const DailySummaryViewComponent = (
-  { initialRecords, initialStations }: DailySummaryViewProps,
+  {
+    initialRecords,
+    initialStations,
+    filters,
+    hideFilters = false,
+  }: DailySummaryViewProps,
   ref: Ref<DailySummaryViewHandle>,
 ) => {
   const { data: session } = useSession();
@@ -87,12 +98,12 @@ const DailySummaryViewComponent = (
     user?.role === "super_admin" || user?.role === "root_admin";
   const isStationAdmin = user?.role === "station_admin";
 
-  const [dateRange, setDateRange] = useState<DateRange>({
+  const [localDateRange, setLocalDateRange] = useState<DateRange>({
     startDate: todayISO(),
     endDate: todayISO(),
   });
   const [dateError, setDateError] = useState<string | null>(null);
-  const [stationFilter, setStationFilter] = useState("all");
+  const [localStationFilter, setLocalStationFilter] = useState("all");
   const [records, setRecords] = useState<DailySummaryRecord[]>(
     initialRecords || [],
   );
@@ -105,6 +116,10 @@ const DailySummaryViewComponent = (
   const [selectedRecord, setSelectedRecord] =
     useState<DailySummaryRecord | null>(null);
   const [isPermissionDeniedOpen, setIsPermissionDeniedOpen] = useState(false);
+  const dateRange = filters
+    ? { startDate: filters.startDate, endDate: filters.endDate }
+    : localDateRange;
+  const stationFilter = filters?.stationFilter ?? localStationFilter;
 
   const stationQuery =
     isSuperAdmin && stationFilter !== "all" ? stationFilter : undefined;
@@ -202,7 +217,7 @@ const DailySummaryViewComponent = (
       newStart.setDate(start.getDate() - (daysInRange + 1));
       const newEnd = new Date(start);
       newEnd.setDate(start.getDate() - 1);
-      setDateRange({
+      setLocalDateRange({
         startDate: format(newStart, "yyyy-MM-dd"),
         endDate: format(newEnd, "yyyy-MM-dd"),
       });
@@ -224,12 +239,12 @@ const DailySummaryViewComponent = (
       const adjustedEnd = new Date(today);
       const adjustedStart = new Date(adjustedEnd);
       adjustedStart.setDate(adjustedEnd.getDate() - daysInRange);
-      setDateRange({
+      setLocalDateRange({
         startDate: format(adjustedStart, "yyyy-MM-dd"),
         endDate: format(adjustedEnd, "yyyy-MM-dd"),
       });
     } else {
-      setDateRange({
+      setLocalDateRange({
         startDate: format(newStart, "yyyy-MM-dd"),
         endDate: format(newEnd, "yyyy-MM-dd"),
       });
@@ -254,7 +269,7 @@ const DailySummaryViewComponent = (
         setDateError("Start date cannot be after end date");
         return;
       }
-      setDateRange((prev) => ({
+      setLocalDateRange((prev) => ({
         ...prev,
         startDate: value,
       }));
@@ -269,7 +284,7 @@ const DailySummaryViewComponent = (
         setDateError("End date cannot be in the future");
         return;
       }
-      setDateRange((prev) => ({
+      setLocalDateRange((prev) => ({
         ...prev,
         endDate: value,
       }));
@@ -335,20 +350,22 @@ const DailySummaryViewComponent = (
         Daily Summary Data
       </h2>
 
-      <FilterPanel
-        dateRange={dateRange}
-        dateError={dateError}
-        onDateChange={handleDateChange}
-        onNavigate={handleNavigate}
-        canExport={isSuperAdmin || isStationAdmin}
-        exportDisabled={!records.length}
-        onExportCSV={handleExportCSV}
-        onExportTXT={handleExportTXT}
-        isSuperAdmin={Boolean(isSuperAdmin)}
-        stations={stations}
-        stationFilter={stationFilter}
-        onStationChange={setStationFilter}
-      />
+      {!hideFilters && (
+        <FilterPanel
+          dateRange={dateRange}
+          dateError={dateError}
+          onDateChange={handleDateChange}
+          onNavigate={handleNavigate}
+          canExport={isSuperAdmin || isStationAdmin}
+          exportDisabled={!records.length}
+          onExportCSV={handleExportCSV}
+          onExportTXT={handleExportTXT}
+          isSuperAdmin={Boolean(isSuperAdmin)}
+          stations={stations}
+          stationFilter={stationFilter}
+          onStationChange={setLocalStationFilter}
+        />
+      )}
 
       <DailySummaryTable
         data={records}

@@ -4,10 +4,19 @@ import { forwardRef } from "react";
 import FirstCardClient from "./FirstCardClient";
 import type { FirstCardTableHandle } from "@/components/first-card-table/FirstCardTable";
 
-const FirstCardTable = forwardRef<FirstCardTableHandle, {}>((props: {}, ref: React.Ref<FirstCardTableHandle>) => {
+interface FirstCardTableProps {
+  filters?: {
+    startDate: string;
+    endDate: string;
+    stationFilter: string;
+  };
+  hideFilters?: boolean;
+}
+
+const FirstCardTable = forwardRef<FirstCardTableHandle, FirstCardTableProps>((props, ref) => {
   return (
     <div className="py-6">
-      <FirstCardClient ref={ref} />
+      <FirstCardClient ref={ref} {...props} />
     </div>
   );
 });

@@ -34,6 +34,15 @@ export interface SynopticCodeViewHandle {
   getData: () => SynopticRecord[];
 }
 
+interface SynopticCodeViewProps {
+  filters?: {
+    startDate: string;
+    endDate: string;
+    stationFilter: string;
+  };
+  hideFilters?: boolean;
+}
+
 const buildDefaultHeaderInfo = (user?: SynopticUser): SynopticHeaderInfo => {
   const now = new Date();
   return {
@@ -70,7 +79,7 @@ const deriveHeaderInfo = (
 };
 
 const SynopticCodeViewComponent = (
-  props: {},
+  { filters, hideFilters = false }: SynopticCodeViewProps,
   ref: Ref<SynopticCodeViewHandle>,
 ) => {
   const { data: session } = useSession();
@@ -87,8 +96,8 @@ const SynopticCodeViewComponent = (
     [],
   );
 
-  const [dateRange, setDateRange] = useState<DateRange>(initialDate);
-  const [stationFilter, setStationFilter] = useState("all");
+  const [localDateRange, setLocalDateRange] = useState<DateRange>(initialDate);
+  const [localStationFilter, setLocalStationFilter] = useState("all");
   const [records, setRecords] = useState<SynopticRecord[]>([]);
   const [stations, setStations] = useState<Station[]>([]);
   const [headerInfo, setHeaderInfo] = useState<SynopticHeaderInfo>(() =>
@@ -100,6 +109,10 @@ const SynopticCodeViewComponent = (
   );
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isPermissionDeniedOpen, setIsPermissionDeniedOpen] = useState(false);
+  const dateRange = filters
+    ? { startDate: filters.startDate, endDate: filters.endDate }
+    : localDateRange;
+  const stationFilter = filters?.stationFilter ?? localStationFilter;
 
   useImperativeHandle(
     ref,
@@ -240,30 +253,32 @@ const SynopticCodeViewComponent = (
         Synoptic Code Data
       </h2>
 
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4 bg-slate-100 p-3 sm:p-4 md:p-5 rounded-lg print:hidden">
-        <DateFilters
-          startDate={dateRange.startDate}
-          endDate={dateRange.endDate}
-          onRangeChange={setDateRange}
-        />
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 md:gap-6 w-full sm:w-auto">
-          {(isSuperAdmin || isStationAdmin) && (
-            <ExportButtons
-              disabled={!records.length}
-              onExportCSV={handleExportCSV}
-              onExportTXT={handleExportTXT}
-              onExportTAC={handleExportTAC}
-            />
-          )}
-          {isSuperAdmin && (
-            <StationFilter
-              value={stationFilter}
-              stations={stations}
-              onChange={setStationFilter}
-            />
-          )}
+      {!hideFilters && (
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4 bg-slate-100 p-3 sm:p-4 md:p-5 rounded-lg print:hidden">
+          <DateFilters
+            startDate={dateRange.startDate}
+            endDate={dateRange.endDate}
+            onRangeChange={setLocalDateRange}
+          />
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 md:gap-6 w-full sm:w-auto">
+            {(isSuperAdmin || isStationAdmin) && (
+              <ExportButtons
+                disabled={!records.length}
+                onExportCSV={handleExportCSV}
+                onExportTXT={handleExportTXT}
+                onExportTAC={handleExportTAC}
+              />
+            )}
+            {isSuperAdmin && (
+              <StationFilter
+                value={stationFilter}
+                stations={stations}
+                onChange={setLocalStationFilter}
+              />
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       <SynopticTable
         data={records}
@@ -312,7 +327,10 @@ const SynopticCodeViewComponent = (
   );
 };
 
-export const SynopticCodeView = forwardRef<SynopticCodeViewHandle>(
+export const SynopticCodeView = forwardRef<
+  SynopticCodeViewHandle,
+  SynopticCodeViewProps
+>(
   SynopticCodeViewComponent,
 );
 

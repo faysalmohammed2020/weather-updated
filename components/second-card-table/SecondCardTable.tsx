@@ -40,6 +40,12 @@ import type { WeatherFormValues } from "./forms/WeatherForm";
 
 interface SecondCardTableProps {
   refreshTrigger?: number;
+  filters?: {
+    startDate: string;
+    endDate: string;
+    stationFilter: string;
+  };
+  hideFilters?: boolean;
 }
 
 export interface SecondCardTableHandle {
@@ -149,12 +155,12 @@ const canEditObservation = (record: WeatherObservationRecord, user: any) => {
 };
 
 const SecondCardTable = forwardRef<SecondCardTableHandle, SecondCardTableProps>(
-  ({ refreshTrigger = 0 }, ref) => {
+  ({ refreshTrigger = 0, filters, hideFilters = false }, ref) => {
     const today = format(new Date(), "yyyy-MM-dd");
-    const [startDate, setStartDate] = useState(today);
-    const [endDate, setEndDate] = useState(today);
+    const [localStartDate, setLocalStartDate] = useState(today);
+    const [localEndDate, setLocalEndDate] = useState(today);
     const [dateError, setDateError] = useState<string | null>(null);
-    const [stationFilter, setStationFilter] = useState("all");
+    const [localStationFilter, setLocalStationFilter] = useState("all");
     const [selectedRecord, setSelectedRecord] =
       useState<WeatherObservationRecord | null>(null);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -171,6 +177,9 @@ const SecondCardTable = forwardRef<SecondCardTableHandle, SecondCardTableProps>(
       user?.role === "super_admin" || user?.role === "root_admin";
     const isStationAdmin = user?.role === "station_admin";
     const canExport = Boolean(isSuperAdmin || isStationAdmin);
+    const startDate = filters?.startDate ?? localStartDate;
+    const endDate = filters?.endDate ?? localEndDate;
+    const stationFilter = filters?.stationFilter ?? localStationFilter;
 
     const weatherQuery: WeatherQueryParams = {
       startDate,
@@ -213,8 +222,8 @@ const SecondCardTable = forwardRef<SecondCardTableHandle, SecondCardTableProps>(
     ) => {
       const range = getRange();
       if (!range) return;
-      setStartDate(range.startDate);
-      setEndDate(range.endDate);
+      setLocalStartDate(range.startDate);
+      setLocalEndDate(range.endDate);
       setDateError(null);
     };
 
@@ -238,13 +247,13 @@ const SecondCardTable = forwardRef<SecondCardTableHandle, SecondCardTableProps>(
           setDateError("Start date cannot be after end date");
           return;
         }
-        setStartDate(value);
+        setLocalStartDate(value);
       } else {
         if (date < otherDate) {
           setDateError("End date cannot be before start date");
           return;
         }
-        setEndDate(value);
+        setLocalEndDate(value);
       }
 
       setDateError(null);
@@ -358,55 +367,57 @@ const SecondCardTable = forwardRef<SecondCardTableHandle, SecondCardTableProps>(
             Second Card Data Table
           </div>
           <CardContent className="p-6 space-y-4">
-            <div className="flex flex-col gap-4 bg-slate-100 p-3 sm:p-4 rounded-lg">
-              <WeekNavigation
-                onPrevious={goToPreviousWeek}
-                onNext={goToNextWeek}
-              >
-                <DateRange
-                  startDate={startDate}
-                  endDate={endDate}
-                  maxDate={today}
-                  onDateChange={handleDateChange}
-                  dateError={dateError}
-                />
-              </WeekNavigation>
-
-              <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 md:gap-4 pt-3 md:pt-0 border-t md:border-t-0 border-slate-200">
-                {canExport && (
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleExportCsv}
-                      className="flex items-center justify-center gap-2 hover:bg-green-50 border-green-200 text-green-700 bg-transparent"
-                      disabled={flattenedObservations.length === 0}
-                    >
-                      <Download className="h-4 w-4 flex-shrink-0" />
-                      <span className="whitespace-nowrap">Export CSV</span>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleExportTxt}
-                      className="flex items-center justify-center gap-2 hover:bg-blue-50 border-blue-200 text-blue-700 bg-transparent"
-                      disabled={flattenedObservations.length === 0}
-                    >
-                      <Download className="h-4 w-4 flex-shrink-0" />
-                      <span className="whitespace-nowrap">Export TXT</span>
-                    </Button>
-                  </div>
-                )}
-
-                {isSuperAdmin && (
-                  <StationFilter
-                    stations={stations}
-                    value={stationFilter}
-                    onChange={setStationFilter}
+            {!hideFilters && (
+              <div className="flex flex-col gap-4 bg-slate-100 p-3 sm:p-4 rounded-lg">
+                <WeekNavigation
+                  onPrevious={goToPreviousWeek}
+                  onNext={goToNextWeek}
+                >
+                  <DateRange
+                    startDate={startDate}
+                    endDate={endDate}
+                    maxDate={today}
+                    onDateChange={handleDateChange}
+                    dateError={dateError}
                   />
-                )}
+                </WeekNavigation>
+
+                <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 md:gap-4 pt-3 md:pt-0 border-t md:border-t-0 border-slate-200">
+                  {canExport && (
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleExportCsv}
+                        className="flex items-center justify-center gap-2 hover:bg-green-50 border-green-200 text-green-700 bg-transparent"
+                        disabled={flattenedObservations.length === 0}
+                      >
+                        <Download className="h-4 w-4 flex-shrink-0" />
+                        <span className="whitespace-nowrap">Export CSV</span>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleExportTxt}
+                        className="flex items-center justify-center gap-2 hover:bg-blue-50 border-blue-200 text-blue-700 bg-transparent"
+                        disabled={flattenedObservations.length === 0}
+                      >
+                        <Download className="h-4 w-4 flex-shrink-0" />
+                        <span className="whitespace-nowrap">Export TXT</span>
+                      </Button>
+                    </div>
+                  )}
+
+                  {isSuperAdmin && (
+                    <StationFilter
+                      stations={stations}
+                      value={stationFilter}
+                      onChange={setLocalStationFilter}
+                    />
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="bg-white rounded-lg shadow-lg border border-slate-200 overflow-hidden">
               <div className="p-3 md:p-4 bg-gradient-to-r from-slate-100 to-slate-200 border-b border-slate-300">

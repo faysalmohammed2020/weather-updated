@@ -5,8 +5,10 @@ import FirstCardTable, {
   type FirstCardTableHandle,
 } from "@/components/first-card-table/FirstCardTable";
 
-const FirstCardClient = forwardRef<FirstCardTableHandle, {}>((props: {}, ref: React.Ref<FirstCardTableHandle>) => {
-  return <FirstCardTable ref={ref} />;
+type FirstCardClientProps = React.ComponentProps<typeof FirstCardTable>;
+
+const FirstCardClient = forwardRef<FirstCardTableHandle, FirstCardClientProps>((props, ref) => {
+  return <FirstCardTable ref={ref} {...props} />;
 });
 
 FirstCardClient.displayName = "FirstCardClient";

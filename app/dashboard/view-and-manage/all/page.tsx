@@ -1,13 +1,13 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import FirstCardTable from "../first-card-view/FirstCardTable";
 import SecondCardTable from "../second-card-view/SecondCardTable";
 import SynopticCodeTable from "../synoptic-code/SynopticCodeTable";
 import ExcelJS from "exceljs";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, Filter } from "lucide-react";
 // ✅ CHANGED: useSession now from next-auth
 import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
@@ -16,6 +16,21 @@ import MargeTable from "@/components/margeTable";
 import type { DailySummaryRecord } from "@/lib/types/dailySummary";
 import type { WeatherObservationRecord } from "@/types/weather-observation";
 import type { SynopticRecord } from "@/lib/types/synoptic";
+import type { Station } from "@/types/station";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  getNextRange,
+  getPreviousRange,
+  todayISO,
+  validateDateChange,
+} from "@/lib/utils/date-utils";
 
 // ✅ CHANGED: keep only one dynamic import (no redeclare inside component)
 const CompactPDFExportButton = dynamic(() => import("../PdfExportComponent"), {
@@ -31,11 +46,82 @@ const CompactPDFExportButton = dynamic(() => import("../PdfExportComponent"), {
 export default function AllViewAndManagePage() {
   const [activeTab, setActiveTab] = useState("full-table");
   const { data: session } = useSession();
+  const [globalFilters, setGlobalFilters] = useState({
+    startDate: todayISO(),
+    endDate: todayISO(),
+    stationFilter: "all",
+  });
+  const [dateError, setDateError] = useState<string | null>(null);
+  const [stations, setStations] = useState<Station[]>([]);
 
   const firstCardRef = useRef<any>(null);
   const secondCardRef = useRef<any>(null);
   const synopticRef = useRef<any>(null);
   const dailySummeryRef = useRef<any>(null);
+  const isGlobalStationFilterVisible =
+    session?.user?.role === "super_admin" ||
+    session?.user?.role === "root_admin";
+
+  useEffect(() => {
+    if (!isGlobalStationFilterVisible) {
+      setStations([]);
+      return;
+    }
+
+    let active = true;
+
+    const loadStations = async () => {
+      try {
+        const response = await fetch("/api/stations");
+        if (!response.ok) {
+          throw new Error("Failed to fetch stations");
+        }
+        const data = await response.json();
+        if (active) {
+          setStations(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch stations:", error);
+      }
+    };
+
+    loadStations();
+
+    return () => {
+      active = false;
+    };
+  }, [isGlobalStationFilterVisible]);
+
+  const handleGlobalDateChange = (type: "start" | "end", value: string) => {
+    const { range, error } = validateDateChange(type, value, {
+      startDate: globalFilters.startDate,
+      endDate: globalFilters.endDate,
+    });
+
+    if (error) {
+      setDateError(error);
+      return;
+    }
+
+    setDateError(null);
+    setGlobalFilters((prev) => ({ ...prev, ...range }));
+  };
+
+  const handlePreviousRange = () => {
+    setGlobalFilters((prev) => ({
+      ...prev,
+      ...getPreviousRange(prev.startDate, prev.endDate),
+    }));
+    setDateError(null);
+  };
+
+  const handleNextRange = () => {
+    const range = getNextRange(globalFilters.startDate, globalFilters.endDate);
+    if (!range) return;
+
+    setGlobalFilters((prev) => ({ ...prev, ...range }));
+    setDateError(null);
+  };
 
   const exportToExcel = async () => {
     const wb = new ExcelJS.Workbook();
@@ -211,6 +297,91 @@ export default function AllViewAndManagePage() {
         )}
       </div>
 
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-slate-100 p-3 sm:p-4 rounded-lg print:hidden">
+        <div className="flex flex-col gap-2 w-full lg:w-auto">
+          <div className="flex items-center gap-2 w-full">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handlePreviousRange}
+              className="hover:bg-slate-200 flex-shrink-0 bg-transparent"
+              aria-label="Go to previous range"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+              <input
+                type="date"
+                value={globalFilters.startDate}
+                onChange={(event) =>
+                  handleGlobalDateChange("start", event.currentTarget.value)
+                }
+                max={globalFilters.endDate}
+                className="text-xs sm:text-sm p-2 border border-slate-300 focus:ring-purple-500 focus:ring-2 rounded w-full sm:w-auto min-w-[120px]"
+              />
+              <span className="text-sm text-slate-600 whitespace-nowrap">
+                to
+              </span>
+              <input
+                type="date"
+                value={globalFilters.endDate}
+                onChange={(event) =>
+                  handleGlobalDateChange("end", event.currentTarget.value)
+                }
+                min={globalFilters.startDate}
+                max={todayISO()}
+                className="text-xs sm:text-sm p-2 border border-slate-300 focus:ring-purple-500 focus:ring-2 rounded w-full sm:w-auto min-w-[120px]"
+              />
+            </div>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleNextRange}
+              className="hover:bg-slate-200 flex-shrink-0 bg-transparent"
+              aria-label="Go to next range"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+          {dateError && <p className="text-sm text-red-600">{dateError}</p>}
+        </div>
+
+        {isGlobalStationFilterVisible && (
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+            <div className="flex items-center gap-2">
+              <Filter size={16} className="text-purple-500 flex-shrink-0" />
+              <Label
+                htmlFor="globalStationFilter"
+                className="whitespace-nowrap font-medium text-slate-700 text-sm"
+              >
+                Station:
+              </Label>
+            </div>
+            <Select
+              value={globalFilters.stationFilter}
+              onValueChange={(stationFilter) =>
+                setGlobalFilters((prev) => ({ ...prev, stationFilter }))
+              }
+            >
+              <SelectTrigger
+                id="globalStationFilter"
+                className="w-full sm:w-[220px] border-slate-300 focus:ring-purple-500 text-sm bg-white"
+              >
+                <SelectValue placeholder="All Stations" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Stations</SelectItem>
+                {stations.map((station) => (
+                  <SelectItem key={station.id} value={station.id}>
+                    {station.name} ({station.stationId})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+      </div>
+
       {/* Tabs Section - Responsive */}
       <Tabs
         defaultValue="full-table"
@@ -257,19 +428,39 @@ export default function AllViewAndManagePage() {
         <div className="mt-4 md:mt-6 rounded-lg border bg-white shadow overflow-hidden">
           <div className="p-2 sm:p-4 overflow-x-auto">
             <div hidden={activeTab !== "full-table"}>
-              <MargeTable ref={MargeTableRef} />
+              <MargeTable
+                ref={MargeTableRef}
+                filters={globalFilters}
+                hideFilters
+              />
             </div>
             <div hidden={activeTab !== "first-card"}>
-              <FirstCardTable ref={firstCardRef} />
+              <FirstCardTable
+                ref={firstCardRef}
+                filters={globalFilters}
+                hideFilters
+              />
             </div>
             <div hidden={activeTab !== "second-card"}>
-              <SecondCardTable ref={secondCardRef} />
+              <SecondCardTable
+                ref={secondCardRef}
+                filters={globalFilters}
+                hideFilters
+              />
             </div>
             <div hidden={activeTab !== "synoptic-code"}>
-              <SynopticCodeTable ref={synopticRef} />
+              <SynopticCodeTable
+                ref={synopticRef}
+                filters={globalFilters}
+                hideFilters
+              />
             </div>
             <div hidden={activeTab !== "daily-summery"}>
-              <DailySummaryTable ref={dailySummeryRef} />
+              <DailySummaryTable
+                ref={dailySummeryRef}
+                filters={globalFilters}
+                hideFilters
+              />
             </div>
           </div>
         </div>

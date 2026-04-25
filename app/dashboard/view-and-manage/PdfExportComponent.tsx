@@ -193,11 +193,35 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
   const formatTime = (utcTime: string) => {
     if (!utcTime) return "--";
     try {
-      return new Date(utcTime).toLocaleTimeString("en-US", {
+      const date = new Date(utcTime);
+      if (isNaN(date.getTime())) return "--";
+      return date.toLocaleTimeString("en-US", {
         hour: "2-digit",
         minute: "2-digit",
         timeZone: "UTC",
       });
+    } catch {
+      return "--";
+    }
+  };
+
+  const formatDate = (dateValue: any) => {
+    if (!dateValue) return "--";
+    try {
+      const date = new Date(dateValue);
+      if (isNaN(date.getTime())) return "--";
+      return moment(date).format("ll");
+    } catch {
+      return "--";
+    }
+  };
+
+  const formatTimeFromMoment = (dateValue: any) => {
+    if (!dateValue) return "--";
+    try {
+      const date = new Date(dateValue);
+      if (isNaN(date.getTime())) return "--";
+      return moment(date).format("LT");
     } catch {
       return "--";
     }
@@ -281,7 +305,7 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
             <Text style={styles.stationLabel}>DATE</Text>
             <Text style={styles.stationValue}>
               {firstCardData.length > 0
-                ? moment(firstCardData[0].utcTime).format("ll")
+                ? formatDate(firstCardData[0].utcTime)
                 : stationInfo.date}
             </Text>
           </View>
@@ -395,7 +419,7 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
                     {formatTime(record.utcTime)}
                   </Text>
                   <Text style={[styles.tableCell, { width: "5%" }]}>
-                    {moment(record.utcTime).format("ll")}
+                    {formatDate(record.utcTime)}
                   </Text>
                   <Text style={[styles.tableCell, { width: "3%" }]}>
                     {formatValue(record.subIndicator)}
@@ -614,7 +638,7 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
                     {formatTime(record.utcTime)}
                   </Text>
                   <Text style={[styles.tableCell, { width: "4%" }]}>
-                    {moment(record.utcTime).format("ll")}
+                    {formatDate(record.utcTime)}
                   </Text>
                   <Text style={[styles.tableCell, { width: "2.5%" }]}>
                     {formatValue(record.lowCloudForm)}
@@ -692,10 +716,10 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
                     {formatValue(record.layer4Amount)}
                   </Text>
                   <Text style={[styles.tableCell, { width: "2.5%" }]}>
-                    {moment(record.rainfallTimeStart).format("LT")}
+                    {formatTimeFromMoment(record.rainfallTimeStart)}
                   </Text>
                   <Text style={[styles.tableCell, { width: "2.5%" }]}>
-                    {moment(record.rainfallTimeEnd).format("LT")}
+                    {formatTimeFromMoment(record.rainfallTimeEnd)}
                   </Text>
                   <Text style={[styles.tableCell, { width: "2.5%" }]}>
                     {formatValue(record.rainfallSincePrevious)}
@@ -812,7 +836,7 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
                     {formatTime(record.GG)}
                   </Text>
                   <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
-                    {moment(record.date).format("ll")}
+                    {formatDate(record.date)}
                   </Text>
                   <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>
                     {formatValue(record.C1)}
@@ -980,10 +1004,10 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
               {dailySummeryData.slice(0, 8).map((record, index) => (
                 <View key={index} style={styles.tableRow}>
                   <Text style={[styles.tableCellSynoptic, { width: "5.5%" }]}>
-                    {record.date ? moment(record.date).format("HH:mm") : "--"}
+                    {record.date ? formatTimeFromMoment(record.date) : "--"}
                   </Text>
                   <Text style={[styles.tableCellSynoptic, { width: "5.5%" }]}>
-                    {moment(record.date).format("ll")}
+                    {formatDate(record.date)}
                   </Text>
                   <Text style={[styles.tableCellSynoptic, { width: "6%" }]}>
                     {formatValue(record.avStationPressure)}
@@ -1083,13 +1107,33 @@ export const CompactPDFExportButton: React.FC<CompactPDFExportButtonProps> = ({
   },
 }) => {
   const [isGenerating, setIsGenerating] = React.useState(false);
-  const { data: session } = useSession(); // ✅ hook normal React tree তে
+  const { data: session } = useSession();
+
+  const [pdfData, setPdfData] = React.useState<{
+    firstCardData: any[];
+    secondCardData: any[];
+    synopticData: any[];
+    dailySummeryData: any[];
+    stationInfo: { stationId: string; stationName: string; date: string };
+  } | null>(null);
+
+  const [showDownload, setShowDownload] = React.useState(false);
 
   const generatePDFData = React.useCallback(() => {
     const firstCardData = firstCardRef.current?.getData?.() || [];
     const secondCardData = secondCardRef.current?.getData?.() || [];
     const synopticData = synopticRef.current?.getData?.() || [];
     const dailySummeryData = dailySummeryRef.current?.getData?.() || [];
+
+    const isValidArray = (arr: any) => Array.isArray(arr);
+    if (
+      !isValidArray(firstCardData) ||
+      !isValidArray(secondCardData) ||
+      !isValidArray(synopticData) ||
+      !isValidArray(dailySummeryData)
+    ) {
+      throw new Error("Invalid data format received from refs");
+    }
 
     return {
       firstCardData,
@@ -1102,23 +1146,56 @@ export const CompactPDFExportButton: React.FC<CompactPDFExportButtonProps> = ({
 
   const fileName = `Weather_Data_Compact_${stationInfo.date.replace(/\//g, "-")}.pdf`;
 
+  // Important: don't continuously regenerate PDF when global filters change.
+  // Snapshot the data on button click, then render the PDFDownloadLink with stable props.
+  if (!showDownload || !pdfData) {
+    return (
+      <Button
+        disabled={isGenerating}
+        className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white w-full sm:w-auto"
+        onClick={() => {
+          try {
+            setIsGenerating(true);
+            const snapshot = generatePDFData();
+            setPdfData(snapshot);
+            setShowDownload(true);
+          } catch (err) {
+            console.error("Error generating PDF data:", err);
+          } finally {
+            setTimeout(() => setIsGenerating(false), 250);
+          }
+        }}
+      >
+        {isGenerating ? (
+          <>
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+            Preparing...
+          </>
+        ) : (
+          <>
+            <FileText className="h-4 w-4" />
+            Export All to PDF
+          </>
+        )}
+      </Button>
+    );
+  }
+
   return (
     <PDFDownloadLink
-      document={
-        <CompactWeatherPDFDocument {...generatePDFData()} session={session} />
-      }
+      key={`${pdfData.stationInfo.stationId}-${pdfData.stationInfo.date}`}
+      document={<CompactWeatherPDFDocument {...pdfData} session={session} />}
       fileName={fileName}
     >
-      {({ loading }) => (
+      {({ loading, error: pdfError }) => (
         <Button
-          disabled={loading || isGenerating}
+          disabled={loading}
           className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white w-full sm:w-auto"
           onClick={() => {
-            setIsGenerating(true);
-            setTimeout(() => setIsGenerating(false), 1000);
+            if (pdfError) console.error("PDF generation error:", pdfError);
           }}
         >
-          {loading || isGenerating ? (
+          {loading ? (
             <>
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
               Generating PDF...
@@ -1126,7 +1203,7 @@ export const CompactPDFExportButton: React.FC<CompactPDFExportButtonProps> = ({
           ) : (
             <>
               <FileText className="h-4 w-4" />
-              Export All to PDF
+              Download PDF
             </>
           )}
         </Button>

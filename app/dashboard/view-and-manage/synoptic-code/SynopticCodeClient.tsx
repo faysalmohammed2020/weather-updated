@@ -5,8 +5,10 @@ import SynopticCodeView, {
   type SynopticCodeViewHandle,
 } from "./SynopticCodeView";
 
-const SynopticCodeClient = forwardRef<SynopticCodeViewHandle, {}>((props: {}, ref: React.Ref<SynopticCodeViewHandle>) => {
-  return <SynopticCodeView ref={ref} />;
+type SynopticCodeClientProps = React.ComponentProps<typeof SynopticCodeView>;
+
+const SynopticCodeClient = forwardRef<SynopticCodeViewHandle, SynopticCodeClientProps>((props, ref) => {
+  return <SynopticCodeView ref={ref} {...props} />;
 });
 
 SynopticCodeClient.displayName = "SynopticCodeClient";
