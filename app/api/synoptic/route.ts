@@ -5,6 +5,9 @@ import { PrismaClient } from "@prisma/client";
 import { getTodayUtcRange, utcToHour } from "@/lib/utils";
 import { getSession } from "@/lib/getSession";
 
+ export const dynamic = "force-dynamic";
+ export const revalidate = 0;
+
 const prisma = new PrismaClient();
 
 export async function GET() {
@@ -128,18 +131,14 @@ export async function GET() {
       iR = "3"; // No precipitation
     }
 
-    // iX logic based on present and past weather codes
+    // iX logic based on present weather code
     const ww = Number(firstCard.presentWeatherWW) || 0;
-    const W1 = Number(firstCard.pastWeatherW1) || 0;
-    const W2 = Number(firstCard.pastWeatherW2) || 0;
 
     let iX: string;
-    if (ww >= 4 && ww <= 99 && W1 >= 3 && W1 <= 9 && W2 >= 3 && W2 <= 9) {
-      iX = "1"; // ww code 04-99; W1W2 code 3-9
-    } else if (ww >= 0 && ww <= 3 && W1 >= 0 && W1 <= 2 && W2 >= 0 && W2 <= 2) {
-      iX = "2"; // ww code 00-03; W1W2 code 0-2
+    if (ww >= 0 && ww <= 4) {
+      iX = "2";
     } else {
-      iX = "2"; // default case
+      iX = "1";
     }
 
     const lowCloudHeight = weatherObs.lowCloudHeight || "0";
@@ -443,13 +442,23 @@ export async function GET() {
     measurements[8] = `7${presentWeather}${pastWeather1}${pastWeather2}`;
 
     // 10. 8NhClCmCh (57-61) - Cloud information
-
     const lowAmount = weatherObs.lowCloudAmount || "";
     const lowForm = weatherObs.lowCloudForm || "";
     const mediumForm = weatherObs.mediumCloudForm || "";
     const highForm = weatherObs.highCloudForm || "";
 
-    if (!lowAmount && !lowForm && !mediumForm && !highForm) {
+    const isZeroOrEmpty = (v: unknown) => {
+      if (v === null || v === undefined) return true;
+      const s = String(v).trim();
+      return s === "" || s === "0";
+    };
+
+    if (
+      isZeroOrEmpty(lowAmount) &&
+      isZeroOrEmpty(lowForm) &&
+      isZeroOrEmpty(mediumForm) &&
+      isZeroOrEmpty(highForm)
+    ) {
       measurements[9] = ""; // একেবারেই খালি
     } else {
       measurements[9] = `8${lowAmount}${lowForm}${mediumForm}${highForm}`;
@@ -579,7 +588,11 @@ export async function GET() {
       measurements,
     };
 
-    return NextResponse.json(formValues);
+    return NextResponse.json(formValues, {
+      headers: {
+        "Cache-Control": "no-store",
+      },
+    });
   } catch (error) {
     console.error("Error generating synoptic code:", error);
     return NextResponse.json(
