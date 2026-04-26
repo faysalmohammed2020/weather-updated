@@ -142,8 +142,44 @@ export default function AllViewAndManagePage() {
       "observingTime",
       "observingTimeId",
       "localTime",
+      "utcTime",
+      "date",
       "c2Indicator",
     ];
+
+    const getDateTimeParts = (value: unknown) => {
+      if (!value) {
+        return { date: "", time: "" };
+      }
+
+      const parsed = value instanceof Date ? value : new Date(String(value));
+      if (Number.isNaN(parsed.getTime())) {
+        return { date: String(value), time: "" };
+      }
+
+      const isoValue = parsed.toISOString().slice(0, 19);
+      return {
+        date: isoValue.slice(0, 10),
+        time: isoValue.slice(11, 19),
+      };
+    };
+
+    const getObservationDateTime = (item: any) =>
+      getDateTimeParts(
+        item.localTime ||
+          item.utcTime ||
+          item.date ||
+          item.ObservingTime?.utcTime ||
+          item.createdAt,
+      );
+
+    const orderExportKeys = (keys: string[]) => {
+      const leadingKeys = ["stationName", "stationCode", "date", "time"];
+      return [
+        ...leadingKeys.filter((key) => keys.includes(key)),
+        ...keys.filter((key) => !leadingKeys.includes(key)),
+      ];
+    };
 
     // Helper function to add station info to data
     const addStationInfo = (data: any[]) => {
@@ -152,27 +188,32 @@ export default function AllViewAndManagePage() {
         // 1. FlattenedWeatherObservation (direct stationName, stationId)
         // 2. WeatherObservationRecord (nested station object)
         // 3. SynopticRecord & DailySummaryRecord (nested ObservingTime.station)
+        const observationDateTime = getObservationDateTime(item);
         const stationInfo = {
-          stationName: 
-            item.stationName || 
-            item.station?.name || 
-            item.ObservingTime?.station?.name || 
+          stationName:
+            item.stationName ||
+            item.station?.name ||
+            item.ObservingTime?.station?.name ||
             "",
-          stationCode: 
-            item.stationId || 
-            item.station?.stationId || 
-            item.ObservingTime?.station?.stationId || 
+          stationCode:
+            item.stationId ||
+            item.station?.stationId ||
+            item.ObservingTime?.station?.stationId ||
             "",
+          date: observationDateTime.date,
+          time: observationDateTime.time,
         };
-        
+
         const cleaned: any = { ...stationInfo };
         Object.keys(item).forEach((key: string) => {
-          if (!excludedKeys.includes(key) && 
-              key !== "station" && 
-              key !== "user" && 
-              key !== "stationName" && 
-              key !== "stationId" &&
-              key !== "ObservingTime") {
+          if (
+            !excludedKeys.includes(key) &&
+            key !== "station" &&
+            key !== "user" &&
+            key !== "stationName" &&
+            key !== "stationId" &&
+            key !== "ObservingTime"
+          ) {
             cleaned[key] = item[key];
           }
         });
@@ -181,22 +222,13 @@ export default function AllViewAndManagePage() {
     };
 
     const cleanFirst = addStationInfo(firstCardData);
-    const cleanSecond = secondCardData.map((item: any) => {
-      const cleaned: any = {};
-      Object.keys(item).forEach((key: string) => {
-        if (!excludedKeys.includes(key) && key !== "station" && key !== "user" && key !== "stationName" && key !== "stationId") {
-          cleaned[key] = item[key];
-        }
-      });
-      return cleaned;
-    });
+    const cleanSecond = addStationInfo(secondCardData);
 
     const firstKeys = Object.keys(cleanFirst[0] || {});
     const secondKeys = Object.keys(cleanSecond[0] || {});
 
-    // Ensure station columns are first only for First Card
-    const orderedFirstKeys = ["stationName", "stationCode", ...firstKeys.filter(k => k !== "stationName" && k !== "stationCode")];
-    const orderedSecondKeys = secondKeys; // No station columns for Second Card
+    const orderedFirstKeys = orderExportKeys(firstKeys);
+    const orderedSecondKeys = orderExportKeys(secondKeys);
 
     const firstHeader = Array(orderedFirstKeys.length).fill("First Card");
     const secondHeader = Array(orderedSecondKeys.length).fill("Second Card");
@@ -223,18 +255,25 @@ export default function AllViewAndManagePage() {
     mergedSheet.addRow(subHeaderRow);
     mergedRows.forEach((row) => mergedSheet.addRow(row));
 
-    // Merge header cells
+    // Merge header cells only when a section spans multiple columns.
     const firstColEnd = orderedFirstKeys.length;
-    const secondColEnd = orderedFirstKeys.length + orderedSecondKeys.length;
-    mergedSheet.mergeCells(1, 1, 1, firstColEnd);
-    mergedSheet.mergeCells(1, firstColEnd + 1, 1, secondColEnd);
+    const secondColStart = firstColEnd + 1;
+    const secondColEnd = firstColEnd + orderedSecondKeys.length;
+
+    if (orderedFirstKeys.length > 1) {
+      mergedSheet.mergeCells(1, 1, 1, firstColEnd);
+    }
+
+    if (orderedSecondKeys.length > 1) {
+      mergedSheet.mergeCells(1, secondColStart, 1, secondColEnd);
+    }
 
     // Synoptic
     const cleanSynoptic = addStationInfo(synopticData);
     const synopticSheet = wb.addWorksheet("Synoptic");
     if (cleanSynoptic.length > 0) {
       const synopticKeys = Object.keys(cleanSynoptic[0]);
-      const orderedSynopticKeys = ["stationName", "stationCode", ...synopticKeys.filter(k => k !== "stationName" && k !== "stationCode")];
+      const orderedSynopticKeys = orderExportKeys(synopticKeys);
       synopticSheet.addRow(orderedSynopticKeys);
       cleanSynoptic.forEach((item: any) => {
         synopticSheet.addRow(orderedSynopticKeys.map((k) => item[k]));
@@ -246,7 +285,7 @@ export default function AllViewAndManagePage() {
     const summarySheet = wb.addWorksheet("Daily Summary");
     if (cleanSummary.length > 0) {
       const summaryKeys = Object.keys(cleanSummary[0]);
-      const orderedSummaryKeys = ["stationName", "stationCode", ...summaryKeys.filter(k => k !== "stationName" && k !== "stationCode")];
+      const orderedSummaryKeys = orderExportKeys(summaryKeys);
       summarySheet.addRow(orderedSummaryKeys);
       cleanSummary.forEach((item: any) => {
         summarySheet.addRow(orderedSummaryKeys.map((k) => item[k]));
