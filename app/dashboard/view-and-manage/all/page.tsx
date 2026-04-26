@@ -153,26 +153,28 @@ export default function AllViewAndManagePage() {
         // 2. WeatherObservationRecord (nested station object)
         // 3. SynopticRecord & DailySummaryRecord (nested ObservingTime.station)
         const stationInfo = {
-          stationName: 
-            item.stationName || 
-            item.station?.name || 
-            item.ObservingTime?.station?.name || 
+          stationName:
+            item.stationName ||
+            item.station?.name ||
+            item.ObservingTime?.station?.name ||
             "",
-          stationCode: 
-            item.stationId || 
-            item.station?.stationId || 
-            item.ObservingTime?.station?.stationId || 
+          stationCode:
+            item.stationId ||
+            item.station?.stationId ||
+            item.ObservingTime?.station?.stationId ||
             "",
         };
-        
+
         const cleaned: any = { ...stationInfo };
         Object.keys(item).forEach((key: string) => {
-          if (!excludedKeys.includes(key) && 
-              key !== "station" && 
-              key !== "user" && 
-              key !== "stationName" && 
-              key !== "stationId" &&
-              key !== "ObservingTime") {
+          if (
+            !excludedKeys.includes(key) &&
+            key !== "station" &&
+            key !== "user" &&
+            key !== "stationName" &&
+            key !== "stationId" &&
+            key !== "ObservingTime"
+          ) {
             cleaned[key] = item[key];
           }
         });
@@ -184,7 +186,13 @@ export default function AllViewAndManagePage() {
     const cleanSecond = secondCardData.map((item: any) => {
       const cleaned: any = {};
       Object.keys(item).forEach((key: string) => {
-        if (!excludedKeys.includes(key) && key !== "station" && key !== "user" && key !== "stationName" && key !== "stationId") {
+        if (
+          !excludedKeys.includes(key) &&
+          key !== "station" &&
+          key !== "user" &&
+          key !== "stationName" &&
+          key !== "stationId"
+        ) {
           cleaned[key] = item[key];
         }
       });
@@ -195,7 +203,11 @@ export default function AllViewAndManagePage() {
     const secondKeys = Object.keys(cleanSecond[0] || {});
 
     // Ensure station columns are first only for First Card
-    const orderedFirstKeys = ["stationName", "stationCode", ...firstKeys.filter(k => k !== "stationName" && k !== "stationCode")];
+    const orderedFirstKeys = [
+      "stationName",
+      "stationCode",
+      ...firstKeys.filter((k) => k !== "stationName" && k !== "stationCode"),
+    ];
     const orderedSecondKeys = secondKeys; // No station columns for Second Card
 
     const firstHeader = Array(orderedFirstKeys.length).fill("First Card");
@@ -234,7 +246,13 @@ export default function AllViewAndManagePage() {
     const synopticSheet = wb.addWorksheet("Synoptic");
     if (cleanSynoptic.length > 0) {
       const synopticKeys = Object.keys(cleanSynoptic[0]);
-      const orderedSynopticKeys = ["stationName", "stationCode", ...synopticKeys.filter(k => k !== "stationName" && k !== "stationCode")];
+      const orderedSynopticKeys = [
+        "stationName",
+        "stationCode",
+        ...synopticKeys.filter(
+          (k) => k !== "stationName" && k !== "stationCode",
+        ),
+      ];
       synopticSheet.addRow(orderedSynopticKeys);
       cleanSynoptic.forEach((item: any) => {
         synopticSheet.addRow(orderedSynopticKeys.map((k) => item[k]));
@@ -246,7 +264,13 @@ export default function AllViewAndManagePage() {
     const summarySheet = wb.addWorksheet("Daily Summary");
     if (cleanSummary.length > 0) {
       const summaryKeys = Object.keys(cleanSummary[0]);
-      const orderedSummaryKeys = ["stationName", "stationCode", ...summaryKeys.filter(k => k !== "stationName" && k !== "stationCode")];
+      const orderedSummaryKeys = [
+        "stationName",
+        "stationCode",
+        ...summaryKeys.filter(
+          (k) => k !== "stationName" && k !== "stationCode",
+        ),
+      ];
       summarySheet.addRow(orderedSummaryKeys);
       cleanSummary.forEach((item: any) => {
         summarySheet.addRow(orderedSummaryKeys.map((k) => item[k]));
@@ -296,7 +320,7 @@ export default function AllViewAndManagePage() {
     <div className="p-3 sm:p-4 md:p-6 space-y-4 md:space-y-6 min-h-screen">
       {/* Header Section - Responsive */}
       <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 break-words">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 wrap-break-word">
           All View & Manage
         </h1>
 

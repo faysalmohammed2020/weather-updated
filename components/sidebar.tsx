@@ -23,6 +23,7 @@ import {
   Leaf,
   Code2,
   BarChart2,
+  DatabaseBackup,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import {
@@ -146,6 +147,11 @@ const Sidebar = () => {
           icon: <Leaf className="mr-2 h-5 w-5" />,
           href: "/dashboard/data-entry/agroclimatological",
           label: "Agroclimatological",
+        },
+        {
+          icon: <DatabaseBackup className="mr-2 h-5 w-5" />,
+          href: "/dashboard/data-entry/backlock",
+          label: "Backlock",
         },
       ],
     },
@@ -314,7 +320,7 @@ const Sidebar = () => {
 
       {isMobileOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-[9] md:hidden backdrop-blur-sm shrink-0"
+          className="fixed inset-0 bg-black/50 z-9 md:hidden backdrop-blur-sm shrink-0"
           onClick={toggleMobileSidebar}
         />
       )}
