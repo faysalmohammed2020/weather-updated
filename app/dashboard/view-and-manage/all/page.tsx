@@ -142,8 +142,44 @@ export default function AllViewAndManagePage() {
       "observingTime",
       "observingTimeId",
       "localTime",
+      "utcTime",
+      "date",
       "c2Indicator",
     ];
+
+    const getDateTimeParts = (value: unknown) => {
+      if (!value) {
+        return { date: "", time: "" };
+      }
+
+      const parsed = value instanceof Date ? value : new Date(String(value));
+      if (Number.isNaN(parsed.getTime())) {
+        return { date: String(value), time: "" };
+      }
+
+      const isoValue = parsed.toISOString().slice(0, 19);
+      return {
+        date: isoValue.slice(0, 10),
+        time: isoValue.slice(11, 19),
+      };
+    };
+
+    const getObservationDateTime = (item: any) =>
+      getDateTimeParts(
+        item.localTime ||
+          item.utcTime ||
+          item.date ||
+          item.ObservingTime?.utcTime ||
+          item.createdAt,
+      );
+
+    const orderExportKeys = (keys: string[]) => {
+      const leadingKeys = ["stationName", "stationCode", "date", "time"];
+      return [
+        ...leadingKeys.filter((key) => keys.includes(key)),
+        ...keys.filter((key) => !leadingKeys.includes(key)),
+      ];
+    };
 
     // Helper function to add station info to data
     const addStationInfo = (data: any[]) => {
@@ -152,7 +188,12 @@ export default function AllViewAndManagePage() {
         // 1. FlattenedWeatherObservation (direct stationName, stationId)
         // 2. WeatherObservationRecord (nested station object)
         // 3. SynopticRecord & DailySummaryRecord (nested ObservingTime.station)
+        const observationDateTime = getObservationDateTime(item);
         const stationInfo = {
+          stationName:
+            item.stationName ||
+            item.station?.name ||
+            item.ObservingTime?.station?.name ||
           stationName:
             item.stationName ||
             item.station?.name ||
@@ -162,11 +203,26 @@ export default function AllViewAndManagePage() {
             item.stationId ||
             item.station?.stationId ||
             item.ObservingTime?.station?.stationId ||
+          stationCode:
+            item.stationId ||
+            item.station?.stationId ||
+            item.ObservingTime?.station?.stationId ||
             "",
+          date: observationDateTime.date,
+          time: observationDateTime.time,
         };
+
 
         const cleaned: any = { ...stationInfo };
         Object.keys(item).forEach((key: string) => {
+          if (
+            !excludedKeys.includes(key) &&
+            key !== "station" &&
+            key !== "user" &&
+            key !== "stationName" &&
+            key !== "stationId" &&
+            key !== "ObservingTime"
+          ) {
           if (
             !excludedKeys.includes(key) &&
             key !== "station" &&
@@ -235,11 +291,18 @@ export default function AllViewAndManagePage() {
     mergedSheet.addRow(subHeaderRow);
     mergedRows.forEach((row) => mergedSheet.addRow(row));
 
-    // Merge header cells
+    // Merge header cells only when a section spans multiple columns.
     const firstColEnd = orderedFirstKeys.length;
-    const secondColEnd = orderedFirstKeys.length + orderedSecondKeys.length;
-    mergedSheet.mergeCells(1, 1, 1, firstColEnd);
-    mergedSheet.mergeCells(1, firstColEnd + 1, 1, secondColEnd);
+    const secondColStart = firstColEnd + 1;
+    const secondColEnd = firstColEnd + orderedSecondKeys.length;
+
+    if (orderedFirstKeys.length > 1) {
+      mergedSheet.mergeCells(1, 1, 1, firstColEnd);
+    }
+
+    if (orderedSecondKeys.length > 1) {
+      mergedSheet.mergeCells(1, secondColStart, 1, secondColEnd);
+    }
 
     // Synoptic
     const cleanSynoptic = addStationInfo(synopticData);
