@@ -38,8 +38,9 @@ export async function POST(req: Request) {
     }
 
     const data = await req.json();
+    const { backlockMode, selectedDate, selectedUtc } = data;
 
-    if (!data.observingTimeId) {
+    if (!data.observingTimeId && !backlockMode) {
       return NextResponse.json(
         {
           error: true,
@@ -49,7 +50,9 @@ export async function POST(req: Request) {
       );
     }
 
-    const formattedObservingTime = hourToUtc(data.observingTimeId);
+    const formattedObservingTime = backlockMode 
+      ? new Date(`${selectedDate}T${selectedUtc}:00:00.000Z`)
+      : hourToUtc(data.observingTimeId);
     const targetUtcTime = new Date(formattedObservingTime);
     const targetDayStart = new Date(
       Date.UTC(

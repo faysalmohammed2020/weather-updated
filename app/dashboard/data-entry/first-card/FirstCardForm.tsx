@@ -85,7 +85,19 @@ const tabStyles = {
 
 type TabKey = keyof typeof tabStyles;
 
-export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
+export function FirstCardForm({ 
+  timeInfo,
+  backlockMode = false,
+  selectedDate,
+  selectedUtc,
+  onSuccess
+}: { 
+  timeInfo: TimeInfo[];
+  backlockMode?: boolean;
+  selectedDate?: string;
+  selectedUtc?: string;
+  onSuccess?: () => void;
+}) {
   const {
     formik,
     activeTab,
@@ -104,7 +116,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
     isHourSelected,
     selectedHour,
     hygrometricData,
-  } = useFirstCardForm();
+  } = useFirstCardForm({ backlockMode, selectedDate, selectedUtc, onSuccess });
 
   // ✅ stable tab change handler
   const onTabClick = useCallback(
@@ -118,7 +130,8 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
     []
   );
 
-  const showHourSelector = isLoading || firstCardError || !isHourSelected;
+  const showHourSelector =
+    !backlockMode && (isLoading || firstCardError || !isHourSelected);
   const showSkeletonOverlay = isSubmitting; // submit-time skeleton
 
   return (
@@ -231,7 +244,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
               <TabsContent value="temperature" className="mt-6">
                 <TemperatureTab
                   formik={formik}
-                  selectedHour={selectedHour}
+                  selectedHour={selectedHour || ""}
                   hygrometricData={hygrometricData}
                   handleNumericInput={handleNumericInput}
                   handleChange={handleChange}
@@ -304,7 +317,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
               <TabsContent value="summary" className="mt-6">
                 <SummaryTab
                   formik={formik}
-                  selectedHour={selectedHour}
+                  selectedHour={selectedHour || ""}
                   handleNumericInput={handleNumericInput}
                   handleChange={handleChange}
                   handleReset={handleReset}

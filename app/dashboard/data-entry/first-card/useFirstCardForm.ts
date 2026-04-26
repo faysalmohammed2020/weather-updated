@@ -25,7 +25,17 @@ export const tabOrder = [
   "summary",
 ] as const;
 
-export const useFirstCardForm = () => {
+export const useFirstCardForm = ({
+  backlockMode = false,
+  selectedDate,
+  selectedUtc,
+  onSuccess
+}: {
+  backlockMode?: boolean;
+  selectedDate?: string;
+  selectedUtc?: string;
+  onSuccess?: () => void;
+} = {}) => {
   const [activeTab, setActiveTab] = useState<string>("temperature");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hygrometricData, setHygrometricData] = useState<HygrometricData>({
@@ -39,12 +49,14 @@ export const useFirstCardForm = () => {
   const { data: session } = useSession();
   const {
     isHourSelected,
-    selectedHour,
+    selectedHour: contextHour,
     firstCardError,
     isLoading,
     timeData,
     resetStates,
   } = useHour();
+
+  const selectedHour = backlockMode ? selectedUtc : contextHour;
 
   const formik = useFormik<any>({
     initialValues: {
@@ -98,6 +110,9 @@ export const useFirstCardForm = () => {
         ...values,
         ...hygrometricData,
         observingTimeId: selectedHour,
+        backlockMode,
+        selectedDate,
+        selectedUtc,
       };
 
       const response = await fetch("/api/first-card-data", {
@@ -127,8 +142,12 @@ export const useFirstCardForm = () => {
         relativeHumidity: "",
       });
 
-      resetStates();
-      setActiveTab("temperature");
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        resetStates();
+        setActiveTab("temperature");
+      }
     } catch (error) {
       console.error("Submission error:", error);
       toast.error("Submission failed", {
@@ -316,7 +335,7 @@ export const useFirstCardForm = () => {
 
     const is3 = (s?: string) => !!s && s.length === 3;
 
-    const mode = checkMinMax(selectedHour);
+    const mode = checkMinMax(selectedHour || "");
     const isMinMode = (mode || "").toLowerCase().includes("min");
     const isMaxMode = (mode || "").toLowerCase().includes("max");
 

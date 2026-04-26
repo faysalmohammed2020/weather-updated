@@ -10,6 +10,7 @@ const prisma = new PrismaClient();
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+    const { backlockMode, selectedDate, selectedUtc } = body;
 
     const session = await getSession();
 
@@ -20,12 +21,16 @@ export async function POST(req: Request) {
       );
     }
 
+    const formattedUtcTime = backlockMode
+      ? new Date(`${selectedDate}T${selectedUtc}:00:00.000Z`)
+      : null;
+
     const { startToday, endToday } = getTodayUtcRange();
     const observingTime = await prisma.observingTime.findFirst({
       where: {
         AND: [
           {
-            utcTime: {
+            utcTime: backlockMode ? formattedUtcTime! : {
               gte: startToday,
               lte: endToday,
             },

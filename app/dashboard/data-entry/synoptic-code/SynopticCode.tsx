@@ -190,7 +190,17 @@ const measurements = [
 
 type MeasurementItem = (typeof measurements)[number];
 
-export function SynopticCode() {
+export function SynopticCode({
+  backlockMode = false,
+  selectedDate,
+  selectedUtc,
+  onSuccess
+}: {
+  backlockMode?: boolean;
+  selectedDate?: string;
+  selectedUtc?: string;
+  onSuccess?: () => void;
+}) {
   const { values, setFieldValue } = useFormikContext<SynopticFormValues>();
 
   const [dataStatus, setDataStatus] = useState<{
@@ -242,7 +252,11 @@ export function SynopticCode() {
           error: undefined,
         }));
 
-        const response = await fetch("/api/synoptic");
+        const url = backlockMode 
+          ? `/api/synoptic?date=${selectedDate}&utc=${selectedUtc}`
+          : "/api/synoptic";
+          
+        const response = await fetch(url);
         const generatedValues = await response.json();
 
         if (generatedValues.error) {
@@ -297,7 +311,7 @@ export function SynopticCode() {
     };
 
     fetchSynopticData();
-  }, [setFieldValue]);
+  }, [setFieldValue, backlockMode, selectedDate, selectedUtc]);
 
   // ✅ early return AFTER hooks (fixes hook order error)
   if (dataStatus.isLoading) {
@@ -329,6 +343,9 @@ export function SynopticCode() {
         NsChshs: values.measurements[18] || null,
         dqqqt90: values.measurements[19] || null,
         fqfqfq91: values.measurements[20] || null,
+        backlockMode,
+        selectedDate,
+        selectedUtc,
       };
 
       const response = await fetch("/api/synoptic-code", {
@@ -341,7 +358,10 @@ export function SynopticCode() {
 
       if (!result.success) return toast.error(result.error);
       if (!response.ok) return toast.error(result.error);
-      if (result.success) toast.success(result.message);
+      if (result.success) {
+        toast.success(result.message);
+        if (onSuccess) onSuccess();
+      }
     } catch (error) {
       console.error("Submit error:", error);
       toast.error("❌ Something went wrong");
