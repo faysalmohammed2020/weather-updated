@@ -135,6 +135,7 @@ export default function AllViewAndManagePage() {
     const excludedKeys = [
       "id",
       "stationId",
+      "utcTime",
       "submittedAt",
       "createdAt",
       "updatedAt",
@@ -344,7 +345,12 @@ export default function AllViewAndManagePage() {
         "date",
         "time",
         ...summaryKeys.filter(
-          (k) => k !== "stationName" && k !== "stationCode" && k !== "date" && k !== "time",
+          (k) =>
+            k !== "stationName" &&
+            k !== "stationCode" &&
+            k !== "date" &&
+            k !== "time" &&
+            k !== "stationNo",
         ),
       ];
       summarySheet.addRow(orderedSummaryKeys);
