@@ -143,7 +143,74 @@ export default function AllViewAndManagePage() {
       "observingTimeId",
       "localTime",
       "c2Indicator",
+      "date",
+      "time",
     ];
+
+    // Helper function to extract date and time from different data structures
+    const getObservationDateTime = (item: any) => {
+      const pad2 = (n: number) => String(n).padStart(2, "0");
+
+      let dateStr = "";
+      let timeStr = "";
+
+      const isoCandidate: any =
+        item.ObservingTime?.utcTime ||
+        item.utcTime ||
+        item.submittedAt ||
+        item.createdAt ||
+        item.updatedAt ||
+        item.ObservingTime?.submittedAt ||
+        item.ObservingTime?.createdAt ||
+        item.observingTime ||
+        item.observationTime ||
+        item.localTime;
+
+      const dateCandidate: any = isoCandidate || item.date || item.observingDate || item.observationDate;
+
+      const timeCandidate: any = isoCandidate || item.time || item.observingTime || item.observationTime;
+
+      if (dateCandidate) {
+        if (typeof dateCandidate === "string" && dateCandidate.includes("T")) {
+          dateStr = dateCandidate.split("T")[0] || "";
+        } else {
+          const d = new Date(dateCandidate);
+          if (!Number.isNaN(d.getTime())) {
+            dateStr = d.toISOString().split("T")[0];
+          }
+        }
+      }
+
+      if (timeCandidate) {
+        if (typeof timeCandidate === "string") {
+          if (timeCandidate.includes("T")) {
+            timeStr = (timeCandidate.split("T")[1] || "").substring(0, 5);
+          } else if (/^\d{2}:\d{2}/.test(timeCandidate)) {
+            timeStr = timeCandidate.substring(0, 5);
+          } else {
+            const d = new Date(timeCandidate);
+            if (!Number.isNaN(d.getTime())) {
+              timeStr = `${pad2(d.getUTCHours())}:${pad2(d.getUTCMinutes())}`;
+            }
+          }
+        } else {
+          const d = new Date(timeCandidate);
+          if (!Number.isNaN(d.getTime())) {
+            timeStr = `${pad2(d.getUTCHours())}:${pad2(d.getUTCMinutes())}`;
+          }
+        }
+      }
+
+      if ((!dateStr || !timeStr) && isoCandidate) {
+        const d = new Date(isoCandidate);
+        if (!Number.isNaN(d.getTime())) {
+          if (!dateStr) dateStr = d.toISOString().split("T")[0];
+          if (!timeStr) timeStr = `${pad2(d.getUTCHours())}:${pad2(d.getUTCMinutes())}`;
+        }
+      }
+
+      return { date: dateStr, time: timeStr };
+    };
 
     // Helper function to add station info to data
     const addStationInfo = (data: any[]) => {
@@ -152,6 +219,7 @@ export default function AllViewAndManagePage() {
         // 1. FlattenedWeatherObservation (direct stationName, stationId)
         // 2. WeatherObservationRecord (nested station object)
         // 3. SynopticRecord & DailySummaryRecord (nested ObservingTime.station)
+        const observationDateTime = getObservationDateTime(item);
         const stationInfo = {
           stationName:
             item.stationName ||
@@ -163,6 +231,8 @@ export default function AllViewAndManagePage() {
             item.station?.stationId ||
             item.ObservingTime?.station?.stationId ||
             "",
+          date: observationDateTime.date,
+          time: observationDateTime.time,
         };
 
         const cleaned: any = { ...stationInfo };
@@ -206,7 +276,9 @@ export default function AllViewAndManagePage() {
     const orderedFirstKeys = [
       "stationName",
       "stationCode",
-      ...firstKeys.filter((k) => k !== "stationName" && k !== "stationCode"),
+      "date",
+      "time",
+      ...firstKeys.filter((k) => k !== "stationName" && k !== "stationCode" && k !== "date" && k !== "time"),
     ];
     const orderedSecondKeys = secondKeys; // No station columns for Second Card
 
@@ -249,8 +321,10 @@ export default function AllViewAndManagePage() {
       const orderedSynopticKeys = [
         "stationName",
         "stationCode",
+        "date",
+        "time",
         ...synopticKeys.filter(
-          (k) => k !== "stationName" && k !== "stationCode",
+          (k) => k !== "stationName" && k !== "stationCode" && k !== "date" && k !== "time",
         ),
       ];
       synopticSheet.addRow(orderedSynopticKeys);
@@ -267,8 +341,10 @@ export default function AllViewAndManagePage() {
       const orderedSummaryKeys = [
         "stationName",
         "stationCode",
+        "date",
+        "time",
         ...summaryKeys.filter(
-          (k) => k !== "stationName" && k !== "stationCode",
+          (k) => k !== "stationName" && k !== "stationCode" && k !== "date" && k !== "time",
         ),
       ];
       summarySheet.addRow(orderedSummaryKeys);
