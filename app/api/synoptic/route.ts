@@ -2,7 +2,7 @@
 
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-import { getTodayUtcRange, utcToHour } from "@/lib/utils";
+import { utcToHour } from "@/lib/utils";
 import { getSession } from "@/lib/getSession";
 
  export const dynamic = "force-dynamic";
@@ -35,31 +35,34 @@ export async function GET(request: Request) {
         },
         orderBy: { utcTime: "desc" },
         include: {
-          MeteorologicalEntry: true,
-          WeatherObservation: true,
+          MeteorologicalEntry: {
+            orderBy: { createdAt: "desc" },
+            take: 1,
+          },
+          WeatherObservation: {
+            orderBy: { createdAt: "desc" },
+            take: 1,
+          },
         },
       });
     } else {
-      const { startToday, endToday } = getTodayUtcRange();
-
       observingTime = await prisma.observingTime.findFirst({
         where: {
-          AND: [
-            {
-              utcTime: {
-                gte: startToday,
-                lte: endToday,
-              },
-            },
-            {
-              stationId: session.user.station?.id,
-            },
-          ],
+          stationId: session.user.station?.id,
+          MeteorologicalEntry: { some: {} },
+          WeatherObservation: { some: {} },
+          SynopticCode: { none: {} },
         },
         orderBy: { utcTime: "desc" },
         include: {
-          MeteorologicalEntry: true,
-          WeatherObservation: true,
+          MeteorologicalEntry: {
+            orderBy: { createdAt: "desc" },
+            take: 1,
+          },
+          WeatherObservation: {
+            orderBy: { createdAt: "desc" },
+            take: 1,
+          },
         },
       });
     }

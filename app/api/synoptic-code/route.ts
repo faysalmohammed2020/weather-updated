@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getSession } from "@/lib/getSession";
-import { getTodayBDRange, getTodayUtcRange } from "@/lib/utils";
 import { LogAction, LogActionType, LogModule } from "@/lib/log";
 import { diff } from "deep-object-diff";
 
@@ -25,21 +24,18 @@ export async function POST(req: Request) {
       ? new Date(`${selectedDate}T${selectedUtc}:00:00.000Z`)
       : null;
 
-    const { startToday, endToday } = getTodayUtcRange();
     const observingTime = await prisma.observingTime.findFirst({
-      where: {
-        AND: [
-          {
-            utcTime: backlockMode ? formattedUtcTime! : {
-              gte: startToday,
-              lte: endToday,
-            },
-          },
-          {
+      where: backlockMode
+        ? {
+            utcTime: formattedUtcTime!,
             stationId: session.user.station?.id,
+          }
+        : {
+            stationId: session.user.station?.id,
+            MeteorologicalEntry: { some: {} },
+            WeatherObservation: { some: {} },
+            SynopticCode: { none: {} },
           },
-        ],
-      },
       select: {
         id: true,
         utcTime: true,
