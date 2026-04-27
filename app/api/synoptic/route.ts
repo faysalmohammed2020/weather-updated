@@ -10,7 +10,7 @@ import { getSession } from "@/lib/getSession";
 
 const prisma = new PrismaClient();
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const session = await getSession();
 
@@ -18,28 +18,51 @@ export async function GET() {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const { startToday, endToday } = getTodayUtcRange();
+    const { searchParams } = new URL(request.url);
+    const date = searchParams.get("date");
+    const utc = searchParams.get("utc");
 
-    const observingTime = await prisma.observingTime.findFirst({
-      where: {
-        AND: [
-          {
-            utcTime: {
-              gte: startToday,
-              lte: endToday,
+    let observingTime;
+    
+    if (date && utc) {
+      const targetUtcTime = new Date(`${date}T${utc}:00:00.000Z`);
+      observingTime = await prisma.observingTime.findFirst({
+        where: {
+          AND: [
+            { utcTime: targetUtcTime },
+            { stationId: session.user.station?.id },
+          ],
+        },
+        orderBy: { utcTime: "desc" },
+        include: {
+          MeteorologicalEntry: true,
+          WeatherObservation: true,
+        },
+      });
+    } else {
+      const { startToday, endToday } = getTodayUtcRange();
+
+      observingTime = await prisma.observingTime.findFirst({
+        where: {
+          AND: [
+            {
+              utcTime: {
+                gte: startToday,
+                lte: endToday,
+              },
             },
-          },
-          {
-            stationId: session.user.station?.id,
-          },
-        ],
-      },
-      orderBy: { utcTime: "desc" },
-      include: {
-        MeteorologicalEntry: true,
-        WeatherObservation: true,
-      },
-    });
+            {
+              stationId: session.user.station?.id,
+            },
+          ],
+        },
+        orderBy: { utcTime: "desc" },
+        include: {
+          MeteorologicalEntry: true,
+          WeatherObservation: true,
+        },
+      });
+    }
 
     if (
       !observingTime?.MeteorologicalEntry.length ||
