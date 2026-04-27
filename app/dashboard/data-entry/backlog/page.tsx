@@ -60,7 +60,7 @@ function BacklogContent() {
   }, [selectedHour, selectedDate, router]);
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="container mx-auto px-3 py-4 sm:px-4 sm:py-8">
       <DateSelector
         onChange={handleDateChange}
         onCheckData={handleCheckData}
@@ -68,9 +68,9 @@ function BacklogContent() {
       />
 
       <Dialog open={showStatus} onOpenChange={setShowStatus}>
-        <DialogContent className="w-[95%] left-270 max-w-7xl rounded-2xl border-0 bg-white p-0 shadow-2xl overflow-y-auto max-h-[90vh]">
-          <DialogHeader className="border-b border-slate-200 px-6 py-5 sticky top-0 bg-white z-10">
-            <DialogTitle className="flex flex-col gap-1 text-xl font-bold text-slate-800">
+        <DialogContent className="w-[calc(100%-1.5rem)]sm:w-[95%] max-w-7xl rounded-xl sm:rounded-2xl border-0 bg-white p-0 shadow-2xl overflow-y-auto max-h-[90vh]">
+          <DialogHeader className="border-b border-slate-200 px-4 py-4 sm:px-6 sm:py-5 sticky top-0 bg-white z-10">
+            <DialogTitle className="flex flex-col gap-1 text-lg sm:text-xl font-bold text-slate-800">
               UTC Data Status
               <span className="text-sm font-medium text-slate-500">
                 Selected Date: {selectedDate}
@@ -78,13 +78,13 @@ function BacklogContent() {
             </DialogTitle>
             <button
               onClick={() => setShowStatus(false)}
-              className="absolute right-6 top-5 text-slate-400 hover:text-slate-600 transition-colors"
+              className="absolute right-4 top-4 sm:right-6 sm:top-5 text-slate-400 hover:text-slate-600 transition-colors"
             >
               <X className="h-5 w-5" />
             </button>
           </DialogHeader>
 
-          <div className="px-6 py-8">
+          <div className="px-4 py-5 sm:px-6 sm:py-8">
             <HourSelector type="first" timeInfo={timeInfo} />
           </div>
         </DialogContent>
