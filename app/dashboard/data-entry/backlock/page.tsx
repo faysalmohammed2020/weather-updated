@@ -9,17 +9,27 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { X } from "lucide-react";
 import HourSelector from "@/components/hour-selector";
 import { useRouter } from "next/navigation";
 import { TimeInfo } from "@/lib/data-type";
+import { useSession } from "@/lib/auth-client";
 
 function BacklockContent() {
   const router = useRouter();
   const { selectedHour, setSelectedHour, clearError } = useHour();
+  const { data: session, status } = useSession();
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [timeInfo, setTimeInfo] = useState<TimeInfo[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showStatus, setShowStatus] = useState(false);
+
+  // Redirect to login if session expires
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/sign-in");
+    }
+  }, [status, router]);
 
   const handleDateChange = (date: string) => {
     setSelectedDate(date);
@@ -66,6 +76,12 @@ function BacklockContent() {
                 Selected Date: {selectedDate}
               </span>
             </DialogTitle>
+            <button
+              onClick={() => setShowStatus(false)}
+              className="absolute right-6 top-5 text-slate-400 hover:text-slate-600 transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </button>
           </DialogHeader>
 
           <div className="px-6 py-8">

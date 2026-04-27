@@ -151,6 +151,24 @@ export async function POST(req: Request) {
       module: LogModule.SYNOPTIC_CODE,
     });
 
+    // Log backlog action if in backlock mode
+    if (backlockMode) {
+      await LogAction({
+        init: prisma,
+        action: LogActionType.CREATE,
+        actionText: "Backlog Synoptic Code Entry Created",
+        role: session.user.role!,
+        actorId: session.user.id,
+        actorEmail: session.user.email ?? undefined,
+        module: LogModule.BACKLOG,
+        details: {
+          date: selectedDate,
+          utc: selectedUtc,
+          stationId: stationRecord.id,
+        },
+      });
+    }
+
     return NextResponse.json(
       { success: true, message: "Synoptic entry saved", data: newEntry },
       { status: 201 }

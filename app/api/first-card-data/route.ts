@@ -311,6 +311,24 @@ export async function POST(req: Request) {
       module: LogModule.METEOROLOGICAL_ENTRY,
     });
 
+    // Log backlog action if in backlock mode
+    if (backlockMode) {
+      await LogAction({
+        init: prisma,
+        action: LogActionType.CREATE,
+        actionText: "Backlog First Card Entry Created",
+        role: session.user.role!,
+        actorId: session.user.id!,
+        actorEmail: session.user.email ?? undefined,
+        module: LogModule.BACKLOG,
+        details: {
+          date: selectedDate,
+          utc: selectedUtc,
+          stationId: stationRecord.id,
+        },
+      });
+    }
+
     // Revalidate time checking
     revalidateTag("time-check");
 

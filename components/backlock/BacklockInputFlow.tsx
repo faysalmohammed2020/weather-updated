@@ -10,6 +10,8 @@ import { cn } from "@/lib/utils";
 import { TimeInfo } from "@/lib/data-type";
 import { useHour } from "@/contexts/hourContext";
 import { Formik, Form } from "formik";
+import { toast } from "sonner";
+import { useSession } from "@/lib/auth-client";
 
 type Step = "first-card" | "second-card" | "synoptic-code" | "completed";
 
@@ -18,11 +20,19 @@ export default function BacklockInputFlow() {
   const router = useRouter();
   const date = searchParams.get("date");
   const utc = searchParams.get("utc");
+  const { data: session, status } = useSession();
 
   const [currentStep, setCurrentStep] = useState<Step>("first-card");
   const [timeInfo, setTimeInfo] = useState<TimeInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { setSelectedHour, clearError } = useHour();
+
+  // Redirect to login if session expires
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/sign-in");
+    }
+  }, [status, router]);
 
   useEffect(() => {
     if (!date || !utc) {
@@ -40,7 +50,26 @@ export default function BacklockInputFlow() {
         // Fetch full time info for the forms that need it
         const timeRes = await fetch(`/api/time-info?date=${date}`);
         const timeData = await timeRes.json();
-        setTimeInfo(timeData.timeInfo || []);
+        const info: TimeInfo[] = timeData.timeInfo || [];
+        setTimeInfo(info);
+
+        const utcHour = utc.padStart(2, "0");
+        const entry = info.find((t) => {
+          const hour = new Date(t.utcTime).getUTCHours().toString().padStart(2, "0");
+          return hour === utcHour;
+        });
+
+        if (!entry) {
+          setCurrentStep("first-card");
+        } else if (!entry.hasMeteorologicalEntry) {
+          setCurrentStep("first-card");
+        } else if (!entry.hasWeatherObservation) {
+          setCurrentStep("second-card");
+        } else if (!entry.hasSynopticCode) {
+          setCurrentStep("synoptic-code");
+        } else {
+          setCurrentStep("completed");
+        }
       } catch (error) {
         console.error("Init flow error:", error);
       } finally {
@@ -52,9 +81,16 @@ export default function BacklockInputFlow() {
   }, [date, utc, router, setSelectedHour, clearError]);
 
   const handleNextStep = () => {
-    if (currentStep === "first-card") setCurrentStep("second-card");
-    else if (currentStep === "second-card") setCurrentStep("synoptic-code");
-    else if (currentStep === "synoptic-code") setCurrentStep("completed");
+    if (currentStep === "first-card") {
+      toast.success("First Card submitted", { description: "Moving to Second Card..." });
+      setCurrentStep("second-card");
+    } else if (currentStep === "second-card") {
+      toast.success("Second Card submitted", { description: "Moving to Synoptic Code..." });
+      setCurrentStep("synoptic-code");
+    } else if (currentStep === "synoptic-code") {
+      toast.success("Synoptic Code submitted", { description: "Completing entry..." });
+      setCurrentStep("completed");
+    }
   };
 
   if (isLoading) {
