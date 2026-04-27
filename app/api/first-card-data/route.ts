@@ -38,9 +38,9 @@ export async function POST(req: Request) {
     }
 
     const data = await req.json();
-    const { backlockMode, selectedDate, selectedUtc } = data;
+    const { backlogMode, selectedDate, selectedUtc } = data;
 
-    if (!data.observingTimeId && !backlockMode) {
+    if (!data.observingTimeId && !backlogMode) {
       return NextResponse.json(
         {
           error: true,
@@ -50,7 +50,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const formattedObservingTime = backlockMode 
+    const formattedObservingTime = backlogMode 
       ? new Date(`${selectedDate}T${selectedUtc}:00:00.000Z`)
       : hourToUtc(data.observingTimeId);
     const targetUtcTime = new Date(formattedObservingTime);
@@ -311,8 +311,8 @@ export async function POST(req: Request) {
       module: LogModule.METEOROLOGICAL_ENTRY,
     });
 
-    // Log backlog action if in backlock mode
-    if (backlockMode) {
+    // Log backlog action if in backlog mode
+    if (backlogMode) {
       await LogAction({
         init: prisma,
         action: LogActionType.CREATE,
@@ -324,7 +324,8 @@ export async function POST(req: Request) {
         details: {
           date: selectedDate,
           utc: selectedUtc,
-          stationId: stationRecord.id,
+          stationCode: stationRecord.stationId,
+          stationName: stationRecord.name,
         },
       });
     }

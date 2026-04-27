@@ -10,7 +10,7 @@ const prisma = new PrismaClient();
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { backlockMode, selectedDate, selectedUtc } = body;
+    const { backlogMode, selectedDate, selectedUtc } = body;
 
     const session = await getSession();
 
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const formattedUtcTime = backlockMode
+    const formattedUtcTime = backlogMode
       ? new Date(`${selectedDate}T${selectedUtc}:00:00.000Z`)
       : null;
 
@@ -30,7 +30,7 @@ export async function POST(req: Request) {
       where: {
         AND: [
           {
-            utcTime: backlockMode ? formattedUtcTime! : {
+            utcTime: backlogMode ? formattedUtcTime! : {
               gte: startToday,
               lte: endToday,
             },
@@ -151,8 +151,8 @@ export async function POST(req: Request) {
       module: LogModule.SYNOPTIC_CODE,
     });
 
-    // Log backlog action if in backlock mode
-    if (backlockMode) {
+    // Log backlog action if in backlog mode
+    if (backlogMode) {
       await LogAction({
         init: prisma,
         action: LogActionType.CREATE,
@@ -164,7 +164,8 @@ export async function POST(req: Request) {
         details: {
           date: selectedDate,
           utc: selectedUtc,
-          stationId: stationRecord.id,
+          stationCode: stationRecord.stationId,
+          stationName: stationRecord.name,
         },
       });
     }

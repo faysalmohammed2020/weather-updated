@@ -87,13 +87,13 @@ type TabKey = keyof typeof tabStyles;
 
 export function FirstCardForm({ 
   timeInfo,
-  backlockMode = false,
+  backlogMode = false,
   selectedDate,
   selectedUtc,
   onSuccess
 }: { 
   timeInfo: TimeInfo[];
-  backlockMode?: boolean;
+  backlogMode?: boolean;
   selectedDate?: string;
   selectedUtc?: string;
   onSuccess?: () => void;
@@ -116,7 +116,7 @@ export function FirstCardForm({
     isHourSelected,
     selectedHour,
     hygrometricData,
-  } = useFirstCardForm({ backlockMode, selectedDate, selectedUtc, onSuccess });
+  } = useFirstCardForm({ backlogMode, selectedDate, selectedUtc, onSuccess });
 
   // ✅ stable tab change handler
   const onTabClick = useCallback(
@@ -131,7 +131,7 @@ export function FirstCardForm({
   );
 
   const showHourSelector =
-    !backlockMode && (isLoading || firstCardError || !isHourSelected);
+    !backlogMode && (isLoading || firstCardError || !isHourSelected);
   const showSkeletonOverlay = isSubmitting; // submit-time skeleton
 
   return (

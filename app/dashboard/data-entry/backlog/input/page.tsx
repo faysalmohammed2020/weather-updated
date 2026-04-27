@@ -1,12 +1,12 @@
-//app/dashboard/data-entry/backlock/input/page.tsx
+//app/dashboard/data-entry/backlog/input/page.tsx
 "use client";
 
-import BacklockInputFlow from "@/components/backlock/BacklockInputFlow";
+import BacklogInputFlow from "@/components/backlog/BacklogInputFlow";
 import { HourProvider } from "@/contexts/hourContext";
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 
-export default function BacklockInput() {
+export default function BacklogInput() {
   return (
     <Suspense fallback={
       <div className="flex h-[60vh] w-full flex-col items-center justify-center gap-4">
@@ -15,7 +15,7 @@ export default function BacklockInput() {
       </div>
     }>
       <HourProvider>
-        <BacklockInputFlow />
+        <BacklogInputFlow />
       </HourProvider>
     </Suspense>
   );

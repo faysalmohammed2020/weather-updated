@@ -203,13 +203,13 @@ const observerSchema = Yup.object({
 // --- MAIN COMPONENT ---
 export default function SecondCardForm({ 
   timeInfo,
-  backlockMode = false,
+  backlogMode = false,
   selectedDate,
   selectedUtc,
   onSuccess
 }: { 
   timeInfo: TimeInfo[];
-  backlockMode?: boolean;
+  backlogMode?: boolean;
   selectedDate?: string;
   selectedUtc?: string;
   onSuccess?: () => void;
@@ -229,7 +229,7 @@ export default function SecondCardForm({
     resetStates,
   } = useHour();
 
-  const selectedHour = backlockMode ? selectedUtc : contextHour;
+  const selectedHour = backlogMode ? selectedUtc : contextHour;
 
   // Check if current hour is 00, 06, 12, or 18 UTC
   const isSixHourReport = useMemo(() => {
@@ -684,7 +684,7 @@ export default function SecondCardForm({
       const submissionData = {
         ...values,
         observingTimeId: selectedHour || "",
-        backlockMode,
+        backlogMode,
         selectedDate,
         selectedUtc,
         metadata: {
@@ -812,7 +812,7 @@ export default function SecondCardForm({
   return (
     <>
       <AnimatePresence mode="wait">
-        {!backlockMode && (isLoading || secondCardError || !isHourSelected) ? (
+        {!backlogMode && (isLoading || secondCardError || !isHourSelected) ? (
           <motion.div
             key="hour-selector"
             initial={{ opacity: 0 }}
