@@ -25,7 +25,7 @@ export async function POST(req: Request) {
       : null;
 
     const observingTime = await prisma.observingTime.findFirst({
-      where: backlockMode
+      where: backlogMode
         ? {
             utcTime: formattedUtcTime!,
             stationId: session.user.station?.id,
