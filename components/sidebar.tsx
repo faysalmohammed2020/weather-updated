@@ -150,9 +150,9 @@ const Sidebar = () => {
         },
         {
           icon: <DatabaseBackup className="mr-2 h-5 w-5" />,
-          href: "/dashboard/data-entry/backlock",
+          href: "/dashboard/data-entry/backlog",
           roles: ["root_admin", "station_admin", "super_admin"],
-          label: "Backlock",
+          label: "Backlog",
         },
       ],
     },

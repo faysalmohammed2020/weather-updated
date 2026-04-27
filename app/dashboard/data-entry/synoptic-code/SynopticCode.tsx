@@ -191,12 +191,12 @@ const measurements = [
 type MeasurementItem = (typeof measurements)[number];
 
 export function SynopticCode({
-  backlockMode = false,
+  backlogMode = false,
   selectedDate,
   selectedUtc,
   onSuccess
 }: {
-  backlockMode?: boolean;
+  backlogMode?: boolean;
   selectedDate?: string;
   selectedUtc?: string;
   onSuccess?: () => void;
@@ -252,7 +252,7 @@ export function SynopticCode({
           error: undefined,
         }));
 
-        const url = backlockMode 
+        const url = backlogMode 
           ? `/api/synoptic?date=${selectedDate}&utc=${selectedUtc}`
           : "/api/synoptic";
           
@@ -311,7 +311,7 @@ export function SynopticCode({
     };
 
     fetchSynopticData();
-  }, [setFieldValue, backlockMode, selectedDate, selectedUtc]);
+  }, [setFieldValue, backlogMode, selectedDate, selectedUtc]);
 
   // ✅ early return AFTER hooks (fixes hook order error)
   if (dataStatus.isLoading) {
@@ -343,7 +343,7 @@ export function SynopticCode({
         NsChshs: values.measurements[18] || null,
         dqqqt90: values.measurements[19] || null,
         fqfqfq91: values.measurements[20] || null,
-        backlockMode,
+        backlogMode,
         selectedDate,
         selectedUtc,
       };

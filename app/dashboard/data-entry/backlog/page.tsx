@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import DateSelector from "@/components/backlock/DateSelector";
+import DateSelector from "@/components/backlog/DateSelector";
 import { HourProvider, useHour } from "@/contexts/hourContext";
 import {
   Dialog,
@@ -15,7 +15,7 @@ import { useRouter } from "next/navigation";
 import { TimeInfo } from "@/lib/data-type";
 import { useSession } from "@/lib/auth-client";
 
-function BacklockContent() {
+function BacklogContent() {
   const router = useRouter();
   const { selectedHour, setSelectedHour, clearError } = useHour();
   const { data: session, status } = useSession();
@@ -46,7 +46,7 @@ function BacklockContent() {
       setTimeInfo(data.timeInfo || []);
       setShowStatus(true);
     } catch (error) {
-      console.error("Error fetching backlock status:", error);
+      console.error("Error fetching backlog status:", error);
       setTimeInfo([]);
     } finally {
       setIsLoading(false);
@@ -55,7 +55,7 @@ function BacklockContent() {
 
   useEffect(() => {
     if (selectedHour && selectedDate) {
-      router.push(`/dashboard/data-entry/backlock/input?date=${selectedDate}&utc=${selectedHour}`);
+      router.push(`/dashboard/data-entry/backlog/input?date=${selectedDate}&utc=${selectedHour}`);
     }
   }, [selectedHour, selectedDate, router]);
 
@@ -93,10 +93,10 @@ function BacklockContent() {
   );
 }
 
-export default function Backlock() {
+export default function Backlog() {
   return (
     <HourProvider>
-      <BacklockContent />
+      <BacklogContent />
     </HourProvider>
   );
 }

@@ -26,12 +26,12 @@ export const tabOrder = [
 ] as const;
 
 export const useFirstCardForm = ({
-  backlockMode = false,
+  backlogMode = false,
   selectedDate,
   selectedUtc,
   onSuccess
 }: {
-  backlockMode?: boolean;
+  backlogMode?: boolean;
   selectedDate?: string;
   selectedUtc?: string;
   onSuccess?: () => void;
@@ -56,7 +56,7 @@ export const useFirstCardForm = ({
     resetStates,
   } = useHour();
 
-  const selectedHour = backlockMode ? selectedUtc : contextHour;
+  const selectedHour = backlogMode ? selectedUtc : contextHour;
 
   const formik = useFormik<any>({
     initialValues: {
@@ -110,7 +110,7 @@ export const useFirstCardForm = ({
         ...values,
         ...hygrometricData,
         observingTimeId: selectedHour,
-        backlockMode,
+        backlogMode,
         selectedDate,
         selectedUtc,
       };

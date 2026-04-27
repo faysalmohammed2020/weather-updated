@@ -15,7 +15,7 @@ import { useSession } from "@/lib/auth-client";
 
 type Step = "first-card" | "second-card" | "synoptic-code" | "completed";
 
-export default function BacklockInputFlow() {
+export default function BacklogInputFlow() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const date = searchParams.get("date");
@@ -36,7 +36,7 @@ export default function BacklockInputFlow() {
 
   useEffect(() => {
     if (!date || !utc) {
-      router.push("/dashboard/data-entry/backlock");
+      router.push("/dashboard/data-entry/backlog");
       return;
     }
 
@@ -126,7 +126,7 @@ export default function BacklockInputFlow() {
           />
         </div>
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-slate-800">Backlock Data Entry</h1>
+          <h1 className="text-2xl font-bold text-slate-800">Backlog Data Entry</h1>
           <p className="text-slate-500 font-medium">Date: {date} | UTC: {utc}:00</p>
         </div>
       </div>
@@ -135,7 +135,7 @@ export default function BacklockInputFlow() {
         {currentStep === "first-card" && (
           <FirstCardForm 
             timeInfo={timeInfo} 
-            backlockMode 
+            backlogMode 
             selectedDate={date!} 
             selectedUtc={utc!} 
             onSuccess={handleNextStep} 
@@ -144,7 +144,7 @@ export default function BacklockInputFlow() {
         {currentStep === "second-card" && (
           <SecondCardForm 
             timeInfo={timeInfo} 
-            backlockMode 
+            backlogMode 
             selectedDate={date!} 
             selectedUtc={utc!} 
             onSuccess={handleNextStep} 
@@ -165,7 +165,7 @@ export default function BacklockInputFlow() {
           >
             <Form>
               <SynopticCode
-                backlockMode
+                backlogMode
                 selectedDate={date!}
                 selectedUtc={utc!}
                 onSuccess={handleNextStep}
@@ -181,10 +181,10 @@ export default function BacklockInputFlow() {
             <h2 className="text-3xl font-bold text-slate-800 mb-2">All Done!</h2>
             <p className="text-slate-500 text-lg mb-10">Data for {date} {utc}:00 UTC has been successfully recorded.</p>
             <button
-              onClick={() => router.push("/dashboard/data-entry/backlock")}
+              onClick={() => router.push("/dashboard/data-entry/backlog")}
               className="px-8 py-4 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 transition shadow-xl shadow-blue-100"
             >
-              Back to Backlock Overview
+              Back to Backlog Overview
             </button>
           </div>
         )}
