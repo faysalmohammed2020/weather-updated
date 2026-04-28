@@ -4,6 +4,9 @@ import { getSession } from "@/lib/getSession";
 import { LogAction, LogActionType, LogModule } from "@/lib/log";
 import { diff } from "deep-object-diff";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
@@ -260,7 +263,13 @@ export async function GET(req: Request) {
       },
     });
 
-    return NextResponse.json(entries);
+    return NextResponse.json(entries, {
+      headers: {
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        Pragma: "no-cache",
+        Expires: "0",
+      },
+    });
   } catch (error) {
     console.error("Error fetching synoptic data:", error);
     return NextResponse.json(

@@ -3,6 +3,9 @@ import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/getSession";
 import { LogAction, LogActionType, LogModule } from "@/lib/log";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 // GET stations based on role
 export async function GET() {
   try {
@@ -17,7 +20,13 @@ export async function GET() {
           name: 'asc'
         }
       });
-      return NextResponse.json(stations);
+      return NextResponse.json(stations, {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+          Pragma: "no-cache",
+          Expires: "0",
+        },
+      });
     }
 
     // Filter stations based on user role
@@ -52,7 +61,13 @@ export async function GET() {
       return NextResponse.json({ error: "Invalid role" }, { status: 403 });
     }
 
-    return NextResponse.json(stations);
+    return NextResponse.json(stations, {
+      headers: {
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        Pragma: "no-cache",
+        Expires: "0",
+      },
+    });
   } catch (error) {
     console.error("Error fetching stations:", error);
     return NextResponse.json(

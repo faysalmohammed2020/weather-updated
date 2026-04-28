@@ -27,7 +27,7 @@ export const fetchSynoptic = async (
   query: SynopticQuery,
 ): Promise<SynopticRecord[]> => {
   const url = buildSynopticUrl(query);
-  const response = await fetch(url);
+  const response = await fetch(url, { cache: "no-store" });
 
   if (!response.ok) {
     throw new Error("Failed to fetch synoptic data");
@@ -37,7 +37,7 @@ export const fetchSynoptic = async (
 };
 
 export const fetchStations = async (): Promise<Station[]> => {
-  const response = await fetch(STATIONS_ENDPOINT);
+  const response = await fetch(STATIONS_ENDPOINT, { cache: "no-store" });
 
   if (!response.ok) {
     throw new Error("Failed to fetch stations");
