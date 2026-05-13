@@ -259,17 +259,42 @@ export async function GET() {
     const obsHour = observationTime.getUTCHours();
     const shouldInclude6RRRtR = [0, 6, 12, 18].includes(obsHour);
 
-    // rainfallDuringPrevious is stored in 0.1 mm units (e.g., 0250 => 25.0 mm)
-    const parseRainValue = (value: unknown) => {
+    // Rainfall can arrive as decimal mm ("8.3") or coded tenths ("0083").
+    const parseRainfallMm = (value: unknown): number | null => {
+      if (value === null || value === undefined) return null;
+      const raw = String(value).trim();
+      if (!raw) return null;
+
+      const parsed = Number(raw);
+      if (!Number.isFinite(parsed)) return null;
+
+      return raw.includes(".") || raw.length < 4 ? parsed : parsed / 10;
+    };
+
+    const formatRainfallAmount = (
+      amountMm: number | null,
+      rounding: "floor" | "round" = "floor",
+    ) => {
+      if (amountMm === null || !Number.isFinite(amountMm)) return "000";
+      const wholeMm =
+        rounding === "round" ? Math.round(amountMm) : Math.floor(amountMm);
+      return pad((Math.max(0, wholeMm) % 1000).toString(), 3);
+    };
+
+    const parseLegacyRainValue = (value: unknown) => {
       if (value === null || value === undefined) return null;
       if (typeof value === "string" && value.trim() === "") return null;
       const parsed = Number(value);
       return Number.isFinite(parsed) ? parsed : null;
     };
 
-    const rainFallRaw = parseRainValue(weatherObs.rainfallDuringPrevious) ?? 0;
-    const rainFallMm = Math.floor(rainFallRaw / 10);
-    const rainFallPadded = pad((rainFallMm % 1000).toString(), 3);
+    const legacyRainFallRaw =
+      parseLegacyRainValue(weatherObs.rainfallDuringPrevious) ?? 0;
+    const legacyRainFallMm = Math.floor(legacyRainFallRaw / 10);
+    const legacyRainFallPadded = pad(
+      (legacyRainFallMm % 1000).toString(),
+      3,
+    );
 
     const buildSlotRanges = (
       obs: typeof weatherObs | null,
@@ -372,14 +397,21 @@ export async function GET() {
       : null;
     const isIntermittentRain = detectIntermittent(combinedSlots);
 
-    // Only include 6RRRtR at 00/06/12/18 UTC AND only if rainfall exists.
-    // If rainfall is 0000 then the group should not appear.
-    if (!shouldInclude6RRRtR) {
-      measurements[7] = "";
-    } else {
+    const build6RRRtrGroup = (
+      amountMm: number | null,
+      options: { includeZero?: boolean } = {},
+    ) => {
+      if (
+        amountMm === null ||
+        !Number.isFinite(amountMm) ||
+        (!options.includeZero && amountMm <= 0)
+      ) {
+        return "";
+      }
+
       let tr = "/";
 
-      // ? Rainfall window (previous 6 hours via two timecards)
+      // Rainfall window (previous 6 hours via two timecards)
       const H = observationTime;
       const H_3 = new Date(H.getTime() - 3 * 60 * 60 * 1000);
       const H_6 = new Date(H.getTime() - 6 * 60 * 60 * 1000);
@@ -432,7 +464,60 @@ export async function GET() {
         tr = "/";
       }
 
-      measurements[7] = `6${rainFallPadded}${tr}`;
+      return `6${formatRainfallAmount(amountMm)}${tr}`;
+    };
+
+    if (!shouldInclude6RRRtR) {
+      measurements[7] = "";
+    } else {
+      let tr = "/";
+
+      // Original section-1 logic: preserve its historical amount handling.
+      const H = observationTime;
+      const H_3 = new Date(H.getTime() - 3 * 60 * 60 * 1000);
+      const H_6 = new Date(H.getTime() - 6 * 60 * 60 * 1000);
+
+      if (!previousWeatherObs) {
+        tr = "/";
+      } else if (rainStart && rainEnd) {
+        if (isIntermittentRain) {
+          if (rainStart < H_6 || rainEnd > H) {
+            tr = "/";
+          } else if (rainEnd <= H_3) {
+            tr = "1";
+          } else if (rainStart >= H_3) {
+            tr = "2";
+          } else {
+            tr = "3";
+          }
+        } else if (rainStart < H_6 || rainEnd > H) {
+          tr = "/";
+        } else {
+          const durationHours =
+            (rainEnd.getTime() - rainStart.getTime()) / (1000 * 60 * 60);
+          let hoursSinceEnd =
+            (H.getTime() - rainEnd.getTime()) / (1000 * 60 * 60);
+
+          if (hoursSinceEnd < 0) hoursSinceEnd += 24;
+
+          if (durationHours <= 2) {
+            if (hoursSinceEnd <= 2) tr = "4";
+            else if (hoursSinceEnd <= 4) tr = "5";
+            else if (hoursSinceEnd <= 6) tr = "6";
+          } else if (durationHours <= 4) {
+            if (hoursSinceEnd <= 2) tr = "7";
+            else if (hoursSinceEnd <= 4) tr = "8";
+          } else if (durationHours <= 6 && hoursSinceEnd <= 2) {
+            tr = "9";
+          } else {
+            tr = "/";
+          }
+        }
+      } else {
+        tr = "/";
+      }
+
+      measurements[7] = `6${legacyRainFallPadded}${tr}`;
     }
 
     // 9. 7wwW1W2 (52-56) - Weather codes
@@ -513,7 +598,30 @@ export async function GET() {
     measurements[16] = `${pressureChangeIndicator}${slicedPressure}`;
 
     // 18. (6RRRtR)/7R24R24R24 (24-28) - Precipitation
-    measurements[17] = `${measurements[7]}`;
+    // 7R24R24R24 is mandatory. 6RRRtR is conditional for 03/09/15/21 UTC.
+    const last24RainfallMm = parseRainfallMm(weatherObs.rainfallLast24Hours);
+    const group7R24 = `7${formatRainfallAmount(last24RainfallMm, "round")}`;
+
+    const currentSincePreviousMm = parseRainfallMm(
+      weatherObs.rainfallSincePrevious,
+    );
+    const previousSincePreviousMm = parseRainfallMm(
+      previousWeatherObs?.rainfallSincePrevious,
+    );
+    const summedSixHourRainfallMm =
+      currentSincePreviousMm === null && previousSincePreviousMm === null
+        ? null
+        : (currentSincePreviousMm ?? 0) + (previousSincePreviousMm ?? 0);
+    const sectionThreeSixHourRainfallMm =
+      parseRainfallMm(weatherObs.rainfallDuringPrevious) ??
+      summedSixHourRainfallMm;
+    const sectionThree6RRRtr = [3, 9, 15, 21].includes(obsHour)
+      ? build6RRRtrGroup(sectionThreeSixHourRainfallMm)
+      : "";
+
+    measurements[17] = sectionThree6RRRtr
+      ? `${sectionThree6RRRtr}/${group7R24}`
+      : group7R24;
 
     // 19. 8N5Ch5h5 (29-33) - Cloud information
     const cloudSegments: string[] = [];
