@@ -283,7 +283,7 @@ export const LogsTable = ({
           </DialogHeader>
           <div className="mt-4 max-h-[60vh] overflow-auto">
             {selectedDetails && (
-              <pre className="bg-slate-50 border p-4 rounded-md text-sm whitespace-pre-wrap break-words text-green-900">
+              <pre className="bg-slate-50 border p-4 rounded-md text-sm whitespace-pre-wrap text-green-900">
                 {JSON.stringify(selectedDetails, null, 2)}
               </pre>
             )}

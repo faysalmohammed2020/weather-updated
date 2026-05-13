@@ -2,7 +2,7 @@
 
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-import { getTodayUtcRange, utcToHour } from "@/lib/utils";
+import { utcToHour } from "@/lib/utils";
 import { getSession } from "@/lib/getSession";
 
  export const dynamic = "force-dynamic";
@@ -10,7 +10,7 @@ import { getSession } from "@/lib/getSession";
 
 const prisma = new PrismaClient();
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const session = await getSession();
 
@@ -18,28 +18,54 @@ export async function GET() {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const { startToday, endToday } = getTodayUtcRange();
+    const { searchParams } = new URL(request.url);
+    const date = searchParams.get("date");
+    const utc = searchParams.get("utc");
 
-    const observingTime = await prisma.observingTime.findFirst({
-      where: {
-        AND: [
-          {
-            utcTime: {
-              gte: startToday,
-              lte: endToday,
-            },
+    let observingTime;
+    
+    if (date && utc) {
+      const targetUtcTime = new Date(`${date}T${utc}:00:00.000Z`);
+      observingTime = await prisma.observingTime.findFirst({
+        where: {
+          AND: [
+            { utcTime: targetUtcTime },
+            { stationId: session.user.station?.id },
+          ],
+        },
+        orderBy: { utcTime: "desc" },
+        include: {
+          MeteorologicalEntry: {
+            orderBy: { createdAt: "desc" },
+            take: 1,
           },
-          {
-            stationId: session.user.station?.id,
+          WeatherObservation: {
+            orderBy: { createdAt: "desc" },
+            take: 1,
           },
-        ],
-      },
-      orderBy: { utcTime: "desc" },
-      include: {
-        MeteorologicalEntry: true,
-        WeatherObservation: true,
-      },
-    });
+        },
+      });
+    } else {
+      observingTime = await prisma.observingTime.findFirst({
+        where: {
+          stationId: session.user.station?.id,
+          MeteorologicalEntry: { some: {} },
+          WeatherObservation: { some: {} },
+          SynopticCode: { none: {} },
+        },
+        orderBy: { utcTime: "desc" },
+        include: {
+          MeteorologicalEntry: {
+            orderBy: { createdAt: "desc" },
+            take: 1,
+          },
+          WeatherObservation: {
+            orderBy: { createdAt: "desc" },
+            take: 1,
+          },
+        },
+      });
+    }
 
     if (
       !observingTime?.MeteorologicalEntry.length ||

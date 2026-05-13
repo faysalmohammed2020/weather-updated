@@ -201,7 +201,19 @@ const observerSchema = Yup.object({
 });
 
 // --- MAIN COMPONENT ---
-export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
+export default function SecondCardForm({ 
+  timeInfo,
+  backlogMode = false,
+  selectedDate,
+  selectedUtc,
+  onSuccess
+}: { 
+  timeInfo: TimeInfo[];
+  backlogMode?: boolean;
+  selectedDate?: string;
+  selectedUtc?: string;
+  onSuccess?: () => void;
+}) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("cloud");
   const [currentStep, setCurrentStep] = useState(1);
@@ -212,10 +224,12 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
   const {
     isHourSelected,
     secondCardError,
-    selectedHour,
+    selectedHour: contextHour,
     isLoading,
     resetStates,
   } = useHour();
+
+  const selectedHour = backlogMode ? selectedUtc : contextHour;
 
   // Check if current hour is 00, 06, 12, or 18 UTC
   const isSixHourReport = useMemo(() => {
@@ -305,7 +319,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
       wind: formData?.wind || {},
       observer: {
         "observer-initial": session?.user?.name || "",
-        "observation-time": new Date()
+        "observation-time": selectedHour || new Date()
           .getUTCHours()
           .toString()
           .padStart(2, "0"),
@@ -670,6 +684,9 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
       const submissionData = {
         ...values,
         observingTimeId: selectedHour || "",
+        backlogMode,
+        selectedDate,
+        selectedUtc,
         metadata: {
           ...values.metadata,
           submittedAt: new Date().toISOString(),
@@ -712,10 +729,15 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
 
       resetForm();
       formik.resetForm();
-      resetStates();
-      setCurrentStep(1);
-      setActiveTab("cloud");
-      updateFields({});
+      
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        resetStates();
+        setCurrentStep(1);
+        setActiveTab("cloud");
+        updateFields({});
+      }
     } catch (error) {
       console.error("Submission error:", error);
       toast.error("Failed to submit. Please try again.");
@@ -790,7 +812,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
   return (
     <>
       <AnimatePresence mode="wait">
-        {isLoading || secondCardError || !isHourSelected ? (
+        {!backlogMode && (isLoading || secondCardError || !isHourSelected) ? (
           <motion.div
             key="hour-selector"
             initial={{ opacity: 0 }}

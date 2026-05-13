@@ -35,7 +35,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // ✅ Role-specific protection
-  const forbiddenRoutesForObserver = ["/dashboard/user", "/dashboard/stations"];
+  const forbiddenRoutesForObserver = ["/dashboard/user", "/dashboard/stations", "/dashboard/data-entry/backlog"];
 
   const role = (token as any)?.role;
 

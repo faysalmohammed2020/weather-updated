@@ -1,15 +1,18 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getSession } from "@/lib/getSession";
-import { getTodayBDRange, getTodayUtcRange } from "@/lib/utils";
 import { LogAction, LogActionType, LogModule } from "@/lib/log";
 import { diff } from "deep-object-diff";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+    const { backlogMode, selectedDate, selectedUtc } = body;
 
     const session = await getSession();
 
@@ -20,21 +23,22 @@ export async function POST(req: Request) {
       );
     }
 
-    const { startToday, endToday } = getTodayUtcRange();
+    const formattedUtcTime = backlogMode
+      ? new Date(`${selectedDate}T${selectedUtc}:00:00.000Z`)
+      : null;
+
     const observingTime = await prisma.observingTime.findFirst({
-      where: {
-        AND: [
-          {
-            utcTime: {
-              gte: startToday,
-              lte: endToday,
-            },
-          },
-          {
+      where: backlogMode
+        ? {
+            utcTime: formattedUtcTime!,
             stationId: session.user.station?.id,
+          }
+        : {
+            stationId: session.user.station?.id,
+            MeteorologicalEntry: { some: {} },
+            WeatherObservation: { some: {} },
+            SynopticCode: { none: {} },
           },
-        ],
-      },
       select: {
         id: true,
         utcTime: true,
@@ -146,6 +150,25 @@ export async function POST(req: Request) {
       module: LogModule.SYNOPTIC_CODE,
     });
 
+    // Log backlog action if in backlog mode
+    if (backlogMode) {
+      await LogAction({
+        init: prisma,
+        action: LogActionType.CREATE,
+        actionText: "Backlog Synoptic Code Entry Created",
+        role: session.user.role!,
+        actorId: session.user.id,
+        actorEmail: session.user.email ?? undefined,
+        module: LogModule.BACKLOG,
+        details: {
+          date: selectedDate,
+          utc: selectedUtc,
+          stationCode: stationRecord.stationId,
+          stationName: stationRecord.name,
+        },
+      });
+    }
+
     return NextResponse.json(
       { success: true, message: "Synoptic entry saved", data: newEntry },
       { status: 201 }
@@ -240,7 +263,13 @@ export async function GET(req: Request) {
       },
     });
 
-    return NextResponse.json(entries);
+    return NextResponse.json(entries, {
+      headers: {
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        Pragma: "no-cache",
+        Expires: "0",
+      },
+    });
   } catch (error) {
     console.error("Error fetching synoptic data:", error);
     return NextResponse.json(

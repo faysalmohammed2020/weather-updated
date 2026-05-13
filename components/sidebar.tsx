@@ -150,8 +150,9 @@ const Sidebar = () => {
         },
         {
           icon: <DatabaseBackup className="mr-2 h-5 w-5" />,
-          href: "/dashboard/data-entry/backlock",
-          label: "Backlock",
+          href: "/dashboard/data-entry/backlog",
+          roles: ["root_admin", "station_admin", "super_admin"],
+          label: "Backlog",
         },
       ],
     },
@@ -303,6 +304,7 @@ const Sidebar = () => {
                   label={link.label}
                   isCollapsed={isCollapsed && !isMobileOpen}
                   subMenu={link.subMenu}
+                  role={role}
                   isActive={
                     link.href === pathname ||
                     (link.subMenu &&
@@ -339,7 +341,9 @@ type SidebarLinkProps = {
     href: string;
     label: string;
     icon?: React.ReactNode;
+    roles?: string[];
   }[];
+  role?: string;
   onSubmenuToggle?: () => void;
   onMobileLinkClick?: () => void;
 };
@@ -352,10 +356,17 @@ const SidebarLink = ({
   isActive = false,
   isSubmenuOpen = false,
   subMenu = [],
+  role,
   onSubmenuToggle,
   onMobileLinkClick,
 }: SidebarLinkProps) => {
   const pathname = usePathname();
+
+  // Filter submenu items based on user role
+  const filteredSubMenu = subMenu.filter((item) => {
+    if (!item.roles) return true; // If no roles specified, show to all
+    return item.roles.includes(role as string);
+  });
 
   const handleLinkClick = () => {
     if (onMobileLinkClick && href) {
@@ -364,6 +375,11 @@ const SidebarLink = ({
   };
 
   if (subMenu && subMenu.length > 0) {
+    // Don't show submenu if all items are filtered out
+    if (filteredSubMenu.length === 0) {
+      return null;
+    }
+
     return (
       <Collapsible
         open={isSubmenuOpen}
@@ -435,7 +451,7 @@ const SidebarLink = ({
                 className="overflow-hidden"
               >
                 <div className="mt-1 flex flex-col space-y-1">
-                  {subMenu.map((item) => {
+                  {filteredSubMenu.map((item) => {
                     const isItemActive = pathname === item.href;
                     return (
                       <Link

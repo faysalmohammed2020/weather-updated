@@ -24,8 +24,9 @@ export async function POST(request: Request) {
     }
 
     const data = await request.json();
+    const { backlogMode, selectedDate, selectedUtc } = data;
 
-    if (!data.observingTimeId) {
+    if (!data.observingTimeId && !backlogMode) {
       return NextResponse.json(
         {
           error: true,
@@ -35,7 +36,9 @@ export async function POST(request: Request) {
       );
     }
 
-    const formattedObservingTime = hourToUtc(data.observingTimeId);
+    const formattedObservingTime = backlogMode
+      ? new Date(`${selectedDate}T${selectedUtc}:00:00.000Z`)
+      : hourToUtc(data.observingTimeId);
     const targetUtcTime = new Date(formattedObservingTime);
     const targetDayStart = new Date(
       Date.UTC(
@@ -291,6 +294,25 @@ export async function POST(request: Request) {
       module: LogModule.WEATHER_OBSERVATION,
     });
 
+    // Log backlog action if in backlog mode
+    if (backlogMode) {
+      await LogAction({
+        init: prisma,
+        action: LogActionType.CREATE,
+        actionText: "Backlog Second Card Entry Created",
+        role: session.user.role!,
+        actorId: session.user.id,
+        actorEmail: session.user.email ?? undefined,
+        module: LogModule.BACKLOG,
+        details: {
+          date: selectedDate,
+          utc: selectedUtc,
+          stationCode: stationRecord.stationId,
+          stationName: stationRecord.name,
+        },
+      });
+    }
+
     // Create daily
     const { startToday, endToday } = getTodayUtcRange();
     const firstAndSecondCardData = await prisma.observingTime.findMany({
@@ -319,7 +341,7 @@ export async function POST(request: Request) {
     // Calculate Daily Summary
     const getCalculatedDailySummary = generateDailySummary(
       firstAndSecondCardData,
-      formattedObservingTime,
+      formattedObservingTime instanceof Date ? formattedObservingTime.toISOString() : formattedObservingTime,
       stationRecord.id
     );
 

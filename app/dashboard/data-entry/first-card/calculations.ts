@@ -116,6 +116,11 @@ export const createDewPointAndHumidityCalculator = (
 
     const { DpT, RH } = dbtEntry.values[diffIndex];
 
+    if (DpT === null) {
+      toast.error("Dew point not available for the selected temperatures");
+      return;
+    }
+
     const formattedDpT = (DpT * 10).toFixed(0);
     const formattedRH = RH === 100 ? "100" : (RH ?? 0).toString().padStart(3, "0");
 

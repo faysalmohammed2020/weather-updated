@@ -135,6 +135,7 @@ export default function AllViewAndManagePage() {
     const excludedKeys = [
       "id",
       "stationId",
+      "utcTime",
       "submittedAt",
       "createdAt",
       "updatedAt",
@@ -142,67 +143,74 @@ export default function AllViewAndManagePage() {
       "observingTime",
       "observingTimeId",
       "localTime",
-      "utcTime",
       "date",
       "c2Indicator",
+      "time",
     ];
 
-    const getDateTimeParts = (value: unknown) => {
-      if (!value) {
-        return { date: "", time: "" };
-      }
+    const getObservationDateTime = (item: any) => {
+      const pad2 = (n: number) => String(n).padStart(2, "0");
+      const formatFromDate = (value: unknown) => {
+        if (!value) return { date: "", time: "" };
 
-      const parsed = value instanceof Date ? value : new Date(String(value));
-      if (Number.isNaN(parsed.getTime())) {
-        return { date: String(value), time: "" };
-      }
+        if (typeof value === "string") {
+          if (value.includes("T")) {
+            const [date = "", time = ""] = value.split("T");
+            return { date, time: time.substring(0, 5) };
+          }
 
-      const isoValue = parsed.toISOString().slice(0, 19);
+          if (/^\d{2}:\d{2}/.test(value)) {
+            return { date: "", time: value.substring(0, 5) };
+          }
+        }
+
+        const parsed = value instanceof Date ? value : new Date(String(value));
+        if (Number.isNaN(parsed.getTime())) {
+          return { date: String(value), time: "" };
+        }
+
+        return {
+          date: parsed.toISOString().split("T")[0],
+          time: `${pad2(parsed.getUTCHours())}:${pad2(parsed.getUTCMinutes())}`,
+        };
+      };
+
+      const dateTimeSource =
+        item.ObservingTime?.utcTime ||
+        item.utcTime ||
+        item.localTime ||
+        item.submittedAt ||
+        item.createdAt ||
+        item.updatedAt ||
+        item.ObservingTime?.submittedAt ||
+        item.ObservingTime?.createdAt ||
+        item.observingTime ||
+        item.observationTime;
+
+      const parsed = formatFromDate(dateTimeSource);
+      if (parsed.date && parsed.time) return parsed;
+
       return {
-        date: isoValue.slice(0, 10),
-        time: isoValue.slice(11, 19),
+        date:
+          parsed.date ||
+          formatFromDate(item.date || item.observingDate || item.observationDate)
+            .date,
+        time:
+          parsed.time ||
+          formatFromDate(item.time || item.observingTime || item.observationTime)
+            .time,
       };
     };
 
-    const getObservationDateTime = (item: any) =>
-      getDateTimeParts(
-        item.localTime ||
-          item.utcTime ||
-          item.date ||
-          item.ObservingTime?.utcTime ||
-          item.createdAt,
-      );
-
-    const orderExportKeys = (keys: string[]) => {
-      const leadingKeys = ["stationName", "stationCode", "date", "time"];
-      return [
-        ...leadingKeys.filter((key) => keys.includes(key)),
-        ...keys.filter((key) => !leadingKeys.includes(key)),
-      ];
-    };
-
-    // Helper function to add station info to data
     const addStationInfo = (data: any[]) => {
       return data.map((item: any) => {
-        // Handle different data structures:
-        // 1. FlattenedWeatherObservation (direct stationName, stationId)
-        // 2. WeatherObservationRecord (nested station object)
-        // 3. SynopticRecord & DailySummaryRecord (nested ObservingTime.station)
         const observationDateTime = getObservationDateTime(item);
         const stationInfo = {
           stationName:
             item.stationName ||
             item.station?.name ||
             item.ObservingTime?.station?.name ||
-          stationName:
-            item.stationName ||
-            item.station?.name ||
-            item.ObservingTime?.station?.name ||
             "",
-          stationCode:
-            item.stationId ||
-            item.station?.stationId ||
-            item.ObservingTime?.station?.stationId ||
           stationCode:
             item.stationId ||
             item.station?.stationId ||
@@ -212,17 +220,8 @@ export default function AllViewAndManagePage() {
           time: observationDateTime.time,
         };
 
-
         const cleaned: any = { ...stationInfo };
         Object.keys(item).forEach((key: string) => {
-          if (
-            !excludedKeys.includes(key) &&
-            key !== "station" &&
-            key !== "user" &&
-            key !== "stationName" &&
-            key !== "stationId" &&
-            key !== "ObservingTime"
-          ) {
           if (
             !excludedKeys.includes(key) &&
             key !== "station" &&
@@ -262,7 +261,9 @@ export default function AllViewAndManagePage() {
     const orderedFirstKeys = [
       "stationName",
       "stationCode",
-      ...firstKeys.filter((k) => k !== "stationName" && k !== "stationCode"),
+      "date",
+      "time",
+      ...firstKeys.filter((k) => k !== "stationName" && k !== "stationCode" && k !== "date" && k !== "time"),
     ];
     const orderedSecondKeys = secondKeys; // No station columns for Second Card
 
@@ -312,8 +313,10 @@ export default function AllViewAndManagePage() {
       const orderedSynopticKeys = [
         "stationName",
         "stationCode",
+        "date",
+        "time",
         ...synopticKeys.filter(
-          (k) => k !== "stationName" && k !== "stationCode",
+          (k) => k !== "stationName" && k !== "stationCode" && k !== "date" && k !== "time",
         ),
       ];
       synopticSheet.addRow(orderedSynopticKeys);
@@ -330,8 +333,15 @@ export default function AllViewAndManagePage() {
       const orderedSummaryKeys = [
         "stationName",
         "stationCode",
+        "date",
+        "time",
         ...summaryKeys.filter(
-          (k) => k !== "stationName" && k !== "stationCode",
+          (k) =>
+            k !== "stationName" &&
+            k !== "stationCode" &&
+            k !== "date" &&
+            k !== "time" &&
+            k !== "stationNo",
         ),
       ];
       summarySheet.addRow(orderedSummaryKeys);
