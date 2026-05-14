@@ -59,7 +59,7 @@ export const SynopticTableHeader = () => (
         58/59P24
       </th>
       <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
-        (6RRRtR)
+        (6RRRtR)/7R<sub>24</sub>R<sub>24</sub>R<sub>24</sub>R<sub>24</sub>
       </th>
       <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
         8N5Ch5h5
