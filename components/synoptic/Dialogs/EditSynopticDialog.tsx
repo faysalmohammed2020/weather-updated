@@ -36,7 +36,7 @@ const EDIT_FIELDS = [
   { id: "C2", label: "C2", bg: "bg-indigo-50" },
   { id: "GG", label: "GG", bg: "bg-blue-50" },
   { id: "P24Group58_59", label: "58/59P24", bg: "bg-indigo-50" },
-  { id: "R24Group6_7", label: "(6RRRtR)/7R24", bg: "bg-blue-50" },
+  { id: "R24Group6_7", label: "(6RRRtR)/7R24R24R24R24", bg: "bg-blue-50" },
   { id: "NsChshs", label: "8N5Ch5h5", bg: "bg-indigo-50" },
   { id: "dqqqt90", label: "90dqqqt", bg: "bg-blue-50" },
   { id: "fqfqfq91", label: "91fqfqfq", bg: "bg-indigo-50" },

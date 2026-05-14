@@ -307,6 +307,22 @@ export async function GET(request: Request) {
       return pad((Math.max(0, wholeMm) % 1000).toString(), 3);
     };
 
+    const formatR24RainfallAmount = (value: unknown) => {
+      const raw = String(value ?? "").trim().toLowerCase();
+      if (!raw) return "0000";
+      if (["trace", "tr", "t"].includes(raw) || raw === "9999") {
+        return "9999";
+      }
+
+      const amountMm = parseRainfallMm(value);
+      if (amountMm === null || !Number.isFinite(amountMm)) return "0000";
+
+      const tenths = Math.round(Math.max(0, amountMm) * 10);
+      if (tenths >= 9998) return "9998";
+
+      return pad(tenths.toString(), 4);
+    };
+
     const parseLegacyRainValue = (value: unknown) => {
       if (value === null || value === undefined) return null;
       if (typeof value === "string" && value.trim() === "") return null;
@@ -623,10 +639,11 @@ export async function GET(request: Request) {
     const slicedPressure = pressureChange.slice(-3);
     measurements[16] = `${pressureChangeIndicator}${slicedPressure}`;
 
-    // 18. (6RRRtR)/7R24R24R24 (24-28) - Precipitation
-    // 7R24R24R24 is mandatory. 6RRRtR is conditional for 03/09/15/21 UTC.
-    const last24RainfallMm = parseRainfallMm(weatherObs.rainfallLast24Hours);
-    const group7R24 = `7${formatRainfallAmount(last24RainfallMm, "round")}`;
+    // 18. (6RRRtR)/7R24R24R24R24 (24-28) - Precipitation
+    // 7R24R24R24R24 is mandatory; R24 is encoded in tenths of a millimetre.
+    const group7R24 = `7${formatR24RainfallAmount(
+      weatherObs.rainfallLast24Hours,
+    )}`;
 
     const currentSincePreviousMm = parseRainfallMm(
       weatherObs.rainfallSincePrevious,

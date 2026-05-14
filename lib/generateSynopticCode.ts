@@ -184,6 +184,31 @@ export function generateSynopticCode(): SynopticFormValues {
     weatherObs.rainfall?.["since-previous"] ||
     "0";
 
+  const parseRainfallMm = (value: unknown): number | null => {
+    if (value === null || value === undefined) return null;
+    const raw = String(value).trim();
+    if (!raw) return null;
+    const parsed = Number(raw);
+    if (!Number.isFinite(parsed)) return null;
+    return raw.includes(".") || raw.length < 4 ? parsed : parsed / 10;
+  };
+
+  const formatR24RainfallAmount = (value: unknown) => {
+    const raw = String(value ?? "").trim().toLowerCase();
+    if (!raw) return "0000";
+    if (["trace", "tr", "t"].includes(raw) || raw === "9999") {
+      return "9999";
+    }
+
+    const amountMm = parseRainfallMm(value);
+    if (amountMm === null || !Number.isFinite(amountMm)) return "0000";
+
+    const tenths = Math.round(Math.max(0, amountMm) * 10);
+    if (tenths >= 9998) return "9998";
+
+    return pad(tenths, 4);
+  };
+
   // precipitation is treated as 0.1 mm units here (e.g., 0020 => 2.0 mm => RRR=002)
   const precipRaw = Number(precipitation) || 0;
   const precipMm = Math.floor(precipRaw / 10);
@@ -429,8 +454,10 @@ export function generateSynopticCode(): SynopticFormValues {
   const absPressureChange = pad(Math.abs(Math.round(pressureChange * 10)), 3);
   measurements[16] = `${pressureChangeIndicator}${absPressureChange}`;
 
-  // 18. (6RRRtR)/7R24R24R24 (24-28) - Precipitation
-  measurements[17] = `(${measurements[7]})`;
+  // 18. (6RRRtR)/7R24R24R24R24 (24-28) - Precipitation
+  measurements[17] = `7${formatR24RainfallAmount(
+    weatherObs.rainfall?.["last-24-hours"]
+  )}`;
 
   // 19. 8N5Ch5h5 (29-33) - Cloud information
   const lowFormSig = weatherObs.significantClouds?.layer1?.form || "0";

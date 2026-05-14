@@ -173,30 +173,47 @@ const RainFields = () => {
   };
 
   // Rainfall calculation functions
-  const formatToFourDigits = (value: number): string => {
-    return String(value).padStart(4, "0");
+  const parseRainfallCodeToMm = (value?: string | null): number => {
+    if (!value) return 0;
+    const trimmed = value.trim();
+    if (!trimmed) return 0;
+    const numeric = Number.parseFloat(trimmed);
+    if (Number.isNaN(numeric)) return 0;
+    if (trimmed.includes(".")) return numeric;
+    return trimmed.length >= 4 ? numeric / 10 : numeric;
+  };
+
+  const formatToFourDigitCode = (mm: number): string => {
+    const tenths = Math.round(Math.max(0, mm) * 10);
+    return String(tenths).padStart(4, "0");
+  };
+
+  const formatToR24Code = (mm: number): string => {
+    const tenths = Math.round(Math.max(0, mm) * 10);
+    if (tenths >= 9998) return "9998";
+    return String(tenths).padStart(4, "0");
   };
 
   const parseSincePreviousInput = () =>
-    parseInt(rainfallSincePrevious || "0", 10) || 0;
+    parseRainfallCodeToMm(rainfallSincePrevious);
 
   const getRainfallValue = (utcTime: string): number => {
     const item = rainfallApiData.find((data) => data.utcTime === utcTime);
-    return item ? parseInt(item.rainfallSincePrevious, 10) || 0 : 0;
+    return item ? parseRainfallCodeToMm(item.rainfallSincePrevious) : 0;
   };
 
   const calculateDuringPrevious6Hours = (): string => {
     const currentSincePrevious = parseSincePreviousInput();
     // Simplified calculation - in real implementation this would consider UTC hour
     const total = currentSincePrevious;
-    return formatToFourDigits(total);
+    return formatToFourDigitCode(total);
   };
 
   const calculateLast24Hours = (): string => {
     const currentSincePrevious = parseSincePreviousInput();
     // Simplified calculation - in real implementation this would sum previous day values
     const total = currentSincePrevious;
-    return String(total);
+    return formatToR24Code(total);
   };
 
   // Auto-fill calculated values
@@ -357,7 +374,7 @@ const RainFields = () => {
 
           <div className="space-y-1 p-3 rounded-lg bg-emerald-50 border border-white shadow-sm">
             <Label className="text-sm font-medium text-gray-700">
-              Last 24 Hours
+              Last 24 Hours (0.1 mm code)
               <span className="ml-2 text-xs text-green-600 font-medium">
                 (Auto-calculated)
               </span>

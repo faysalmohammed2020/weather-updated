@@ -440,9 +440,10 @@ export default function RainfallTab() {
     return String(tenths).padStart(4, "0");
   };
 
-  const formatToThreeDigitCode = (mm: number): string => {
-    const rounded = Math.round(mm);
-    return String(rounded).padStart(3, "0");
+  const formatToR24Code = (mm: number): string => {
+    const tenths = Math.round(Math.max(0, mm) * 10);
+    if (tenths >= 9998) return "9998";
+    return String(tenths).padStart(4, "0");
   };
 
   const getRainfallValueMm = (utcTime: string): number => {
@@ -512,9 +513,9 @@ export default function RainfallTab() {
       rainfallApiData.some((d) => d.utcTime === t),
     );
 
-    // If no previous timecards exist, show the current input (or 000)
+    // If no previous timecards exist, show the current input (or 0000)
     if (!anyPrevious) {
-      return formatToThreeDigitCode(currentSincePrevious);
+      return formatToR24Code(currentSincePrevious);
     }
 
     // Otherwise sum existing values (missing entries treated as 0)
@@ -526,7 +527,7 @@ export default function RainfallTab() {
     // Add the Since Previous Observation input value (current 00 UTC)
     totalMm += currentSincePrevious;
 
-    return formatToThreeDigitCode(totalMm);
+    return formatToR24Code(totalMm);
   };
 
   // Auto-fill calculated values (run even when API data is empty — functions handle missing entries)
@@ -964,7 +965,7 @@ export default function RainfallTab() {
             {isMidnightReport && (
               <div className="grid gap-2">
                 <Label htmlFor="last-24-hours">
-                  Last 24 Hours Precipitation (mm)
+                  Last 24 Hours Precipitation (0.1 mm code)
                   <span className="ml-2 text-xs text-green-600 font-medium">
                     (Auto-calculated)
                   </span>
@@ -972,7 +973,7 @@ export default function RainfallTab() {
                 <Input
                   id="last-24-hours"
                   type="text"
-                  maxLength={3}
+                  maxLength={4}
                   step="0.1"
                   value={rainfall["last-24-hours"] || ""}
                   readOnly

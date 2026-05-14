@@ -151,7 +151,7 @@ const measurements = [
           (6RRRt<sub>R</sub>)
           <br />
           <span style={{ borderTop: "1px solid black" }}>
-            7R<sub>24</sub>R<sub>24</sub>R<sub>24</sub>
+            7R<sub>24</sub>R<sub>24</sub>R<sub>24</sub>R<sub>24</sub>
           </span>
         </div>
       </div>
