@@ -15,6 +15,7 @@ interface InputFieldProps {
   accent?: string;
   value: string;
   disabled?: boolean;
+  readOnly?: boolean;
   required?: boolean;
   error?: React.ReactNode;
   numeric?: boolean;
@@ -41,6 +42,7 @@ const InputField = memo(function InputField({
   accent = "blue",
   value,
   disabled = false,
+  readOnly = false,
   required = false,
   numeric = false,
   error,
@@ -73,6 +75,7 @@ const InputField = memo(function InputField({
         type={type}
         value={value}
         disabled={disabled}
+        readOnly={readOnly}
         onChange={numeric ? handleInputValidation : onChange}
         inputMode={numeric ? "decimal" : "text"}
         required={required}
@@ -80,6 +83,7 @@ const InputField = memo(function InputField({
           `${accentRing[accent]} border-gray-300 rounded-lg py-2 px-3`,
           {
             "bg-gray-100 cursor-not-allowed": disabled,
+            "bg-slate-50": readOnly && !disabled,
             "border-red-500": error,
           }
         )}

@@ -36,7 +36,6 @@ const RainFields = () => {
     return Number.isNaN(parsed.getTime()) ? null : parsed.getUTCHours();
   }, [observationUtcTime]);
   const isSixHourReport = observationHour !== null && [0, 6, 12, 18].includes(observationHour);
-  const isMidnightReport = observationHour === 0;
 
   // Fetch rainfall calculation data
   useEffect(() => {
@@ -210,38 +209,60 @@ const RainFields = () => {
     return item ? parseRainfallCodeToMm(item.rainfallSincePrevious) : 0;
   };
 
+  const getCurrentObservationUtc = () => {
+    if (!observationUtcTime) return null;
+    const parsed = new Date(observationUtcTime);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  };
+
   const calculateDuringPrevious6Hours = (): string => {
+    const currentObservationUtc = getCurrentObservationUtc();
+    if (!currentObservationUtc || observationHour === null || !isSixHourReport) {
+      return "";
+    }
+
     const currentSincePrevious = parseSincePreviousInput();
-    // Simplified calculation - in real implementation this would consider UTC hour
-    const total = currentSincePrevious;
+    const previousSlotUtc = new Date(
+      currentObservationUtc.getTime() - 3 * 60 * 60 * 1000,
+    );
+    const total = getRainfallValue(previousSlotUtc.toISOString()) + currentSincePrevious;
+
     return formatToFourDigitCode(total);
   };
 
   const calculateLast24Hours = (): string => {
+    const currentObservationUtc = getCurrentObservationUtc();
+    if (!currentObservationUtc) return "";
+
     const currentSincePrevious = parseSincePreviousInput();
-    // Simplified calculation - in real implementation this would sum previous day values
-    const total = currentSincePrevious;
+    let total = currentSincePrevious;
+
+    for (let i = 1; i <= 7; i++) {
+      const previousSlotUtc = new Date(
+        currentObservationUtc.getTime() - i * 3 * 60 * 60 * 1000,
+      );
+      total += getRainfallValue(previousSlotUtc.toISOString());
+    }
+
     return formatToR24Code(total);
   };
 
-  // Auto-fill calculated values only for their valid UTC observation hours.
+  // Auto-fill calculated values using the same rolling UTC accumulation rule as the create form.
   useEffect(() => {
-    if (rainfallApiData.length === 0) return;
-
     if (isSixHourReport) {
       const calculated6Hours = calculateDuringPrevious6Hours();
       setValue("rainfallDuringPrevious", calculated6Hours || "");
+    } else {
+      setValue("rainfallDuringPrevious", "");
     }
 
-    const calculated24Hours = isMidnightReport ? calculateLast24Hours() : "";
-    if (isMidnightReport && calculated24Hours) {
-      setValue("rainfallLast24Hours", calculated24Hours);
-    }
+    const calculated24Hours = calculateLast24Hours();
+    setValue("rainfallLast24Hours", calculated24Hours || "");
   }, [
     rainfallApiData,
     rainfallSincePrevious,
     isSixHourReport,
-    isMidnightReport,
+    observationUtcTime,
     setValue,
   ]);
 
@@ -392,7 +413,7 @@ const RainFields = () => {
             <Label className="text-sm font-medium text-gray-700">
               Last 24 Hours (0.1 mm code)
               <span className="ml-2 text-xs text-green-600 font-medium">
-                (Auto-calculated)
+                (Auto-calculated for all UTC)
               </span>
             </Label>
             <Input

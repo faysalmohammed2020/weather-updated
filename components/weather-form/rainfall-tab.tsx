@@ -451,6 +451,14 @@ export default function RainfallTab() {
     return item ? parseRainfallCodeToMm(item.rainfallSincePrevious) : 0;
   };
 
+  const getCurrentObservationUtc = () => {
+    if (!selectedHour) return null;
+    const hour = parseInt(selectedHour, 10);
+    if (Number.isNaN(hour)) return null;
+    const { todayUTC } = getUtcDateStrings();
+    return new Date(`${todayUTC}T${padHour(hour)}:00:00.000Z`);
+  };
+
   const calculateDuringPrevious6Hours = (): string => {
     if (!selectedHour) return "";
 
@@ -493,39 +501,17 @@ export default function RainfallTab() {
   };
 
   const calculateLast24Hours = (): string => {
-    if (!selectedHour || parseInt(selectedHour, 10) !== 0) return "";
-
-    const { prevUTC } = getUtcDateStrings();
+    const currentObservationUtc = getCurrentObservationUtc();
+    if (!currentObservationUtc) return "";
     const currentSincePrevious = parseSincePreviousInput();
 
-    // Sum all values from previous day 03 to previous day 21 UTC
-    const timesToSum = [
-      `${prevUTC}T03:00:00.000Z`,
-      `${prevUTC}T06:00:00.000Z`,
-      `${prevUTC}T09:00:00.000Z`,
-      `${prevUTC}T12:00:00.000Z`,
-      `${prevUTC}T15:00:00.000Z`,
-      `${prevUTC}T18:00:00.000Z`,
-      `${prevUTC}T21:00:00.000Z`,
-    ];
-    // Helper to check presence of any previous timecards in this range
-    const anyPrevious = timesToSum.some((t) =>
-      rainfallApiData.some((d) => d.utcTime === t),
-    );
-
-    // If no previous timecards exist, show the current input (or 0000)
-    if (!anyPrevious) {
-      return formatToR24Code(currentSincePrevious);
+    let totalMm = currentSincePrevious;
+    for (let i = 1; i <= 7; i++) {
+      const previousSlotUtc = new Date(
+        currentObservationUtc.getTime() - i * 3 * 60 * 60 * 1000,
+      );
+      totalMm += getRainfallValueMm(previousSlotUtc.toISOString());
     }
-
-    // Otherwise sum existing values (missing entries treated as 0)
-    let totalMm = 0;
-    timesToSum.forEach((time) => {
-      totalMm += getRainfallValueMm(time);
-    });
-
-    // Add the Since Previous Observation input value (current 00 UTC)
-    totalMm += currentSincePrevious;
 
     return formatToR24Code(totalMm);
   };
@@ -540,30 +526,24 @@ export default function RainfallTab() {
       setFieldValue("rainfall.during-previous", "");
     }
 
-    // Auto-fill Last 24 Hours only at 00 UTC. For other UTC hours, keep manual input.
-    if (isMidnightReport) {
-      const calculated24Hours = calculateLast24Hours();
-      setFieldValue("rainfall.last-24-hours", calculated24Hours || "");
-    }
+    const calculated24Hours = calculateLast24Hours();
+    setFieldValue("rainfall.last-24-hours", calculated24Hours || "");
   }, [
     rainfallApiData,
     selectedHour,
     sincePrevious,
     isSixHourReport,
-    isMidnightReport,
     setFieldValue,
   ]);
 
   // Separate useEffect for Last 24 Hours calculation when since-previous changes
   useEffect(() => {
-    if (!isMidnightReport) return;
-
     const calculated24Hours = calculateLast24Hours();
     setFieldValue("rainfall.last-24-hours", calculated24Hours || "");
   }, [
     rainfall["since-previous"],
     rainfallApiData,
-    isMidnightReport,
+    selectedHour,
     setFieldValue,
   ]);
 
@@ -962,7 +942,7 @@ export default function RainfallTab() {
               <Label htmlFor="last-24-hours">
                 Last 24 Hours Precipitation (0.1 mm code)
                 <span className="ml-2 text-xs text-green-600 font-medium">
-                  {isMidnightReport ? "(Auto-calculated at 00 UTC)" : "(Manual input)"}
+                  (Auto-calculated for all UTC)
                 </span>
               </Label>
               <Input
@@ -971,13 +951,8 @@ export default function RainfallTab() {
                 maxLength={4}
                 step="0.1"
                 value={rainfall["last-24-hours"] || ""}
-                onChange={(e) =>
-                  setFieldValue("rainfall.last-24-hours", e.target.value)
-                }
-                readOnly={isMidnightReport}
-                className={`border-violet-200 focus:border-violet-500 font-mono ${
-                  isMidnightReport ? "bg-green-50" : "bg-white"
-                }`}
+                readOnly
+                className="border-violet-200 focus:border-violet-500 bg-green-50 font-mono"
               />
             </div>
           </div>
