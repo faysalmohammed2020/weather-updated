@@ -52,15 +52,24 @@ export function DataInputCard({
   analyzeData,
 }: DataInputCardProps) {
   return (
-    <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
-      <CardHeader className="bg-linear-to-r from-blue-500 to-purple-600 text-white rounded-t-lg">
-        <CardTitle className="flex items-center gap-3 text-xl">
-          <Upload className="h-6 w-6" />
-          Data Input
-        </CardTitle>
-        <CardDescription className="text-blue-100">
-          Upload files (TXT, CSV, PDF) or enter data manually. Supports drag & drop functionality.
-        </CardDescription>
+    <Card className="overflow-hidden gap-0 border-0 bg-white/80 py-0 shadow-xl backdrop-blur-sm">
+      <CardHeader className="bg-linear-to-r from-blue-500 via-indigo-500 to-purple-600 px-6 py-5 text-white">
+        <div className="flex items-start gap-4">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/20">
+            <Upload className="h-6 w-6" />
+          </div>
+          <div className="min-w-0 space-y-1">
+            <div className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs font-semibold tracking-[0.18em] text-blue-50 uppercase ring-1 ring-white/20">
+              Data Input
+            </div>
+            <CardTitle className="text-2xl font-bold leading-tight text-white md:text-3xl">
+              Radiosonde Data Analyzer
+            </CardTitle>
+            <CardDescription className="max-w-3xl text-sm leading-relaxed text-blue-100 md:text-base">
+              Advanced meteorological data decoder for TTAA/TTBB upper air soundings with multi-format file support. Upload files or enter data manually below.
+            </CardDescription>
+          </div>
+        </div>
       </CardHeader>
       <CardContent className="p-6 space-y-6">
         {/* File Upload Section */}
