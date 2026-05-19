@@ -2,6 +2,7 @@
 
 import moment from "moment";
 import type { WeatherObservation } from "@/types/weather-observation";
+import { formatCl17RainfallAmount } from "@/lib/utils/rainfall-format";
 
 interface RainRowProps {
   observation?: WeatherObservation;
@@ -113,7 +114,7 @@ const RainRow = ({ observation }: RainRowProps) => {
       </td>
 
       <td className={rainCell(!!observation?.rainfallLast24Hours)}>
-        {observation?.rainfallLast24Hours || "--"}
+        {formatCl17RainfallAmount(observation?.rainfallLast24Hours)}
       </td>
     </>
   );

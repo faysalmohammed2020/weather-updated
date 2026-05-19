@@ -22,6 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { formatCl17RainfallAmount } from "@/lib/utils/rainfall-format";
 
 // Compact PDF Styles for single A3 page
 const styles = StyleSheet.create({
@@ -736,7 +737,7 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
                     {formatValue(record.rainfallDuringPrevious)}
                   </Text>
                   <Text style={[styles.tableCell, { width: "2.5%" }]}>
-                    {formatValue(record.rainfallLast24Hours)}
+                    {formatCl17RainfallAmount(record.rainfallLast24Hours)}
                   </Text>
                   <Text style={[styles.tableCell, { width: "2.5%" }]}>
                     {formatValue(record.windFirstAnemometer)}

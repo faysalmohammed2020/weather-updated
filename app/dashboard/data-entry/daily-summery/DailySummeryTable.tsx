@@ -7,6 +7,7 @@ import { RefreshCw, AlertCircle, Clock } from "lucide-react";
 import SummaryDataTableSkeleton from "./SummaryDataTableSkeleton";
 import { getDailySummary } from "@/app/actions/daily-summary";
 import { utcToHour } from "@/lib/utils";
+import { formatCl17RainfallAmount } from "@/lib/utils/rainfall-format";
 
 /* ---------------------------------------------------------
     ✔ TYPE DEFINITIONS (Correct With Your API Structure)
@@ -299,7 +300,7 @@ export function WeatherDataTable() {
                       <td className="px-3 py-3 text-center">{formatValue(met?.wetBulbAsRead)}</td>
                       <td className="px-3 py-3 text-center">{formatValue(met?.maxMinTempAsRead)}</td>
                       <td className="px-3 py-3 text-center">{formatValue(met?.maxMinTempAsRead)}</td>
-                      <td className="px-3 py-3 text-center">{formatValue(obs?.rainfallLast24Hours)}</td>
+                      <td className="px-3 py-3 text-center">{formatCl17RainfallAmount(obs?.rainfallLast24Hours)}</td>
                       <td className="px-3 py-3 text-center">{formatValue(met?.Td)}</td>
                       <td className="px-3 py-3 text-center">{formatValue(met?.relativeHumidity)}</td>
                       <td className="px-3 py-3 text-center">{formatValue(obs?.windSpeed)}</td>

@@ -18,6 +18,7 @@ import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { utcToHour } from "@/lib/utils";
 import { formatUtcDate } from "@/lib/utils/table-utils";
+import { formatCl17RainfallAmount } from "@/lib/utils/rainfall-format";
 import { Download } from "lucide-react";
 import moment from "moment";
 
@@ -381,7 +382,7 @@ const MargeTable = forwardRef(
               : "--",
           weatherObs?.rainfallSincePrevious || "--",
           weatherObs?.rainfallDuringPrevious || "--",
-          weatherObs?.rainfallLast24Hours || "--",
+          formatCl17RainfallAmount(weatherObs?.rainfallLast24Hours),
           weatherObs?.windFirstAnemometer || "--",
           weatherObs?.windSecondAnemometer || "--",
           weatherObs?.windSpeed || "--",
@@ -534,7 +535,7 @@ ${"=".repeat(60)}
         }\n`;
         txtContent += `Rainfall Since Prev${" ".repeat(3)} ---> ${weatherObs?.rainfallSincePrevious || "--"}\n`;
         txtContent += `Rainfall During Prev${" ".repeat(2)} ---> ${weatherObs?.rainfallDuringPrevious || "--"}\n`;
-        txtContent += `Rainfall Last 24h${" ".repeat(5)} ---> ${weatherObs?.rainfallLast24Hours || "--"}\n`;
+        txtContent += `Rainfall Last 24h${" ".repeat(5)} ---> ${formatCl17RainfallAmount(weatherObs?.rainfallLast24Hours)}\n`;
         txtContent += `Wind First Anemometer${" ".repeat(1)} ---> ${weatherObs?.windFirstAnemometer || "--"}\n`;
         txtContent += `Wind Second Anemometer --> ${weatherObs?.windSecondAnemometer || "--"}\n`;
         txtContent += `Wind Speed${" ".repeat(10)} ---> ${weatherObs?.windSpeed || "--"}\n`;
@@ -1742,7 +1743,7 @@ ${"=".repeat(60)}`;
                             <td
                               className={`border border-slate-300 p-1 ${weatherObs?.rainfallLast24Hours ? "text-emerald-700 font-medium" : ""}`}
                             >
-                              {weatherObs?.rainfallLast24Hours || "--"}
+                              {formatCl17RainfallAmount(weatherObs?.rainfallLast24Hours)}
                             </td>
 
                             {/* Wind Data */}

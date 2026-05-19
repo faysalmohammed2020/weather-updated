@@ -2,6 +2,7 @@ import type { ExportResult } from "@/lib/export/types";
 import type { WeatherObservationRecord } from "@/types/weather-observation";
 import { utcToHour } from "@/lib/utils/utcToHour";
 import { formatUtcDate } from "@/lib/utils/formatUtcDate";
+import { formatCl17RainfallAmount } from "@/lib/utils/rainfall-format";
 
 export interface WeatherTxtExportOptions {
   startDate: string;
@@ -87,7 +88,10 @@ ${"=".repeat(60)}
     txtContent += pad("Rainfall End", formatRainfallTime(obs.rainfallTimeEnd));
     txtContent += pad("Since Previous", asValue(obs.rainfallSincePrevious));
     txtContent += pad("During Previous", asValue(obs.rainfallDuringPrevious));
-    txtContent += pad("Last 24 Hours", asValue(obs.rainfallLast24Hours));
+    txtContent += pad(
+      "Last 24 Hours",
+      formatCl17RainfallAmount(obs.rainfallLast24Hours),
+    );
     txtContent += pad("Wind 1st Anem", asValue(obs.windFirstAnemometer));
     txtContent += pad("Wind 2nd Anem", asValue(obs.windSecondAnemometer));
     txtContent += pad("Wind Speed", asValue(obs.windSpeed));

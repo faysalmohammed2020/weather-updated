@@ -1,6 +1,7 @@
 import type { ExportResult } from "@/lib/export/types";
 import type { WeatherObservationRecord } from "@/types/weather-observation";
 import { utcToHour } from "@/lib/utils/utcToHour";
+import { formatCl17RainfallAmount } from "@/lib/utils/rainfall-format";
 
 export interface WeatherCsvExportOptions {
   startDate: string;
@@ -96,7 +97,7 @@ export const exportWeatherCsv = ({
       valueOrDash(obs.rainfallTimeEnd),
       valueOrDash(obs.rainfallSincePrevious),
       valueOrDash(obs.rainfallDuringPrevious),
-      valueOrDash(obs.rainfallLast24Hours),
+      formatCl17RainfallAmount(obs.rainfallLast24Hours),
       valueOrDash(obs.windFirstAnemometer),
       valueOrDash(obs.windSecondAnemometer),
       valueOrDash(obs.windSpeed),

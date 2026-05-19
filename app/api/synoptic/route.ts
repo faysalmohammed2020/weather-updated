@@ -640,11 +640,8 @@ export async function GET(request: Request) {
     measurements[16] = `${pressureChangeIndicator}${slicedPressure}`;
 
     // 18. (6RRRtR)/7R24R24R24R24 (24-28) - Precipitation
-    // Show 24-hour rainfall in CL17 only at 00 UTC, while the card stores it for all UTC.
-    const group7R24 =
-      obsHour === 0
-        ? `7${formatR24RainfallAmount(weatherObs.rainfallLast24Hours)}`
-        : "";
+    // Show rolling 24-hour rainfall at every UTC using the stored auto-calculated card value.
+    const group7R24 = `7${formatR24RainfallAmount(weatherObs.rainfallLast24Hours)}`;
 
     const currentSincePreviousMm = parseRainfallMm(
       weatherObs.rainfallSincePrevious,

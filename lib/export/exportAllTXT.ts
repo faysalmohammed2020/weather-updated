@@ -1,6 +1,7 @@
 import { triggerDownload } from "@/lib/export/download";
 import type { SynopticRecord } from "@/lib/types/synoptic";
 import type { DailySummaryRecord } from "@/lib/types/dailySummary";
+import { formatCl17RainfallAmount } from "@/lib/utils/rainfall-format";
 
 interface AllDataExportOptions {
   firstCardData: any[];
@@ -128,7 +129,7 @@ Total Records: ${secondCardData.length}\n`;
       txtContent += `Rainfall Time End       ---> ${record.rainfallTimeEnd || "--"}\n`;
       txtContent += `Rainfall Since Previous ---> ${record.rainfallSincePrevious || "--"}\n`;
       txtContent += `Rainfall During Previous ---> ${record.rainfallDuringPrevious || "--"}\n`;
-      txtContent += `Rainfall Last 24 Hours  ---> ${record.rainfallLast24Hours || "--"}\n`;
+      txtContent += `Rainfall Last 24 Hours  ---> ${formatCl17RainfallAmount(record.rainfallLast24Hours)}\n`;
       txtContent += `Wind First Anemometer   ---> ${record.windFirstAnemometer || "--"}\n`;
       txtContent += `Wind Second Anemometer  ---> ${record.windSecondAnemometer || "--"}\n`;
       txtContent += `Wind Speed              ---> ${record.windSpeed || "--"}\n`;
