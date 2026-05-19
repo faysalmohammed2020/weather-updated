@@ -27,8 +27,16 @@ const RainFields = () => {
   // Watch rainfall related fields
   const rainfallTimeSlots = watch("rainfallTimeSlots") || [];
   const rainfallSincePrevious = watch("rainfallSincePrevious") || "";
+  const observationUtcTime = watch("observationUtcTime") || "";
   const [rainfallType, setRainfallType] = useState<"continuous" | "intermittent" | "">("");
   const [rainfallApiData, setRainfallApiData] = useState<any[]>([]);
+  const observationHour = useMemo(() => {
+    if (!observationUtcTime) return null;
+    const parsed = new Date(observationUtcTime);
+    return Number.isNaN(parsed.getTime()) ? null : parsed.getUTCHours();
+  }, [observationUtcTime]);
+  const isSixHourReport = observationHour !== null && [0, 6, 12, 18].includes(observationHour);
+  const isMidnightReport = observationHour === 0;
 
   // Fetch rainfall calculation data
   useEffect(() => {
@@ -216,18 +224,26 @@ const RainFields = () => {
     return formatToR24Code(total);
   };
 
-  // Auto-fill calculated values
+  // Auto-fill calculated values only for their valid UTC observation hours.
   useEffect(() => {
     if (rainfallApiData.length === 0) return;
 
-    const calculated6Hours = calculateDuringPrevious6Hours();
-    setValue("rainfallDuringPrevious", calculated6Hours || "");
+    if (isSixHourReport) {
+      const calculated6Hours = calculateDuringPrevious6Hours();
+      setValue("rainfallDuringPrevious", calculated6Hours || "");
+    }
 
-    const calculated24Hours = calculateLast24Hours();
-    if (calculated24Hours) {
+    const calculated24Hours = isMidnightReport ? calculateLast24Hours() : "";
+    if (isMidnightReport && calculated24Hours) {
       setValue("rainfallLast24Hours", calculated24Hours);
     }
-  }, [rainfallApiData, rainfallSincePrevious]);
+  }, [
+    rainfallApiData,
+    rainfallSincePrevious,
+    isSixHourReport,
+    isMidnightReport,
+    setValue,
+  ]);
 
   return (
     <div className="space-y-4">

@@ -640,10 +640,11 @@ export async function GET(request: Request) {
     measurements[16] = `${pressureChangeIndicator}${slicedPressure}`;
 
     // 18. (6RRRtR)/7R24R24R24R24 (24-28) - Precipitation
-    // 7R24R24R24R24 is mandatory; R24 is encoded in tenths of a millimetre.
-    const group7R24 = `7${formatR24RainfallAmount(
-      weatherObs.rainfallLast24Hours,
-    )}`;
+    // Show 24-hour rainfall in CL17 only at 00 UTC, while the card stores it for all UTC.
+    const group7R24 =
+      obsHour === 0
+        ? `7${formatR24RainfallAmount(weatherObs.rainfallLast24Hours)}`
+        : "";
 
     const currentSincePreviousMm = parseRainfallMm(
       weatherObs.rainfallSincePrevious,
@@ -662,9 +663,10 @@ export async function GET(request: Request) {
       ? build6RRRtrGroup(sectionThreeSixHourRainfallMm)
       : "";
 
-    measurements[17] = sectionThree6RRRtr
-      ? `${sectionThree6RRRtr}/${group7R24}`
-      : group7R24;
+    measurements[17] =
+      sectionThree6RRRtr && group7R24
+        ? `${sectionThree6RRRtr}/${group7R24}`
+        : sectionThree6RRRtr || group7R24;
 
     // 19. 8N5Ch5h5 (29-33) - Cloud information
     const cloudSegments: string[] = [];

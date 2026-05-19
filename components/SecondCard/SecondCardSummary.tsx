@@ -54,11 +54,10 @@ const SecondCardSummary = memo(function SecondCardSummary({
     return [0, 6, 12, 18].includes(hour);
   }, [selectedHour]);
 
-  const isTwentyFourHourReport = useMemo(() => {
+  const isMidnightReport = useMemo(() => {
     if (!selectedHour) return false;
     const hour = Number.parseInt(selectedHour, 10);
-    if (Number.isNaN(hour)) return false;
-    return [0].includes(hour);
+    return !Number.isNaN(hour) && hour === 0;
   }, [selectedHour]);
 
   // Memoized Cloud Amount Options (shared with parent)
@@ -270,21 +269,21 @@ const SecondCardSummary = memo(function SecondCardSummary({
               required
             />
           )}
-          {isTwentyFourHourReport && (
-            <div>
-              <InputField
-                id="summary-last-24-hours"
-                name="last-24-hours"
-                label="Last 24 Hours Precipitation"
-                accent="cyan"
-                value={formik.values.rainfall["last-24-hours"] || ""}
-                onChange={handleInputChange}
-                error={renderErrorMessage("rainfall.last-24-hours")}
-                required
-                numeric
-              />
-            </div>
-          )}
+          <div>
+            <InputField
+              id="summary-last-24-hours"
+              name="last-24-hours"
+              label={`Last 24 Hours Precipitation${
+                isMidnightReport ? " (Auto-calculated at 00 UTC)" : ""
+              }`}
+              accent="cyan"
+              value={formik.values.rainfall["last-24-hours"] || ""}
+              onChange={handleInputChange}
+              error={renderErrorMessage("rainfall.last-24-hours")}
+              required
+              numeric
+            />
+          </div>
         </div>
       </SectionCard>
 

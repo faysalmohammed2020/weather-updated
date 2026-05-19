@@ -88,11 +88,13 @@ const initialFormValues: WeatherFormValues = {
   observerInitial: "",
   rainfallTimeStart: "",
   rainfallTimeEnd: "",
+  observationUtcTime: "",
   rainfallTimeSlots: [],
 };
 
 const mapObservationToForm = (
   observation?: WeatherObservation,
+  observationUtcTime?: string,
 ): WeatherFormValues => ({
   ...initialFormValues,
   totalCloudAmount: observation?.totalCloudAmount || "",
@@ -130,6 +132,7 @@ const mapObservationToForm = (
   observerInitial: observation?.observerInitial || "",
   rainfallTimeStart: observation?.rainfallTimeStart || "",
   rainfallTimeEnd: observation?.rainfallTimeEnd || "",
+  observationUtcTime: observationUtcTime || "",
   rainfallTimeSlots: observation?.rainfallTimeSlots || [],
   rainfallType: observation?.rainfallType || undefined,
 });
@@ -263,7 +266,7 @@ const SecondCardTable = forwardRef<SecondCardTableHandle, SecondCardTableProps>(
       if (user && canEditObservation(record, user)) {
         setSelectedRecord(record);
         const observation = record.WeatherObservation[0];
-        form.reset(mapObservationToForm(observation));
+        form.reset(mapObservationToForm(observation, record.utcTime));
         setIsEditDialogOpen(true);
       } else {
         setIsPermissionDialogOpen(true);
@@ -280,7 +283,11 @@ const SecondCardTable = forwardRef<SecondCardTableHandle, SecondCardTableProps>(
           body: JSON.stringify({
             id: selectedRecord.WeatherObservation[0].id,
             type: "weather",
-            ...values,
+            ...Object.fromEntries(
+              Object.entries(values).filter(
+                ([key]) => key !== "observationUtcTime",
+              ),
+            ),
           }),
         });
 

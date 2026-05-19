@@ -540,12 +540,10 @@ export default function RainfallTab() {
       setFieldValue("rainfall.during-previous", "");
     }
 
-    // Auto-fill Last 24 Hours (only at 00 UTC)
+    // Auto-fill Last 24 Hours only at 00 UTC. For other UTC hours, keep manual input.
     if (isMidnightReport) {
       const calculated24Hours = calculateLast24Hours();
       setFieldValue("rainfall.last-24-hours", calculated24Hours || "");
-    } else {
-      setFieldValue("rainfall.last-24-hours", "");
     }
   }, [
     rainfallApiData,
@@ -960,27 +958,28 @@ export default function RainfallTab() {
                 />
               </div>
             )}
-            {/* Last 24 Hours Precipitation - Only visible at 00 UTC */}
-            {/* Last 24 Hours Precipitation - Only visible at 00 UTC */}
-            {isMidnightReport && (
-              <div className="grid gap-2">
-                <Label htmlFor="last-24-hours">
-                  Last 24 Hours Precipitation (0.1 mm code)
-                  <span className="ml-2 text-xs text-green-600 font-medium">
-                    (Auto-calculated)
-                  </span>
-                </Label>
-                <Input
-                  id="last-24-hours"
-                  type="text"
-                  maxLength={4}
-                  step="0.1"
-                  value={rainfall["last-24-hours"] || ""}
-                  readOnly
-                  className="border-violet-200 focus:border-violet-500 bg-green-50 font-mono"
-                />
-              </div>
-            )}
+            <div className="grid gap-2">
+              <Label htmlFor="last-24-hours">
+                Last 24 Hours Precipitation (0.1 mm code)
+                <span className="ml-2 text-xs text-green-600 font-medium">
+                  {isMidnightReport ? "(Auto-calculated at 00 UTC)" : "(Manual input)"}
+                </span>
+              </Label>
+              <Input
+                id="last-24-hours"
+                type="text"
+                maxLength={4}
+                step="0.1"
+                value={rainfall["last-24-hours"] || ""}
+                onChange={(e) =>
+                  setFieldValue("rainfall.last-24-hours", e.target.value)
+                }
+                readOnly={isMidnightReport}
+                className={`border-violet-200 focus:border-violet-500 font-mono ${
+                  isMidnightReport ? "bg-green-50" : "bg-white"
+                }`}
+              />
+            </div>
           </div>
         </CardContent>
       </Card>

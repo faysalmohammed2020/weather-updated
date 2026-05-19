@@ -455,9 +455,10 @@ export function generateSynopticCode(): SynopticFormValues {
   measurements[16] = `${pressureChangeIndicator}${absPressureChange}`;
 
   // 18. (6RRRtR)/7R24R24R24R24 (24-28) - Precipitation
-  measurements[17] = `7${formatR24RainfallAmount(
-    weatherObs.rainfall?.["last-24-hours"]
-  )}`;
+  measurements[17] =
+    hour === "00"
+      ? `7${formatR24RainfallAmount(weatherObs.rainfall?.["last-24-hours"])}`
+      : "";
 
   // 19. 8N5Ch5h5 (29-33) - Cloud information
   const lowFormSig = weatherObs.significantClouds?.layer1?.form || "0";

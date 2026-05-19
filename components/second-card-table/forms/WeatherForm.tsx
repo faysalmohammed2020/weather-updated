@@ -44,6 +44,7 @@ export interface WeatherFormValues {
   rainfallTimeStart: string;
   rainfallTimeEnd: string;
   rainfallType?: string;
+  observationUtcTime?: string;
   rainfallTimeSlots: Array<{
     id: string;
     timeStart: string;
