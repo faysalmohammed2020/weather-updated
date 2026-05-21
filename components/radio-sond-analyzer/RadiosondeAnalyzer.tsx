@@ -1,7 +1,7 @@
 // components/radio-sond-analyzer/RadiosondeAnalyzer.tsx
 "use client"
 
-import { Cloud, CheckCircle } from "lucide-react"
+import { CheckCircle } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
@@ -38,20 +38,6 @@ export default function RadiosondeAnalyzer() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       <div className="container mx-auto p-6 space-y-6">
-        {/* Header */}
-        <div className="text-center space-y-4 py-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mb-4">
-            <Cloud className="h-8 w-8 text-white" />
-          </div>
-          <h1 className="text-4xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Radiosonde Data Analyzer
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Advanced meteorological data decoder for TTAA/TTBB upper air soundings
-            with multi-format file support
-          </p>
-        </div>
-
         {/* Export Success Notification */}
         {exportStatus && (
           <div className="fixed top-4 right-4 z-50">
