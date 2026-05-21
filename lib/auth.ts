@@ -5,6 +5,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter"; // v4 adapter
 import prisma from "@/lib/prisma";
 import { LogAction, LogActionType, LogModule } from "@/lib/log";
+import { SESSION_IDLE_TIMEOUT_SECONDS } from "@/lib/session-policy";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { authenticator } from "otplib";
@@ -62,7 +63,7 @@ export const authOptions: NextAuthOptions = {
   secret: authSecret,
   session: {
     strategy: "jwt",
-    maxAge: 60 * 15, // 15 minutes
+    maxAge: SESSION_IDLE_TIMEOUT_SECONDS,
     updateAge: 0,
   },
 
