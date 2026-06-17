@@ -3,6 +3,7 @@
 import { signIn as naSignIn, signOut as naSignOut, useSession as naUseSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import type { UserRole } from "@/lib/constants/user-management";
+import { SIGN_IN_ROUTE } from "@/lib/session-policy";
 
 // ---- main hooks ----
 export function useSession() {
@@ -32,7 +33,7 @@ export async function signIn(params: { email: string; password: string; otp?: st
 
 // ---- sign out ----
 export function signOut() {
-  return naSignOut({ redirect: true, callbackUrl: "/login" });
+  return naSignOut({ redirect: true, callbackUrl: SIGN_IN_ROUTE });
 }
 
 // ---- sign up ----

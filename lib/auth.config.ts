@@ -1,6 +1,7 @@
 //lib/auth.config.ts
 import type { AuthOptions } from "next-auth";
 import NextAuth from "next-auth";
+import { SESSION_IDLE_TIMEOUT_SECONDS } from "@/lib/session-policy";
 
 // ✅ NO Prisma imports here
 export const authConfig: AuthOptions = {
@@ -8,7 +9,7 @@ export const authConfig: AuthOptions = {
 
   session: {
     strategy: "jwt",
-    maxAge: 60 * 15,
+    maxAge: SESSION_IDLE_TIMEOUT_SECONDS,
   },
 
   callbacks: {
