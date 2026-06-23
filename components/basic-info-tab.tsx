@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,9 +20,7 @@ type ValuesState = {
   day: string;
 };
 
-// ✅ stable refs creator (no re-create per render)
-const makeRefs = (len: number): React.RefObject<HTMLInputElement | null>[] =>
-  Array.from({ length: len }, () => React.createRef<HTMLInputElement>());
+type SegmentedInputRefs = React.RefObject<Array<HTMLInputElement | null>>;
 
 export default function BasicInfoTab({
   onFieldChange,
@@ -30,11 +28,11 @@ export default function BasicInfoTab({
 }: BasicInfoTabProps) {
   const { data: session } = useSession();
 
-  const dataTypeRefs = useMemo(() => makeRefs(2), []);
-  const stationNoRefs = useMemo(() => makeRefs(5), []);
-  const yearRefs = useMemo(() => makeRefs(2), []);
-  const monthRefs = useMemo(() => makeRefs(2), []);
-  const dayRefs = useMemo(() => makeRefs(2), []);
+  const dataTypeRefs = useRef<Array<HTMLInputElement | null>>([]);
+  const stationNoRefs = useRef<Array<HTMLInputElement | null>>([]);
+  const yearRefs = useRef<Array<HTMLInputElement | null>>([]);
+  const monthRefs = useRef<Array<HTMLInputElement | null>>([]);
+  const dayRefs = useRef<Array<HTMLInputElement | null>>([]);
 
   const [values, setValues] = useState<ValuesState>(() => {
     const today = new Date();
@@ -84,7 +82,8 @@ export default function BasicInfoTab({
       name: keyof ValuesState,
       value: string,
       index?: number,
-      refs?: React.RefObject<HTMLInputElement | null>[]
+      refs?: SegmentedInputRefs,
+      totalSegments?: number
     ) => {
       setValues((prev) => ({ ...prev, [name]: value }));
       pushUpdates({ [name]: value });
@@ -92,10 +91,11 @@ export default function BasicInfoTab({
       if (
         index !== undefined &&
         refs &&
-        index < refs.length - 1 &&
+        totalSegments !== undefined &&
+        index < totalSegments - 1 &&
         value.length === 1
       ) {
-        refs[index + 1]?.current?.focus();
+        refs.current[index + 1]?.focus();
       }
     },
     [pushUpdates]
@@ -105,8 +105,9 @@ export default function BasicInfoTab({
     (
       e: React.ChangeEvent<HTMLInputElement>,
       index: number,
-      refs: React.RefObject<HTMLInputElement | null>[],
-      fieldName: keyof ValuesState
+      refs: SegmentedInputRefs,
+      fieldName: keyof ValuesState,
+      totalSegments: number
     ) => {
       const val = e.target.value.slice(0, 1);
       const validationPattern = fieldName === "dataType" ? /^[A-Z]?$/ : /^\d?$/;
@@ -116,7 +117,7 @@ export default function BasicInfoTab({
       updated[index] = val;
       const newValue = updated.join("");
 
-      handleChange(fieldName, newValue, index, refs);
+      handleChange(fieldName, newValue, index, refs, totalSegments);
     },
     [values, handleChange]
   );
@@ -158,16 +159,18 @@ export default function BasicInfoTab({
                 DATA TYPE
               </Label>
               <div className="flex gap-1">
-                {dataTypeRefs.map((ref, i) => (
+                {Array.from({ length: 2 }).map((_, i) => (
                   <Input
                     key={`dataType-${i}`}
                     maxLength={1}
                     readOnly
-                    ref={ref}
+                    ref={(node) => {
+                      dataTypeRefs.current[i] = node;
+                    }}
                     className="w-12 bg-white text-center"
                     value={values.dataType?.[i] || ""}
                     onChange={(e) =>
-                      handleSegmentedInput(e, i, dataTypeRefs, "dataType")
+                      handleSegmentedInput(e, i, dataTypeRefs, "dataType", 2)
                     }
                   />
                 ))}
@@ -180,16 +183,18 @@ export default function BasicInfoTab({
                 STATION NO.
               </Label>
               <div className="flex gap-1">
-                {stationNoRefs.map((ref, i) => (
+                {Array.from({ length: 5 }).map((_, i) => (
                   <Input
                     key={`stationNo-${i}`}
                     maxLength={1}
                     readOnly
-                    ref={ref}
+                    ref={(node) => {
+                      stationNoRefs.current[i] = node;
+                    }}
                     className="w-12 bg-white text-center"
                     value={values.stationNo?.[i] || ""}
                     onChange={(e) =>
-                      handleSegmentedInput(e, i, stationNoRefs, "stationNo")
+                      handleSegmentedInput(e, i, stationNoRefs, "stationNo", 5)
                     }
                   />
                 ))}
@@ -216,16 +221,18 @@ export default function BasicInfoTab({
                 YEAR
               </Label>
               <div className="flex gap-1">
-                {yearRefs.map((ref, i) => (
+                {Array.from({ length: 2 }).map((_, i) => (
                   <Input
                     key={`year-${i}`}
                     maxLength={1}
                     readOnly
-                    ref={ref}
+                    ref={(node) => {
+                      yearRefs.current[i] = node;
+                    }}
                     className="w-12 bg-white text-center"
                     value={values.year?.[i] || ""}
                     onChange={(e) =>
-                      handleSegmentedInput(e, i, yearRefs, "year")
+                      handleSegmentedInput(e, i, yearRefs, "year", 2)
                     }
                   />
                 ))}
@@ -238,16 +245,18 @@ export default function BasicInfoTab({
                 MONTH
               </Label>
               <div className="flex gap-1">
-                {monthRefs.map((ref, i) => (
+                {Array.from({ length: 2 }).map((_, i) => (
                   <Input
                     key={`month-${i}`}
                     maxLength={1}
                     readOnly
-                    ref={ref}
+                    ref={(node) => {
+                      monthRefs.current[i] = node;
+                    }}
                     className="w-12 bg-white text-center"
                     value={values.month?.[i] || ""}
                     onChange={(e) =>
-                      handleSegmentedInput(e, i, monthRefs, "month")
+                      handleSegmentedInput(e, i, monthRefs, "month", 2)
                     }
                   />
                 ))}
@@ -260,15 +269,19 @@ export default function BasicInfoTab({
                 DAY
               </Label>
               <div className="flex gap-1">
-                {dayRefs.map((ref, i) => (
+                {Array.from({ length: 2 }).map((_, i) => (
                   <Input
                     key={`day-${i}`}
                     maxLength={1}
                     readOnly
-                    ref={ref}
+                    ref={(node) => {
+                      dayRefs.current[i] = node;
+                    }}
                     className="w-12 bg-white text-center"
                     value={values.day?.[i] || ""}
-                    onChange={(e) => handleSegmentedInput(e, i, dayRefs, "day")}
+                    onChange={(e) =>
+                      handleSegmentedInput(e, i, dayRefs, "day", 2)
+                    }
                   />
                 ))}
               </div>
