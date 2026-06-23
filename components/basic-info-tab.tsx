@@ -20,7 +20,9 @@ type ValuesState = {
   day: string;
 };
 
-type SegmentedInputRefs = React.RefObject<Array<HTMLInputElement | null>>;
+type SegmentedInputRefs = React.MutableRefObject<
+  Array<HTMLInputElement | null>
+>;
 
 export default function BasicInfoTab({
   onFieldChange,
@@ -95,7 +97,7 @@ export default function BasicInfoTab({
         index < totalSegments - 1 &&
         value.length === 1
       ) {
-        refs.current[index + 1]?.focus();
+        refs.current?.[index + 1]?.focus();
       }
     },
     [pushUpdates]
