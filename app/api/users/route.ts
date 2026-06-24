@@ -5,21 +5,11 @@ import { getSession } from "@/lib/getSession";
 import { diff } from "deep-object-diff";
 import { revalidateTag } from "next/cache";
 import { LogAction, LogActionType, LogModule } from "@/lib/log";
-import {
-  appendPasswordHistory,
-  findLatestPasswordAccount,
-  hasRecentPasswordReuse,
-  PASSWORD_REUSE_ERROR,
-} from "@/lib/password-history";
-import {
-  PASSWORD_REQUIREMENTS,
-  USER_ROLES,
-  type UserRole,
-} from "@/lib/constants/user-management";
+import { buildStationAdminUsersWhere } from "@/lib/utils/user-management";
 
 // ✅ NextAuth server session
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth"; 
+import { authOptions } from "@/lib/auth";
 
 async function revokeUserSessions(userId: string) {
   await prisma.sessions.deleteMany({
@@ -43,7 +33,9 @@ export async function GET(request: NextRequest) {
     const search = (searchParams.get("search") || "").trim(); // ✅ NEW
     const roleFilter = searchParams.get("role") || "";
     const stationFilter = searchParams.get("station") || "";
-    const statusFilterParam = (searchParams.get("status") || "active").toLowerCase();
+    const statusFilterParam = (
+      searchParams.get("status") || "active"
+    ).toLowerCase();
 
     // ✅ root_admin + super_admin => see all users
     const isPrivileged =
@@ -54,17 +46,21 @@ export async function GET(request: NextRequest) {
       statusFilterParam === "banned"
         ? { banned: true }
         : statusFilterParam === "all"
-        ? {}
-        : notBannedFilter;
+          ? {}
+          : notBannedFilter;
 
     // ✅ base filter
+    const isStationAdmin = session.user.role === "station_admin";
+
     const baseWhere = isPrivileged
       ? statusFilter
-      : {
-          ...notBannedFilter,
-          role: "observer",
-          stationId: session.user.stationId ?? session.user.station?.id,
-        };
+      : isStationAdmin
+        ? buildStationAdminUsersWhere(session.user, notBannedFilter)
+        : {
+            ...notBannedFilter,
+            role: "observer",
+            stationId: session.user.stationId ?? session.user.station?.id,
+          };
 
     // ✅ Additional filters for super admin
     const additionalFilters: Record<string, string> = isPrivileged ? {} : {};
@@ -76,7 +72,8 @@ export async function GET(request: NextRequest) {
     }
 
     // ✅ Combine all filters
-    const allFilters = Object.keys(additionalFilters).length > 0 ? additionalFilters : {};
+    const allFilters =
+      Object.keys(additionalFilters).length > 0 ? additionalFilters : {};
 
     // ✅ search filter add (name/email)
     const where = search
@@ -108,7 +105,7 @@ export async function GET(request: NextRequest) {
     console.error("Error fetching users:", error);
     return NextResponse.json(
       { error: "Failed to fetch users" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -124,7 +121,10 @@ export async function PUT(request: NextRequest) {
     const { id, password, ...rest } = body;
 
     if (!id) {
-      return NextResponse.json({ error: "User ID is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "User ID is required" },
+        { status: 400 },
+      );
     }
 
     const existingUser = await prisma.users.findUnique({ where: { id } });
@@ -142,7 +142,7 @@ export async function PUT(request: NextRequest) {
     if (!isPrivileged && !isStationAdmin) {
       return NextResponse.json(
         { error: "You are not authorized to do this action" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -154,15 +154,19 @@ export async function PUT(request: NextRequest) {
     if (isSuper && existingUser.role === "root_admin") {
       return NextResponse.json(
         { error: "Super admin cannot edit root admin accounts" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
     // ✅ non-privileged cannot edit super_admin/root_admin
-    if (!isPrivileged && (existingUser.role === "super_admin" || existingUser.role === "root_admin")) {
+    if (
+      !isPrivileged &&
+      (existingUser.role === "super_admin" ||
+        existingUser.role === "root_admin")
+    ) {
       return NextResponse.json(
         { error: "You are not authorized to do this action" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -175,7 +179,7 @@ export async function PUT(request: NextRequest) {
     ) {
       return NextResponse.json(
         { error: "You are not authorized to do this action" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -187,13 +191,12 @@ export async function PUT(request: NextRequest) {
       if (hasStatusUpdate) {
         return NextResponse.json(
           { error: "Station Admin cannot deactivate or restore user accounts" },
-          { status: 403 }
+          { status: 403 },
         );
       }
 
       // Station Admin can only edit users from their own station
-      const userStationId =
-        session.user.stationId ?? session.user.station?.id;
+      const userStationId = session.user.stationId ?? session.user.station?.id;
       const userStationCode = session.user.station?.stationId;
       const sameStation =
         Boolean(userStationId) &&
@@ -203,7 +206,7 @@ export async function PUT(request: NextRequest) {
       if (!sameStation) {
         return NextResponse.json(
           { error: "Station Admin can only edit users from their own station" },
-          { status: 403 }
+          { status: 403 },
         );
       }
 
@@ -211,15 +214,21 @@ export async function PUT(request: NextRequest) {
       if (rest.role && rest.role !== "observer") {
         return NextResponse.json(
           { error: "Station Admin can only manage Observer accounts" },
-          { status: 403 }
+          { status: 403 },
         );
       }
 
       // Station Admin cannot edit Super Admin or Root Admin
-      if (existingUser.role === "super_admin" || existingUser.role === "root_admin") {
+      if (
+        existingUser.role === "super_admin" ||
+        existingUser.role === "root_admin"
+      ) {
         return NextResponse.json(
-          { error: "Station Admin cannot edit super admin or root admin accounts" },
-          { status: 403 }
+          {
+            error:
+              "Station Admin cannot edit super admin or root admin accounts",
+          },
+          { status: 403 },
         );
       }
     }
@@ -234,8 +243,10 @@ export async function PUT(request: NextRequest) {
     // - others not allowed
     if (rest.role === "super_admin" && !isPrivileged) {
       return NextResponse.json(
-        { error: "Only super/root admins can promote users to super admin role" },
-        { status: 403 }
+        {
+          error: "Only super/root admins can promote users to super admin role",
+        },
+        { status: 403 },
       );
     }
 
@@ -244,7 +255,7 @@ export async function PUT(request: NextRequest) {
     if (rest.role === "root_admin" && !isRoot) {
       return NextResponse.json(
         { error: "Only root admin can promote users to root admin role" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -257,10 +268,9 @@ export async function PUT(request: NextRequest) {
       | Awaited<ReturnType<typeof findLatestPasswordAccount>>
       | undefined;
     if (password && password.trim() !== "") {
-      const effectiveRole =
-        ((rest.role as UserRole | undefined) ??
-          (existingUser.role as UserRole | null) ??
-          USER_ROLES.OBSERVER) as UserRole;
+      const effectiveRole = ((rest.role as UserRole | undefined) ??
+        (existingUser.role as UserRole | null) ??
+        USER_ROLES.OBSERVER) as UserRole;
       const minLength = PASSWORD_REQUIREMENTS[effectiveRole];
 
       if (password.length < minLength) {
@@ -268,23 +278,24 @@ export async function PUT(request: NextRequest) {
           {
             error: `Password must be at least ${minLength} characters for ${effectiveRole} role`,
           },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
-      existingAccount = (await findLatestPasswordAccount(prisma, id)) ?? undefined;
+      existingAccount =
+        (await findLatestPasswordAccount(prisma, id)) ?? undefined;
 
       const isRecentReuse = await hasRecentPasswordReuse(
         prisma,
         id,
         password,
-        existingAccount?.password
+        existingAccount?.password,
       );
 
       if (isRecentReuse) {
         return NextResponse.json(
           { error: PASSWORD_REUSE_ERROR },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -348,15 +359,16 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json(
       { message: "User updated successfully", user: updatedUser },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Error updating user:", error);
-    return NextResponse.json({ error: "Failed to update user" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to update user" },
+      { status: 500 },
+    );
   }
 }
-
-
 
 /* ----------------------------- CREATE USER ----------------------------- */
 export async function POST(request: NextRequest) {
@@ -374,7 +386,7 @@ export async function POST(request: NextRequest) {
     if (!isPrivileged && !isStationAdmin) {
       return NextResponse.json(
         { error: "You are not authorized to do this action" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -398,15 +410,17 @@ export async function POST(request: NextRequest) {
       if (role !== "observer") {
         return NextResponse.json(
           { error: "Station Admin can only create Observer accounts" },
-          { status: 403 }
+          { status: 403 },
         );
       }
 
       // Station Admin can only create users for their own station
       if (!userStationDbId || stationId !== userStationDbId) {
         return NextResponse.json(
-          { error: "Station Admin can only create users for their own station" },
-          { status: 403 }
+          {
+            error: "Station Admin can only create users for their own station",
+          },
+          { status: 403 },
         );
       }
     }
@@ -414,7 +428,7 @@ export async function POST(request: NextRequest) {
     if (!email || !password || !role || !division || !district || !upazila) {
       return NextResponse.json(
         { error: "Missing required fields" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -440,7 +454,7 @@ export async function POST(request: NextRequest) {
         {
           error: `Password must be at least ${requiredLength} characters for ${role} role`,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -451,7 +465,7 @@ export async function POST(request: NextRequest) {
     if (existingUser) {
       return NextResponse.json(
         { error: "User with this email already exists" },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
@@ -510,13 +524,13 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       { message: "User created successfully" },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("Error creating user:", error);
     return NextResponse.json(
       { error: "Failed to create user" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -535,7 +549,7 @@ export async function DELETE(request: NextRequest) {
     if (actorRole !== "super_admin" && actorRole !== "root_admin") {
       return NextResponse.json(
         { error: "You are not authorized to do this action" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -545,7 +559,7 @@ export async function DELETE(request: NextRequest) {
     if (!userId) {
       return NextResponse.json(
         { error: "User ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -553,7 +567,7 @@ export async function DELETE(request: NextRequest) {
     if (session.user.id === userId) {
       return NextResponse.json(
         { error: "You cannot delete your own account" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -568,7 +582,7 @@ export async function DELETE(request: NextRequest) {
     if (userToDelete.banned) {
       return NextResponse.json(
         { message: "User already deleted" },
-        { status: 200 }
+        { status: 200 },
       );
     }
 
@@ -576,7 +590,7 @@ export async function DELETE(request: NextRequest) {
     if (actorRole === "super_admin" && userToDelete.role === "root_admin") {
       return NextResponse.json(
         { error: "Super admin cannot delete root admin accounts" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -614,14 +628,13 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json(
       { message: "User deleted successfully" },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Error deleting user:", error);
     return NextResponse.json(
       { error: "Failed to delete user" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-

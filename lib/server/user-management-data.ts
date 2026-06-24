@@ -2,6 +2,7 @@
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/getSession";
 import type { Station } from "@prisma/client";
+import { buildStationAdminUsersWhere } from "@/lib/utils/user-management";
 
 /**
  * Users fetch (server-only, build-safe)
@@ -45,7 +46,26 @@ export async function getUsersForSession(params: {
   const role = session.user.role;
   const isPrivileged = role === "super_admin" || role === "root_admin";
 
-  // ✅ non-privileged: safe default (only self)
+  if (role === "station_admin") {
+    const where = buildStationAdminUsersWhere(session.user, statusFilter);
+    const [users, total] = await Promise.all([
+      prisma.users.findMany({
+        where,
+        skip: params.offset,
+        take: params.limit,
+        orderBy: { createdAt: "desc" },
+        include: {
+          Station: {
+            select: { id: true, name: true, securityCode: true },
+          },
+        },
+      }),
+      prisma.users.count({ where }),
+    ]);
+    return { users, total };
+  }
+
+  // ✅ other non-privileged roles: self only
   if (!isPrivileged) {
     const [users, total] = await Promise.all([
       prisma.users.findMany({

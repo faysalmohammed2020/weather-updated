@@ -250,3 +250,62 @@ export function canDeleteUser(
   // ✅ API rule: root_admin can delete anyone (including super_admin/root_admin)
   return { canDelete: true, error: "" };
 }
+
+type StationAdminSession = {
+  id?: string;
+  stationId?: string;
+  station?: { id?: string; stationId?: string } | null;
+};
+
+type StationAdminUser = {
+  id: string;
+  role: string | null;
+  stationId: string;
+};
+
+/** Prisma where: station admin sees self + station observers. */
+export function buildStationAdminUsersWhere(
+  session: StationAdminSession,
+  statusFilter: Record<string, unknown>,
+) {
+  const stationDbId = session.station?.id ?? session.stationId;
+  const stationCode = session.station?.stationId;
+  const stationIds = [stationDbId, stationCode].filter(
+    (id): id is string => Boolean(id),
+  );
+
+  const selfFilter = session.id ? [{ id: session.id }] : [];
+
+  return {
+    AND: [
+      statusFilter,
+      {
+        OR: [
+          ...selfFilter,
+          {
+            role: USER_ROLES.OBSERVER,
+            ...(stationIds.length > 0
+              ? { stationId: { in: stationIds } }
+              : {}),
+          },
+        ],
+      },
+    ],
+  };
+}
+
+/** Client filter: station admin sees self + station observers. */
+export function isUserVisibleToStationAdmin(
+  user: StationAdminUser,
+  session: StationAdminSession,
+) {
+  if (session.id && user.id === session.id) return true;
+
+  const stationDbId = session.station?.id ?? session.stationId;
+  const stationCode = session.station?.stationId;
+
+  return (
+    user.role === USER_ROLES.OBSERVER &&
+    (user.stationId === stationDbId || user.stationId === stationCode)
+  );
+}
