@@ -46,6 +46,7 @@ import {
   canDeleteUser,
   canImpersonate,
   buildUserUpdatePayload,
+  isUserVisibleToStationAdmin,
 } from "@/lib/utils/user-management";
 import {
   useUserOperations,
@@ -249,19 +250,16 @@ export const UserTableClient = ({
   }, [stations]);
 
   const visibleUsers = useMemo(() => {
-    const userStationDbId =
-      session?.user?.station?.id ?? session?.user?.stationId;
-    const userStationCode = session?.user?.station?.stationId;
-
     if (actorRole === USER_ROLES.ROOT_ADMIN) return users;
 
-    // Station Admin can only see users from their own station
+    // Station admin: self + station observers
     if (actorRole === USER_ROLES.STATION_ADMIN) {
-      return users.filter(
-        (u) =>
-          u.role === USER_ROLES.OBSERVER &&
-          (u.stationId === userStationDbId ||
-            u.stationId === userStationCode),
+      return users.filter((u) =>
+        isUserVisibleToStationAdmin(u, {
+          id: session?.user?.id,
+          stationId: session?.user?.stationId,
+          station: session?.user?.station,
+        }),
       );
     }
 

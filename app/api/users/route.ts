@@ -5,6 +5,7 @@ import { getSession } from "@/lib/getSession";
 import { diff } from "deep-object-diff";
 import { revalidateTag } from "next/cache";
 import { LogAction, LogActionType, LogModule } from "@/lib/log";
+import { buildStationAdminUsersWhere } from "@/lib/utils/user-management";
 
 // ✅ NextAuth server session
 import { getServerSession } from "next-auth";
@@ -47,13 +48,17 @@ export async function GET(request: NextRequest) {
         : notBannedFilter;
 
     // ✅ base filter
+    const isStationAdmin = session.user.role === "station_admin";
+
     const baseWhere = isPrivileged
       ? statusFilter
-      : {
-          ...notBannedFilter,
-          role: "observer",
-          stationId: session.user.stationId ?? session.user.station?.id,
-        };
+      : isStationAdmin
+        ? buildStationAdminUsersWhere(session.user, notBannedFilter)
+        : {
+            ...notBannedFilter,
+            role: "observer",
+            stationId: session.user.stationId ?? session.user.station?.id,
+          };
 
     // ✅ Additional filters for super admin
     const additionalFilters: Record<string, string> = isPrivileged ? {} : {};
