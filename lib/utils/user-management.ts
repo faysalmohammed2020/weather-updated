@@ -254,7 +254,7 @@ export function canDeleteUser(
 type StationAdminSession = {
   id?: string;
   stationId?: string;
-  station?: { id?: string; stationId?: string };
+  station?: { id?: string; stationId?: string } | null;
 };
 
 type StationAdminUser = {
@@ -265,7 +265,7 @@ type StationAdminUser = {
 
 /** Prisma where: station admin sees self + station observers. */
 export function buildStationAdminUsersWhere(
-  session: StationAdminSession & { id: string },
+  session: StationAdminSession,
   statusFilter: Record<string, unknown>,
 ) {
   const stationDbId = session.station?.id ?? session.stationId;
@@ -274,12 +274,14 @@ export function buildStationAdminUsersWhere(
     (id): id is string => Boolean(id),
   );
 
+  const selfFilter = session.id ? [{ id: session.id }] : [];
+
   return {
     AND: [
       statusFilter,
       {
         OR: [
-          { id: session.id },
+          ...selfFilter,
           {
             role: USER_ROLES.OBSERVER,
             ...(stationIds.length > 0
