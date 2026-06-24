@@ -137,3 +137,22 @@ export const twoFactor = {
     callTwoFactor("verifyBackupCode", params),
   disable: (params: { password: string }) => callTwoFactor("disable", params),
 };
+
+export async function changePassword(params: {
+  currentPassword: string;
+  newPassword: string;
+}) {
+  const res = await fetch("/api/account/password", {
+    method: "PATCH",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(params),
+  });
+
+  const body = await res.json().catch(() => ({}));
+
+  return {
+    ok: res.ok,
+    message: body?.message as string | undefined,
+    error: body?.error as string | undefined,
+  };
+}

@@ -5,12 +5,23 @@ import { useState } from "react";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-import { useSession, twoFactor } from "@/lib/auth-client";
+import { changePassword, twoFactor, useSession } from "@/lib/auth-client";
+import {
+  PASSWORD_REQUIREMENTS,
+  USER_ROLES,
+  type UserRole,
+} from "@/lib/constants/user-management";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Shield, Settings as SettingsIcon } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  KeyRound,
+  Shield,
+  Settings as SettingsIcon,
+} from "lucide-react";
 import QRCode from "react-qr-code";
 import { toast } from "sonner";
 import {
@@ -42,15 +53,20 @@ const Settings = () => {
   const [disablePassword, setDisablePassword] = useState("");
   const [disableError, setDisableError] = useState("");
   const [isDisableLoading, setIsDisableLoading] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [isPasswordLoading, setIsPasswordLoading] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showTwoFactorPassword, setShowTwoFactorPassword] = useState(false);
+  const [showDisablePassword, setShowDisablePassword] = useState(false);
 
-  // Early redirect and loading state
   useEffect(() => {
-    if (!isPending && session) {
-      const role = session?.user?.role;
-      if (role !== "super_admin" && role !== "root_admin") {
-        router.replace("/dashboard");
-        return;
-      }
+    if (!isPending && !session) {
+      router.replace("/sign-in");
     }
   }, [session, isPending, router]);
 
@@ -58,7 +74,6 @@ const Settings = () => {
     setTwoFactorEnabled(Boolean(session?.user?.twoFactorEnabled));
   }, [session?.user?.twoFactorEnabled]);
 
-  // Don't render anything if session is loading or user is not super_admin
   if (isPending) {
     return (
       <div className="p-6 max-w-4xl mx-auto">
@@ -69,14 +84,55 @@ const Settings = () => {
     );
   }
 
-  // If no session or not super_admin, show nothing (redirect will happen)
-  if (
-    !session ||
-    (session?.user?.role !== "super_admin" &&
-      session?.user?.role !== "root_admin")
-  ) {
+  if (!session) {
     return null;
   }
+
+  const roleLabel = String(session.user?.role || "observer")
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+  const currentRole =
+    ((session.user?.role as UserRole | undefined) ?? USER_ROLES.OBSERVER);
+  const minPasswordLength = PASSWORD_REQUIREMENTS[currentRole];
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setPasswordError("All password fields are required");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError("New password and confirm password do not match");
+      return;
+    }
+
+    setIsPasswordLoading(true);
+    setPasswordError("");
+
+    try {
+      const result = await changePassword({
+        currentPassword,
+        newPassword,
+      });
+
+      if (!result.ok) {
+        setPasswordError(result.error || "Failed to update password");
+        return;
+      }
+
+      toast.success(result.message || "Password updated successfully");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (err: unknown) {
+      setPasswordError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setIsPasswordLoading(false);
+    }
+  };
 
   const handleToggle2FA = async (checked: boolean) => {
     if (checked) {
@@ -189,7 +245,94 @@ const Settings = () => {
     <div className="p-6">
       <div className="flex items-center gap-2 mb-6">
         <SettingsIcon className="h-6 w-6" />
-        <h1 className="text-2xl font-bold">Account Settings</h1>
+        <div>
+          <h1 className="text-2xl font-bold">Account Settings</h1>
+          <p className="text-sm text-gray-500">{roleLabel}</p>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 className="text-xl font-semibold mb-4">Password</h2>
+
+        <form onSubmit={handlePasswordChange} className="space-y-4">
+          <div className="flex items-start gap-3">
+            <KeyRound className="h-5 w-5 mt-0.5 text-blue-600" />
+            <div className="w-full space-y-4">
+              <p className="text-sm text-gray-500">
+                Change your own password. This works for root admin, super
+                admin, station admin, and observer accounts.
+              </p>
+
+              <div className="rounded-lg border border-sky-100 bg-sky-50 px-4 py-3 text-sm text-slate-700">
+                <p className="font-medium text-sky-900">Password rules</p>
+                <ul className="mt-2 space-y-1">
+                  <li>
+                    Use at least {minPasswordLength} characters for your{" "}
+                    {roleLabel} account.
+                  </li>
+                  <li>New password must be different from current password.</li>
+                  <li>Confirm password must match the new password exactly.</li>
+                  <li>
+                    No extra uppercase, number, or symbol requirement is
+                    enforced currently.
+                  </li>
+                </ul>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="space-y-2">
+                  <Label htmlFor="currentPassword">Current Password</Label>
+                  <PasswordInputField
+                    id="currentPassword"
+                    value={currentPassword}
+                    onChange={setCurrentPassword}
+                    showPassword={showCurrentPassword}
+                    onToggleVisibility={() =>
+                      setShowCurrentPassword((prev) => !prev)
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword">New Password</Label>
+                  <PasswordInputField
+                    id="newPassword"
+                    value={newPassword}
+                    onChange={setNewPassword}
+                    showPassword={showNewPassword}
+                    onToggleVisibility={() =>
+                      setShowNewPassword((prev) => !prev)
+                    }
+                    placeholder={`At least ${minPasswordLength} characters`}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <PasswordInputField
+                    id="confirmPassword"
+                    value={confirmPassword}
+                    onChange={setConfirmPassword}
+                    showPassword={showConfirmPassword}
+                    onToggleVisibility={() =>
+                      setShowConfirmPassword((prev) => !prev)
+                    }
+                  />
+                </div>
+              </div>
+
+              {passwordError && (
+                <p className="text-sm text-red-500">{passwordError}</p>
+              )}
+
+              <div className="flex justify-end">
+                <Button type="submit" disabled={isPasswordLoading}>
+                  {isPasswordLoading ? "Updating..." : "Update Password"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </form>
       </div>
 
       <div className="bg-white rounded-lg shadow p-6 mb-6">
@@ -250,12 +393,15 @@ const Settings = () => {
               <div className="space-y-4 py-2">
                 <div className="space-y-2">
                   <Label htmlFor="password">Password</Label>
-                  <Input
+                  <PasswordInputField
                     id="password"
-                    type="password"
-                    placeholder="Enter your password"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={setPassword}
+                    showPassword={showTwoFactorPassword}
+                    onToggleVisibility={() =>
+                      setShowTwoFactorPassword((prev) => !prev)
+                    }
+                    placeholder="Enter your password"
                   />
                 </div>
                 {error && <p className="text-sm text-red-500">{error}</p>}
@@ -387,12 +533,15 @@ const Settings = () => {
             <div className="space-y-4 py-2">
               <div className="space-y-2">
                 <Label htmlFor="disablePassword">Password</Label>
-                <Input
+                <PasswordInputField
                   id="disablePassword"
-                  type="password"
-                  placeholder="Enter your password"
                   value={disablePassword}
-                  onChange={(e) => setDisablePassword(e.target.value)}
+                  onChange={setDisablePassword}
+                  showPassword={showDisablePassword}
+                  onToggleVisibility={() =>
+                    setShowDisablePassword((prev) => !prev)
+                  }
+                  placeholder="Enter your password"
                 />
               </div>
               {disableError && (
@@ -423,5 +572,46 @@ const Settings = () => {
     </div>
   );
 };
+
+function PasswordInputField({
+  id,
+  value,
+  onChange,
+  showPassword,
+  onToggleVisibility,
+  placeholder,
+}: {
+  id: string;
+  value: string;
+  onChange: (value: string) => void;
+  showPassword: boolean;
+  onToggleVisibility: () => void;
+  placeholder?: string;
+}) {
+  return (
+    <div className="relative">
+      <Input
+        id={id}
+        type={showPassword ? "text" : "password"}
+        value={value}
+        placeholder={placeholder}
+        onChange={(e) => onChange(e.target.value)}
+        className="pr-10"
+      />
+      <button
+        type="button"
+        onClick={onToggleVisibility}
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition-colors hover:text-gray-600"
+        aria-label={showPassword ? "Hide password" : "Show password"}
+      >
+        {showPassword ? (
+          <EyeOff className="h-4 w-4" />
+        ) : (
+          <Eye className="h-4 w-4" />
+        )}
+      </button>
+    </div>
+  );
+}
 
 export default Settings;

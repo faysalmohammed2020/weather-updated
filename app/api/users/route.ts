@@ -128,6 +128,13 @@ export async function PUT(request: NextRequest) {
     const isStationAdmin = actorRole === "station_admin";
     const isPrivileged = isRoot || isSuper;
 
+    if (!isPrivileged && !isStationAdmin) {
+      return NextResponse.json(
+        { error: "You are not authorized to do this action" },
+        { status: 403 }
+      );
+    }
+
     // ============================================================
     // ✅ HARD RULES (as per your requirement)
     // ============================================================

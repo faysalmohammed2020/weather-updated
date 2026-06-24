@@ -34,7 +34,7 @@ const Profile = () => {
   }
 
   return (
-    <div className="flex items-center gap-6 h-12">
+    <div className="flex items-center gap-4 h-12 pr-4">
       {isLoading ? (
         <div className="flex flex-col">
           <span className="whitespace-nowrap text-xs md:text-md md:font-medium text-white uppercase text-shadow">

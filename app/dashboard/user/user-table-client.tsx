@@ -967,6 +967,7 @@ const updatePageInUrl = useCallback(
                         onDelete={openDeleteConfirmation}
                         onRestore={openRestoreConfirmation}
                         onImpersonate={handleImpersonate}
+                        onOpenSettings={() => router.push("/dashboard/settings")}
                         isImpersonating={impersonatingUserId === user.id}
                       />
                     </TableCell>
@@ -1116,6 +1117,7 @@ interface UserActionButtonsProps {
     userName: string | null,
     userRole: string | null,
   ) => void;
+  onOpenSettings: () => void;
   isImpersonating: boolean;
 }
 
@@ -1130,6 +1132,7 @@ const UserActionButtons = ({
   onDelete,
   onRestore,
   onImpersonate,
+  onOpenSettings,
   isImpersonating,
 }: UserActionButtonsProps) => {
   const isRootActor = actorRole === USER_ROLES.ROOT_ADMIN;
@@ -1156,9 +1159,16 @@ const UserActionButtons = ({
   const canManageStatus = canManageUsers && !blockSuperOnSuper;
 
   const canManageTarget = user.role !== USER_ROLES.ROOT_ADMIN || isRootActor;
+  const isCurrentUser = user.id === currentUserId;
 
   return (
     <div className="flex gap-2">
+      {isCurrentUser && (
+        <Button variant="outline" size="sm" onClick={onOpenSettings}>
+          My Account
+        </Button>
+      )}
+
       {canEditUser && (
         <Button variant="outline" size="sm" onClick={() => onEdit(user)}>
           Edit

@@ -229,7 +229,7 @@ const Sidebar = () => {
       href: "/dashboard/settings",
       icon: <Settings className="w-5 h-5" />,
       label: "Settings",
-      roles: ["root_admin", "super_admin"],
+      roles: ["root_admin", "super_admin", "station_admin", "observer"],
     },
   ];
 
