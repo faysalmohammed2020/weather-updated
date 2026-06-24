@@ -18,9 +18,11 @@ import { Label } from "@/components/ui/label";
 import {
   Eye,
   EyeOff,
+  CheckCircle2,
   KeyRound,
   Shield,
   Settings as SettingsIcon,
+  XCircle,
 } from "lucide-react";
 import QRCode from "react-qr-code";
 import { toast } from "sonner";
@@ -32,6 +34,136 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+
+type PasswordCheck = {
+  id: string;
+  label: string;
+  passed: boolean;
+};
+
+type PasswordStrength = {
+  label: "Bad" | "Weak" | "Strong" | "Extra Strong";
+  score: number;
+  maxScore: number;
+  barClassName: string;
+  textClassName: string;
+};
+
+const FALLBACK_PASSWORD_LENGTH = 12;
+
+const hasUppercase = (value: string) => /[A-Z]/.test(value);
+const hasLowercase = (value: string) => /[a-z]/.test(value);
+const hasNumber = (value: string) => /\d/.test(value);
+const hasSymbol = (value: string) => /[^A-Za-z0-9]/.test(value);
+
+function getPasswordChecks({
+  currentPassword,
+  newPassword,
+  confirmPassword,
+  minLength = FALLBACK_PASSWORD_LENGTH,
+}: {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+  minLength?: number;
+}): PasswordCheck[] {
+  return [
+    {
+      id: "length",
+      label: `At least ${minLength} characters`,
+      passed: newPassword.length >= minLength,
+    },
+    {
+      id: "uppercase",
+      label: "Contains uppercase letter",
+      passed: hasUppercase(newPassword),
+    },
+    {
+      id: "lowercase",
+      label: "Contains lowercase letter",
+      passed: hasLowercase(newPassword),
+    },
+    {
+      id: "number",
+      label: "Contains number",
+      passed: hasNumber(newPassword),
+    },
+    {
+      id: "symbol",
+      label: "Contains symbol/special character",
+      passed: hasSymbol(newPassword),
+    },
+    {
+      id: "different",
+      label: "Different from current password",
+      passed:
+        currentPassword.length > 0 &&
+        newPassword.length > 0 &&
+        newPassword !== currentPassword,
+    },
+    {
+      id: "match",
+      label: "Confirm password matches",
+      passed:
+        confirmPassword.length > 0 &&
+        newPassword.length > 0 &&
+        confirmPassword === newPassword,
+    },
+  ];
+}
+
+function getPasswordStrength(
+  password: string,
+  minLength: number,
+): PasswordStrength {
+  const maxScore = 6;
+  const score = [
+    password.length >= minLength,
+    hasUppercase(password),
+    hasLowercase(password),
+    hasNumber(password),
+    hasSymbol(password),
+    password.length >= minLength + 4,
+  ].filter(Boolean).length;
+
+  if (score >= 6) {
+    return {
+      label: "Extra Strong",
+      score,
+      maxScore,
+      barClassName: "bg-emerald-600",
+      textClassName: "text-emerald-700",
+    };
+  }
+
+  if (score >= 4) {
+    return {
+      label: "Strong",
+      score,
+      maxScore,
+      barClassName: "bg-green-600",
+      textClassName: "text-green-700",
+    };
+  }
+
+  if (score >= 2) {
+    return {
+      label: "Weak",
+      score,
+      maxScore,
+      barClassName: "bg-yellow-500",
+      textClassName: "text-yellow-700",
+    };
+  }
+
+  return {
+    label: "Bad",
+    score,
+    maxScore,
+    barClassName: "bg-red-500",
+    textClassName: "text-red-600",
+  };
+}
 
 const Settings = () => {
   const { data: session, isPending } = useSession();
@@ -94,7 +226,22 @@ const Settings = () => {
     .join(" ");
   const currentRole =
     ((session.user?.role as UserRole | undefined) ?? USER_ROLES.OBSERVER);
-  const minPasswordLength = PASSWORD_REQUIREMENTS[currentRole];
+  const configuredMinPasswordLength =
+    PASSWORD_REQUIREMENTS[currentRole] ?? FALLBACK_PASSWORD_LENGTH;
+  const minPasswordLength = configuredMinPasswordLength;
+  const passwordChecks = getPasswordChecks({
+    currentPassword,
+    newPassword,
+    confirmPassword,
+    minLength: minPasswordLength,
+  });
+  const allPasswordChecksPassed = passwordChecks.every((check) => check.passed);
+  const isPasswordSubmitDisabled =
+    isPasswordLoading ||
+    !currentPassword ||
+    !newPassword ||
+    !confirmPassword ||
+    !allPasswordChecksPassed;
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,8 +251,25 @@ const Settings = () => {
       return;
     }
 
+    if (newPassword === currentPassword) {
+      setPasswordError("New password must be different from current password");
+      return;
+    }
+
     if (newPassword !== confirmPassword) {
       setPasswordError("New password and confirm password do not match");
+      return;
+    }
+
+    const failedPasswordCheck = getPasswordChecks({
+      currentPassword,
+      newPassword,
+      confirmPassword,
+      minLength: minPasswordLength,
+    }).find((check) => !check.passed);
+
+    if (failedPasswordCheck) {
+      setPasswordError(`Password rule failed: ${failedPasswordCheck.label}`);
       return;
     }
 
@@ -266,18 +430,13 @@ const Settings = () => {
               <div className="rounded-lg border border-sky-100 bg-sky-50 px-4 py-3 text-sm text-slate-700">
                 <p className="font-medium text-sky-900">Password rules</p>
                 <ul className="mt-2 space-y-1">
-                  <li>
-                    Use at least {minPasswordLength} characters for your{" "}
-                    {roleLabel} account.
-                  </li>
-                  <li>New password must be different from current password.</li>
-                  <li>Confirm password must match the new password exactly.</li>
-                  <li>You cannot reuse any of your last 4 passwords.</li>
-                  <li>
-                    No extra uppercase, number, or symbol requirement is
-                    enforced currently.
-                  </li>
+                  {passwordChecks.map((check) => (
+                    <PasswordRuleItem key={check.id} check={check} />
+                  ))}
                 </ul>
+                <p className="mt-2 text-xs text-slate-500">
+                  You cannot reuse any of your last 4 passwords.
+                </p>
               </div>
 
               <div className="grid gap-4 md:grid-cols-3">
@@ -306,6 +465,12 @@ const Settings = () => {
                     }
                     placeholder={`At least ${minPasswordLength} characters`}
                   />
+                  {newPassword && (
+                    <PasswordStrengthIndicator
+                      password={newPassword}
+                      minLength={minPasswordLength}
+                    />
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -319,6 +484,19 @@ const Settings = () => {
                       setShowConfirmPassword((prev) => !prev)
                     }
                   />
+                  {confirmPassword && (
+                    <p
+                      className={`text-xs font-medium ${
+                        confirmPassword === newPassword
+                          ? "text-green-600"
+                          : "text-red-500"
+                      }`}
+                    >
+                      {confirmPassword === newPassword
+                        ? "Passwords match"
+                        : "Passwords do not match"}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -327,7 +505,7 @@ const Settings = () => {
               )}
 
               <div className="flex justify-end">
-                <Button type="submit" disabled={isPasswordLoading}>
+                <Button type="submit" disabled={isPasswordSubmitDisabled}>
                   {isPasswordLoading ? "Updating..." : "Update Password"}
                 </Button>
               </div>
@@ -573,6 +751,51 @@ const Settings = () => {
     </div>
   );
 };
+
+function PasswordRuleItem({ check }: { check: PasswordCheck }) {
+  return (
+    <li
+      className={`flex items-center gap-2 ${
+        check.passed ? "text-green-700" : "text-slate-500"
+      }`}
+    >
+      {check.passed ? (
+        <CheckCircle2 className="h-4 w-4 shrink-0 text-green-600" />
+      ) : (
+        <XCircle className="h-4 w-4 shrink-0 text-red-400" />
+      )}
+      <span>{check.label}</span>
+    </li>
+  );
+}
+
+function PasswordStrengthIndicator({
+  password,
+  minLength,
+}: {
+  password: string;
+  minLength: number;
+}) {
+  const strength = getPasswordStrength(password, minLength);
+  const progressPercent = Math.max(
+    12,
+    Math.round((strength.score / strength.maxScore) * 100),
+  );
+
+  return (
+    <div className="space-y-1">
+      <p className={`text-xs font-medium ${strength.textClassName}`}>
+        Password strength: {strength.label}
+      </p>
+      <div className="h-1.5 overflow-hidden rounded-full bg-slate-200">
+        <div
+          className={`h-full rounded-full transition-all ${strength.barClassName}`}
+          style={{ width: `${progressPercent}%` }}
+        />
+      </div>
+    </div>
+  );
+}
 
 function PasswordInputField({
   id,

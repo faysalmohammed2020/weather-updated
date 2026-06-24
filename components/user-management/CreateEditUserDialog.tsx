@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Eye, EyeOff } from "lucide-react";
+import { CheckCircle2, Eye, EyeOff, XCircle } from "lucide-react";
 import {
   USER_ROLES,
   PASSWORD_REQUIREMENTS,
@@ -70,6 +70,118 @@ interface CreateEditUserDialogProps {
   currentUserRole: UserRole | null;
   userStationId?: string;
   createTrigger?: React.ReactNode;
+}
+
+type PasswordCheck = {
+  id: string;
+  label: string;
+  passed: boolean;
+};
+
+type PasswordStrength = {
+  label: "Bad" | "Weak" | "Strong" | "Extra Strong";
+  score: number;
+  maxScore: number;
+  barClassName: string;
+  textClassName: string;
+};
+
+const hasUppercase = (value: string) => /[A-Z]/.test(value);
+const hasLowercase = (value: string) => /[a-z]/.test(value);
+const hasNumber = (value: string) => /\d/.test(value);
+const hasSymbol = (value: string) => /[^A-Za-z0-9]/.test(value);
+
+function getPasswordChecks(
+  password: string,
+  role: UserRole | null,
+): PasswordCheck[] {
+  const minLength = role ? PASSWORD_REQUIREMENTS[role] : 0;
+
+  return [
+    {
+      id: "length",
+      label: `At least ${minLength} characters`,
+      passed: Boolean(role) && password.length >= minLength,
+    },
+    {
+      id: "uppercase",
+      label: "Contains uppercase letter",
+      passed: hasUppercase(password),
+    },
+    {
+      id: "lowercase",
+      label: "Contains lowercase letter",
+      passed: hasLowercase(password),
+    },
+    {
+      id: "number",
+      label: "Contains number",
+      passed: hasNumber(password),
+    },
+    {
+      id: "symbol",
+      label: "Contains symbol/special character",
+      passed: hasSymbol(password),
+    },
+  ];
+}
+
+function getPasswordStrength(
+  password: string,
+  role: UserRole | null,
+): PasswordStrength {
+  const minLength = role ? PASSWORD_REQUIREMENTS[role] : 0;
+  const maxScore = 6;
+  const score = [
+    Boolean(role) && password.length >= minLength,
+    hasUppercase(password),
+    hasLowercase(password),
+    hasNumber(password),
+    hasSymbol(password),
+    Boolean(role) && password.length >= minLength + 4,
+  ].filter(Boolean).length;
+
+  if (score >= 6) {
+    return {
+      label: "Extra Strong",
+      score,
+      maxScore,
+      barClassName: "bg-emerald-600",
+      textClassName: "text-emerald-700",
+    };
+  }
+
+  if (score >= 4) {
+    return {
+      label: "Strong",
+      score,
+      maxScore,
+      barClassName: "bg-green-600",
+      textClassName: "text-green-700",
+    };
+  }
+
+  if (score >= 2) {
+    return {
+      label: "Weak",
+      score,
+      maxScore,
+      barClassName: "bg-yellow-500",
+      textClassName: "text-yellow-700",
+    };
+  }
+
+  return {
+    label: "Bad",
+    score,
+    maxScore,
+    barClassName: "bg-red-500",
+    textClassName: "text-red-600",
+  };
+}
+
+function isPasswordValidForRole(password: string, role: UserRole | null) {
+  return getPasswordChecks(password, role).every((check) => check.passed);
 }
 
 const DialogTitle_Internal = memo(({ editUser }: { editUser: User | null }) => {
@@ -184,6 +296,8 @@ const EmailPasswordFields = memo(
   }) => {
     const [showPassword, setShowPassword] = useState(false);
     const minLength = role ? PASSWORD_REQUIREMENTS[role] : 0;
+    const showPasswordGuidance =
+      Boolean(role) && !isPasswordDisabled && (!editUser || password.length > 0);
 
     return (
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -235,6 +349,19 @@ const EmailPasswordFields = memo(
               )}
             </button>
           </div>
+          {editUser && (
+            <p className="text-xs text-gray-500">
+              Leave password empty if you do not want to change it.
+            </p>
+          )}
+          {showPasswordGuidance && (
+            <div className="space-y-3 rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
+              {password.length > 0 && (
+                <PasswordStrengthIndicator password={password} role={role} />
+              )}
+              <PasswordRulesChecklist password={password} role={role} />
+            </div>
+          )}
         </div>
       </div>
     );
@@ -242,6 +369,70 @@ const EmailPasswordFields = memo(
 );
 
 EmailPasswordFields.displayName = "EmailPasswordFields";
+
+const PasswordRulesChecklist = memo(
+  ({ password, role }: { password: string; role: UserRole | null }) => {
+    const checks = getPasswordChecks(password, role);
+
+    return (
+      <div className="space-y-1">
+        <p className="text-xs font-medium text-slate-700">Password rules</p>
+        <ul className="space-y-1">
+          {checks.map((check) => (
+            <PasswordRuleItem key={check.id} check={check} />
+          ))}
+        </ul>
+      </div>
+    );
+  },
+);
+
+PasswordRulesChecklist.displayName = "PasswordRulesChecklist";
+
+const PasswordRuleItem = memo(({ check }: { check: PasswordCheck }) => {
+  return (
+    <li
+      className={`flex items-center gap-2 text-xs ${
+        check.passed ? "text-green-700" : "text-slate-500"
+      }`}
+    >
+      {check.passed ? (
+        <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-green-600" />
+      ) : (
+        <XCircle className="h-3.5 w-3.5 shrink-0 text-red-400" />
+      )}
+      <span>{check.label}</span>
+    </li>
+  );
+});
+
+PasswordRuleItem.displayName = "PasswordRuleItem";
+
+const PasswordStrengthIndicator = memo(
+  ({ password, role }: { password: string; role: UserRole | null }) => {
+    const strength = getPasswordStrength(password, role);
+    const progressPercent = Math.max(
+      12,
+      Math.round((strength.score / strength.maxScore) * 100),
+    );
+
+    return (
+      <div className="space-y-1">
+        <p className={`text-xs font-medium ${strength.textClassName}`}>
+          Password strength: {strength.label}
+        </p>
+        <div className="h-1.5 overflow-hidden rounded-full bg-slate-200">
+          <div
+            className={`h-full rounded-full transition-all ${strength.barClassName}`}
+            style={{ width: `${progressPercent}%` }}
+          />
+        </div>
+      </div>
+    );
+  },
+);
+
+PasswordStrengthIndicator.displayName = "PasswordStrengthIndicator";
 
 const StationFields = memo(
   ({
@@ -523,6 +714,46 @@ export const CreateEditUserDialog = memo((props: CreateEditUserDialogProps) => {
     [formData, onFormDataChange, upazilas, onUpazilaChange]
   );
 
+  const passwordHasValue = formData.password.length > 0;
+  const shouldValidatePassword = !editUser || passwordHasValue;
+  const passwordValidationFailed =
+    shouldValidatePassword &&
+    !isPasswordValidForRole(formData.password, formData.role);
+  const isSubmitDisabled =
+    Boolean(isLoading) ||
+    !formData.role ||
+    (!editUser && !passwordHasValue) ||
+    passwordValidationFailed;
+
+  const handleSubmit = useCallback(() => {
+    if (!formData.role) {
+      toast.error("Please select a role before submitting");
+      return;
+    }
+
+    if (!editUser && !formData.password) {
+      toast.error("Password is required");
+      return;
+    }
+
+    if (editUser && !formData.password) {
+      onSubmit();
+      return;
+    }
+
+    const failedPasswordCheck = getPasswordChecks(
+      formData.password,
+      formData.role,
+    ).find((check) => !check.passed);
+
+    if (failedPasswordCheck) {
+      toast.error(`Password rule failed: ${failedPasswordCheck.label}`);
+      return;
+    }
+
+    onSubmit();
+  }, [editUser, formData.password, formData.role, onSubmit]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {createTrigger && <DialogTrigger asChild>{createTrigger}</DialogTrigger>}
@@ -606,9 +837,9 @@ export const CreateEditUserDialog = memo((props: CreateEditUserDialogProps) => {
             Cancel
           </Button>
           <Button
-            onClick={onSubmit}
+            onClick={handleSubmit}
             className="bg-blue-600 hover:bg-blue-700"
-            disabled={isLoading}
+            disabled={isSubmitDisabled}
           >
             {isLoading
               ? "Processing..."
