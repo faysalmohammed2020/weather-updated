@@ -3,6 +3,7 @@ import { LocationProvider } from "@/contexts/divisionContext";
 import { HourProvider } from "@/contexts/hourContext";
 import Profile from "@/components/profile";
 import { ImpersonationBanner } from "@/components/impersonation-banner";
+import { PasswordAgeWarning } from "@/components/password-age-warning";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -16,6 +17,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
         <div className="grow overflow-y-auto relative">
           <ImpersonationBanner />
+          <PasswordAgeWarning />
           <LocationProvider>
             <HourProvider>{children}</HourProvider>
           </LocationProvider>

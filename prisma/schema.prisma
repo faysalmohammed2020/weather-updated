@@ -36,6 +36,7 @@ model users {
   updatedAt        DateTime
   sessions         sessions[]
   accounts         accounts[]
+  passwordHistory  passwordHistory[]
   twoFactor        twoFactor[]
 
   Station       Station         @relation(fields: [stationId], references: [id], onDelete: Restrict)
@@ -76,10 +77,22 @@ model accounts {
   refreshTokenExpiresAt DateTime?
   scope                 String?
   password              String?
+  passwordChangedAt     DateTime?
   createdAt             DateTime
   updatedAt             DateTime
 
   @@index([userId])
+}
+
+model passwordHistory {
+  id           String   @id @default(cuid())
+  userId       String
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  user users @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
 }
 
 model verifications {

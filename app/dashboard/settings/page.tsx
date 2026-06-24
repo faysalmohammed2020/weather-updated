@@ -272,6 +272,7 @@ const Settings = () => {
                   </li>
                   <li>New password must be different from current password.</li>
                   <li>Confirm password must match the new password exactly.</li>
+                  <li>You cannot reuse any of your last 4 passwords.</li>
                   <li>
                     No extra uppercase, number, or symbol requirement is
                     enforced currently.

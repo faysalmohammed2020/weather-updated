@@ -1,68 +1,21 @@
 import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import bcrypt from "bcryptjs";
-import crypto from "crypto";
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/getSession";
 import { LogAction, LogActionType, LogModule } from "@/lib/log";
+import {
+  appendPasswordHistory,
+  findLatestPasswordAccount,
+  hasRecentPasswordReuse,
+  PASSWORD_REUSE_ERROR,
+  verifyStoredPassword,
+} from "@/lib/password-history";
 import {
   PASSWORD_REQUIREMENTS,
   USER_ROLES,
   type UserRole,
 } from "@/lib/constants/user-management";
-
-function verifyLegacyScryptPassword(plain: string, stored: string) {
-  if (!stored.includes(":")) return false;
-
-  const [saltHex, keyHex] = stored.split(":");
-  if (!saltHex || !keyHex) return false;
-
-  const salt = Buffer.from(saltHex, "hex");
-  const expected = Buffer.from(keyHex, "hex");
-  const rCandidates = [8, 16];
-  const pCandidates = [1, 2];
-
-  for (let ln = 10; ln <= 18; ln++) {
-    const N = 2 ** ln;
-
-    for (const r of rCandidates) {
-      for (const p of pCandidates) {
-        try {
-          const derived = crypto.scryptSync(plain, salt, expected.length, {
-            N,
-            r,
-            p,
-            maxmem: 1024 * 1024 * 512,
-          });
-
-          if (crypto.timingSafeEqual(derived, expected)) {
-            return true;
-          }
-        } catch {
-          continue;
-        }
-      }
-    }
-  }
-
-  return false;
-}
-
-async function verifyStoredPassword(plain: string, stored: string) {
-  if (
-    stored.startsWith("$2a$") ||
-    stored.startsWith("$2b$") ||
-    stored.startsWith("$2y$")
-  ) {
-    return bcrypt.compare(plain, stored);
-  }
-
-  if (stored.includes(":") && /^[0-9a-fA-F:]+$/.test(stored)) {
-    return verifyLegacyScryptPassword(plain, stored);
-  }
-
-  return plain === stored;
-}
 
 export async function PATCH(request: Request) {
   try {
@@ -111,21 +64,7 @@ export async function PATCH(request: Request) {
       );
     }
 
-    const account =
-      (await prisma.accounts.findFirst({
-        where: {
-          userId: user.id,
-          password: { not: null },
-          providerId: { in: ["credential", "credentials"] },
-        },
-        orderBy: { updatedAt: "desc" },
-        select: { id: true, password: true },
-      })) ??
-      (await prisma.accounts.findFirst({
-        where: { userId: user.id, password: { not: null } },
-        orderBy: { updatedAt: "desc" },
-        select: { id: true, password: true },
-      }));
+    const account = await findLatestPasswordAccount(prisma, user.id);
 
     if (!account?.password) {
       return NextResponse.json(
@@ -146,14 +85,31 @@ export async function PATCH(request: Request) {
       );
     }
 
+    const isRecentReuse = await hasRecentPasswordReuse(
+      prisma,
+      user.id,
+      newPassword,
+      account.password
+    );
+
+    if (isRecentReuse) {
+      return NextResponse.json(
+        { error: PASSWORD_REUSE_ERROR },
+        { status: 400 }
+      );
+    }
+
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     await prisma.$transaction(async (tx) => {
+      await appendPasswordHistory(tx, user.id, account.password!);
+
       await tx.accounts.update({
         where: { id: account.id },
         data: {
           password: hashedPassword,
           providerId: "credentials",
+          passwordChangedAt: new Date(),
           updatedAt: new Date(),
         },
       });

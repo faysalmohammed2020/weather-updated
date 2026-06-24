@@ -85,6 +85,7 @@ export async function POST(req: NextRequest) {
           providerId: "credential",
           userId: newUser.id,
           password: hashedPassword,
+          passwordChangedAt: new Date(),
           createdAt: new Date(),
           updatedAt: new Date(),
         },

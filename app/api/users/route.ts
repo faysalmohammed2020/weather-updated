@@ -5,6 +5,17 @@ import { getSession } from "@/lib/getSession";
 import { diff } from "deep-object-diff";
 import { revalidateTag } from "next/cache";
 import { LogAction, LogActionType, LogModule } from "@/lib/log";
+import {
+  appendPasswordHistory,
+  findLatestPasswordAccount,
+  hasRecentPasswordReuse,
+  PASSWORD_REUSE_ERROR,
+} from "@/lib/password-history";
+import {
+  PASSWORD_REQUIREMENTS,
+  USER_ROLES,
+  type UserRole,
+} from "@/lib/constants/user-management";
 
 // ✅ NextAuth server session
 import { getServerSession } from "next-auth";
@@ -242,7 +253,41 @@ export async function PUT(request: NextRequest) {
     // ============================================================
 
     let hashedPassword: string | undefined;
+    let existingAccount:
+      | Awaited<ReturnType<typeof findLatestPasswordAccount>>
+      | undefined;
     if (password && password.trim() !== "") {
+      const effectiveRole =
+        ((rest.role as UserRole | undefined) ??
+          (existingUser.role as UserRole | null) ??
+          USER_ROLES.OBSERVER) as UserRole;
+      const minLength = PASSWORD_REQUIREMENTS[effectiveRole];
+
+      if (password.length < minLength) {
+        return NextResponse.json(
+          {
+            error: `Password must be at least ${minLength} characters for ${effectiveRole} role`,
+          },
+          { status: 400 }
+        );
+      }
+
+      existingAccount = (await findLatestPasswordAccount(prisma, id)) ?? undefined;
+
+      const isRecentReuse = await hasRecentPasswordReuse(
+        prisma,
+        id,
+        password,
+        existingAccount?.password
+      );
+
+      if (isRecentReuse) {
+        return NextResponse.json(
+          { error: PASSWORD_REUSE_ERROR },
+          { status: 400 }
+        );
+      }
+
       hashedPassword = await bcrypt.hash(password, 10);
     }
 
@@ -253,22 +298,25 @@ export async function PUT(request: NextRequest) {
       });
 
       if (hashedPassword) {
-        const existingAccount = await tx.accounts.findFirst({
-          where: { userId: id, providerId: "credential" },
-        });
-
         if (existingAccount) {
+          await appendPasswordHistory(tx, id, existingAccount.password!);
+
           await tx.accounts.update({
             where: { id: existingAccount.id },
-            data: { password: hashedPassword },
+            data: {
+              password: hashedPassword,
+              providerId: "credentials",
+              passwordChangedAt: new Date(),
+            },
           });
         } else {
           await tx.accounts.create({
             data: {
               accountId: id,
-              providerId: "credential",
+              providerId: "credentials",
               userId: id,
               password: hashedPassword,
+              passwordChangedAt: new Date(),
               createdAt: new Date(),
               updatedAt: new Date(),
             },
@@ -437,6 +485,7 @@ export async function POST(request: NextRequest) {
           providerId: "credential",
           userId: newUser.id,
           password: hashedPassword,
+          passwordChangedAt: new Date(),
           createdAt: new Date(),
           updatedAt: new Date(),
         },
