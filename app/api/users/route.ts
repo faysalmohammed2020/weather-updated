@@ -6,6 +6,17 @@ import { diff } from "deep-object-diff";
 import { revalidateTag } from "next/cache";
 import { LogAction, LogActionType, LogModule } from "@/lib/log";
 import { buildStationAdminUsersWhere } from "@/lib/utils/user-management";
+import {
+  PASSWORD_REQUIREMENTS,
+  USER_ROLES,
+  type UserRole,
+} from "@/lib/constants/user-management";
+import {
+  appendPasswordHistory,
+  findLatestPasswordAccount,
+  hasRecentPasswordReuse,
+  PASSWORD_REUSE_ERROR,
+} from "@/lib/password-history";
 
 // ✅ NextAuth server session
 import { getServerSession } from "next-auth";
@@ -433,21 +444,11 @@ export async function POST(request: NextRequest) {
     }
 
     // ✅ add root_admin + password rule
-    const passwordMinLength = {
-      root_admin: 12,
-      super_admin: 12,
-      station_admin: 11,
-      observer: 10,
-    } as const;
-
-    if (
-      !["root_admin", "super_admin", "station_admin", "observer"].includes(role)
-    ) {
+    if (!Object.values(USER_ROLES).includes(role as UserRole)) {
       return NextResponse.json({ error: "Invalid role" }, { status: 400 });
     }
 
-    const requiredLength =
-      passwordMinLength[role as keyof typeof passwordMinLength];
+    const requiredLength = PASSWORD_REQUIREMENTS[role as UserRole];
 
     if (password.length < requiredLength) {
       return NextResponse.json(
