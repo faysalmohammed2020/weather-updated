@@ -1,0 +1,18 @@
+
+> weather-forecast-bd@0.1.0 dev
+> next dev --turbo -p 7999
+
+   ▲ Next.js 15.5.19 (Turbopack)
+   - Local:        http://localhost:7999
+   - Network:      http://192.168.1.92:7999
+   - Environments: .env
+
+ ✓ Starting...
+Creating turbopack project { dir: 'E:\\weather\\next_update\\weather-updated', testMode: true }
+ ○ Compiling middleware ...
+ ✓ Compiled middleware in 1412ms
+ ✓ Ready in 6.5s
+ ○ Compiling / ...
+ ✓ Compiled / in 14.5s
+ GET / 200 in 16079ms
+[?25h
