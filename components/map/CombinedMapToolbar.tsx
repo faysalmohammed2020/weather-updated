@@ -53,159 +53,140 @@ export default function CombinedMapToolbar({
   onLayerDrawerOpen,
 }: CombinedMapToolbarProps) {
   const [isLayerPanelOpen, setIsLayerPanelOpen] = useState(false);
-  const selectedDistrict = districts.find(
-    (district) => district.code === selectedDistrictId
-  );
   const districtDisabled = viewMode !== "district" || districts.length === 0;
   const previewForecastLayers = forecastLayers.slice(0, 3);
 
   return (
-    <div className="pointer-events-none absolute left-1/2 top-4 z-[1200] w-[min(calc(100%-1rem),940px)] -translate-x-1/2 px-2 sm:px-0">
-      <div className="pointer-events-auto overflow-hidden rounded-2xl border border-white/50 bg-white/88 shadow-2xl shadow-slate-950/16 ring-1 ring-slate-950/5 backdrop-blur-2xl dark:border-white/10 dark:bg-slate-950/82 dark:ring-white/10">
-        <div className="flex flex-col gap-3 p-3 lg:flex-row lg:items-center lg:gap-4">
-          <div className="min-w-0 flex-1">
-            <div className="mb-2 flex items-center justify-between gap-3">
-              <div className="flex min-w-0 items-center gap-2">
-                <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-emerald-500/12 text-emerald-700 ring-1 ring-emerald-500/20 dark:text-emerald-300">
-                  <MapPinned className="size-4" />
-                </span>
-                <div className="min-w-0">
-                  <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
-                    Boundary View
-                  </div>
-                  <div className="truncate text-sm font-semibold text-slate-950 dark:text-white">
-                    {viewMode === "country"
-                      ? "Bangladesh country boundary"
-                      : selectedDistrict?.name ?? "District-wise boundary"}
-                  </div>
-                </div>
-              </div>
+    <div className="pointer-events-none absolute left-1/2 top-3 z-[1200] w-[min(calc(100%-1rem),980px)] -translate-x-1/2 px-2 sm:px-0">
+      <div className="pointer-events-auto overflow-hidden rounded-2xl border border-white/50 bg-white/88 shadow-xl shadow-slate-950/12 ring-1 ring-slate-950/5 backdrop-blur-2xl dark:border-white/10 dark:bg-slate-950/82 dark:ring-white/10">
+        <div className="flex items-center gap-2 p-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-emerald-500/12 text-emerald-700 ring-1 ring-emerald-500/20 dark:text-emerald-300">
+                <MapPinned className="size-4" />
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>Boundary controls</TooltipContent>
+          </Tooltip>
+
+          <div className="grid min-w-0 flex-1 gap-2 sm:grid-cols-[minmax(170px,0.9fr)_minmax(210px,1.1fr)]">
+            <Select
+              value={viewMode}
+              onValueChange={(value) =>
+                onViewModeChange(value as BoundaryViewMode)
+              }
+            >
+              <SelectTrigger className="h-10 w-full rounded-xl border-slate-200 bg-white/92 px-3 text-sm font-semibold shadow-sm dark:border-white/10 dark:bg-slate-900/80">
+                <SelectValue placeholder="Boundary mode" />
+              </SelectTrigger>
+              <SelectContent className="z-[1300]">
+                <SelectItem value="country">🇧🇩 Bangladesh</SelectItem>
+                <SelectItem value="district">District-wise Boundary</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={selectedDistrictId ?? undefined}
+              disabled={districtDisabled}
+              onValueChange={onDistrictChange}
+            >
+              <SelectTrigger className="h-10 w-full rounded-xl border-slate-200 bg-white/92 px-3 text-sm font-medium shadow-sm dark:border-white/10 dark:bg-slate-900/80">
+                <SelectValue
+                  placeholder={
+                    districts.length === 0
+                      ? "Loading districts..."
+                      : "Select district"
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent className="z-[1300] max-h-72">
+                {districts.map((district) => (
+                  <SelectItem key={district.code} value={district.code}>
+                    {district.name}
+                    {district.division ? ` · ${district.division}` : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
               <Button
                 type="button"
                 size="icon"
                 variant="ghost"
-                className="size-8 shrink-0 rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"
+                className="size-10 shrink-0 rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"
                 onClick={onReset}
                 aria-label="Reset boundary view"
               >
                 <RotateCcw className="size-4" />
               </Button>
-            </div>
+            </TooltipTrigger>
+            <TooltipContent>Reset boundary view</TooltipContent>
+          </Tooltip>
 
-            <div className="grid gap-2 sm:grid-cols-[minmax(190px,0.9fr)_minmax(230px,1.1fr)]">
-              <Select
-                value={viewMode}
-                onValueChange={(value) =>
-                  onViewModeChange(value as BoundaryViewMode)
+          <div className="hidden h-10 w-px shrink-0 bg-slate-200 dark:bg-white/10 sm:block" />
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                className="size-10 shrink-0 rounded-xl border border-slate-200 bg-white/80 text-slate-700 shadow-sm hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10"
+                onClick={() => setIsLayerPanelOpen((value) => !value)}
+                aria-expanded={isLayerPanelOpen}
+                aria-label="Show all weather layers"
+              >
+                <Layers className="size-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Show all weather layers</TooltipContent>
+          </Tooltip>
+
+          <div className="flex min-w-0 gap-1.5 overflow-x-auto py-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {stationLayers.map((layer) => (
+              <ToolbarLayerButton
+                key={layer.key}
+                layer={layer}
+                active={enabled[layer.key]}
+                onClick={() =>
+                  onParameterToggle(layer.key, !enabled[layer.key])
                 }
-              >
-                <SelectTrigger className="h-11 w-full rounded-xl border-slate-200 bg-white/92 px-3 text-sm font-semibold shadow-sm dark:border-white/10 dark:bg-slate-900/80">
-                  <SelectValue placeholder="Boundary mode" />
-                </SelectTrigger>
-                <SelectContent className="z-[1300]">
-                  <SelectItem value="country">🇧🇩 Bangladesh</SelectItem>
-                  <SelectItem value="district">District-wise Boundary</SelectItem>
-                </SelectContent>
-              </Select>
+              />
+            ))}
+            <div className="mx-0.5 min-h-10 w-px shrink-0 bg-slate-200 dark:bg-white/10" />
+            {previewForecastLayers.map((layer) => {
+              const layerId = layer.key as ForecastLayerId;
 
-              <Select
-                value={selectedDistrictId ?? undefined}
-                disabled={districtDisabled}
-                onValueChange={onDistrictChange}
-              >
-                <SelectTrigger className="h-11 w-full rounded-xl border-slate-200 bg-white/92 px-3 text-sm font-medium shadow-sm dark:border-white/10 dark:bg-slate-900/80">
-                  <SelectValue
-                    placeholder={
-                      districts.length === 0
-                        ? "Loading districts..."
-                        : "Select district"
-                    }
-                  />
-                </SelectTrigger>
-                <SelectContent className="z-[1300] max-h-72">
-                  {districts.map((district) => (
-                    <SelectItem key={district.code} value={district.code}>
-                      {district.name}
-                      {district.division ? ` · ${district.division}` : ""}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="hidden h-16 w-px bg-slate-200 dark:bg-white/10 lg:block" />
-
-          <div className="min-w-0 lg:max-w-[438px]">
-            <div className="mb-2 flex items-center justify-between gap-3">
-              <div>
-                <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
-                  Weather Layers
-                </div>
-                <div className="text-xs text-slate-500 dark:text-slate-400">
-                  Station and forecast overlays
-                </div>
-              </div>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="ghost"
-                    className="size-9 shrink-0 rounded-xl border border-slate-200 bg-white/80 text-slate-700 shadow-sm hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10"
-                    onClick={() => setIsLayerPanelOpen((value) => !value)}
-                    aria-expanded={isLayerPanelOpen}
-                    aria-label="Show all weather layers"
-                  >
-                    <Layers className="size-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Show all weather layers</TooltipContent>
-              </Tooltip>
-            </div>
-
-            <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {stationLayers.map((layer) => (
+              return (
                 <ToolbarLayerButton
                   key={layer.key}
                   layer={layer}
-                  active={enabled[layer.key]}
-                  onClick={() => onParameterToggle(layer.key, !enabled[layer.key])}
+                  active={enabledForecast[layerId]}
+                  onClick={() =>
+                    onForecastToggle(layerId, !enabledForecast[layerId])
+                  }
                 />
-              ))}
-              <div className="mx-1 min-h-10 w-px shrink-0 bg-slate-200 dark:bg-white/10" />
-              {previewForecastLayers.map((layer) => {
-                const layerId = layer.key as ForecastLayerId;
-
-                return (
-                  <ToolbarLayerButton
-                    key={layer.key}
-                    layer={layer}
-                    active={enabledForecast[layerId]}
-                    onClick={() =>
-                      onForecastToggle(layerId, !enabledForecast[layerId])
-                    }
-                  />
-                );
-              })}
-              <button
-                type="button"
-                className={cn(
-                  "grid size-10 shrink-0 place-items-center rounded-xl border text-xs font-bold transition-all",
-                  isLayerPanelOpen
-                    ? "border-cyan-500 bg-cyan-500 text-white shadow-lg shadow-cyan-500/20"
-                    : "border-slate-200 bg-white/80 text-slate-600 shadow-sm hover:-translate-y-0.5 hover:bg-white hover:text-slate-950 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white"
-                )}
-                onClick={() => setIsLayerPanelOpen((value) => !value)}
-                aria-expanded={isLayerPanelOpen}
-                aria-label="Show remaining weather layers"
-              >
-                +{forecastLayers.length - previewForecastLayers.length}
-              </button>
-            </div>
+              );
+            })}
+            <button
+              type="button"
+              className={cn(
+                "grid size-10 shrink-0 place-items-center rounded-xl border text-xs font-bold transition-all",
+                isLayerPanelOpen
+                  ? "border-cyan-500 bg-cyan-500 text-white shadow-lg shadow-cyan-500/20"
+                  : "border-slate-200 bg-white/80 text-slate-600 shadow-sm hover:-translate-y-0.5 hover:bg-white hover:text-slate-950 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white",
+              )}
+              onClick={() => setIsLayerPanelOpen((value) => !value)}
+              aria-expanded={isLayerPanelOpen}
+              aria-label="Show remaining weather layers"
+            >
+              +{forecastLayers.length - previewForecastLayers.length}
+            </button>
           </div>
         </div>
-
         {isLayerPanelOpen && (
           <div className="border-t border-slate-200/70 bg-slate-50/78 p-3 dark:border-white/10 dark:bg-white/[0.03]">
             <div className="grid gap-3 lg:grid-cols-[0.85fr_1.15fr]">
@@ -229,7 +210,10 @@ export default function CombinedMapToolbar({
             </div>
 
             <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white/78 px-3 py-2 text-xs text-slate-500 dark:border-white/10 dark:bg-slate-950/35 dark:text-slate-400">
-              <span>All weather layers are available here; the top row stays compact.</span>
+              <span>
+                All weather layers are available here; the top row stays
+                compact.
+              </span>
               <Button
                 type="button"
                 size="sm"
@@ -299,7 +283,7 @@ function LayerPanelButton({
         "group flex min-w-0 items-center gap-2 rounded-xl border px-2.5 py-2 text-left text-sm transition-all duration-200",
         active
           ? "border-transparent bg-slate-950 text-white shadow-lg shadow-slate-950/15 dark:bg-white dark:text-slate-950"
-          : "border-slate-200 bg-white/82 text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-slate-300 hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10"
+          : "border-slate-200 bg-white/82 text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-slate-300 hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10",
       )}
       onClick={onClick}
       aria-pressed={active}
@@ -342,7 +326,7 @@ function ToolbarLayerButton({
             "group relative grid size-10 shrink-0 place-items-center rounded-xl border transition-all duration-200",
             active
               ? "border-transparent bg-slate-950 text-white shadow-lg shadow-slate-950/20 dark:bg-white dark:text-slate-950"
-              : "border-slate-200 bg-white/80 text-slate-600 shadow-sm hover:-translate-y-0.5 hover:border-slate-300 hover:bg-white hover:text-slate-950 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white"
+              : "border-slate-200 bg-white/80 text-slate-600 shadow-sm hover:-translate-y-0.5 hover:border-slate-300 hover:bg-white hover:text-slate-950 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white",
           )}
           onClick={onClick}
           aria-pressed={active}
@@ -351,7 +335,7 @@ function ToolbarLayerButton({
           <span
             className={cn(
               "absolute inset-x-2 bottom-1 h-0.5 rounded-full transition-opacity",
-              active ? "opacity-100" : "opacity-0 group-hover:opacity-70"
+              active ? "opacity-100" : "opacity-0 group-hover:opacity-70",
             )}
             style={{ backgroundColor: layer.accent }}
           />

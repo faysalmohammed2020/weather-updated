@@ -60,6 +60,9 @@ import {
   type WeatherMarkerType,
 } from "@/components/weather/weather-marker-factory";
 import CombinedMapToolbar from "@/components/map/CombinedMapToolbar";
+import WeatherCanvasLayer from "@/components/weather-animation/WeatherCanvasLayer";
+import WeatherLegend from "@/components/weather-animation/WeatherLegend";
+import { isForecastAnimationLayer } from "@/lib/weather/grid-types";
 import type {
   BoundaryViewMode,
   DistrictOption,
@@ -1054,6 +1057,14 @@ export default function WeatherMapClient({ isDark }: WeatherMapClientProps) {
     () => weatherLayers.find((layer) => layer.key === activeLayerKey),
     [activeLayerKey]
   );
+  const activeForecastLayerKey =
+    activeLayer && isForecastAnimationLayer(activeLayer.key)
+      ? activeLayer.key
+      : null;
+  const forecastTimestamps = useMemo(
+    () => timelineSteps.map((step) => step.iso),
+    []
+  );
 
   const handleLayerChange = useCallback((layerKey: WeatherLayerKey) => {
     setActiveLayerKey((current) => (current === layerKey ? null : layerKey));
@@ -1174,6 +1185,15 @@ export default function WeatherMapClient({ isDark }: WeatherMapClientProps) {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
             url={isDark ? mapTiles.dark : mapTiles.light}
           />
+          <WeatherCanvasLayer
+            activeLayer={activeLayer}
+            opacity={overlayOpacity}
+            timelineIndex={timelineIndex}
+            isPlaying={isPlaying}
+            speed={speed}
+            timestamps={forecastTimestamps}
+            isDark={isDark}
+          />
           <BoundaryLayer isDark={isDark} />
           <DistrictBoundaryLayer
             isDark={isDark}
@@ -1188,11 +1208,14 @@ export default function WeatherMapClient({ isDark }: WeatherMapClientProps) {
         </MapContainer>
       </div>
 
-      <ForecastOverlay
-        activeLayer={activeLayer}
-        opacity={overlayOpacity}
-        timelineIndex={timelineIndex}
-      />
+      {activeForecastLayerKey && (
+        <WeatherLegend
+          layerKey={activeForecastLayerKey}
+          isPlaying={isPlaying}
+          timestamp={timelineSteps[timelineIndex]?.iso ?? ""}
+          opacity={overlayOpacity}
+        />
+      )}
       <CombinedMapToolbar
         viewMode={boundaryViewMode}
         selectedDistrictId={selectedDistrictCode}
