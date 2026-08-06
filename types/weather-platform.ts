@@ -1,5 +1,13 @@
 import type { LucideIcon } from "lucide-react";
 
+export type BoundaryViewMode = "country" | "district";
+
+export type DistrictOption = {
+  code: string;
+  name: string;
+  division: string;
+};
+
 export type WeatherLayerKind = "station" | "forecast";
 
 export type WeatherLayerKey =
@@ -18,6 +26,21 @@ export type WeatherLayerKey =
   | "dewPointForecast"
   | "lowCloud"
   | "totalCloud";
+
+export type ForecastLayerId = Extract<
+  WeatherLayerKey,
+  | "temperatureForecast"
+  | "humidityForecast"
+  | "windForecast"
+  | "pressureIsolines"
+  | "meanSeaLevelPressure"
+  | "geopotential"
+  | "dewPointForecast"
+  | "lowCloud"
+  | "totalCloud"
+>;
+
+export type EnabledMap = Record<WeatherLayerKey, boolean>;
 
 export type WeatherLayer = {
   key: WeatherLayerKey;

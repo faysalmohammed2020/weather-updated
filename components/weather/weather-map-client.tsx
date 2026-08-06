@@ -24,7 +24,6 @@ import {
   ChevronsLeft,
   ChevronsRight,
   Gauge,
-  Layers,
   LocateFixed,
   Minus,
   Pause,
@@ -60,7 +59,12 @@ import {
   getZoomMode,
   type WeatherMarkerType,
 } from "@/components/weather/weather-marker-factory";
+import CombinedMapToolbar from "@/components/map/CombinedMapToolbar";
 import type {
+  BoundaryViewMode,
+  DistrictOption,
+  EnabledMap,
+  ForecastLayerId,
   WeatherLayer,
   WeatherLayerKey,
   WeatherStation,
@@ -68,14 +72,6 @@ import type {
 
 type WeatherMapClientProps = {
   isDark: boolean;
-};
-
-type BoundaryViewMode = "country" | "district";
-
-type DistrictOption = {
-  code: string;
-  name: string;
-  division: string;
 };
 
 const bangladeshBounds: L.LatLngBoundsLiteral = [
@@ -631,94 +627,6 @@ function StationMarkers({
   );
 }
 
-function BoundaryViewControl({
-  viewMode,
-  selectedDistrictCode,
-  districtOptions,
-  onViewModeChange,
-  onDistrictChange,
-}: {
-  viewMode: BoundaryViewMode;
-  selectedDistrictCode: string | null;
-  districtOptions: DistrictOption[];
-  onViewModeChange: (viewMode: BoundaryViewMode) => void;
-  onDistrictChange: (districtCode: string | null) => void;
-}) {
-  return (
-    <div className="absolute left-1/2 top-20 z-[870] w-[min(calc(100%-1.5rem),560px)] -translate-x-1/2 rounded-lg border border-white/40 bg-white/84 p-3 shadow-2xl shadow-slate-950/12 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/78 sm:top-4 lg:top-[5.25rem]">
-      <div className="mb-2 flex items-center justify-between gap-3">
-        <div>
-          <div className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">
-            Boundary View
-          </div>
-          <div className="text-sm font-semibold text-slate-950 dark:text-white">
-            {viewMode === "country"
-              ? "Bangladesh country boundary"
-              : selectedDistrictCode
-                ? districtOptions.find((district) => district.code === selectedDistrictCode)
-                    ?.name ?? "District boundary"
-                : "District-wise boundary"}
-          </div>
-        </div>
-        {viewMode === "district" && selectedDistrictCode && (
-          <Button
-            type="button"
-            size="sm"
-            variant="ghost"
-            className="h-8 rounded-md px-2 text-xs"
-            onClick={() => onDistrictChange(null)}
-          >
-            Clear
-          </Button>
-        )}
-      </div>
-      <div className="grid gap-2 sm:grid-cols-[1fr_1.2fr]">
-        <label className="sr-only" htmlFor="boundary-view-mode">
-          Boundary view mode
-        </label>
-        <select
-          id="boundary-view-mode"
-          value={viewMode}
-          onChange={(event) => {
-            const nextMode = event.target.value as BoundaryViewMode;
-            onViewModeChange(nextMode);
-            if (nextMode === "country") {
-              onDistrictChange(null);
-            }
-          }}
-          className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-900 shadow-sm outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 dark:border-white/10 dark:bg-slate-900 dark:text-white"
-        >
-          <option value="country">🇧🇩 Bangladesh</option>
-          <option value="district">District-wise Boundary</option>
-        </select>
-
-        <label className="sr-only" htmlFor="district-boundary-select">
-          Select district
-        </label>
-        <select
-          id="district-boundary-select"
-          value={selectedDistrictCode ?? ""}
-          disabled={viewMode !== "district" || districtOptions.length === 0}
-          onChange={(event) => onDistrictChange(event.target.value || null)}
-          className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-900 shadow-sm outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 disabled:cursor-not-allowed disabled:opacity-55 dark:border-white/10 dark:bg-slate-900 dark:text-white"
-        >
-          <option value="">
-            {viewMode === "district" && districtOptions.length === 0
-              ? "Loading districts..."
-              : "Select district"}
-          </option>
-          {districtOptions.map((district) => (
-            <option key={district.code} value={district.code}>
-              {district.name}
-              {district.division ? ` · ${district.division}` : ""}
-            </option>
-          ))}
-        </select>
-      </div>
-    </div>
-  );
-}
-
 function ForecastOverlay({
   activeLayer,
   opacity,
@@ -923,52 +831,6 @@ function LayerDrawer({
   );
 }
 
-function FloatingToolbar({
-  activeLayerKey,
-  onLayerChange,
-  onDrawerOpen,
-}: {
-  activeLayerKey: WeatherLayerKey | null;
-  onLayerChange: (layerKey: WeatherLayerKey) => void;
-  onDrawerOpen: () => void;
-}) {
-  return (
-    <div className="absolute left-1/2 top-4 z-[850] hidden -translate-x-1/2 items-center gap-2 rounded-lg border border-white/40 bg-white/78 p-2 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/70 lg:flex">
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            type="button"
-            size="icon"
-            variant="ghost"
-            className="size-9 rounded-md"
-            onClick={onDrawerOpen}
-            aria-label={landingCopy.openDrawer}
-          >
-            <Layers className="size-4" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>{landingCopy.layerSelection}</TooltipContent>
-      </Tooltip>
-      <div className="h-7 w-px bg-slate-200 dark:bg-white/10" />
-      {weatherLayers.slice(0, 9).map((layer) => (
-        <Tooltip key={layer.key}>
-          <TooltipTrigger asChild>
-            <div>
-              <LayerButton
-                layer={layer}
-                activeLayerKey={activeLayerKey}
-                onChange={onLayerChange}
-                compact
-              />
-            </div>
-          </TooltipTrigger>
-          <TooltipContent>{layer.label}</TooltipContent>
-        </Tooltip>
-      ))}
-    </div>
-  );
-}
-
 function RoleStatus() {
   const { data: session, status } = useSession();
   const role = (session?.user as { role?: string } | undefined)?.role;
@@ -988,7 +850,7 @@ function RoleStatus() {
         : landingCopy.noStations;
 
   return (
-    <div className="absolute right-3 top-4 z-[850] max-w-[calc(100%-6rem)] rounded-lg border border-white/35 bg-white/82 px-3 py-2 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/78 sm:right-5">
+    <div className="absolute right-3 top-[8.5rem] z-[850] max-w-[calc(100%-6rem)] rounded-lg border border-white/35 bg-white/82 px-3 py-2 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/78 sm:right-5 lg:top-[6.5rem]">
       <div className="flex items-center gap-2">
         <RadioTower className="size-4 text-cyan-500" />
         <div>
@@ -1196,12 +1058,87 @@ export default function WeatherMapClient({ isDark }: WeatherMapClientProps) {
   const handleLayerChange = useCallback((layerKey: WeatherLayerKey) => {
     setActiveLayerKey((current) => (current === layerKey ? null : layerKey));
   }, []);
+  const handleParameterToggle = useCallback((layerKey: string, isEnabled: boolean) => {
+    setActiveLayerKey((current) => {
+      if (!isEnabled && current === layerKey) {
+        return null;
+      }
+
+      if (isEnabled) {
+        return layerKey as WeatherLayerKey;
+      }
+
+      return current;
+    });
+  }, []);
+  const handleForecastToggle = useCallback(
+    (layerKey: ForecastLayerId, isEnabled: boolean) => {
+      setActiveLayerKey((current) => {
+        if (!isEnabled && current === layerKey) {
+          return null;
+        }
+
+        if (isEnabled) {
+          return layerKey;
+        }
+
+        return current;
+      });
+    },
+    []
+  );
   const handleZoomChange = useCallback((zoom: number) => {
     setMapZoom(zoom);
   }, []);
   const handleDistrictOptionsChange = useCallback((districts: DistrictOption[]) => {
     setDistrictOptions(districts);
   }, []);
+  const handleResetBoundary = useCallback(() => {
+    setBoundaryViewMode("country");
+    setSelectedDistrictCode(null);
+    mapRef.current?.flyToBounds(bangladeshBounds, {
+      animate: true,
+      duration: 0.75,
+      maxZoom: 8,
+      padding: [30, 30],
+    });
+  }, []);
+
+  const enabled = useMemo<EnabledMap>(
+    () => ({
+      temperature: activeLayerKey === "temperature",
+      wind: activeLayerKey === "wind",
+      humidity: activeLayerKey === "humidity",
+      pressure: activeLayerKey === "pressure",
+      dewPoint: activeLayerKey === "dewPoint",
+      solarRadiation: activeLayerKey === "solarRadiation",
+      temperatureForecast: activeLayerKey === "temperatureForecast",
+      humidityForecast: activeLayerKey === "humidityForecast",
+      windForecast: activeLayerKey === "windForecast",
+      pressureIsolines: activeLayerKey === "pressureIsolines",
+      meanSeaLevelPressure: activeLayerKey === "meanSeaLevelPressure",
+      geopotential: activeLayerKey === "geopotential",
+      dewPointForecast: activeLayerKey === "dewPointForecast",
+      lowCloud: activeLayerKey === "lowCloud",
+      totalCloud: activeLayerKey === "totalCloud",
+    }),
+    [activeLayerKey]
+  );
+
+  const enabledForecast = useMemo<Record<ForecastLayerId, boolean>>(
+    () => ({
+      temperatureForecast: enabled.temperatureForecast,
+      humidityForecast: enabled.humidityForecast,
+      windForecast: enabled.windForecast,
+      pressureIsolines: enabled.pressureIsolines,
+      meanSeaLevelPressure: enabled.meanSeaLevelPressure,
+      geopotential: enabled.geopotential,
+      dewPointForecast: enabled.dewPointForecast,
+      lowCloud: enabled.lowCloud,
+      totalCloud: enabled.totalCloud,
+    }),
+    [enabled]
+  );
 
   useEffect(() => {
     if (boundaryViewMode !== "country") {
@@ -1256,17 +1193,26 @@ export default function WeatherMapClient({ isDark }: WeatherMapClientProps) {
         opacity={overlayOpacity}
         timelineIndex={timelineIndex}
       />
-      <FloatingToolbar
-        activeLayerKey={activeLayerKey}
-        onLayerChange={handleLayerChange}
-        onDrawerOpen={() => setIsDrawerOpen(true)}
-      />
-      <BoundaryViewControl
+      <CombinedMapToolbar
         viewMode={boundaryViewMode}
-        selectedDistrictCode={selectedDistrictCode}
-        districtOptions={districtOptions}
-        onViewModeChange={setBoundaryViewMode}
-        onDistrictChange={setSelectedDistrictCode}
+        selectedDistrictId={selectedDistrictCode}
+        districts={districtOptions}
+        onViewModeChange={(viewMode) => {
+          setBoundaryViewMode(viewMode);
+          if (viewMode === "country") {
+            handleResetBoundary();
+          }
+        }}
+        onDistrictChange={(districtCode) => {
+          setBoundaryViewMode("district");
+          setSelectedDistrictCode(districtCode);
+        }}
+        onReset={handleResetBoundary}
+        enabled={enabled}
+        enabledForecast={enabledForecast}
+        onParameterToggle={handleParameterToggle}
+        onForecastToggle={handleForecastToggle}
+        onLayerDrawerOpen={() => setIsDrawerOpen(true)}
       />
       <RoleStatus />
       <LayerDrawer
@@ -1293,7 +1239,7 @@ export default function WeatherMapClient({ isDark }: WeatherMapClientProps) {
         onSpeedChange={setSpeed}
       />
 
-      <div className="pointer-events-none absolute left-4 top-[5.25rem] z-[840] hidden rounded-lg border border-white/35 bg-white/78 px-3 py-2 shadow-lg backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/70 sm:block">
+      <div className="pointer-events-none absolute left-[20.75rem] top-[6.5rem] z-[840] hidden rounded-lg border border-white/35 bg-white/78 px-3 py-2 shadow-lg backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/70 lg:block">
         <div className="flex items-center gap-2 text-sm font-semibold">
           {activeLayer?.kind === "forecast" ? (
             <Wind className="size-4 text-cyan-500" />
